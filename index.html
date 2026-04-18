@@ -533,6 +533,89 @@
     opacity: 0.85;
 }
 
+/* 缩小版存储用量卡片 */
+.data-management-card.compact {
+    background: #fff;
+    border-radius: 12px;
+    padding: 12px;
+    margin: 12px 0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.storage-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.storage-icon {
+    font-size: 18px;
+    margin-right: 6px;
+}
+
+.storage-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+.storage-total {
+    font-size: 14px;
+    color: #5cb85c;
+    font-weight: 500;
+}
+
+.storage-categories.compact {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.category-card.compact {
+    flex: 1;
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+}
+
+.category-icon {
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.chat-icon { color: #5cb85c; }
+.settings-icon { color: #9966cc; }
+.media-icon { color: #5bc0de; }
+
+.category-size {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 2px;
+}
+
+.category-label {
+    font-size: 12px;
+    color: #666;
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 6px;
+    background: #eaeaea;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: #5cb85c;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
     </style>
 </head>
 <body class="text-gray-800">
@@ -1310,6 +1393,37 @@
             <div class="flex items-center gap-2 mb-8">
                 <i data-lucide="database" class="w-6 h-6 text-amber-600"></i>
                 <h2 class="text-xl font-bold text-gray-900">数据管理</h2>
+
+<div class="data-management-card compact">
+    <div class="storage-header">
+        <div class="storage-icon">💾</div>
+        <span class="storage-title">存储用量</span>
+        <span id="storage-total" class="storage-total">0 KB / ~5 MB (0%)</span>
+    </div>
+
+    <div class="storage-categories compact">
+        <div class="category-card compact">
+            <div class="category-icon chat-icon">💬</div>
+            <div id="chat-storage" class="category-size">0KB</div>
+            <div class="category-label">聊天记录</div>
+        </div>
+        <div class="category-card compact">
+            <div class="category-icon settings-icon">⚙️</div>
+            <div id="settings-storage" class="category-size">0KB</div>
+            <div class="category-label">设置数据</div>
+        </div>
+        <div class="category-card compact">
+            <div class="category-icon media-icon">🖼️</div>
+            <div id="media-storage" class="category-size">0KB</div>
+            <div class="category-label">图片媒体</div>
+        </div>
+    </div>
+
+    <div class="progress-bar-container">
+        <div id="storage-progress" class="progress-bar"></div>
+    </div>
+</div>
+
             </div>
             
             <div class="grid grid-cols-2 gap-4 mb-8">
@@ -1809,31 +1923,38 @@
                 container.appendChild(wrapper);
             });
         }
-        // 异步加载数据
-        async function loadData() {
-            try {
-                const stored = localStorage.getItem('ai_chat_sim_data');
-                if (stored) {
-                    appData = JSON.parse(stored);
-                    // 数据迁移：如果没有wordGroups，从旧的replies迁移
-                    if (!appData.wordbanks.wordGroups) {
-                        appData.wordbanks.wordGroups = [
-                            { name: '默认', words: [...(appData.wordbanks.replies || [])] }
-                        ];
-                    }
-                    // 同步replies为所有分组的合并（保持向后兼容）
-                    syncAllReplies();
-                }
-            } catch (e) {
-                console.log('Failed to load data:', e);
-            }
-            initAppearance();
-            renderRoleList();
-            updateDate();
-            loadUnreadCounts();
-            // 启动主动回复定时器
-            startAutoSendTimer();
+       // 异步加载数据（修复版：优先读取本地数据，无数据才用默认数据）
+async function loadData() {
+    try {
+        const stored = localStorage.getItem('ai_chat_sim_data');
+        if (stored) {
+            // 有本地数据 → 直接加载
+            appData = JSON.parse(stored);
+        } else {
+            // 无本地数据 → 才初始化默认数据
+            appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
         }
+
+        // 数据迁移：如果没有wordGroups，从旧的replies迁移
+        if (!appData.wordbanks.wordGroups) {
+            appData.wordbanks.wordGroups = [
+                { name: '默认', words: [...(appData.wordbanks.replies || [])] }
+            ];
+        }
+        // 同步replies为所有分组的合并（保持向后兼容）
+        syncAllReplies();
+    } catch (e) {
+        console.log('Failed to load data:', e);
+        // 出错时用默认数据兜底
+        appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    }
+    initAppearance();
+    renderRoleList();
+    updateDate();
+    loadUnreadCounts();
+    // 启动主动回复定时器
+    startAutoSendTimer();
+}
         // 同步所有回复词条（合并所有分组）
         function syncAllReplies() {
             const allWords = [];
@@ -2277,12 +2398,80 @@
                 document.getElementById('modal-settings-main').classList.remove('hidden');
             }
         }
+
+// 计算字符串的字节大小（UTF-8 编码）
+function getByteSize(str) {
+    return new Blob([str]).size;
+}
+
+// 统计所有 localStorage 数据的存储用量
+function calculateStorageUsage() {
+    let totalBytes = 0;
+    let chatBytes = 0;
+    let settingsBytes = 0;
+    let mediaBytes = 0;
+
+    // 遍历所有 localStorage 键值对
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const value = localStorage.getItem(key);
+        const size = getByteSize(value);
+        totalBytes += size;
+
+        // 按键名分类（和你现有的键名规则匹配）
+        if (key === 'ai_chat_sim_data') {
+            chatBytes = size;
+        } else if (key === 'ai_chat_sim_backgrounds' || key === 'ai_chat_sim_unread') {
+            settingsBytes += size;
+        } else if (key.startsWith('media_') || key === 'ai_chat_sim_media') {
+            mediaBytes += size;
+        }
+    }
+
+    // 单位转换（KB/MB）
+    const totalKB = (totalBytes / 1024).toFixed(1);
+    const chatKB = (chatBytes / 1024).toFixed(1);
+    const settingsKB = (settingsBytes / 1024).toFixed(1);
+    const mediaKB = (mediaBytes / 1024).toFixed(1);
+    const maxMB = 5;
+    const usedPercent = ((totalBytes / (maxMB * 1024 * 1024)) * 100).toFixed(1);
+
+    return {
+        totalKB,
+        chatKB,
+        settingsKB,
+        mediaKB,
+        maxMB,
+        usedPercent
+    };
+}
+
+// 更新存储用量显示
+function updateStorageUsageDisplay() {
+    const usage = calculateStorageUsage();
+    
+    // 更新总用量文字
+    const totalEl = document.getElementById('storage-total');
+    const chatEl = document.getElementById('chat-storage');
+    const settingsEl = document.getElementById('settings-storage');
+    const mediaEl = document.getElementById('media-storage');
+    const progressEl = document.getElementById('storage-progress');
+
+    if (totalEl) totalEl.textContent = `${usage.totalKB} KB / ~${usage.maxMB} MB (${usage.usedPercent}%)`;
+    if (chatEl) chatEl.textContent = `${usage.chatKB}KB`;
+    if (settingsEl) settingsEl.textContent = `${usage.settingsKB}KB`;
+    if (mediaEl) mediaEl.textContent = `${usage.mediaKB}KB`;
+    if (progressEl) progressEl.style.width = `${usage.usedPercent}%`;
+}
+
         // 数据管理功能
         function openDataManagement() {
-            pageHistory.push('settings');
-            document.getElementById('modal-settings-main').classList.add('hidden');
-            document.getElementById('modal-settings-data').classList.remove('hidden');
-        }
+    pageHistory.push('settings');
+    document.getElementById('modal-settings-main').classList.add('hidden');
+    document.getElementById('modal-settings-data').classList.remove('hidden');
+    // 👇 新增这一行，打开页面时自动刷新存储用量
+    updateStorageUsageDisplay();
+}
         function closeDataManagement() {
             document.getElementById('modal-settings-data').classList.add('hidden');
             if (pageHistory.pop() === 'settings') {
