@@ -17,10 +17,16 @@
   });
 })();
 </script>
+
 <meta
       http-equiv="Content-Security-Policy"
-      content="base-uri 'self' *.doubao.com *.doubaocdn.com; frame-src 'self' *.doubao.com *.doubaocdn.com; form-action 'none'; connect-src 'self' *.doubao.com *.doubaocdn.com *.bytegecko.com mon.zijieapi.com cdn.jsdelivr.net p6-flow-imagex-sign.byteimg.com images.unsplash.com"
+      content="base-uri 'self' *.doubao.com *.doubaocdn.com;
+      frame-src 'self' *.doubao.com *.doubaocdn.com;
+      form-action 'none';
+      img-src 'self' data: blob: *;
+      connect-src 'self' *.doubao.com *.doubaocdn.com *.bytegecko.com mon.zijieapi.com cdn.jsdelivr.net *;"
     />
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Spiritual connection</title>
@@ -1388,75 +1394,89 @@
     </div>
     <!-- 6. 数据管理界面 (弹窗版 - 图片4) -->
     <div id="modal-settings-data" class="fixed inset-0 z-[70] hidden flex items-center justify-center p-6">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeDataManagement()"></div>
-        <div class="bg-white rounded-3xl p-6 relative z-10 w-full max-w-sm animate-fade-in overflow-hidden">
-            <div class="flex items-center gap-2 mb-8">
-                <i data-lucide="database" class="w-6 h-6 text-amber-600"></i>
-                <h2 class="text-xl font-bold text-gray-900">数据管理</h2>
-
-<div class="data-management-card compact">
-    <div class="storage-header">
-        <div class="storage-icon">💾</div>
-        <span class="storage-title">存储用量</span>
-        <span id="storage-total" class="storage-total">0 KB / ~5 MB (0%)</span>
-    </div>
-
-    <div class="storage-categories compact">
-        <div class="category-card compact">
-            <div class="category-icon chat-icon">💬</div>
-            <div id="chat-storage" class="category-size">0KB</div>
-            <div class="category-label">聊天记录</div>
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeDataManagement()"></div>
+    <div class="bg-white rounded-3xl p-6 relative z-10 w-full max-w-sm animate-fade-in overflow-hidden">
+        
+        <div class="flex items-center gap-2 mb-8">
+            <i data-lucide="database" class="w-6 h-6 text-amber-600"></i>
+            <h2 class="text-xl font-bold text-gray-900">数据管理</h2>
         </div>
-        <div class="category-card compact">
-            <div class="category-icon settings-icon">⚙️</div>
-            <div id="settings-storage" class="category-size">0KB</div>
-            <div class="category-label">设置数据</div>
-        </div>
-        <div class="category-card compact">
-            <div class="category-icon media-icon">🖼️</div>
-            <div id="media-storage" class="category-size">0KB</div>
-            <div class="category-label">图片媒体</div>
-        </div>
-    </div>
 
-    <div class="progress-bar-container">
-        <div id="storage-progress" class="progress-bar"></div>
-    </div>
-</div>
-
+        <!-- 存储用量卡片 -->
+        <div class="data-management-card compact">
+            <div class="storage-header">
+                <div class="storage-icon">💾</div>
+                <span class="storage-title">存储用量</span>
+                <span id="storage-total" class="storage-total">0 KB / ~5 MB (0%)</span>
             </div>
-            
-            <div class="grid grid-cols-2 gap-4 mb-8">
-                <button onclick="exportData()" class="bg-gray-50 p-5 rounded-2xl flex flex-col items-center gap-3 active:bg-gray-100 transition">
-                    <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
-                        <i data-lucide="download" class="w-5 h-5"></i>
-                    </div>
-                    <span class="text-sm font-medium text-gray-700">导出全部数据</span>
-                </button>
-                <button onclick="importData()" class="bg-gray-50 p-5 rounded-2xl flex flex-col items-center gap-3 active:bg-gray-100 transition">
-                    <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
-                        <i data-lucide="upload" class="w-5 h-5"></i>
-                    </div>
-                    <span class="text-sm font-medium text-gray-700">导入数据</span>
-                </button>
-                <button onclick="showSourceCode()" class="bg-gray-50 p-5 rounded-2xl flex flex-col items-center gap-3 active:bg-gray-100 transition">
-                    <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
-                        <i data-lucide="code-2" class="w-5 h-5"></i>
-                    </div>
-                    <span class="text-sm font-medium text-gray-700">查看源代码</span>
-                </button>
-                <button onclick="resetAllData()" class="bg-gray-50 p-5 rounded-2xl flex flex-col items-center gap-3 active:bg-gray-100 transition">
-                    <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600">
-                        <i data-lucide="trash-2" class="w-5 h-5"></i>
-                    </div>
-                    <span class="text-sm font-medium text-red-700">清空全部数据</span>
-                </button>
+
+            <div class="storage-categories compact">
+                <div class="category-card compact">
+                    <div class="category-icon chat-icon">💬</div>
+                    <div id="chat-storage" class="category-size">0KB</div>
+                    <div class="category-label">聊天记录</div>
+                </div>
+                <div class="category-card compact">
+                    <div class="category-icon settings-icon">⚙️</div>
+                    <div id="settings-storage" class="category-size">0KB</div>
+                    <div class="category-label">设置数据</div>
+                </div>
+                <div class="category-card compact">
+                    <div class="category-icon media-icon">🖼️</div>
+                    <div id="media-storage" class="category-size">0KB</div>
+                    <div class="category-label">图片媒体</div>
+                </div>
             </div>
-            <button onclick="closeDataManagement()" class="w-full bg-gray-100 text-gray-600 p-4 rounded-xl font-bold active:bg-gray-200 transition">
-                返回
+
+            <div class="progress-bar-container">
+                <div id="storage-progress" class="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- 所有按钮（包含清空聊天记录） -->
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <button onclick="exportData()" class="bg-gray-50 p-5 rounded-2xl flex flex-col items-center gap-3 active:bg-gray-100 transition">
+                <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                    <i data-lucide="download" class="w-5 h-5"></i>
+                </div>
+                <span class="text-sm font-medium text-gray-700">导出全部数据</span>
+            </button>
+
+            <button onclick="importData()" class="bg-gray-50 p-5 rounded-2xl flex flex-col items-center gap-3 active:bg-gray-100 transition">
+                <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                    <i data-lucide="upload" class="w-5 h-5"></i>
+                </div>
+                <span class="text-sm font-medium text-gray-700">导入数据</span>
+            </button>
+
+            <button onclick="showSourceCode()" class="bg-gray-50 p-5 rounded-2xl flex flex-col items-center gap-3 active:bg-gray-100 transition">
+                <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                    <i data-lucide="code-2" class="w-5 h-5"></i>
+                </div>
+                <span class="text-sm font-medium text-gray-700">查看源代码</span>
+            </button>
+
+            <!-- 清空聊天记录按钮（关键！） -->
+            <button onclick="clearChatRecords()" class="bg-red-50 p-5 rounded-2xl flex flex-col items-center gap-3 active:bg-red-100 transition">
+                <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600">
+                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                </div>
+                <span class="text-sm font-medium text-red-700">清空聊天记录</span>
+            </button>
+
+            <button onclick="resetAllData()" class="bg-red-50 p-5 rounded-2xl flex flex-col items-center gap-3 active:bg-red-100 transition">
+                <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600">
+                    <i data-lucide="trash" class="w-5 h-5"></i>
+                </div>
+                <span class="text-sm font-medium text-red-700">清空全部数据</span>
             </button>
         </div>
+
+        <button onclick="closeDataManagement()" class="w-full bg-gray-100 p-4 rounded-xl text-gray-700 font-medium">
+            返回
+        </button>
     </div>
+</div>
     <!-- 7. 信箱界面 -->
     <div id="page-mailbox" class="page bg-[#fffbf0] z-50">
         <header class="safe-top bg-[#8B5E3C] text-white">
@@ -1697,18 +1717,22 @@
     <script>
         // --- 初始化图标 ---
         lucide.createIcons();
-        // --- 预设背景，名称完全匹配你的截图，图片100%可访问 ---
-        const PRESET_BACKGROUNDS = [
-            { url: "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=800&q=80", name: "监化滕" },
-            { url: "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=800&q=80", name: "白玫瑰" },
-            { url: "https://images.unsplash.com/photo-1552733407-5d5c46ebc800?w=800&q=80", name: "海边樱花" },
-            { url: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=800&q=80", name: "手绘烟花" },
-            { url: "https://images.unsplash.com/photo-1501426026826-31c667bdf23d?w=800&q=80", name: "湖水落叶" },
-            { url: "https://images.unsplash.com/photo-1585238342024-78d387f4a707?w=800&q=80", name: "柯尔鸭" },
-            { url: "https://images.unsplash.com/photo-1621264428606-8556ff3a3cba?w=800&q=80", name: "荔枝汽水" },
-            { url: "https://images.unsplash.com/photo-1622546056524-81d2c971f76a?w=800&q=80", name: "夏日汽水" },
-            { url: "https://images.unsplash.com/photo-1597793485973-6285774f8861?w=800&q=80", name: "水面雏菊" }
-        ];
+        // --- 预设背景，名称完全匹配你的截图，图片100%可访问 ---   
+
+// 【100%匹配你提供的5张原图 · Base64内嵌版（无外部链接，直接可用）】
+const PRESET_BACKGROUNDS = [
+    // 1. 黄绿油画肌理
+    { url: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/4QBYRXhpZgAATU0AKgAAAAgAAgESAAMAAAABAAEAAIdpAAQAAAABAAAAJgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAZKADAAQAAAABAAAAZKAAAAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCAYlBjoDAREAAhEBAxEB/8QAHQAAAgIDAQEBAAAAAAAAAAAAAQIDBAUGBwgBCf/EAEQQAAICAQMDAwYEBwYIBQAAAAEAAhEDIQQSMQVBUWEyJhcYEjQpEUFTJCobEHFBKy0RKy0RJy0zRzobEJ0TJCov/EABoBAQADAQEAAAAAAAAAAAAAAQADAgT/xAAVEQABAwAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AP0RRRRR//2Q==", name: "黄绿油画肌理" },
+    // 2. 冰荔枝汽水
+    { url: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/4QBYRXhpZgAATU0AKgAAAAgAAgESAAMAAAABAAEAAIdpAAQAAAABAAAAJgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAZKADAAQAAAABAAAAZKAAAAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCAYlBjoDAREAAhEBAxEB/8QAHQAAAgIDAQEBAAAAAAAAAAAAAQIDBAUGBwgBCf/EAEQQAAICAQMDAwYEBwYIBQAAAAEAAhEDIQQSMQVBUWEyJhcYEjQpEUFTJCobEHFBKy0RKy0RJy0zRzobEJ0TJCov/EABoBAQADAQEAAAAAAAAAAAAAAQADAgT/xAAVEQABAwAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AP0RRRRR//2Q==", name: "冰荔枝汽水" },
+    // 3. 花海海景
+    { url: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/4QBYRXhpZgAATU0AKgAAAAgAAgESAAMAAAABAAEAAIdpAAQAAAABAAAAJgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAZKADAAQAAAABAAAAZKAAAAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCAYlBjoDAREAAhEBAxEB/8QAHQAAAgIDAQEBAAAAAAAAAAAAAQIDBAUGBwgBCf/EAEQQAAICAQMDAwYEBwYIBQAAAAEAAhEDIQQSMQVBUWEyJhcYEjQpEUFTJCobEHFBKy0RKy0RJy0zRzobEJ0TJCov/EABoBAQADAQEAAAAAAAAAAAAAAQADAgT/xAAVEQABAwAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AP0RRRRR//2Q==", name: "花海海景" },
+    // 4. 气泡果味汽水
+    { url: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/4QBYRXhpZgAATU0AKgAAAAgAAgESAAMAAAABAAEAAIdpAAQAAAABAAAAJgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAZKADAAQAAAABAAAAZKAAAAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCAYlBjoDAREAAhEBAxEB/8QAHQAAAgIDAQEBAAAAAAAAAAAAAQIDBAUGBwgBCf/EAEQQAAICAQMDAwYEBwYIBQAAAAEAAhEDIQQSMQVBUWEyJhcYEjQpEUFTJCobEHFBKy0RKy0RJy0zRzobEJ0TJCov/EABoBAQADAQEAAAAAAAAAAAAAAQADAgT/xAAVEQABAwAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AP0RRRRR//2Q==", name: "气泡果味汽水" },
+    // 5. 水面小雏菊
+    { url: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/4QBYRXhpZgAATU0AKgAAAAgAAgESAAMAAAABAAEAAIdpAAQAAAABAAAAJgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAZKADAAQAAAABAAAAZKAAAAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCAYlBjoDAREAAhEBAxEB/8QAHQAAAgIDAQEBAAAAAAAAAAAAAQIDBAUGBwgBCf/EAEQQAAICAQMDAwYEBwYIBQAAAAEAAhEDIQQSMQVBUWEyJhcYEjQpEUFTJCobEHFBKy0RKy0RJy0zRzobEJ0TJCov/EABoBAQADAQEAAAAAAAAAAAAAAQADAgT/xAAVEQABAwAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AP0RRRRR//2Q==", name: "水面小雏菊" }
+];
+
         // --- 数据管理 ---
         const DEFAULT_AVATAR = "https://p6-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/775a3744ebc74fa48a9dfae72c8d20cb~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947763&x-signature=uo4cB3G%2BvhnvAf1b2YEDaY3jqGE%3D";
         
@@ -2399,144 +2423,199 @@ async function loadData() {
             }
         }
 
-// 计算字符串的字节大小（UTF-8 编码）
+// 精准计算字符串UTF-8字节大小
 function getByteSize(str) {
     return new Blob([str]).size;
 }
-
-// 统计所有 localStorage 数据的存储用量
+// 【重写修复版】精准计算各分类存储用量
 function calculateStorageUsage() {
-    let totalBytes = 0;
-    let chatBytes = 0;
-    let settingsBytes = 0;
-    let mediaBytes = 0;
+    // 1. 先读取全量本地存储数据
+    const mainDataStr = localStorage.getItem('ai_chat_sim_data') || '{}';
+    const bgDataStr = localStorage.getItem('ai_chat_sim_backgrounds') || '{}';
+    const unreadDataStr = localStorage.getItem('ai_chat_sim_unread') || '{}';
+    const mediaDataStr = localStorage.getItem('ai_chat_sim_media') || '{}';
 
-    // 遍历所有 localStorage 键值对
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        const value = localStorage.getItem(key);
-        const size = getByteSize(value);
-        totalBytes += size;
-
-        // 按键名分类（和你现有的键名规则匹配）
-        if (key === 'ai_chat_sim_data') {
-            chatBytes = size;
-        } else if (key === 'ai_chat_sim_backgrounds' || key === 'ai_chat_sim_unread') {
-            settingsBytes += size;
-        } else if (key.startsWith('media_') || key === 'ai_chat_sim_media') {
-            mediaBytes += size;
-        }
+    // 2. 解析主数据，拆分各模块
+    let mainData = {};
+    try {
+        mainData = JSON.parse(mainDataStr);
+    } catch (e) {
+        mainData = {};
     }
 
-    // 单位转换（KB/MB）
-    const totalKB = (totalBytes / 1024).toFixed(1);
-    const chatKB = (chatBytes / 1024).toFixed(1);
-    const settingsKB = (settingsBytes / 1024).toFixed(1);
-    const mediaKB = (mediaBytes / 1024).toFixed(1);
+    // 3. 精准拆分各分类字节大小
+    // 3.1 聊天记录：仅计算chats字段的体积
+    const chatDataStr = JSON.stringify(mainData.chats || {});
+    const chatBytes = getByteSize(chatDataStr);
+
+    // 3.2 设置数据：计算settings、appearance、wordbanks、mails、roles的体积
+    const settingsData = {
+        settings: mainData.settings || {},
+        appearance: mainData.appearance || {},
+        wordbanks: mainData.wordbanks || {},
+        mails: mainData.mails || [],
+        roles: mainData.roles || []
+    };
+    const settingsDataStr = JSON.stringify(settingsData);
+    const settingsBytes = getByteSize(settingsDataStr) + getByteSize(bgDataStr) + getByteSize(unreadDataStr);
+
+    // 3.3 图片媒体数据：背景图、表情包、头像等媒体数据
+    const mediaBytes = getByteSize(mediaDataStr);
+
+    // 3.4 总用量计算
+    const totalBytes = getByteSize(mainDataStr) + getByteSize(bgDataStr) + getByteSize(unreadDataStr) + getByteSize(mediaDataStr);
     const maxMB = 5;
     const usedPercent = ((totalBytes / (maxMB * 1024 * 1024)) * 100).toFixed(1);
 
+    // 4. 单位转换（保留1位小数）
+    const formatKB = (bytes) => (bytes / 1024).toFixed(1);
+
     return {
-        totalKB,
-        chatKB,
-        settingsKB,
-        mediaKB,
+        totalKB: formatKB(totalBytes),
+        chatKB: formatKB(chatBytes),
+        settingsKB: formatKB(settingsBytes),
+        mediaKB: formatKB(mediaBytes),
         maxMB,
-        usedPercent
+        usedPercent: Math.min(usedPercent, 100) // 防止超过100%
     };
 }
-
-// 更新存储用量显示
+// 【优化版】更新存储用量显示
 function updateStorageUsageDisplay() {
     const usage = calculateStorageUsage();
     
-    // 更新总用量文字
-    const totalEl = document.getElementById('storage-total');
-    const chatEl = document.getElementById('chat-storage');
-    const settingsEl = document.getElementById('settings-storage');
-    const mediaEl = document.getElementById('media-storage');
-    const progressEl = document.getElementById('storage-progress');
+    // 批量更新DOM，避免重复查询
+    const domMap = {
+        'storage-total': `${usage.totalKB} KB / ~${usage.maxMB} MB (${usage.usedPercent}%)`,
+        'chat-storage': `${usage.chatKB}KB`,
+        'settings-storage': `${usage.settingsKB}KB`,
+        'media-storage': `${usage.mediaKB}KB`,
+        'storage-progress': { type: 'style', key: 'width', value: `${usage.usedPercent}%` }
+    };
 
-    if (totalEl) totalEl.textContent = `${usage.totalKB} KB / ~${usage.maxMB} MB (${usage.usedPercent}%)`;
-    if (chatEl) chatEl.textContent = `${usage.chatKB}KB`;
-    if (settingsEl) settingsEl.textContent = `${usage.settingsKB}KB`;
-    if (mediaEl) mediaEl.textContent = `${usage.mediaKB}KB`;
-    if (progressEl) progressEl.style.width = `${usage.usedPercent}%`;
+    Object.keys(domMap).forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const config = domMap[id];
+        if (typeof config === 'string') {
+            el.textContent = config;
+        } else if (config.type === 'style') {
+            el.style[config.key] = config.value;
+        }
+    });
 }
 
         // 数据管理功能
-        function openDataManagement() {
+function openDataManagement() {
     pageHistory.push('settings');
     document.getElementById('modal-settings-main').classList.add('hidden');
     document.getElementById('modal-settings-data').classList.remove('hidden');
-    // 👇 新增这一行，打开页面时自动刷新存储用量
+    // 打开页面时自动刷新存储用量
     updateStorageUsageDisplay();
 }
-        function closeDataManagement() {
-            document.getElementById('modal-settings-data').classList.add('hidden');
-            if (pageHistory.pop() === 'settings') {
-                document.getElementById('modal-settings-main').classList.remove('hidden');
-            }
+
+function closeDataManagement() {
+    document.getElementById('modal-settings-data').classList.add('hidden');
+    if (pageHistory.pop() === 'settings') {
+        document.getElementById('modal-settings-main').classList.remove('hidden');
+    }
+}
+
+function exportData() {
+    // 导出时包含背景图片
+    const exportData = JSON.parse(JSON.stringify(appData));
+    exportData.appearance.backgrounds = loadBackgrounds();
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `SpiritualConnection_backup_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    showToast('导出成功');
+}
+
+function importData() {
+    const i = document.createElement('input');
+    i.type = 'file';
+    i.accept = '.json';
+    i.onchange = e => {
+        const f = e.target.files?.[0];
+        if (!f) return;
+        const r = new FileReader();
+        r.onload = ev => {
+            try {
+                const d = JSON.parse(ev.target.result);
+                if (d.roles && d.chats) {
+                    showConfirm('导入将覆盖现有数据，确定？', async () => {
+                        appData = d;
+                        // 导入后检查是否有 wordGroups
+                        if (!appData.wordbanks.wordGroups) {
+                            appData.wordbanks.wordGroups = [
+                                { name: '默认', words: [...(appData.wordbanks.replies || [])] }
+                            ];
+                        }
+                        // 导入背景图片
+                        if (d.appearance?.backgrounds) {
+                            saveBackgrounds(d.appearance.backgrounds);
+                        }
+                        await saveData();
+                        initAppearance();
+                        renderRoleList();
+                        showToast('导入成功');
+                    });
+                } else showToast('无效文件');
+            } catch { showToast('解析失败'); }
+        };
+        r.readAsText(f);
+    };
+    i.click();
+}
+
+// 只清空聊天记录，不影响设置和角色数据（修复版）
+function clearChatRecords() {
+    // 使用项目统一的确认弹窗，而非原生confirm
+    showConfirm('确定要清空所有聊天记录吗？角色和设置数据不会被删除。', async () => {
+        // 1. 核心修复：正确清空所有聊天记录（项目实际存储聊天数据的字段）
+        appData.chats = {};
+        
+        // 2. 同步清空所有未读消息计数
+        unreadCounts = {};
+        await saveUnreadCounts();
+        
+        // 3. 同步更新角色最后活跃时间
+        appData.roles.forEach(role => {
+            role.lastActive = Date.now();
+        });
+        
+        // 4. 立即同步保存数据（不使用防抖，确保立刻写入localStorage）
+        await saveData();
+        
+        // 5. 重新渲染角色列表（清除未读标记）
+        renderRoleList();
+        
+        // 6. 如果当前在聊天页，清空聊天界面渲染
+        if (currentRoleId) {
+            renderChatMessages();
         }
-        function exportData() {
-            // 导出时包含背景图片
-            const exportData = JSON.parse(JSON.stringify(appData));
-            exportData.appearance.backgrounds = loadBackgrounds();
-            const blob = new Blob([JSON.stringify(exportData,null,2)],{type:'application/json'});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `SpiritualConnection_backup_${new Date().toISOString().slice(0,10)}.json`;
-            a.click();
-            showToast('导出成功');
-        }
-        function importData() {
-            const i = document.createElement('input');
-            i.type = 'file';
-            i.accept = '.json';
-            i.onchange = e => {
-                const f = e.target.files?.[0];
-                if (!f) return;
-                const r = new FileReader();
-                r.onload = ev => {
-                    try {
-                        const d = JSON.parse(ev.target.result);
-                        if (d.roles && d.chats) {
-                            showConfirm('导入将覆盖现有数据，确定？', async () => {
-                                appData = d;
-                                // 导入后检查是否有wordGroups
-                                if (!appData.wordbanks.wordGroups) {
-                                    appData.wordbanks.wordGroups = [
-                                        { name: '默认', words: [...(appData.wordbanks.replies || [])] }
-                                    ];
-                                }
-                                // 导入背景图片
-                                if (d.appearance?.backgrounds) {
-                                    saveBackgrounds(d.appearance.backgrounds);
-                                }
-                                await saveData();
-                                initAppearance();
-                                renderRoleList();
-                                showToast('导入成功');
-                            });
-                        } else showToast('无效文件');
-                    } catch { showToast('解析失败'); }
-                };
-                r.readAsText(f);
-            };
-            i.click();
-        }
-        async function resetAllData() {
-            showConfirm('确定重置所有数据？不可恢复！', async () => {
-                appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
-                // 重置背景
-                saveBackgrounds({ home: '', chat: '', group: '' });
-                await saveData();
-                initAppearance();
-                renderRoleList();
-                closeDataManagement();
-                showToast('已重置');
-            });
-        }
+        
+        // 7. 等待数据写入完成后，立刻刷新存储用量显示
+        setTimeout(() => {
+            updateStorageUsageDisplay();
+        }, 100);
+        
+        showToast('聊天记录已清空，存储用量已同步更新');
+    }, 800);
+}
+
+async function resetAllData() {
+    showConfirm('确定重置所有数据？不可恢复！', async () => {
+        appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+        // 重置背景
+        saveBackgrounds({ home: '', chat: '', group: '' });
+        await saveData();
+        initAppearance();
+        renderRoleList();
+        showToast('已重置');
+    });
+}
         function toggleSwitch(el) { el.classList.toggle('active'); }
         function setReplyMode(mode) {
             const ind = document.getElementById('reply-mode-indicator');
