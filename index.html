@@ -1222,6 +1222,34 @@
             background: rgba(0,0,0,0.02);
             border-radius: 8px;
         }
+        /* 新增分组弹窗样式 */
+        .input-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1300;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .input-modal.active {
+            display: flex;
+        }
+        .input-modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+        }
+        .input-modal-content {
+            position: relative;
+            z-index: 1;
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            padding: 24px;
+            max-width: 320px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body class="text-gray-800">
