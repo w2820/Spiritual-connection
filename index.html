@@ -1711,7 +1711,7 @@
     </div>
 </div>
 
-<!-- 聊天节奏设置界面 (含群聊概率和通话配置，增加自动通话设置) -->
+<!-- 聊天节奏设置界面 (含群聊概率和通话配置，增加通话时长设置) -->
 <div id="modal-settings-chat" class="modal-overlay hidden">
     <div class="modal-card max-h-[90vh] overflow-y-auto">
         <div class="flex items-center gap-2 mb-6"><i data-lucide="message-square" class="w-6 h-6" style="color: var(--accent-color);"></i><h2 class="text-xl font-bold">聊天设置</h2></div>
@@ -1750,7 +1750,7 @@
                 </div>
             </div>
 
-            <!-- 通话功能配置 -->
+            <!-- 通话功能配置（新增通话时长设置） -->
             <div class="border-t border-gray-200 pt-4 mt-4">
                 <h3 class="text-sm font-semibold mb-3">模拟视频通话</h3>
                 <div class="bg-gray-50 p-4 rounded-xl space-y-3">
@@ -1769,10 +1769,20 @@
                             <input type="number" id="setting-call-miss-prob" min="0" max="100" value="10" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm">
                         </div>
                     </div>
+                    <div class="grid grid-cols-2 gap-3 mt-3">
+                        <div>
+                            <span class="text-xs text-gray-500 block mb-1">最短通话 (分钟)</span>
+                            <input type="number" id="setting-call-min-duration" min="0.1" max="30" step="0.1" value="0.5" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <span class="text-xs text-gray-500 block mb-1">最长通话 (分钟)</span>
+                            <input type="number" id="setting-call-max-duration" min="0.1" max="30" step="0.1" value="2" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- 自动通话设置 -->
+            <!-- 自动通话设置（新增角色来电时长设置） -->
             <div class="border-t border-gray-200 pt-4 mt-4">
                 <h3 class="text-sm font-semibold mb-3">自动来电</h3>
                 <div class="bg-gray-50 p-4 rounded-xl space-y-3">
@@ -1797,6 +1807,16 @@
                         <div>
                             <span class="text-xs text-gray-500 block mb-1">超时未接 (秒)</span>
                             <input type="number" id="setting-auto-call-user-timeout" min="5" max="60" value="30" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 mt-3">
+                        <div>
+                            <span class="text-xs text-gray-500 block mb-1">最短通话 (分钟)</span>
+                            <input type="number" id="setting-auto-call-min-duration" min="0.1" max="30" step="0.1" value="0.5" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <span class="text-xs text-gray-500 block mb-1">最长通话 (分钟)</span>
+                            <input type="number" id="setting-auto-call-max-duration" min="0.1" max="30" step="0.1" value="3" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm">
                         </div>
                     </div>
                 </div>
@@ -2223,7 +2243,9 @@
                     missProb: 10,
                     answerDelay: 2000,
                     background: '',
-                    windowSize: 'standard'
+                    windowSize: 'standard',
+                    minDuration: 0.5,
+                    maxDuration: 2
                 },
                 autoCall: {
                     enabled: false,
@@ -2231,8 +2253,8 @@
                     minInterval: 10,
                     maxInterval: 30,
                     userTimeout: 30,
-                    minDuration: 10,
-                    maxDuration: 60
+                    minDuration: 0.5,
+                    maxDuration: 3
                 }
             },
             wordbanks: {
@@ -2510,8 +2532,8 @@
                 if (!appData.importantDays) appData.importantDays = [{ id: '1', name: '4.21黎宝和领戒指', date: '2025-04-21', type: 'anniversary', cover: '' }];
                 if (!appData.favoriteMessages) appData.favoriteMessages = [];
                 if (!appData.settings.autoSendProbability) appData.settings.autoSendProbability = 0.5;
-                if (!appData.settings.call) appData.settings.call = { enabled: true, rejectProb: 20, missProb: 10, answerDelay: 2000, background: '', windowSize: 'standard' };
-                if (!appData.settings.autoCall) appData.settings.autoCall = { enabled: false, probability: 30, minInterval: 10, maxInterval: 30, userTimeout: 30, minDuration: 10, maxDuration: 60 };
+                if (!appData.settings.call) appData.settings.call = { enabled: true, rejectProb: 20, missProb: 10, answerDelay: 2000, background: '', windowSize: 'standard', minDuration: 0.5, maxDuration: 2 };
+                if (!appData.settings.autoCall) appData.settings.autoCall = { enabled: false, probability: 30, minInterval: 10, maxInterval: 30, userTimeout: 30, minDuration: 0.5, maxDuration: 3 };
                 appData.roles.forEach(r => { 
                     if (!r.lastAutoSendTime) r.lastAutoSendTime = Date.now(); 
                     if (!r.lastLoveRefresh) r.lastLoveRefresh = 0; 
@@ -3153,14 +3175,20 @@
             callEnabledSwitch.classList.toggle('active', appData.settings.call?.enabled !== false);
             document.getElementById('setting-call-reject-prob').value = appData.settings.call?.rejectProb ?? 20;
             document.getElementById('setting-call-miss-prob').value = appData.settings.call?.missProb ?? 10;
+            // 用户主动拨打时长
+            document.getElementById('setting-call-min-duration').value = appData.settings.call?.minDuration ?? 0.5;
+            document.getElementById('setting-call-max-duration').value = appData.settings.call?.maxDuration ?? 2;
             
             // 自动通话设置
-            const autoCall = appData.settings.autoCall || { enabled: false, probability: 30, minInterval: 10, maxInterval: 30, userTimeout: 30, minDuration: 10, maxDuration: 60 };
+            const autoCall = appData.settings.autoCall || { enabled: false, probability: 30, minInterval: 10, maxInterval: 30, userTimeout: 30, minDuration: 0.5, maxDuration: 3 };
             document.getElementById('setting-auto-call-enabled-switch').classList.toggle('active', autoCall.enabled);
             document.getElementById('setting-auto-call-prob').value = autoCall.probability;
             document.getElementById('setting-auto-call-min-interval').value = autoCall.minInterval;
             document.getElementById('setting-auto-call-max-interval').value = autoCall.maxInterval;
             document.getElementById('setting-auto-call-user-timeout').value = autoCall.userTimeout;
+            // 角色来电时长
+            document.getElementById('setting-auto-call-min-duration').value = autoCall.minDuration ?? 0.5;
+            document.getElementById('setting-auto-call-max-duration').value = autoCall.maxDuration ?? 3;
         }
         function closeChatSettings() { document.getElementById('modal-settings-chat').classList.add('hidden'); if (pageHistory.pop() === 'settings') document.getElementById('modal-settings-main').classList.remove('hidden'); }
         function toggleSwitch(el) { el.classList.toggle('active'); }
@@ -3184,6 +3212,9 @@
             appData.settings.call.enabled = document.getElementById('setting-call-enabled-switch').classList.contains('active');
             appData.settings.call.rejectProb = parseInt(document.getElementById('setting-call-reject-prob').value) || 20;
             appData.settings.call.missProb = parseInt(document.getElementById('setting-call-miss-prob').value) || 10;
+            // 保存用户拨打时长
+            appData.settings.call.minDuration = parseFloat(document.getElementById('setting-call-min-duration').value) || 0.5;
+            appData.settings.call.maxDuration = parseFloat(document.getElementById('setting-call-max-duration').value) || 2;
             
             if (!appData.settings.autoCall) appData.settings.autoCall = {};
             appData.settings.autoCall.enabled = document.getElementById('setting-auto-call-enabled-switch').classList.contains('active');
@@ -3191,6 +3222,9 @@
             appData.settings.autoCall.minInterval = parseInt(document.getElementById('setting-auto-call-min-interval').value) || 10;
             appData.settings.autoCall.maxInterval = parseInt(document.getElementById('setting-auto-call-max-interval').value) || 30;
             appData.settings.autoCall.userTimeout = parseInt(document.getElementById('setting-auto-call-user-timeout').value) || 30;
+            // 保存角色来电时长
+            appData.settings.autoCall.minDuration = parseFloat(document.getElementById('setting-auto-call-min-duration').value) || 0.5;
+            appData.settings.autoCall.maxDuration = parseFloat(document.getElementById('setting-auto-call-max-duration').value) || 3;
             
             await saveData();
             closeChatSettings();
@@ -3865,7 +3899,7 @@
             appendMessageToDOM('me', pokeText, Date.now(), null, 'poke');
         }
 
-        // --- 通话功能（增加自动来电）---
+        // --- 通话功能（增加自动来电，时长独立配置）---
         function updateCallButtonVisibility() {
             const btn = document.getElementById('call-button');
             if (!btn) return;
@@ -3917,7 +3951,10 @@
                     callState.status = 'connected';
                     document.getElementById('call-status').textContent = '通话中';
                     startCallTimer();
-                    const autoHangupTime = (10 + Math.random() * 20) * 1000;
+                    // 使用用户拨打时长设置
+                    const minDur = (appData.settings.call?.minDuration || 0.5) * 60;
+                    const maxDur = (appData.settings.call?.maxDuration || 2) * 60;
+                    const autoHangupTime = (minDur + Math.random() * (maxDur - minDur)) * 1000;
                     callState.autoHangupTimer = setTimeout(() => {
                         if (callState.active && callState.status === 'connected') {
                             hangUpCall(true);
@@ -3952,7 +3989,10 @@
             callState.status = 'connected';
             document.getElementById('call-status').textContent = '通话中';
             startCallTimer();
-            const autoHangupTime = ((appData.settings.autoCall?.minDuration || 10) + Math.random() * ((appData.settings.autoCall?.maxDuration || 60) - (appData.settings.autoCall?.minDuration || 10))) * 1000;
+            // 使用角色来电时长设置
+            const minDur = (appData.settings.autoCall?.minDuration || 0.5) * 60;
+            const maxDur = (appData.settings.autoCall?.maxDuration || 3) * 60;
+            const autoHangupTime = (minDur + Math.random() * (maxDur - minDur)) * 1000;
             callState.autoHangupTimer = setTimeout(() => {
                 if (callState.active && callState.status === 'connected') {
                     hangUpCall(true);
@@ -4433,3 +4473,5 @@
     </script>
 </body>
 </html>
+
+```
