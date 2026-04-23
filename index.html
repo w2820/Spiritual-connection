@@ -41,28 +41,29 @@
     <style>
         /* ========== 全局重置与变量 ========== */
         :root {
-            --accent-color: #d97706;
-            --accent-rgb: 217, 119, 6;
-            --bg-primary: #f3f4f6;
+            --accent-color: #82cbb2;
+            --accent-rgb: 130, 203, 178;
+            --accent-light: #e8f4ef;
+            --accent-secondary: #f8e6e9;
+            --bg-primary: #f5f5f5;
             --bg-secondary: #ffffff;
-            --text-primary: #1f2937;
-            --text-secondary: #6b7280;
-            --border-color: #e5e7eb;
-            --bubble-sent: #d97706;
+            --text-primary: #333333;
+            --text-secondary: #888888;
+            --border-color: #e0e0e0;
+            --bubble-sent: #82cbb2;
             --bubble-sent-text: #ffffff;
             --bubble-received: #ffffff;
-            --bubble-received-text: #1f2937;
+            --bubble-received-text: #333333;
             
-            /* 主题着色变量 (头部/底部/按钮等) */
+            /* 主题着色变量 */
             --header-bg: #ffffff;
-            --header-text: #1f2937;
+            --header-text: #333333;
             --footer-bg: #ffffff;
-            --footer-border: #e5e7eb;
-            --button-primary-bg: #d97706;
+            --footer-border: #e0e0e0;
+            --button-primary-bg: #82cbb2;
             --button-primary-text: #ffffff;
-            --tab-active-text: #d97706;
-            --tab-active-border: #d97706;
-            --accent-light: rgba(217, 119, 6, 0.1);
+            --tab-active-text: #82cbb2;
+            --tab-active-border: #82cbb2;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -95,7 +96,7 @@
             50% { transform: translateY(-4px); }
         }
 
-        /* ========== 气泡样式（优化宽度控制，防止竖排） ========== */
+        /* ========== 气泡样式 ========== */
         .bubble-left {
             background: linear-gradient(to bottom, #D8E7F2, #FAF5EC) !important;
             border-radius: 13px 13px 13px 13px !important;
@@ -104,7 +105,7 @@
             position: relative !important;
             color: #686A67 !important;
             padding: 6px 12px !important;
-            max-width: 100% !important;                /* 关键：宽度由父容器决定，不再自行限制百分比 */
+            max-width: 100% !important;
             width: fit-content !important;
             min-width: 20px !important;
             word-wrap: break-word !important;
@@ -152,7 +153,7 @@
             position: relative !important;
             color: #686A67 !important;
             padding: 6px 12px !important;
-            max-width: 100% !important;                /* 关键：宽度由父容器决定 */
+            max-width: 100% !important;
             width: fit-content !important;
             min-width: 20px !important;
             word-wrap: break-word !important;
@@ -192,7 +193,6 @@
             z-index: 2;
             pointer-events: none;
         }
-        /* 纯图片消息背景透明处理 */
         .bubble-left:has(> img:only-child),
         .bubble-right:has(> img:only-child) {
             background: transparent !important;
@@ -224,7 +224,6 @@
             overflow: visible !important;
         }
 
-        /* 时间戳防止压缩 */
         .message-time {
             flex-shrink: 0 !important;
             white-space: nowrap !important;
@@ -241,7 +240,6 @@
             word-break: break-word;
         }
 
-        /* 正在输入提示 */
         #typing-indicator {
             position: absolute;
             top: 50%;
@@ -393,7 +391,7 @@
         .progress-bar::after { content: ''; position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 9px; height: 9px; background: #fff; border-radius: 50%; box-shadow: 0 0 5px rgba(100, 180, 140, 0.7); }
         .status-text { font-size: 0.8rem; color: #64b48c; opacity: 0.85; }
 
-        /* 悬浮音乐播放器 (左下角) */
+        /* 悬浮音乐播放器 */
         .music-player {
             position: fixed; left: 20px; bottom: 130px; width: 56px; height: 56px;
             background: rgba(255,255,255,0.9); backdrop-filter: blur(12px); border-radius: 28px;
@@ -501,14 +499,14 @@
         }
         .btn-primary { background: var(--accent-color); color: white; border: none; }
 
-        /* 新版🥰面板 (完全参照图片一：顶部紧凑、三行居中、底部情话) */
+        /* 新版🥰面板 */
         #modal-love-panel .love-card {
             background: #fff; border-radius: 32px; overflow: hidden; position: relative;
             box-shadow: 0 20px 40px rgba(0,0,0,0.15); max-width: 360px; width: 100%;
         }
         .love-header {
             position: relative; height: 120px;
-            background: linear-gradient(135deg, #d97706, #f5a623, #d97706);
+            background: linear-gradient(135deg, #82cbb2, #a8e0cc, #82cbb2);
             background-size: 200% 200%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             color: white; text-shadow: 0 2px 8px rgba(0,0,0,0.3);
@@ -555,7 +553,7 @@
             color: var(--accent-color); font-style: italic; border-left: 3px solid var(--accent-color);
         }
         .love-btn {
-            width: 100%; padding: 14px; background: linear-gradient(135deg, #d97706, #f5a623);
+            width: 100%; padding: 14px; background: linear-gradient(135deg, #82cbb2, #a8e0cc);
             color: white; border: none; border-radius: 40px; font-size: 16px; font-weight: 700;
             position: relative; overflow: hidden; cursor: pointer;
         }
@@ -596,7 +594,7 @@
         .poke-preview {
             background: #fef3c7; border-radius: 16px; padding: 12px 16px;
             margin: 16px 0; color: #92400e; font-size: 14px;
-            border-left: 4px solid #d97706;
+            border-left: 4px solid #82cbb2;
         }
         .poke-card-actions {
             display: flex; gap: 12px; margin-top: 20px;
@@ -609,9 +607,8 @@
             background: #f3f4f6; color: #4b5563;
         }
         .poke-btn-save {
-            background: #d97706; color: white;
+            background: #82cbb2; color: white;
         }
-        /* 戳一戳系统消息样式 */
         .poke-system-message {
             display: flex; justify-content: center; margin: 12px 0;
         }
@@ -622,7 +619,6 @@
         }
 
         /* ========== 通话功能样式 ========== */
-        /* 通话浮层 (全屏/卡片) */
         #modal-call {
             z-index: 2000;
         }
@@ -764,7 +760,6 @@
             border: 1px solid rgba(255,255,255,0.2);
         }
 
-        /* 迷你悬浮窗 */
         #call-mini-window {
             position: fixed;
             bottom: 100px;
@@ -818,7 +813,6 @@
             cursor: pointer;
         }
 
-        /* 通话系统消息样式 (复用戳一戳居中样式) */
         .call-system-message {
             display: flex;
             justify-content: center;
@@ -832,6 +826,355 @@
             font-size: 13px;
             max-width: 80%;
             text-align: center;
+        }
+
+        /* ========== 重要日全新样式（完全按图片设计） ========== */
+        #modal-important-days {
+            z-index: 1000;
+        }
+        .important-modal {
+            width: 90%;
+            max-width: 360px;
+            max-height: 85vh;
+            background: var(--bg-secondary);
+            border-radius: 24px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        /* Banner 区域 - 薄荷绿渐变背景 */
+        .important-banner {
+            background: linear-gradient(135deg, #82cbb2, #a8e0cc, #82cbb2);
+            padding: 30px 20px 20px;
+            text-align: center;
+            position: relative;
+        }
+        .important-banner-days {
+            font-size: 72px;
+            font-weight: 300;
+            color: white;
+            line-height: 1;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .important-banner-days small {
+            font-size: 24px;
+            margin-left: 4px;
+        }
+        
+        /* 标签栏 - 在Banner内部下方 */
+        .important-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .important-tab {
+            padding: 8px 24px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(255,255,255,0.3);
+            color: white;
+            border: none;
+        }
+        .important-tab.active {
+            background: #f8e6e9;
+            color: #333;
+        }
+        
+        /* 操作按钮行 */
+        .important-actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .important-action-btn {
+            padding: 6px 16px;
+            border-radius: 16px;
+            font-size: 13px;
+            cursor: pointer;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+        
+        /* 列表区域 */
+        .important-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 16px;
+        }
+        
+        /* 纪念日卡片 - 浅粉背景 + 薄荷绿描边 */
+        .important-card-item {
+            background: #f8e6e9;
+            border: 2px solid #82cbb2;
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .important-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+        .important-card-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .important-card-delete {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #999;
+            padding: 4px;
+        }
+        .important-card-delete:hover {
+            color: #ff6b6b;
+        }
+        .important-card-days {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        /* 底部按钮 */
+        .important-footer {
+            display: flex;
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+            gap: 12px;
+        }
+        .important-footer .btn-secondary {
+            flex: 1;
+            padding: 12px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 500;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+        .important-footer .btn-primary {
+            flex: 1.5;
+            padding: 12px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 500;
+            background: #82cbb2;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* ========== 编辑弹窗 ========== */
+        #modal-important-editor {
+            z-index: 1100;
+        }
+        .editor-modal {
+            width: 90%;
+            max-width: 360px;
+            background: var(--bg-secondary);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        .editor-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .editor-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .editor-body {
+            padding: 20px;
+        }
+        .editor-field {
+            margin-bottom: 20px;
+        }
+        .editor-field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .editor-field input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 15px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            outline: none;
+            box-sizing: border-box;
+        }
+        .editor-type-group {
+            display: flex;
+            gap: 12px;
+        }
+        .editor-type-btn {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-primary);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .editor-type-btn.active {
+            background: #82cbb2;
+            border-color: #82cbb2;
+            color: white;
+        }
+        .editor-type-btn .type-name {
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        .editor-type-btn .type-hint {
+            font-size: 11px;
+            opacity: 0.7;
+        }
+        .editor-type-desc {
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            padding: 8px 12px;
+            background: #f8e6e9;
+            border-radius: 8px;
+        }
+        .editor-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+        .editor-save-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            background: #82cbb2;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* ========== 角色在线状态弹窗 ========== */
+        #modal-online-status {
+            z-index: 1100;
+        }
+        .online-status-card {
+            width: 90%;
+            max-width: 360px;
+            max-height: 80vh;
+            background: var(--bg-secondary);
+            border-radius: 28px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        .online-status-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .online-status-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .online-status-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+        .online-status-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .online-status-role-selector {
+            margin-bottom: 20px;
+        }
+        .online-status-role-select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 14px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            outline: none;
+        }
+        .online-status-switch-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .online-status-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .online-status-tag {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .online-status-tag button {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0 2px;
+        }
+        .online-status-add {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .online-status-add input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 14px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            outline: none;
+        }
+        .online-status-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
         }
     </style>
 </head>
@@ -897,7 +1240,7 @@
     </div>
 </div>
 
-<!-- 聊天界面（统一支持单人和群聊） -->
+<!-- 聊天界面 -->
 <div id="page-chat" class="page bg-[#f0f2f5]">
     <header class="bg-white shadow-sm z-10 safe-top" style="background-color: var(--header-bg);">
         <div class="px-2 py-2 flex items-center h-12">
@@ -908,7 +1251,6 @@
                 <h1 class="text-lg font-bold text-gray-900 truncate" id="chat-title" style="color: var(--header-text);">角色名</h1>
                 <p class="text-xs text-green-500 truncate" id="chat-subtitle">在线</p>
             </div>
-            <!-- 通话按钮 (放在🥰左侧) -->
             <button id="call-button" class="p-2 rounded-full hover:bg-gray-100 relative" onclick="startCall()" style="display: none;">
                 <i data-lucide="phone" class="w-6 h-6" style="color: var(--accent-color);"></i>
             </button>
@@ -1025,18 +1367,17 @@
     </div>
 </div>
 
-<!-- 外观子页面：主题配色 (增强版：含快捷换肤和主题方案) -->
+<!-- 外观子页面：主题配色 -->
 <div id="modal-appearance-theme" class="modal-overlay hidden">
     <div class="modal-card">
         <div class="flex items-center gap-2 mb-6">
             <button onclick="closeAppearanceSubTab()" class="p-1 -ml-1 rounded-full hover:bg-gray-100"><i data-lucide="chevron-left" class="w-6 h-6"></i></button>
             <h2 class="text-xl font-bold">主题配色</h2>
         </div>
-        <!-- 预设主题 -->
         <div class="mb-6">
             <h3 class="text-sm font-semibold mb-3">快捷换肤</h3>
             <div class="flex gap-3 flex-wrap">
-                <div class="w-10 h-10 rounded-full cursor-pointer border-2 border-transparent hover:scale-110 transition" style="background-color: #8B5E3C;" onclick="applyThemeColor('#8B5E3C')" title="棕色"></div>
+                <div class="w-10 h-10 rounded-full cursor-pointer border-2 border-transparent hover:scale-110 transition" style="background-color: #82cbb2;" onclick="applyThemeColor('#82cbb2')" title="薄荷绿"></div>
                 <div class="w-10 h-10 rounded-full cursor-pointer border-2 border-transparent hover:scale-110 transition" style="background-color: #d97706;" onclick="applyThemeColor('#d97706')" title="橙色"></div>
                 <div class="w-10 h-10 rounded-full cursor-pointer border-2 border-transparent hover:scale-110 transition" style="background-color: #10b981;" onclick="applyThemeColor('#10b981')" title="绿色"></div>
                 <div class="w-10 h-10 rounded-full cursor-pointer border-2 border-transparent hover:scale-110 transition" style="background-color: #3b82f6;" onclick="applyThemeColor('#3b82f6')" title="蓝色"></div>
@@ -1044,18 +1385,16 @@
                 <div class="w-10 h-10 rounded-full cursor-pointer border-2 border-transparent hover:scale-110 transition" style="background-color: #ec4899;" onclick="applyThemeColor('#ec4899')" title="粉色"></div>
                 <div class="w-10 h-10 rounded-full cursor-pointer border-2 border-transparent hover:scale-110 transition" style="background-color: #6b7280;" onclick="applyThemeColor('#6b7280')" title="灰色"></div>
             </div>
-            <p class="text-xs text-gray-400 mt-2">点击色块即可更换主题色（头部/按钮/底部等）</p>
+            <p class="text-xs text-gray-400 mt-2">点击色块即可更换主题色</p>
         </div>
-        <!-- 主题方案管理 -->
         <div class="border-t border-gray-200 pt-4 mt-2">
             <div class="flex items-center justify-between mb-3">
                 <h3 class="text-sm font-semibold">主题方案</h3>
                 <button onclick="saveCurrentScheme()" class="text-xs px-3 py-1 rounded-full" style="background-color: var(--accent-light); color: var(--accent-color);">保存当前</button>
             </div>
-            <p class="text-xs text-gray-400 mb-2">保存当前所有外观设置（不含背景图片），方便快速切换</p>
+            <p class="text-xs text-gray-400 mb-2">保存当前所有外观设置，方便快速切换</p>
             <div id="scheme-list" class="space-y-2 max-h-40 overflow-y-auto">
-                <!-- 动态渲染已保存的方案 -->
-                <div class="text-center text-gray-400 py-2 text-sm">暂无保存的方案，点击“保存当前”试试~</div>
+                <div class="text-center text-gray-400 py-2 text-sm">暂无保存的方案，点击"保存当前"试试~</div>
             </div>
         </div>
         <div class="flex gap-4 mt-6">
@@ -1065,7 +1404,7 @@
     </div>
 </div>
 
-<!-- 外观子页面：背景 & 字体 (保持原样) -->
+<!-- 外观子页面：背景 & 字体 -->
 <div id="modal-appearance-background" class="modal-overlay hidden">
     <div class="modal-card flex flex-col max-h-[80vh]">
         <div class="flex items-center gap-2 mb-6 flex-shrink-0">
@@ -1095,7 +1434,7 @@
     </div>
 </div>
 
-<!-- 外观子页面：气泡 & CSS (保持原样，但预览已应用新气泡) -->
+<!-- 外观子页面：气泡 & CSS -->
 <div id="modal-appearance-bubble" class="modal-overlay hidden">
     <div class="modal-card">
         <div class="flex items-center gap-2 mb-6">
@@ -1113,7 +1452,7 @@
     </div>
 </div>
 
-<!-- 外观子页面：聊天头像 (保持原样) -->
+<!-- 外观子页面：聊天头像 -->
 <div id="modal-appearance-avatar" class="modal-overlay hidden">
     <div class="modal-card">
         <div class="flex items-center gap-2 mb-6">
@@ -1133,7 +1472,7 @@
     </div>
 </div>
 
-<!-- 角色管理界面 (含群聊Tab) -->
+<!-- 角色管理界面 -->
 <div id="modal-role-management" class="modal-overlay hidden">
     <div class="modal-card flex flex-col max-h-[80vh]">
         <div class="flex items-center gap-2 mb-4"><i data-lucide="users" class="w-6 h-6" style="color: var(--accent-color);"></i><h2 class="text-xl font-bold">管理</h2></div>
@@ -1150,7 +1489,7 @@
     </div>
 </div>
 
-<!-- 高级功能界面 (保持原样) -->
+<!-- 高级功能界面 -->
 <div id="modal-settings-advanced" class="modal-overlay hidden">
     <div class="modal-card">
         <div class="flex items-center gap-2 mb-8"><i data-lucide="pen-tool" class="w-6 h-6" style="color: var(--accent-color);"></i><h2 class="text-xl font-bold">实用工具</h2></div>
@@ -1163,6 +1502,7 @@
             <button onclick="openImportantDays()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="heart" class="w-5 h-5"></i></div><span class="text-xs font-medium">重要日</span></button>
             <button onclick="openMailbox()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="mail" class="w-5 h-5"></i></div><span class="text-xs font-medium">写信功能</span></button>
             <button onclick="openStatusWordbank()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="database" class="w-5 h-5"></i></div><span class="text-xs font-medium">角色状态词库</span></button>
+            <button onclick="openOnlineStatus()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="activity" class="w-5 h-5"></i></div><span class="text-xs font-medium">角色在线状态</span></button>
         </div>
         <div class="flex gap-4">
             <button onclick="closeAdvancedSettings()" class="flex-1 bg-gray-100 text-gray-600 p-3 rounded-xl font-bold">返回</button>
@@ -1171,7 +1511,7 @@
     </div>
 </div>
 
-<!-- 角色状态词库界面 (保持原样) -->
+<!-- 角色状态词库界面 -->
 <div id="modal-status-wordbank" class="page hidden z-[90]">
     <div class="safe-top bg-white border-b border-gray-100 p-4 flex items-center" style="background-color: var(--header-bg);">
         <button onclick="closeStatusWordbank()" class="p-2 -ml-2 rounded-full hover:bg-gray-100"><i data-lucide="chevron-left" class="w-6 h-6"></i></button>
@@ -1198,7 +1538,7 @@
     </div>
 </div>
 
-<!-- 内容库主界面 (保持原样) -->
+<!-- 内容库主界面 -->
 <div id="modal-library-main" class="modal-overlay hidden">
     <div class="modal-card">
         <div class="flex items-center gap-2 mb-8"><i data-lucide="library" class="w-6 h-6" style="color: var(--accent-color);"></i><h2 class="text-xl font-bold">内容库管理</h2></div>
@@ -1211,7 +1551,7 @@
     </div>
 </div>
 
-<!-- 字卡词库详情页 (保持原样) -->
+<!-- 字卡词库详情页 -->
 <div id="modal-library-words" class="page hidden z-[90]">
     <div class="safe-top bg-white border-b border-gray-100 p-4 flex items-center" style="background-color: var(--header-bg);">
         <button onclick="closeWordCardLibrary()" class="p-2 -ml-2 rounded-full hover:bg-gray-100"><i data-lucide="chevron-left" class="w-6 h-6"></i></button>
@@ -1241,7 +1581,7 @@
     </div>
 </div>
 
-<!-- Emoji 库详情页 (保持原样) -->
+<!-- Emoji 库详情页 -->
 <div id="modal-library-emoji" class="page hidden z-[90]">
     <div class="safe-top bg-white border-b border-gray-100 p-4 flex items-center" style="background-color: var(--header-bg);">
         <button onclick="closeEmojiLibrary()" class="p-2 -ml-2 rounded-full hover:bg-gray-100"><i data-lucide="chevron-left" class="w-6 h-6"></i></button>
@@ -1263,7 +1603,7 @@
     </div>
 </div>
 
-<!-- 图片表情包库详情页 (保持原样) -->
+<!-- 图片表情包库详情页 -->
 <div id="modal-library-sticker" class="page hidden z-[90]">
     <div class="safe-top bg-white border-b border-gray-100 p-4 flex items-center" style="background-color: var(--header-bg);">
         <button onclick="closeStickerLibrary()" class="p-2 -ml-2 rounded-full hover:bg-gray-100"><i data-lucide="chevron-left" class="w-6 h-6"></i></button>
@@ -1287,13 +1627,11 @@
     </div>
 </div>
 
-<!-- 聊天节奏设置界面 (含群聊概率和通话配置) -->
+<!-- 聊天节奏设置界面 -->
 <div id="modal-settings-chat" class="modal-overlay hidden">
     <div class="modal-card max-h-[90vh] overflow-y-auto">
         <div class="flex items-center gap-2 mb-6"><i data-lucide="message-square" class="w-6 h-6" style="color: var(--accent-color);"></i><h2 class="text-xl font-bold">聊天设置</h2></div>
         <div class="space-y-6 mb-8">
-            <!-- 原有设置项略 (为节省篇幅，保留原有但此处不展开，实际代码包含全部) -->
-            <!-- 回复速度、主动发送等 -->
             <div class="space-y-4">
                 <div class="flex justify-between text-sm font-medium"><span>最短时长</span><span>最长时长</span></div>
                 <div class="flex gap-4 items-center">
@@ -1310,7 +1648,6 @@
             <div><label class="text-sm font-medium block mb-3">多条回复概率设置 (%)</label><div class="flex gap-4"><div class="flex-1"><span class="text-xs text-gray-400 block mb-1 text-center">回复2条概率</span><input type="number" id="setting-prob-2" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-center font-bold" value="20"></div><div class="flex-1"><span class="text-xs text-gray-400 block mb-1 text-center">回复3条概率</span><input type="number" id="setting-prob-3" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-center font-bold" value="5"></div></div></div>
             <div><label class="text-sm font-medium block mb-3">引用功能概率设置 (%)</label><div class="flex gap-4"><div class="flex-1"><span class="text-xs text-gray-400 block mb-1 text-center">引用我的消息</span><input type="number" id="setting-quote-my" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-center font-bold" value="10"></div><div class="flex-1"><span class="text-xs text-gray-400 block mb-1 text-center">引用他人消息</span><input type="number" id="setting-quote-other" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-center font-bold" value="5"></div></div></div>
             
-            <!-- 群聊发言人数概率设置 -->
             <div class="border-t border-gray-200 pt-4 mt-4">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="text-sm font-semibold">群聊发言人数概率</h3>
@@ -1327,7 +1664,6 @@
                 </div>
             </div>
 
-            <!-- 通话功能配置 -->
             <div class="border-t border-gray-200 pt-4 mt-4">
                 <h3 class="text-sm font-semibold mb-3">模拟视频通话</h3>
                 <div class="bg-gray-50 p-4 rounded-xl space-y-3">
@@ -1353,7 +1689,7 @@
     </div>
 </div>
 
-<!-- 数据管理界面 (保持原样) -->
+<!-- 数据管理界面 -->
 <div id="modal-settings-data" class="modal-overlay hidden">
     <div class="modal-card">
         <div class="flex items-center gap-2 mb-6"><i data-lucide="database" class="w-6 h-6" style="color: var(--accent-color);"></i><h2 class="text-xl font-bold">数据管理</h2></div>
@@ -1387,7 +1723,7 @@
     </div>
 </div>
 
-<!-- 信箱界面 (保持原样) -->
+<!-- 信箱界面 -->
 <div id="page-mailbox" class="page bg-[#fffbf0] z-50">
     <header class="safe-top bg-[#8B5E3C] text-white"><div class="px-4 py-4 flex items-center"><button onclick="closeMailbox()" class="p-2 -ml-2 rounded-full hover:bg-white/10"><i data-lucide="chevron-down" class="w-6 h-6"></i></button><h1 class="text-lg font-bold ml-2 text-white">信箱投递</h1></div></header>
     <main class="flex-1 overflow-auto p-6">
@@ -1403,7 +1739,7 @@
     </div>
 </div>
 
-<!-- 弹窗：写信 (保持原样) -->
+<!-- 弹窗：写信 -->
 <div id="modal-compose" class="modal-overlay hidden">
     <div class="modal-card flex flex-col max-h-[85vh]">
         <div class="flex items-center justify-between mb-6"><h2 class="text-xl font-bold">提笔写信</h2><button onclick="closeCompose()" class="p-2 bg-gray-100 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button></div>
@@ -1413,7 +1749,7 @@
     </div>
 </div>
 
-<!-- 弹窗：信件详情 (保持原样) -->
+<!-- 弹窗：信件详情 -->
 <div id="modal-letter-detail" class="modal-overlay hidden">
     <div class="modal-card bg-[#fffbf0] flex flex-col max-h-[85vh]">
         <div class="flex items-center justify-between mb-6">
@@ -1430,7 +1766,7 @@
     </div>
 </div>
 
-<!-- 弹窗：创建/编辑角色 (保持原样) -->
+<!-- 弹窗：创建/编辑角色 -->
 <div id="modal-create-role" class="modal-overlay hidden">
     <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-6 safe-bottom max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold">创建角色</h2><button onclick="closeCreateRole()" class="p-2 bg-gray-100 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button></div>
@@ -1446,7 +1782,7 @@
     </div>
 </div>
 
-<!-- 新版🥰面板 (保持原样) -->
+<!-- 新版🥰面板 -->
 <div id="modal-love-panel" class="modal-overlay hidden">
     <div class="love-card">
         <div class="love-header">
@@ -1480,7 +1816,7 @@
     </div>
 </div>
 
-<!-- 弹窗：源码查看 (保持原样) -->
+<!-- 弹窗：源码查看 -->
 <div id="modal-source" class="page hidden bg-gray-900" style="z-index: 10000 !important;">
     <div class="safe-top p-4 flex justify-between items-center bg-gray-800 border-b border-gray-700"><h2 class="text-white font-bold text-sm">源代码 (可编辑)</h2><button onclick="closeSourceCode()" class="text-white p-2 bg-gray-700 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button></div>
     <div class="flex-1 overflow-auto p-0"><textarea class="w-full h-full bg-black text-green-400 text-xs font-mono p-4 resize-none outline-none" id="source-code-content" spellcheck="false"></textarea></div>
@@ -1522,7 +1858,7 @@
     </div>
 </div>
 
-<!-- 消息统计 (保持原样) -->
+<!-- 消息统计 -->
 <div id="modal-stats" class="modal-overlay hidden">
     <div class="modal-card max-w-md max-h-[85vh] overflow-hidden flex flex-col">
         <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold"><i class="fas fa-chart-bar mr-2" style="color: var(--accent-color);"></i>消息统计</h2><button onclick="closeStats()" class="p-2 rounded-full hover:bg-gray-100"><i data-lucide="x" class="w-5 h-5"></i></button></div>
@@ -1553,22 +1889,109 @@
     </div>
 </div>
 
-<!-- 抉择 (保持原样) -->
+<!-- 抉择 -->
 <div id="modal-decision" class="modal-overlay hidden">
     <div class="modal-card"><h2 class="text-xl font-bold mb-4">抉择</h2><textarea id="decision-options" class="w-full h-32 bg-gray-50 rounded-xl p-3 text-sm" placeholder="输入选项，每行一个或逗号分隔"></textarea><button onclick="makeDecision()" class="w-full text-white p-3 rounded-xl mt-3" style="background-color: var(--button-primary-bg);">随机选择</button><div id="decision-result" class="mt-3 text-center text-lg font-bold" style="color: var(--accent-color);"></div><button onclick="closeDecision()" class="mt-3 w-full bg-gray-100 p-3 rounded-xl">关闭</button></div>
 </div>
 
-<!-- 运势占卜 (保持原样) -->
+<!-- 运势占卜 -->
 <div id="modal-fortune" class="modal-overlay hidden">
     <div class="modal-card text-center"><h2 class="text-xl font-bold mb-4">✨ 今日运势 ✨</h2><div id="fortune-text" class="text-lg italic mb-4" style="color: var(--accent-color);">点击抽签</div><button onclick="drawFortune()" class="text-white px-6 py-2 rounded-full" style="background-color: var(--button-primary-bg);">抽签</button><button onclick="closeFortune()" class="mt-4 w-full bg-gray-100 p-2 rounded-xl">关闭</button></div>
 </div>
 
-<!-- 重要日 (保持原样) -->
-<div id="modal-important-days" class="page hidden z-[80]">
-    <div class="safe-top p-4 border-b flex items-center bg-white" style="background-color: var(--header-bg);"><button onclick="closeImportantDays()" class="p-2 -ml-2"><i data-lucide="chevron-left" class="w-6 h-6"></i></button><h2 class="text-lg font-bold ml-2">重要日</h2></div>
-    <div class="flex-1 overflow-auto p-4 bg-white">
-        <div class="mb-4 flex gap-2"><input type="text" id="new-day-name" placeholder="名称" class="flex-1 border rounded-xl p-2"><input type="date" id="new-day-date" class="border rounded-xl p-2"><button onclick="addImportantDay()" class="text-white px-3 rounded-xl" style="background-color: var(--button-primary-bg);">添加</button></div>
-        <div id="important-days-list" class="important-days-list"></div>
+<!-- 重要日 (完全按图片设计) -->
+<div id="modal-important-days" class="modal-overlay hidden">
+    <div class="important-modal">
+        <!-- Banner区域 -->
+        <div class="important-banner">
+            <div class="important-banner-days" id="important-banner-days">0<small>天</small></div>
+            <!-- 标签栏在Banner内部 -->
+            <div class="important-tabs">
+                <button class="important-tab active" id="important-tab-card" onclick="switchImportantTab('card')">卡片</button>
+                <button class="important-tab" id="important-tab-data" onclick="switchImportantTab('data')">数据</button>
+            </div>
+        </div>
+        
+        <!-- 操作按钮行 -->
+        <div class="important-actions">
+            <button class="important-action-btn" onclick="uploadImportantCover()">更换封面</button>
+            <button class="important-action-btn" onclick="clearImportantCover()">清除</button>
+            <input type="file" id="important-cover-input" accept="image/*" style="display:none;" onchange="handleImportantCoverUpload(this)">
+        </div>
+        
+        <!-- 列表区域 -->
+        <div class="important-list" id="important-list"></div>
+        
+        <!-- 底部按钮 -->
+        <div class="important-footer">
+            <button class="btn-secondary" onclick="closeImportantDays()">关闭</button>
+            <button class="btn-primary" onclick="openImportantEditor(null)">+ 新增纪念日</button>
+        </div>
+    </div>
+</div>
+
+<!-- 编辑弹窗 -->
+<div id="modal-important-editor" class="modal-overlay hidden">
+    <div class="editor-modal">
+        <div class="editor-header">
+            <span class="editor-title" id="editor-title">添加纪念日</span>
+        </div>
+        <div class="editor-body">
+            <div class="editor-field">
+                <label>标题名称</label>
+                <input type="text" id="editor-name" placeholder="例如：贴贴">
+            </div>
+            <div class="editor-field">
+                <label>选择日期</label>
+                <input type="date" id="editor-date">
+            </div>
+            <div class="editor-field">
+                <label>类型</label>
+                <div class="editor-type-group">
+                    <div class="editor-type-btn active" data-type="anniversary" onclick="selectImportantType('anniversary')">
+                        <div class="type-name">纪念日</div>
+                        <div class="type-hint">过去 → 今天</div>
+                    </div>
+                    <div class="editor-type-btn" data-type="countdown" onclick="selectImportantType('countdown')">
+                        <div class="type-name">倒数日</div>
+                        <div class="type-hint">今天 → 未来</div>
+                    </div>
+                </div>
+                <div class="editor-type-desc" id="editor-type-desc">计算从过去某一天到现在已经过了多少天（例如：恋爱纪念日）</div>
+            </div>
+        </div>
+        <div class="editor-footer">
+            <button class="editor-save-btn" onclick="saveImportantDay()">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 角色在线状态弹窗 -->
+<div id="modal-online-status" class="modal-overlay hidden">
+    <div class="online-status-card">
+        <div class="online-status-header">
+            <span class="online-status-title">角色在线状态</span>
+            <button class="online-status-close" onclick="closeOnlineStatus()">&times;</button>
+        </div>
+        <div class="online-status-body">
+            <div class="online-status-role-selector">
+                <select id="online-status-role-select" class="online-status-role-select" onchange="switchOnlineStatusRole()"></select>
+            </div>
+            <div class="online-status-switch-row">
+                <span>启用自动切换</span>
+                <div class="ios-switch" id="online-status-switch" onclick="toggleSwitch(this)"></div>
+            </div>
+            <p style="font-size:12px;color:var(--text-secondary);margin-top:-8px;margin-bottom:16px;">基于时间自动更新在线状态</p>
+            <label style="font-size:14px;font-weight:500;margin-bottom:8px;display:block;">状态列表</label>
+            <div class="online-status-list" id="online-status-list"></div>
+            <div class="online-status-add">
+                <input type="text" id="new-online-status" placeholder="输入新状态，如：在忙">
+                <button class="btn-primary" onclick="addOnlineStatus()" style="padding:8px 16px;">添加</button>
+            </div>
+        </div>
+        <div class="online-status-footer">
+            <button class="btn-primary" onclick="saveOnlineStatus()" style="width:100%;">保存设置</button>
+        </div>
     </div>
 </div>
 
@@ -1587,9 +2010,7 @@
             <label>他戳我时显示</label>
             <input type="text" id="poke-their-text" placeholder="例如：老婆，我们永远不分开 😂😂" maxlength="30" oninput="updatePokePreview()">
         </div>
-        <div class="poke-preview" id="poke-preview-text">
-            预览区域
-        </div>
+        <div class="poke-preview" id="poke-preview-text">预览区域</div>
         <div class="poke-card-actions">
             <button class="poke-btn-cancel" onclick="closePokeSettings()">取消</button>
             <button class="poke-btn-save" onclick="savePokeSettings()">保存</button>
@@ -1634,7 +2055,7 @@
     <div class="call-mini-timer" id="call-mini-timer">00:00</div>
 </div>
 
-<!-- 悬浮音乐播放器 (左下角) -->
+<!-- 悬浮音乐播放器 -->
 <div id="music-player" class="music-player" onclick="toggleMusicPlayer(event)">
     <div class="music-icon">🎵</div>
     <div class="music-controls">
@@ -1669,8 +2090,8 @@
         // --- 默认数据结构 ---
         const DEFAULT_DATA = {
             roles: [
-                { id: '1', name: '老公', avatar: 'https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/b706d6c461e44df0b82fda4381e66f56~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947761&x-signature=WPDM%2Fe%2Bq9Ltf6sL1Rc2vcm320jw%3D', groupProb: 50, lastActive: Date.now(), lastAutoSendTime: Date.now(), lastLoveRefresh: 0, pokeMyText: '哥哥，我超爱你 😍😍', pokeTheirText: '老婆，我们永远不分开 😂😂' },
-                { id: '2', name: '菜🥬', avatar: 'https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/cd47e4d6c7734a9f8c189d3d6c277eb6~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947762&x-signature=a5JLFkIXlkbkhZMc%2BJ%2FUogUFVKc%3D', groupProb: 30, lastActive: Date.now() - 3600000, lastAutoSendTime: Date.now() - 3600000, lastLoveRefresh: 0, pokeMyText: '贴贴 🥰', pokeTheirText: '想你啦 💕' }
+                { id: '1', name: '老公', avatar: 'https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/b706d6c461e44df0b82fda4381e66f56~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947761&x-signature=WPDM%2Fe%2Bq9Ltf6sL1Rc2vcm320jw%3D', groupProb: 50, lastActive: Date.now(), lastAutoSendTime: Date.now(), lastLoveRefresh: 0, pokeMyText: '哥哥，我超爱你 😍😍', pokeTheirText: '老婆，我们永远不分开 😂😂', onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 } },
+                { id: '2', name: '菜🥬', avatar: 'https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/cd47e4d6c7734a9f8c189d3d6c277eb6~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947762&x-signature=a5JLFkIXlkbkhZMc%2BJ%2FUogUFVKc%3D', groupProb: 30, lastActive: Date.now() - 3600000, lastAutoSendTime: Date.now() - 3600000, lastLoveRefresh: 0, pokeMyText: '贴贴 🥰', pokeTheirText: '想你啦 💕', onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭'], currentStatus: '在线', lastUpdate: 0 } }
             ],
             groups: [],
             chats: {},
@@ -1697,13 +2118,15 @@
                 stickers: []
             },
             mails: [],
-            importantDays: [],
+            importantDays: [
+                { id: '1', name: '4.21黎宝和领戒指', date: '2025-04-21', type: 'anniversary', cover: '' }
+            ],
             favoriteMessages: []
         };
 
         // --- 全局状态 ---
         let appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
-        let tempAppearance = { theme: 'custom', customColor: '#d97706', savedSchemes: [], backgrounds: { home: '', chat: '', group: '' }, bubble: { radius: 13, shadow: 1 }, avatarShape: 'circle' };
+        let tempAppearance = { theme: 'custom', customColor: '#82cbb2', savedSchemes: [], backgrounds: { home: '', chat: '', group: '' }, bubble: { radius: 13, shadow: 1 }, avatarShape: 'circle' };
         let currentChatType = 'role';
         let currentRoleId = null;
         let currentGroupId = null;
@@ -1729,10 +2152,20 @@
         let currentEditingGroupProbId = null;
         let roleManagementTab = 'roles';
         
+        // 重要日状态
+        let importantTab = 'card';
+        let selectedImportantId = null;
+        let editingImportantId = null;
+        let currentImportantCover = '';
+        let mailCheckTimer = null;
+        
+        // 在线状态配置：当前选中的角色ID
+        let currentOnlineStatusRoleId = null;
+        
         // 通话状态
         let callState = {
             active: false,
-            status: 'idle', // calling, ringing, connected, rejected, missed, ended
+            status: 'idle',
             roleId: null,
             roleName: '',
             roleAvatar: '',
@@ -1807,6 +2240,7 @@
             if (backgrounds.chat?.startsWith('data:')) mediaBytes += backgrounds.chat.length * 2;
             if (backgrounds.group?.startsWith('data:')) mediaBytes += backgrounds.group.length * 2;
             if (appData.settings?.call?.background?.startsWith('data:')) mediaBytes += appData.settings.call.background.length * 2;
+            appData.importantDays?.forEach(d => { if (d.cover && d.cover.startsWith('data:')) mediaBytes += d.cover.length * 2; });
             
             const totalBytes = new Blob([dataStr]).size + bgStr.length + unreadStr.length + mediaBytes;
             return { total: totalBytes, chat: chatBytes, settings: settingsBytes, media: mediaBytes };
@@ -1942,7 +2376,7 @@
                 if (!appData.groups) appData.groups = [];
                 appData.groups.forEach(g => { if (!g.avatar) g.avatar = DEFAULT_GROUP_AVATAR; if (!g.replyCountProb) g.replyCountProb = {}; });
                 if (!appData.groupChats) appData.groupChats = {};
-                if (!appData.importantDays) appData.importantDays = [];
+                if (!appData.importantDays) appData.importantDays = [{ id: '1', name: '4.21黎宝和领戒指', date: '2025-04-21', type: 'anniversary', cover: '' }];
                 if (!appData.favoriteMessages) appData.favoriteMessages = [];
                 if (!appData.settings.autoSendProbability) appData.settings.autoSendProbability = 0.5;
                 if (!appData.settings.call) appData.settings.call = { enabled: true, rejectProb: 20, missProb: 10, answerDelay: 2000, background: '', windowSize: 'standard' };
@@ -1952,6 +2386,7 @@
                     if (!r.currentLoveState) r.currentLoveState = null; 
                     if (!r.pokeMyText) r.pokeMyText = '哥哥，我超爱你 😍😍';
                     if (!r.pokeTheirText) r.pokeTheirText = '老婆，我们永远不分开 😂😂';
+                    if (!r.onlineStatus) r.onlineStatus = { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 };
                 });
                 syncAllReplies();
             } catch (e) {
@@ -1963,6 +2398,7 @@
             updateDate();
             await loadUnreadCounts();
             startAutoSendTimer();
+            startMailReplyChecker();
             initNotificationSwitch();
             updateCallButtonVisibility();
         }
@@ -1970,10 +2406,10 @@
         // --- 外观初始化与应用 (支持主题色和方案) ---
         async function initAppearance() {
             if (!appData.appearance) {
-                appData.appearance = { theme: 'custom', customColor: '#d97706', savedSchemes: [], backgrounds: { home: '', chat: '', group: '' }, bubble: { radius: 13, shadow: 1 }, avatarShape: 'circle' };
+                appData.appearance = { theme: 'custom', customColor: '#82cbb2', savedSchemes: [], backgrounds: { home: '', chat: '', group: '' }, bubble: { radius: 13, shadow: 1 }, avatarShape: 'circle' };
             } else {
                 if (!appData.appearance.theme) appData.appearance.theme = 'custom';
-                if (!appData.appearance.customColor) appData.appearance.customColor = '#d97706';
+                if (!appData.appearance.customColor) appData.appearance.customColor = '#82cbb2';
                 if (!appData.appearance.savedSchemes) appData.appearance.savedSchemes = [];
                 if (!appData.appearance.backgrounds) appData.appearance.backgrounds = { home: '', chat: '', group: '' };
                 if (!appData.appearance.bubble) appData.appearance.bubble = { radius: 13, shadow: 1 };
@@ -1986,10 +2422,10 @@
         function applyAppearance() {
             const { theme, customColor, backgrounds, bubble, avatarShape } = appData.appearance;
             const root = document.documentElement;
-            let mainColor = '#d97706';
-            if (theme === 'light') mainColor = '#d97706';
-            else if (theme === 'dark') mainColor = '#d97706';
-            else if (theme === 'custom') mainColor = customColor || '#d97706';
+            let mainColor = '#82cbb2';
+            if (theme === 'light') mainColor = '#82cbb2';
+            else if (theme === 'dark') mainColor = '#82cbb2';
+            else if (theme === 'custom') mainColor = customColor || '#82cbb2';
             
             root.style.setProperty('--accent-color', mainColor);
             root.style.setProperty('--accent-rgb', hexToRgb(mainColor).join(','));
@@ -2066,7 +2502,7 @@
             if (!container) return;
             const schemes = appData.appearance.savedSchemes || [];
             if (schemes.length === 0) {
-                container.innerHTML = '<div class="text-center text-gray-400 py-2 text-sm">暂无保存的方案，点击“保存当前”试试~</div>';
+                container.innerHTML = '<div class="text-center text-gray-400 py-2 text-sm">暂无保存的方案，点击"保存当前"试试~</div>';
                 return;
             }
             let html = '';
@@ -2127,7 +2563,7 @@
                 card.className = 'role-card bg-white p-4 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer relative';
                 card.onclick = () => openChat(role.id);
                 let pressTimer;
-                card.addEventListener('touchstart', () => { pressTimer = setTimeout(() => showConfirm(`删除角色“${role.name}”？`, async () => { appData.roles = appData.roles.filter(r => r.id !== role.id); delete appData.chats[role.id]; await saveData(); renderRoleList(); renderGroupList(); showToast('已删除'); }), 500); });
+                card.addEventListener('touchstart', () => { pressTimer = setTimeout(() => showConfirm(`删除角色"${role.name}"？`, async () => { appData.roles = appData.roles.filter(r => r.id !== role.id); delete appData.chats[role.id]; await saveData(); renderRoleList(); renderGroupList(); showToast('已删除'); }), 500); });
                 card.addEventListener('touchend', () => clearTimeout(pressTimer));
                 card.addEventListener('touchmove', () => clearTimeout(pressTimer));
                 card.innerHTML = `${badge}<img src="${role.avatar}" class="w-14 h-14 rounded-full object-cover border-2 border-amber-50"><div class="flex-1 min-w-0"><h3 class="font-bold text-gray-900 text-lg truncate">${escapeHtml(role.name)}</h3>${lastHtml}</div><i data-lucide="chevron-right" class="w-5 h-5 text-gray-300"></i>`;
@@ -2188,7 +2624,8 @@
             role.lastActive = Date.now();
             debouncedSaveData();
             document.getElementById('chat-title').textContent = role.name;
-            document.getElementById('chat-subtitle').textContent = '在线';
+            refreshRoleOnlineStatus(role);
+            document.getElementById('chat-subtitle').textContent = role.onlineStatus?.currentStatus || '在线';
             document.getElementById('page-home').classList.remove('active');
             document.getElementById('page-chat').classList.add('active');
             renderChatMessages();
@@ -2243,7 +2680,7 @@
                 div.className = 'poke-system-message';
                 const pokeRole = appData.roles.find(r => r.id === sender);
                 const roleName = pokeRole?.name || '角色';
-                const pokeText = isMe ? `我拍了拍“${roleName}”：${content}` : `${name}拍了拍你：${content}`;
+                const pokeText = isMe ? `我拍了拍"${roleName}"：${content}` : `${name}拍了拍你：${content}`;
                 div.innerHTML = `<span>${escapeHtml(pokeText)}</span>`;
             } else if (type === 'call') {
                 div.className = 'call-system-message';
@@ -2574,7 +3011,6 @@
             const errorMsg = document.getElementById('prob-error-msg');
             if (errorMsg) errorMsg.classList.add('hidden');
             
-            // 通话设置
             const callEnabledSwitch = document.getElementById('setting-call-enabled-switch');
             callEnabledSwitch.classList.toggle('active', appData.settings.call?.enabled !== false);
             document.getElementById('setting-call-reject-prob').value = appData.settings.call?.rejectProb ?? 20;
@@ -2697,7 +3133,7 @@
         function openCreateRole() { document.getElementById('modal-create-role').classList.remove('hidden'); document.getElementById('role-name-input').value = ''; document.getElementById('role-avatar-preview').src = DEFAULT_AVATAR; document.getElementById('role-group-prob').value = 50; document.getElementById('role-group-prob-val').textContent = '50%'; }
         function closeCreateRole() { document.getElementById('modal-create-role').classList.add('hidden'); }
         async function handleAvatarUpload(input) { if (input.files?.[0]) { showToast('压缩中...'); const compressed = await compressImage(input.files[0], 400, 0.7); document.getElementById('role-avatar-preview').src = compressed; } }
-        async function saveRole() { const name = document.getElementById('role-name-input').value.trim(); if (!name) { showToast('请输入名称'); return; } const avatar = document.getElementById('role-avatar-preview').src; const groupProb = parseInt(document.getElementById('role-group-prob').value); appData.roles.push({ id: Date.now().toString(), name, avatar, groupProb, lastActive: Date.now(), lastAutoSendTime: Date.now(), lastLoveRefresh: 0, currentLoveState: null, pokeMyText: '哥哥，我超爱你 😍😍', pokeTheirText: '老婆，我们永远不分开 😂😂' }); await saveData(); renderRoleList(); closeCreateRole(); showToast('创建成功'); }
+        async function saveRole() { const name = document.getElementById('role-name-input').value.trim(); if (!name) { showToast('请输入名称'); return; } const avatar = document.getElementById('role-avatar-preview').src; const groupProb = parseInt(document.getElementById('role-group-prob').value); appData.roles.push({ id: Date.now().toString(), name, avatar, groupProb, lastActive: Date.now(), lastAutoSendTime: Date.now(), lastLoveRefresh: 0, currentLoveState: null, pokeMyText: '哥哥，我超爱你 😍😍', pokeTheirText: '老婆，我们永远不分开 😂😂', onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 } }); await saveData(); renderRoleList(); closeCreateRole(); showToast('创建成功'); }
 
         // --- 数据管理 ---
         function openDataManagement() { pageHistory.push('settings'); document.getElementById('modal-settings-main').classList.add('hidden'); document.getElementById('modal-settings-data').classList.remove('hidden'); updateStorageDisplay(); updateNotificationUI(); }
@@ -2755,11 +3191,358 @@
         function openFortune() { document.getElementById('modal-fortune').classList.remove('hidden'); drawFortune(); }
         function closeFortune() { document.getElementById('modal-fortune').classList.add('hidden'); }
         function drawFortune() { const f = fortunes[Math.floor(Math.random()*fortunes.length)]; document.getElementById('fortune-text').innerHTML = `<span class="text-3xl">${f}</span><br>${fortuneTexts[f]}`; }
-        function openImportantDays() { renderImportantDays(); document.getElementById('modal-important-days').classList.add('active'); }
-        function closeImportantDays() { document.getElementById('modal-important-days').classList.remove('active'); }
-        function renderImportantDays() { const c = document.getElementById('important-days-list'); c.innerHTML = ''; (appData.importantDays||[]).forEach((d,i) => { const today = new Date(); const target = new Date(d.date); const diff = Math.ceil((target - today)/(1000*3600*24)); const div = document.createElement('div'); div.className = 'important-day-item'; div.innerHTML = `<div><strong>${escapeHtml(d.name)}</strong><br><span class="text-xs">${d.date}</span></div><div>${diff>0?`还有${diff}天`:diff===0?'就是今天':`已过${-diff}天`}</div><button onclick="deleteImportantDay(${i})" class="text-red-500">🗑️</button>`; c.appendChild(div); }); }
-        function addImportantDay() { const name = document.getElementById('new-day-name').value.trim(); const date = document.getElementById('new-day-date').value; if (!name || !date) { showToast('请填写完整'); return; } if (!appData.importantDays) appData.importantDays = []; appData.importantDays.push({ name, date }); saveData(); renderImportantDays(); document.getElementById('new-day-name').value = ''; document.getElementById('new-day-date').value = ''; showToast('添加成功'); }
-        function deleteImportantDay(i) { appData.importantDays.splice(i,1); saveData(); renderImportantDays(); }
+        
+        // --- 重要日功能 (完全按图片布局重构) ---
+        function openImportantDays() {
+            if (!appData.importantDays) appData.importantDays = [];
+            selectedImportantId = appData.importantDays.length > 0 ? appData.importantDays[0].id : null;
+            importantTab = 'card';
+            switchImportantTab('card');
+            renderImportantList();
+            updateBannerDays();
+            document.getElementById('modal-important-days').classList.remove('hidden');
+        }
+        function closeImportantDays() {
+            document.getElementById('modal-important-days').classList.add('hidden');
+            closeImportantEditor();
+        }
+        function switchImportantTab(tab) {
+            importantTab = tab;
+            const tabCard = document.getElementById('important-tab-card');
+            const tabData = document.getElementById('important-tab-data');
+            
+            if (tab === 'card') {
+                tabCard.classList.add('active');
+                tabData.classList.remove('active');
+            } else {
+                tabCard.classList.remove('active');
+                tabData.classList.add('active');
+            }
+            // 两个视图都显示列表
+            renderImportantList();
+        }
+        function updateBannerDays() {
+            const day = appData.importantDays.find(d => d.id === selectedImportantId);
+            const daysEl = document.getElementById('important-banner-days');
+            
+            if (!day) {
+                daysEl.innerHTML = '0<small>天</small>';
+                return;
+            }
+            
+            const target = new Date(day.date);
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            target.setHours(0,0,0,0);
+            const diffTime = target - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const isPast = diffDays < 0;
+            const absDays = Math.abs(diffDays);
+            
+            let daysText = '';
+            if (day.type === 'countdown') {
+                daysText = diffDays > 0 ? absDays : (diffDays === 0 ? 0 : absDays);
+            } else {
+                daysText = isPast ? absDays : (diffDays === 0 ? 0 : absDays);
+            }
+            daysEl.innerHTML = `${daysText}<small>天</small>`;
+        }
+        function renderImportantList() {
+            const container = document.getElementById('important-list');
+            const days = appData.importantDays || [];
+            
+            if (days.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-400 py-8">暂无纪念日，点击下方按钮添加</div>';
+                return;
+            }
+            
+            let html = '';
+            days.forEach(day => {
+                const target = new Date(day.date);
+                const today = new Date();
+                today.setHours(0,0,0,0);
+                target.setHours(0,0,0,0);
+                const diffDays = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+                const isPast = diffDays < 0;
+                const absDays = Math.abs(diffDays);
+                
+                let daysText = '';
+                if (day.type === 'countdown') {
+                    daysText = diffDays > 0 ? `还有 ${absDays} 天` : (diffDays === 0 ? '今天' : `已过 ${absDays} 天`);
+                } else {
+                    daysText = isPast ? `已过 ${absDays} 天` : (diffDays === 0 ? '今天' : `还有 ${absDays} 天`);
+                }
+                
+                html += `<div class="important-card-item" onclick="selectImportantDay('${day.id}')">
+                    <div class="important-card-header">
+                        <span class="important-card-name">${escapeHtml(day.name)}</span>
+                        <button class="important-card-delete" onclick="event.stopPropagation(); deleteImportantDay('${day.id}')">🗑️</button>
+                    </div>
+                    <div class="important-card-days">${daysText}</div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+        function selectImportantDay(id) {
+            selectedImportantId = id;
+            updateBannerDays();
+            renderImportantList();
+        }
+        function deleteImportantDay(id) {
+            showConfirm('确定删除这个纪念日吗？', async () => {
+                appData.importantDays = appData.importantDays.filter(d => d.id !== id);
+                await saveData();
+                
+                if (selectedImportantId === id) {
+                    selectedImportantId = appData.importantDays.length > 0 ? appData.importantDays[0].id : null;
+                }
+                
+                updateBannerDays();
+                renderImportantList();
+                showToast('已删除');
+            });
+        }
+        function openImportantEditor(id = null) {
+            editingImportantId = id;
+            const modal = document.getElementById('modal-important-editor');
+            const title = document.getElementById('editor-title');
+            
+            if (id) {
+                const day = appData.importantDays.find(d => d.id === id);
+                if (day) {
+                    document.getElementById('editor-name').value = day.name;
+                    document.getElementById('editor-date').value = day.date;
+                    selectImportantType(day.type || 'anniversary');
+                    title.textContent = '编辑纪念日';
+                }
+            } else {
+                document.getElementById('editor-name').value = '';
+                document.getElementById('editor-date').value = new Date().toISOString().split('T')[0];
+                selectImportantType('anniversary');
+                title.textContent = '添加纪念日';
+            }
+            modal.classList.remove('hidden');
+        }
+        function closeImportantEditor() {
+            document.getElementById('modal-important-editor').classList.add('hidden');
+            editingImportantId = null;
+        }
+        function selectImportantType(type) {
+            document.querySelectorAll('.editor-type-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.type === type);
+            });
+            const desc = document.getElementById('editor-type-desc');
+            if (type === 'anniversary') {
+                desc.textContent = '计算从过去某一天到现在已经过了多少天（例如：恋爱纪念日）';
+            } else {
+                desc.textContent = '计算从现在到未来某一天还有多少天（例如：生日倒数）';
+            }
+        }
+        async function saveImportantDay() {
+            const name = document.getElementById('editor-name').value.trim();
+            const date = document.getElementById('editor-date').value;
+            
+            if (!name || !date) {
+                showToast('请填写完整');
+                return;
+            }
+            
+            const typeBtn = document.querySelector('.editor-type-btn.active');
+            const type = typeBtn ? typeBtn.dataset.type : 'anniversary';
+            
+            if (editingImportantId) {
+                const day = appData.importantDays.find(d => d.id === editingImportantId);
+                if (day) {
+                    day.name = name;
+                    day.date = date;
+                    day.type = type;
+                }
+            } else {
+                const newDay = {
+                    id: Date.now().toString(),
+                    name,
+                    date,
+                    type,
+                    cover: ''
+                };
+                appData.importantDays.push(newDay);
+                selectedImportantId = newDay.id;
+            }
+            
+            await saveData();
+            closeImportantEditor();
+            updateBannerDays();
+            renderImportantList();
+            showToast('保存成功');
+        }
+        function uploadImportantCover() {
+            document.getElementById('important-cover-input').click();
+        }
+        async function handleImportantCoverUpload(input) {
+            if (input.files?.[0]) {
+                showToast('压缩中...');
+                const compressed = await compressImage(input.files[0], 800, 0.7);
+                const day = appData.importantDays.find(d => d.id === selectedImportantId);
+                if (day) {
+                    day.cover = compressed;
+                    // 可以在这里更新Banner背景
+                    debouncedSaveData();
+                    showToast('封面已更换');
+                }
+                input.value = '';
+            }
+        }
+        function clearImportantCover() {
+            const day = appData.importantDays.find(d => d.id === selectedImportantId);
+            if (day) {
+                day.cover = '';
+                debouncedSaveData();
+                showToast('封面已清除');
+            }
+        }
+
+        // --- 角色在线状态功能（独立配置）---
+        function openOnlineStatus() {
+            if (appData.roles.length > 0) {
+                currentOnlineStatusRoleId = appData.roles[0].id;
+            }
+            populateOnlineStatusRoleSelect();
+            loadOnlineStatusForRole(currentOnlineStatusRoleId);
+            document.getElementById('modal-online-status').classList.remove('hidden');
+        }
+        function closeOnlineStatus() {
+            document.getElementById('modal-online-status').classList.add('hidden');
+        }
+        function populateOnlineStatusRoleSelect() {
+            const select = document.getElementById('online-status-role-select');
+            select.innerHTML = '';
+            appData.roles.forEach(r => {
+                const option = document.createElement('option');
+                option.value = r.id;
+                option.textContent = r.name;
+                if (r.id === currentOnlineStatusRoleId) option.selected = true;
+                select.appendChild(option);
+            });
+        }
+        function switchOnlineStatusRole() {
+            const select = document.getElementById('online-status-role-select');
+            currentOnlineStatusRoleId = select.value;
+            loadOnlineStatusForRole(currentOnlineStatusRoleId);
+        }
+        function loadOnlineStatusForRole(roleId) {
+            const role = appData.roles.find(r => r.id === roleId);
+            if (!role) return;
+            if (!role.onlineStatus) {
+                role.onlineStatus = { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 };
+            }
+            const sw = document.getElementById('online-status-switch');
+            if (role.onlineStatus.enabled) {
+                sw.classList.add('active');
+            } else {
+                sw.classList.remove('active');
+            }
+            renderOnlineStatusList(role.onlineStatus.statusList);
+        }
+        function renderOnlineStatusList(statusList) {
+            const container = document.getElementById('online-status-list');
+            const list = statusList || [];
+            let html = '';
+            list.forEach((status, index) => {
+                html += `<div class="online-status-tag">
+                    <span>${escapeHtml(status)}</span>
+                    <button onclick="removeOnlineStatus(${index})">&times;</button>
+                </div>`;
+            });
+            container.innerHTML = html || '<div style="width:100%;text-align:center;color:var(--text-secondary);">暂无状态，请添加</div>';
+        }
+        function addOnlineStatus() {
+            if (!currentOnlineStatusRoleId) return;
+            const role = appData.roles.find(r => r.id === currentOnlineStatusRoleId);
+            if (!role) return;
+            if (!role.onlineStatus) role.onlineStatus = { enabled: true, statusList: [], currentStatus: '在线', lastUpdate: 0 };
+            
+            const input = document.getElementById('new-online-status');
+            const value = input.value.trim();
+            if (!value) { showToast('请输入状态'); return; }
+            if (role.onlineStatus.statusList.includes(value)) { showToast('状态已存在'); return; }
+            role.onlineStatus.statusList.push(value);
+            renderOnlineStatusList(role.onlineStatus.statusList);
+            input.value = '';
+        }
+        function removeOnlineStatus(index) {
+            if (!currentOnlineStatusRoleId) return;
+            const role = appData.roles.find(r => r.id === currentOnlineStatusRoleId);
+            if (!role || !role.onlineStatus) return;
+            role.onlineStatus.statusList.splice(index, 1);
+            renderOnlineStatusList(role.onlineStatus.statusList);
+        }
+        async function saveOnlineStatus() {
+            if (!currentOnlineStatusRoleId) return;
+            const role = appData.roles.find(r => r.id === currentOnlineStatusRoleId);
+            if (!role) return;
+            if (!role.onlineStatus) role.onlineStatus = { enabled: true, statusList: [], currentStatus: '在线', lastUpdate: 0 };
+            
+            role.onlineStatus.enabled = document.getElementById('online-status-switch').classList.contains('active');
+            await saveData();
+            closeOnlineStatus();
+            showToast('设置已保存');
+        }
+        function refreshRoleOnlineStatus(role) {
+            if (!role.onlineStatus || !role.onlineStatus.enabled) return;
+            const now = Date.now();
+            const threeHours = 3 * 60 * 60 * 1000;
+            if (!role.onlineStatus.lastUpdate || (now - role.onlineStatus.lastUpdate) >= threeHours) {
+                const list = role.onlineStatus.statusList;
+                if (list && list.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * list.length);
+                    role.onlineStatus.currentStatus = list[randomIndex];
+                } else {
+                    role.onlineStatus.currentStatus = '在线';
+                }
+                role.onlineStatus.lastUpdate = now;
+                debouncedSaveData();
+            }
+        }
+
+        // --- 回信自动生成器 ---
+        function startMailReplyChecker() {
+            if (mailCheckTimer) clearInterval(mailCheckTimer);
+            mailCheckTimer = setInterval(() => {
+                const now = Date.now();
+                const sentMails = appData.mails.filter(m => m.type === 'sent' && !m.replied && m.replyTime <= now);
+                sentMails.forEach(mail => {
+                    generateReplyForMail(mail);
+                });
+            }, 60000);
+        }
+        function generateReplyForMail(mail) {
+            const allWords = [];
+            appData.wordbanks.wordGroups.forEach(g => allWords.push(...g.words));
+            if (allWords.length === 0) {
+                allWords.push('今天不知道说什么好', '想你啦', '最近还好吗', '天气不错');
+            }
+            const sentenceCount = 10 + Math.floor(Math.random() * 11);
+            const selectedSentences = [];
+            for (let i = 0; i < sentenceCount; i++) {
+                const randomIndex = Math.floor(Math.random() * allWords.length);
+                selectedSentences.push(allWords[randomIndex]);
+            }
+            const replyContent = selectedSentences.join('。') + '。';
+            const replyMail = {
+                id: Date.now().toString() + '_reply',
+                roleId: mail.roleId,
+                type: 'received',
+                content: replyContent,
+                time: Date.now(),
+                replyTo: mail.id
+            };
+            appData.mails.push(replyMail);
+            mail.replied = true;
+            debouncedSaveData();
+            if (document.getElementById('page-mailbox') && document.getElementById('page-mailbox').classList.contains('active')) {
+                renderMailList();
+            }
+        }
 
         // --- 状态词库、内容库等 (完整实现) ---
         function openStatusWordbank() { pageHistory.push('advanced'); tempStatusData = { moods: [...appData.wordbanks.moods], weathers: [...appData.wordbanks.weathers], quotes: [...appData.wordbanks.quotes] }; switchStatusTab('moods'); document.getElementById('modal-settings-advanced').classList.add('hidden'); document.getElementById('modal-status-wordbank').classList.add('active'); }
@@ -2801,8 +3584,18 @@
         function loadMusic() { const url = document.getElementById('music-url').value; const audio = document.getElementById('music-audio'); audio.src = url; audio.load(); audio.play(); }
 
         // --- 辅助：确认框、Toast、源码等 ---
-        function showConfirm(msg, cb) { document.getElementById('confirm-msg').textContent = msg; confirmCallback = cb; document.getElementById('modal-confirm').classList.remove('hidden'); }
-        function closeConfirm(ok) { document.getElementById('modal-confirm').classList.add('hidden'); if (ok && confirmCallback) confirmCallback(); confirmCallback = null; }
+        function showConfirm(msg, cb) {
+            const modal = document.getElementById('modal-confirm');
+            document.getElementById('confirm-msg').textContent = msg;
+            confirmCallback = cb;
+            modal.style.zIndex = '1200'; // 确保确认框在重要日弹窗之上
+            modal.classList.remove('hidden');
+        }
+        function closeConfirm(ok) {
+            document.getElementById('modal-confirm').classList.add('hidden');
+            if (ok && confirmCallback) confirmCallback();
+            confirmCallback = null;
+        }
         function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 2000); }
         function showSourceCode() { document.getElementById('source-code-content').value = document.documentElement.outerHTML; document.getElementById('modal-source').classList.add('active'); }
         function closeSourceCode() { document.getElementById('modal-source').classList.remove('active'); }
@@ -2883,7 +3676,6 @@
             callState.status = 'calling';
             callState.seconds = 0;
             
-            // 更新界面
             document.getElementById('call-avatar').src = role.avatar;
             document.getElementById('call-name').textContent = role.name;
             document.getElementById('call-status').textContent = '呼叫中...';
@@ -2894,26 +3686,21 @@
             
             document.getElementById('modal-call').classList.remove('hidden');
             
-            // 模拟对方响应
             setTimeout(() => {
                 if (!callState.active || callState.status !== 'calling') return;
                 const rand = Math.random() * 100;
                 if (rand < callState.rejectProb) {
-                    // 拒绝
                     callState.status = 'rejected';
                     document.getElementById('call-status').textContent = '对方拒绝了通话';
                     setTimeout(() => endCall('rejected'), 2000);
                 } else if (rand < callState.rejectProb + callState.missProb) {
-                    // 未接听
                     callState.status = 'missed';
                     document.getElementById('call-status').textContent = '对方未接听';
                     setTimeout(() => endCall('missed'), 2000);
                 } else {
-                    // 接听
                     callState.status = 'connected';
                     document.getElementById('call-status').textContent = '通话中';
                     startCallTimer();
-                    // 随机自动挂断 (10-30秒)
                     const autoHangupTime = (10 + Math.random() * 20) * 1000;
                     callState.autoHangupTimer = setTimeout(() => {
                         if (callState.active && callState.status === 'connected') {
@@ -2964,7 +3751,6 @@
                 callState.miniMode = false;
                 callState.active = false;
                 
-                // 插入系统消息
                 if (currentChatType === 'role' && currentRoleId === callState.roleId) {
                     let sysMsg = '';
                     if (status === 'rejected') sysMsg = `对方拒绝了通话`;
@@ -2986,7 +3772,6 @@
             document.getElementById('call-mini-avatar').src = callState.roleAvatar;
             document.getElementById('call-mini-timer').textContent = document.getElementById('call-timer').textContent;
             mini.style.display = 'flex';
-            // 默认位置
             mini.style.left = 'auto';
             mini.style.right = '20px';
             mini.style.bottom = '100px';
@@ -3120,7 +3905,16 @@
         window.switchHomeTab = switchHomeTab; window.openDecision = openDecision; window.closeDecision = closeDecision;
         window.makeDecision = makeDecision; window.openFortune = openFortune; window.closeFortune = closeFortune;
         window.drawFortune = drawFortune; window.openImportantDays = openImportantDays; window.closeImportantDays = closeImportantDays;
-        window.addImportantDay = addImportantDay; window.deleteImportantDay = deleteImportantDay;
+        window.switchImportantTab = switchImportantTab; window.selectImportantDay = selectImportantDay;
+        window.deleteImportantDay = deleteImportantDay;
+        window.openImportantEditor = openImportantEditor; window.closeImportantEditor = closeImportantEditor;
+        window.selectImportantType = selectImportantType; window.saveImportantDay = saveImportantDay;
+        window.uploadImportantCover = uploadImportantCover; window.handleImportantCoverUpload = handleImportantCoverUpload;
+        window.clearImportantCover = clearImportantCover;
+        window.openOnlineStatus = openOnlineStatus; window.closeOnlineStatus = closeOnlineStatus;
+        window.switchOnlineStatusRole = switchOnlineStatusRole;
+        window.addOnlineStatus = addOnlineStatus; window.removeOnlineStatus = removeOnlineStatus;
+        window.saveOnlineStatus = saveOnlineStatus;
         window.showChatHeaderMenu = showChatHeaderMenu; window.showChatSettings = showChatSettings;
         window.toggleNotificationPermission = toggleNotificationPermission;
 
