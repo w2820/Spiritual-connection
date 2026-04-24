@@ -1711,7 +1711,7 @@
     </div>
 </div>
 
-<!-- 聊天节奏设置界面 (含群聊概率和通话配置，增加通话时长设置) -->
+<!-- 聊天节奏设置界面 (含群聊概率和通话配置，增加自动来信设置) -->
 <div id="modal-settings-chat" class="modal-overlay hidden">
     <div class="modal-card max-h-[90vh] overflow-y-auto">
         <div class="flex items-center gap-2 mb-6"><i data-lucide="message-square" class="w-6 h-6" style="color: var(--accent-color);"></i><h2 class="text-xl font-bold">聊天设置</h2></div>
@@ -1821,6 +1821,24 @@
                     </div>
                 </div>
             </div>
+
+            <!-- 自动来信设置 -->
+            <div class="border-t border-gray-200 pt-4 mt-4">
+                <h3 class="text-sm font-semibold mb-3">自动来信</h3>
+                <div class="bg-gray-50 p-4 rounded-xl space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm">启用角色自动来信</span>
+                        <div class="ios-switch" id="setting-auto-mail-enabled-switch" onclick="toggleSwitch(this)"></div>
+                    </div>
+                    <p class="text-xs text-gray-400">开启后角色会按各自概率自动给你写信</p>
+                    <div class="grid grid-cols-2 gap-3 mt-3">
+                        <div>
+                            <span class="text-xs text-gray-500 block mb-1">检查间隔 (分钟)</span>
+                            <input type="number" id="setting-auto-mail-interval" min="1" max="120" value="10" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="flex gap-4"><button onclick="closeChatSettings()" class="flex-1 bg-gray-100 text-gray-600 p-3 rounded-xl font-bold">返回</button><button onclick="saveSettings()" class="flex-1 text-white p-3 rounded-xl font-bold shadow-lg" style="background-color: var(--button-primary-bg); color: var(--button-primary-text);">保存设置</button></div>
     </div>
@@ -1905,7 +1923,7 @@
     </div>
 </div>
 
-<!-- 弹窗：创建/编辑角色 (保持原样) -->
+<!-- 弹窗：创建/编辑角色 (新增自动写信概率滑块) -->
 <div id="modal-create-role" class="modal-overlay hidden">
     <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-6 safe-bottom max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold">创建角色</h2><button onclick="closeCreateRole()" class="p-2 bg-gray-100 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button></div>
@@ -1916,6 +1934,7 @@
         <div class="space-y-4 mb-6">
             <div><label class="text-xs font-semibold text-gray-500 uppercase block mb-2">心情字卡库</label><div class="flex gap-2 overflow-x-auto pb-2"><span class="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-600">开心</span><span class="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-600">难过</span><span class="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-600">生气</span><button onclick="showToast('点击设置可管理字卡库')" class="px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-xs font-medium flex items-center gap-1"><i data-lucide="plus" class="w-3 h-3"></i>添加</button></div></div>
             <div class="bg-gray-50 p-4 rounded-xl"><label class="text-xs font-semibold text-gray-500 uppercase block mb-2">群聊发言概率 (%)</label><input type="range" id="role-group-prob" min="0" max="100" value="50" class="w-full" style="accent-color: var(--accent-color);"><div class="flex justify-between text-xs text-gray-400 mt-1"><span>0%</span><span id="role-group-prob-val" class="font-bold" style="color: var(--accent-color);">50%</span><span>100%</span></div></div>
+            <div class="bg-gray-50 p-4 rounded-xl"><label class="text-xs font-semibold text-gray-500 uppercase block mb-2">自动写信概率 (%)</label><input type="range" id="role-mail-prob" min="0" max="100" value="15" class="w-full" style="accent-color: var(--accent-color);"><div class="flex justify-between text-xs text-gray-400 mt-1"><span>0%</span><span id="role-mail-prob-val" class="font-bold" style="color: var(--accent-color);">15%</span><span>100%</span></div></div>
         </div>
         <button onclick="saveRole()" class="w-full text-white p-4 rounded-xl font-bold text-lg shadow-lg active:scale-[0.98] transition" style="background-color: var(--button-primary-bg); color: var(--button-primary-text);">完成创建</button>
     </div>
@@ -2228,8 +2247,8 @@
         // --- 默认数据结构 ---
         const DEFAULT_DATA = {
             roles: [
-                { id: '1', name: '老公', avatar: 'https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/b706d6c461e44df0b82fda4381e66f56~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947761&x-signature=WPDM%2Fe%2Bq9Ltf6sL1Rc2vcm320jw%3D', groupProb: 50, lastActive: Date.now(), lastAutoSendTime: Date.now(), lastLoveRefresh: 0, pokeMyText: '哥哥，我超爱你 😍😍', pokeTheirText: '老婆，我们永远不分开 😂😂', onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 } },
-                { id: '2', name: '菜🥬', avatar: 'https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/cd47e4d6c7734a9f8c189d3d6c277eb6~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947762&x-signature=a5JLFkIXlkbkhZMc%2BJ%2FUogUFVKc%3D', groupProb: 30, lastActive: Date.now() - 3600000, lastAutoSendTime: Date.now() - 3600000, lastLoveRefresh: 0, pokeMyText: '贴贴 🥰', pokeTheirText: '想你啦 💕', onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭'], currentStatus: '在线', lastUpdate: 0 } }
+                { id: '1', name: '老公', avatar: 'https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/b706d6c461e44df0b82fda4381e66f56~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947761&x-signature=WPDM%2Fe%2Bq9Ltf6sL1Rc2vcm320jw%3D', groupProb: 50, lastActive: Date.now(), lastAutoSendTime: Date.now(), lastLoveRefresh: 0, pokeMyText: '哥哥，我超爱你 😍😍', pokeTheirText: '老婆，我们永远不分开 😂😂', onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 }, autoMailProbability: 20 },
+                { id: '2', name: '菜🥬', avatar: 'https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/cd47e4d6c7734a9f8c189d3d6c277eb6~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947762&x-signature=a5JLFkIXlkbkhZMc%2BJ%2FUogUFVKc%3D', groupProb: 30, lastActive: Date.now() - 3600000, lastAutoSendTime: Date.now() - 3600000, lastLoveRefresh: 0, pokeMyText: '贴贴 🥰', pokeTheirText: '想你啦 💕', onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭'], currentStatus: '在线', lastUpdate: 0 }, autoMailProbability: 15 }
             ],
             groups: [],
             chats: {},
@@ -2255,6 +2274,10 @@
                     userTimeout: 30,
                     minDuration: 0.5,
                     maxDuration: 3
+                },
+                autoMail: {
+                    enabled: true,
+                    checkInterval: 10
                 }
             },
             wordbanks: {
@@ -2332,6 +2355,7 @@
         let isDraggingMini = false;
         let dragOffsetX = 0, dragOffsetY = 0;
         let autoCallTimer = null;
+        let autoMailGeneratorTimer = null;
 
         // --- localforage 实例 ---
         const store = localforage.createInstance({ name: 'SpiritualConnectionV2' });
@@ -2433,6 +2457,7 @@
                 await store.setItem('appData', dataToSave);
                 startAutoSendTimer();
                 startAutoCallTimer();
+                startAutoMailGenerator();
                 if (document.getElementById('modal-settings-data') && !document.getElementById('modal-settings-data').classList.contains('hidden')) updateStorageDisplay();
             } catch (e) { showToast('保存失败，请清理数据'); }
         }
@@ -2534,6 +2559,7 @@
                 if (!appData.settings.autoSendProbability) appData.settings.autoSendProbability = 0.5;
                 if (!appData.settings.call) appData.settings.call = { enabled: true, rejectProb: 20, missProb: 10, answerDelay: 2000, background: '', windowSize: 'standard', minDuration: 0.5, maxDuration: 2 };
                 if (!appData.settings.autoCall) appData.settings.autoCall = { enabled: false, probability: 30, minInterval: 10, maxInterval: 30, userTimeout: 30, minDuration: 0.5, maxDuration: 3 };
+                if (!appData.settings.autoMail) appData.settings.autoMail = { enabled: true, checkInterval: 10 };
                 appData.roles.forEach(r => { 
                     if (!r.lastAutoSendTime) r.lastAutoSendTime = Date.now(); 
                     if (!r.lastLoveRefresh) r.lastLoveRefresh = 0; 
@@ -2541,6 +2567,7 @@
                     if (!r.pokeMyText) r.pokeMyText = '哥哥，我超爱你 😍😍';
                     if (!r.pokeTheirText) r.pokeTheirText = '老婆，我们永远不分开 😂😂';
                     if (!r.onlineStatus) r.onlineStatus = { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 };
+                    if (r.autoMailProbability === undefined) r.autoMailProbability = 15;
                 });
                 syncAllReplies();
             } catch (e) {
@@ -2556,6 +2583,7 @@
             initNotificationSwitch();
             updateCallButtonVisibility();
             startAutoCallTimer();
+            startAutoMailGenerator();
         }
 
         // --- 外观初始化与应用 (支持主题色和方案) ---
@@ -3175,20 +3203,21 @@
             callEnabledSwitch.classList.toggle('active', appData.settings.call?.enabled !== false);
             document.getElementById('setting-call-reject-prob').value = appData.settings.call?.rejectProb ?? 20;
             document.getElementById('setting-call-miss-prob').value = appData.settings.call?.missProb ?? 10;
-            // 用户主动拨打时长
             document.getElementById('setting-call-min-duration').value = appData.settings.call?.minDuration ?? 0.5;
             document.getElementById('setting-call-max-duration').value = appData.settings.call?.maxDuration ?? 2;
             
-            // 自动通话设置
             const autoCall = appData.settings.autoCall || { enabled: false, probability: 30, minInterval: 10, maxInterval: 30, userTimeout: 30, minDuration: 0.5, maxDuration: 3 };
             document.getElementById('setting-auto-call-enabled-switch').classList.toggle('active', autoCall.enabled);
             document.getElementById('setting-auto-call-prob').value = autoCall.probability;
             document.getElementById('setting-auto-call-min-interval').value = autoCall.minInterval;
             document.getElementById('setting-auto-call-max-interval').value = autoCall.maxInterval;
             document.getElementById('setting-auto-call-user-timeout').value = autoCall.userTimeout;
-            // 角色来电时长
             document.getElementById('setting-auto-call-min-duration').value = autoCall.minDuration ?? 0.5;
             document.getElementById('setting-auto-call-max-duration').value = autoCall.maxDuration ?? 3;
+            
+            const autoMail = appData.settings.autoMail || { enabled: true, checkInterval: 10 };
+            document.getElementById('setting-auto-mail-enabled-switch').classList.toggle('active', autoMail.enabled);
+            document.getElementById('setting-auto-mail-interval').value = autoMail.checkInterval;
         }
         function closeChatSettings() { document.getElementById('modal-settings-chat').classList.add('hidden'); if (pageHistory.pop() === 'settings') document.getElementById('modal-settings-main').classList.remove('hidden'); }
         function toggleSwitch(el) { el.classList.toggle('active'); }
@@ -3212,7 +3241,6 @@
             appData.settings.call.enabled = document.getElementById('setting-call-enabled-switch').classList.contains('active');
             appData.settings.call.rejectProb = parseInt(document.getElementById('setting-call-reject-prob').value) || 20;
             appData.settings.call.missProb = parseInt(document.getElementById('setting-call-miss-prob').value) || 10;
-            // 保存用户拨打时长
             appData.settings.call.minDuration = parseFloat(document.getElementById('setting-call-min-duration').value) || 0.5;
             appData.settings.call.maxDuration = parseFloat(document.getElementById('setting-call-max-duration').value) || 2;
             
@@ -3222,14 +3250,18 @@
             appData.settings.autoCall.minInterval = parseInt(document.getElementById('setting-auto-call-min-interval').value) || 10;
             appData.settings.autoCall.maxInterval = parseInt(document.getElementById('setting-auto-call-max-interval').value) || 30;
             appData.settings.autoCall.userTimeout = parseInt(document.getElementById('setting-auto-call-user-timeout').value) || 30;
-            // 保存角色来电时长
             appData.settings.autoCall.minDuration = parseFloat(document.getElementById('setting-auto-call-min-duration').value) || 0.5;
             appData.settings.autoCall.maxDuration = parseFloat(document.getElementById('setting-auto-call-max-duration').value) || 3;
+            
+            if (!appData.settings.autoMail) appData.settings.autoMail = {};
+            appData.settings.autoMail.enabled = document.getElementById('setting-auto-mail-enabled-switch').classList.contains('active');
+            appData.settings.autoMail.checkInterval = parseInt(document.getElementById('setting-auto-mail-interval').value) || 10;
             
             await saveData();
             closeChatSettings();
             updateCallButtonVisibility();
             startAutoCallTimer();
+            startAutoMailGenerator();
             showToast('设置已保存');
         }
 
@@ -3316,12 +3348,71 @@
                 showToast('群聊已删除');
             });
         }
-        function editRole(id) { const r = appData.roles.find(x => x.id === id); if (!r) return; const m = document.getElementById('modal-create-role'); m.querySelector('h2').textContent = '编辑角色'; document.getElementById('role-name-input').value = r.name; document.getElementById('role-avatar-preview').src = r.avatar; document.getElementById('role-group-prob').value = r.groupProb ?? 50; document.getElementById('role-group-prob-val').textContent = (r.groupProb ?? 50) + '%'; const btn = m.querySelector('button[onclick="saveRole()"]'); const oc = btn.getAttribute('onclick'); btn.removeAttribute('onclick'); btn.onclick = async () => { r.name = document.getElementById('role-name-input').value.trim(); r.avatar = document.getElementById('role-avatar-preview').src; r.groupProb = parseInt(document.getElementById('role-group-prob').value); await saveData(); renderRoleList(); closeCreateRole(); openRoleManagement(); showToast('更新成功'); btn.setAttribute('onclick', oc); }; m.classList.remove('hidden'); }
+        function editRole(id) { 
+            const r = appData.roles.find(x => x.id === id); 
+            if (!r) return; 
+            const m = document.getElementById('modal-create-role'); 
+            m.querySelector('h2').textContent = '编辑角色'; 
+            document.getElementById('role-name-input').value = r.name; 
+            document.getElementById('role-avatar-preview').src = r.avatar; 
+            document.getElementById('role-group-prob').value = r.groupProb ?? 50; 
+            document.getElementById('role-group-prob-val').textContent = (r.groupProb ?? 50) + '%'; 
+            document.getElementById('role-mail-prob').value = r.autoMailProbability ?? 15; 
+            document.getElementById('role-mail-prob-val').textContent = (r.autoMailProbability ?? 15) + '%'; 
+            const btn = m.querySelector('button[onclick="saveRole()"]'); 
+            const oc = btn.getAttribute('onclick'); 
+            btn.removeAttribute('onclick'); 
+            btn.onclick = async () => { 
+                r.name = document.getElementById('role-name-input').value.trim(); 
+                r.avatar = document.getElementById('role-avatar-preview').src; 
+                r.groupProb = parseInt(document.getElementById('role-group-prob').value); 
+                r.autoMailProbability = parseInt(document.getElementById('role-mail-prob').value) || 15; 
+                await saveData(); 
+                renderRoleList(); 
+                closeCreateRole(); 
+                openRoleManagement(); 
+                showToast('更新成功'); 
+                btn.setAttribute('onclick', oc); 
+            }; 
+            m.classList.remove('hidden'); 
+        }
         function deleteRole(id) { showConfirm('删除角色？', async () => { appData.roles = appData.roles.filter(x => x.id !== id); delete appData.chats[id]; await saveData(); openRoleManagement(); renderRoleList(); renderGroupList(); showToast('已删除'); }); }
-        function openCreateRole() { document.getElementById('modal-create-role').classList.remove('hidden'); document.getElementById('role-name-input').value = ''; document.getElementById('role-avatar-preview').src = DEFAULT_AVATAR; document.getElementById('role-group-prob').value = 50; document.getElementById('role-group-prob-val').textContent = '50%'; }
+        function openCreateRole() { 
+            document.getElementById('modal-create-role').classList.remove('hidden'); 
+            document.getElementById('role-name-input').value = ''; 
+            document.getElementById('role-avatar-preview').src = DEFAULT_AVATAR; 
+            document.getElementById('role-group-prob').value = 50; 
+            document.getElementById('role-group-prob-val').textContent = '50%'; 
+            document.getElementById('role-mail-prob').value = 15; 
+            document.getElementById('role-mail-prob-val').textContent = '15%'; 
+        }
         function closeCreateRole() { document.getElementById('modal-create-role').classList.add('hidden'); }
         async function handleAvatarUpload(input) { if (input.files?.[0]) { showToast('压缩中...'); const compressed = await compressImage(input.files[0], 400, 0.7); document.getElementById('role-avatar-preview').src = compressed; } }
-        async function saveRole() { const name = document.getElementById('role-name-input').value.trim(); if (!name) { showToast('请输入名称'); return; } const avatar = document.getElementById('role-avatar-preview').src; const groupProb = parseInt(document.getElementById('role-group-prob').value); appData.roles.push({ id: Date.now().toString(), name, avatar, groupProb, lastActive: Date.now(), lastAutoSendTime: Date.now(), lastLoveRefresh: 0, currentLoveState: null, pokeMyText: '哥哥，我超爱你 😍😍', pokeTheirText: '老婆，我们永远不分开 😂😂', onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 } }); await saveData(); renderRoleList(); closeCreateRole(); showToast('创建成功'); }
+        async function saveRole() { 
+            const name = document.getElementById('role-name-input').value.trim(); 
+            if (!name) { showToast('请输入名称'); return; } 
+            const avatar = document.getElementById('role-avatar-preview').src; 
+            const groupProb = parseInt(document.getElementById('role-group-prob').value); 
+            const mailProb = parseInt(document.getElementById('role-mail-prob').value) || 15; 
+            appData.roles.push({ 
+                id: Date.now().toString(), 
+                name, 
+                avatar, 
+                groupProb, 
+                autoMailProbability: mailProb, 
+                lastActive: Date.now(), 
+                lastAutoSendTime: Date.now(), 
+                lastLoveRefresh: 0, 
+                currentLoveState: null, 
+                pokeMyText: '哥哥，我超爱你 😍😍', 
+                pokeTheirText: '老婆，我们永远不分开 😂😂', 
+                onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 } 
+            }); 
+            await saveData(); 
+            renderRoleList(); 
+            closeCreateRole(); 
+            showToast('创建成功'); 
+        }
 
         // --- 数据管理 ---
         function openDataManagement() { pageHistory.push('settings'); document.getElementById('modal-settings-main').classList.add('hidden'); document.getElementById('modal-settings-data').classList.remove('hidden'); updateStorageDisplay(); updateNotificationUI(); }
@@ -3951,7 +4042,6 @@
                     callState.status = 'connected';
                     document.getElementById('call-status').textContent = '通话中';
                     startCallTimer();
-                    // 使用用户拨打时长设置
                     const minDur = (appData.settings.call?.minDuration || 0.5) * 60;
                     const maxDur = (appData.settings.call?.maxDuration || 2) * 60;
                     const autoHangupTime = (minDur + Math.random() * (maxDur - minDur)) * 1000;
@@ -3989,7 +4079,6 @@
             callState.status = 'connected';
             document.getElementById('call-status').textContent = '通话中';
             startCallTimer();
-            // 使用角色来电时长设置
             const minDur = (appData.settings.autoCall?.minDuration || 0.5) * 60;
             const maxDur = (appData.settings.autoCall?.maxDuration || 3) * 60;
             const autoHangupTime = (minDur + Math.random() * (maxDur - minDur)) * 1000;
@@ -4204,6 +4293,62 @@
                     endCall('missed', 0);
                 }
             }, userTimeout);
+        }
+
+        // --- 自动来信生成器 ---
+        function startAutoMailGenerator() {
+            if (autoMailGeneratorTimer) clearTimeout(autoMailGeneratorTimer);
+            const autoMail = appData.settings.autoMail;
+            if (!autoMail?.enabled) return;
+            if (appData.roles.length === 0) return;
+            
+            const interval = (autoMail.checkInterval || 10) * 60 * 1000;
+            autoMailGeneratorTimer = setTimeout(() => {
+                checkAndGenerateAutoMail();
+                startAutoMailGenerator();
+            }, interval);
+        }
+        function checkAndGenerateAutoMail() {
+            const autoMail = appData.settings.autoMail;
+            if (!autoMail?.enabled) return;
+            
+            appData.roles.forEach(role => {
+                const prob = role.autoMailProbability ?? 15;
+                const rand = Math.random() * 100;
+                if (rand < prob) {
+                    generateAutoLetter(role);
+                }
+            });
+        }
+        function generateAutoLetter(role) {
+            const allWords = [];
+            appData.wordbanks.wordGroups.forEach(g => allWords.push(...g.words));
+            if (allWords.length === 0) {
+                allWords.push('今天不知道说什么好', '想你啦', '最近还好吗', '天气不错');
+            }
+            const sentenceCount = 3 + Math.floor(Math.random() * 6); // 3-8句话
+            const selectedSentences = [];
+            for (let i = 0; i < sentenceCount; i++) {
+                const randomIndex = Math.floor(Math.random() * allWords.length);
+                selectedSentences.push(allWords[randomIndex]);
+            }
+            const content = selectedSentences.join('。') + '。';
+            
+            const delay = 60000 + Math.random() * 60000; // 1-2分钟后标记为已收到
+            const newMail = {
+                id: Date.now().toString(),
+                roleId: role.id,
+                type: 'received',
+                content: content,
+                time: Date.now(),
+                replyTime: Date.now(),
+                replied: true
+            };
+            appData.mails.push(newMail);
+            debouncedSaveData();
+            if (document.getElementById('page-mailbox') && document.getElementById('page-mailbox').classList.contains('active')) {
+                renderMailList();
+            }
         }
 
         // 挂载全局
@@ -4473,5 +4618,3 @@
     </script>
 </body>
 </html>
-
-```
