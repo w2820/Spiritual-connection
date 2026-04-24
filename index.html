@@ -1711,7 +1711,7 @@
     </div>
 </div>
 
-<!-- 聊天节奏设置界面 (含群聊概率和通话配置，增加自动来信设置) -->
+<!-- 聊天节奏设置界面 (含群聊概率和通话配置，增加消息氛围设置) -->
 <div id="modal-settings-chat" class="modal-overlay hidden">
     <div class="modal-card max-h-[90vh] overflow-y-auto">
         <div class="flex items-center gap-2 mb-6"><i data-lucide="message-square" class="w-6 h-6" style="color: var(--accent-color);"></i><h2 class="text-xl font-bold">聊天设置</h2></div>
@@ -1733,6 +1733,24 @@
             <div><label class="text-sm font-medium block mb-3">多条回复概率设置 (%)</label><div class="flex gap-4"><div class="flex-1"><span class="text-xs text-gray-400 block mb-1 text-center">回复2条概率</span><input type="number" id="setting-prob-2" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-center font-bold" value="20"></div><div class="flex-1"><span class="text-xs text-gray-400 block mb-1 text-center">回复3条概率</span><input type="number" id="setting-prob-3" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-center font-bold" value="5"></div></div></div>
             <div><label class="text-sm font-medium block mb-3">引用功能概率设置 (%)</label><div class="flex gap-4"><div class="flex-1"><span class="text-xs text-gray-400 block mb-1 text-center">引用我的消息</span><input type="number" id="setting-quote-my" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-center font-bold" value="10"></div><div class="flex-1"><span class="text-xs text-gray-400 block mb-1 text-center">引用他人消息</span><input type="number" id="setting-quote-other" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-center font-bold" value="5"></div></div></div>
             
+            <!-- 消息氛围设置（emoji/图片表情混入概率） -->
+            <div class="border-t border-gray-200 pt-4 mt-4">
+                <h3 class="text-sm font-semibold mb-3">消息氛围</h3>
+                <div class="bg-gray-50 p-4 rounded-xl space-y-3">
+                    <p class="text-xs text-gray-400">角色回复时随机混入 Emoji 或图片表情</p>
+                    <div class="grid grid-cols-2 gap-3 mt-3">
+                        <div>
+                            <span class="text-xs text-gray-500 block mb-1">Emoji 混入概率 (%)</span>
+                            <input type="number" id="setting-emoji-prob" min="0" max="100" value="20" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <span class="text-xs text-gray-500 block mb-1">图片表情概率 (%)</span>
+                            <input type="number" id="setting-sticker-prob" min="0" max="100" value="10" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 群聊发言人数概率设置 -->
             <div class="border-t border-gray-200 pt-4 mt-4">
                 <div class="flex items-center justify-between mb-3">
@@ -2256,6 +2274,7 @@
             settings: {
                 minDelay: 1, maxDelay: 3, autoSend: false, autoInterval: 30, autoSendProbability: 0.5,
                 replyMode: 'single', quoteMyProb: 20, quoteOtherProb: 10, prob2: 20, prob3: 5,
+                emojiProb: 20, stickerProb: 10,
                 call: {
                     enabled: true,
                     rejectProb: 20,
@@ -2489,15 +2508,28 @@
             const all = [];
             appData.wordbanks.wordGroups.forEach(g => all.push(...g.words));
             if (all.length === 0) return;
-            const content = all[Math.floor(Math.random() * all.length)];
+            let content = all[Math.floor(Math.random() * all.length)];
+            let type = 'text';
+
+            // sticker概率
+            if (appData.wordbanks.stickers.length > 0 && Math.random() * 100 < (appData.settings.stickerProb || 10)) {
+                type = 'image';
+                content = appData.wordbanks.stickers[Math.floor(Math.random() * appData.wordbanks.stickers.length)];
+            } else {
+                // emoji混入
+                if (Math.random() * 100 < (appData.settings.emojiProb || 20) && appData.wordbanks.emojis.length > 0) {
+                    content += ' ' + appData.wordbanks.emojis[Math.floor(Math.random() * appData.wordbanks.emojis.length)];
+                }
+            }
+
             if (!appData.chats[role.id]) appData.chats[role.id] = [];
-            const msg = { id: Date.now(), sender: role.id, content, time: Date.now(), type: 'text' };
+            const msg = { id: Date.now(), sender: role.id, content, time: Date.now(), type };
             appData.chats[role.id].push(msg);
             role.lastActive = Date.now();
             role.lastAutoSendTime = Date.now();
             debouncedSaveData();
             if (currentChatType === 'role' && currentRoleId !== role.id) incrementUnread(role.id);
-            if (currentChatType === 'role' && currentRoleId === role.id) appendMessageToDOM(role.id, content, Date.now(), null, 'text');
+            if (currentChatType === 'role' && currentRoleId === role.id) appendMessageToDOM(role.id, content, Date.now(), null, type);
         }
         
         function triggerGroupAutoReply(group) {
@@ -2523,11 +2555,22 @@
             if (!appData.groupChats[group.id]) appData.groupChats[group.id] = [];
             speakers.forEach((speakerId, index) => {
                 setTimeout(() => {
-                    const content = allWords[Math.floor(Math.random() * allWords.length)];
-                    const msg = { id: Date.now() + index, sender: speakerId, content, time: Date.now(), type: 'text' };
+                    let content = allWords[Math.floor(Math.random() * allWords.length)];
+                    let type = 'text';
+
+                    if (appData.wordbanks.stickers.length > 0 && Math.random() * 100 < (appData.settings.stickerProb || 10)) {
+                        type = 'image';
+                        content = appData.wordbanks.stickers[Math.floor(Math.random() * appData.wordbanks.stickers.length)];
+                    } else {
+                        if (Math.random() * 100 < (appData.settings.emojiProb || 20) && appData.wordbanks.emojis.length > 0) {
+                            content += ' ' + appData.wordbanks.emojis[Math.floor(Math.random() * appData.wordbanks.emojis.length)];
+                        }
+                    }
+
+                    const msg = { id: Date.now() + index, sender: speakerId, content, time: Date.now(), type };
                     appData.groupChats[group.id].push(msg);
                     debouncedSaveData();
-                    if (currentChatType === 'group' && currentGroupId === group.id) appendMessageToDOM(speakerId, content, Date.now(), null, 'text');
+                    if (currentChatType === 'group' && currentGroupId === group.id) appendMessageToDOM(speakerId, content, Date.now(), null, type);
                     else incrementUnread('group_' + group.id);
                 }, index * 800);
             });
@@ -2560,6 +2603,8 @@
                 if (!appData.settings.call) appData.settings.call = { enabled: true, rejectProb: 20, missProb: 10, answerDelay: 2000, background: '', windowSize: 'standard', minDuration: 0.5, maxDuration: 2 };
                 if (!appData.settings.autoCall) appData.settings.autoCall = { enabled: false, probability: 30, minInterval: 10, maxInterval: 30, userTimeout: 30, minDuration: 0.5, maxDuration: 3 };
                 if (!appData.settings.autoMail) appData.settings.autoMail = { enabled: true, checkInterval: 10 };
+                if (appData.settings.emojiProb === undefined) appData.settings.emojiProb = 20;
+                if (appData.settings.stickerProb === undefined) appData.settings.stickerProb = 10;
                 appData.roles.forEach(r => { 
                     if (!r.lastAutoSendTime) r.lastAutoSendTime = Date.now(); 
                     if (!r.lastLoveRefresh) r.lastLoveRefresh = 0; 
@@ -2873,6 +2918,26 @@
             } else if (sender === 'system') {
                 div.className = 'call-system-message';
                 div.innerHTML = `<span>${escapeHtml(content)}</span>`;
+            } else if (type === 'image') {
+                // 图片消息，透明气泡
+                const imgTag = `<img src="${content}" style="max-width:120px; max-height:90px; border-radius:4px; display:block;">`;
+                if (!isMe) {
+                    div.innerHTML = `<div class="flex-shrink-0 w-10 h-10 mr-3 mt-1"><img src="${avatar}" class="w-full h-full rounded-full object-cover border border-gray-100"></div>
+                    <div class="flex flex-col max-w-[75%]">
+                        <div class="text-sm font-bold text-gray-700 mb-1">${escapeHtml(name)}</div>
+                        <div class="flex items-end gap-2">
+                            <div class="bubble-left" style="background:transparent; box-shadow:none; padding:0;">${imgTag}</div>
+                            <span class="text-xs text-gray-400 mb-2.5 message-time">${ts}</span>
+                        </div>
+                    </div>`;
+                } else {
+                    div.innerHTML = `<div class="flex flex-col items-end max-w-[75%]">
+                        <div class="flex items-end gap-2">
+                            <span class="text-xs text-gray-400 mb-2.5 message-time">${ts}</span>
+                            <div class="bubble-right" style="background:transparent; box-shadow:none; padding:0;">${imgTag}</div>
+                        </div>
+                    </div>`;
+                }
             } else {
                 const qt = quote ? `<div class="quote-preview">${escapeHtml(quote)}</div>` : '';
                 if (!isMe) {
@@ -2980,16 +3045,29 @@
                 if (rand < prob2) msgCount = 2; else if (rand < prob2 + prob3) msgCount = 3;
                 const sendNext = (count) => {
                     if (count <= 0) return;
-                    const content = all[Math.floor(Math.random() * all.length)];
+                    let content = all[Math.floor(Math.random() * all.length)];
+                    let type = 'text';
                     let quote = null;
                     const msgs = appData.chats[currentRoleId] || [];
                     const lastMe = msgs.slice().reverse().find(m => m.sender === 'me');
                     if (lastMe && Math.random() * 100 < appData.settings.quoteMyProb) quote = `我: ${lastMe.content.substring(0,10)}...`;
-                    const msg = { id: Date.now() + count, sender: currentRoleId, content, time: Date.now(), quote, type: 'text' };
+
+                    // sticker概率
+                    if (appData.wordbanks.stickers.length > 0 && Math.random() * 100 < (appData.settings.stickerProb || 10)) {
+                        type = 'image';
+                        content = appData.wordbanks.stickers[Math.floor(Math.random() * appData.wordbanks.stickers.length)];
+                    } else {
+                        // emoji混入
+                        if (Math.random() * 100 < (appData.settings.emojiProb || 20) && appData.wordbanks.emojis.length > 0) {
+                            content += ' ' + appData.wordbanks.emojis[Math.floor(Math.random() * appData.wordbanks.emojis.length)];
+                        }
+                    }
+
+                    const msg = { id: Date.now() + count, sender: currentRoleId, content, time: Date.now(), quote, type };
                     appData.chats[currentRoleId].push(msg);
                     role.lastActive = Date.now();
                     debouncedSaveData();
-                    appendMessageToDOM(currentRoleId, content, Date.now(), quote, 'text');
+                    appendMessageToDOM(currentRoleId, content, Date.now(), quote, type);
                     sendNotificationIfNeeded(`${role.name} 发来消息`, content);
                     
                     if (Math.random() < 0.15) {
@@ -3045,11 +3123,22 @@
                 if (!appData.groupChats[currentGroupId]) appData.groupChats[currentGroupId] = [];
                 speakers.forEach((speakerId, index) => {
                     setTimeout(() => {
-                        const content = allWords[Math.floor(Math.random() * allWords.length)];
-                        const msg = { id: Date.now() + index, sender: speakerId, content, time: Date.now(), type: 'text' };
+                        let content = allWords[Math.floor(Math.random() * allWords.length)];
+                        let type = 'text';
+
+                        if (appData.wordbanks.stickers.length > 0 && Math.random() * 100 < (appData.settings.stickerProb || 10)) {
+                            type = 'image';
+                            content = appData.wordbanks.stickers[Math.floor(Math.random() * appData.wordbanks.stickers.length)];
+                        } else {
+                            if (Math.random() * 100 < (appData.settings.emojiProb || 20) && appData.wordbanks.emojis.length > 0) {
+                                content += ' ' + appData.wordbanks.emojis[Math.floor(Math.random() * appData.wordbanks.emojis.length)];
+                            }
+                        }
+
+                        const msg = { id: Date.now() + index, sender: speakerId, content, time: Date.now(), type };
                         appData.groupChats[currentGroupId].push(msg);
                         debouncedSaveData();
-                        appendMessageToDOM(speakerId, content, Date.now(), null, 'text');
+                        appendMessageToDOM(speakerId, content, Date.now(), null, type);
                         const role = appData.roles.find(r => r.id === speakerId);
                         if (role) sendNotificationIfNeeded(`${role.name} (群聊)`, content);
                     }, index * 800);
@@ -3194,6 +3283,8 @@
             document.getElementById('setting-prob-3').value = appData.settings.prob3;
             document.getElementById('setting-quote-my').value = appData.settings.quoteMyProb;
             document.getElementById('setting-quote-other').value = appData.settings.quoteOtherProb;
+            document.getElementById('setting-emoji-prob').value = appData.settings.emojiProb || 20;
+            document.getElementById('setting-sticker-prob').value = appData.settings.stickerProb || 10;
             populateGroupSelect();
             document.getElementById('group-prob-config-panel').classList.add('hidden');
             const errorMsg = document.getElementById('prob-error-msg');
@@ -3236,6 +3327,8 @@
             appData.settings.prob3 = parseInt(document.getElementById('setting-prob-3').value) || 0;
             appData.settings.quoteMyProb = parseInt(document.getElementById('setting-quote-my').value) || 0;
             appData.settings.quoteOtherProb = parseInt(document.getElementById('setting-quote-other').value) || 0;
+            appData.settings.emojiProb = parseInt(document.getElementById('setting-emoji-prob').value) || 20;
+            appData.settings.stickerProb = parseInt(document.getElementById('setting-sticker-prob').value) || 10;
             
             if (!appData.settings.call) appData.settings.call = {};
             appData.settings.call.enabled = document.getElementById('setting-call-enabled-switch').classList.contains('active');
@@ -4326,7 +4419,7 @@
             if (allWords.length === 0) {
                 allWords.push('今天不知道说什么好', '想你啦', '最近还好吗', '天气不错');
             }
-            const sentenceCount = 3 + Math.floor(Math.random() * 6); // 3-8句话
+            const sentenceCount = 3 + Math.floor(Math.random() * 6);
             const selectedSentences = [];
             for (let i = 0; i < sentenceCount; i++) {
                 const randomIndex = Math.floor(Math.random() * allWords.length);
@@ -4334,7 +4427,6 @@
             }
             const content = selectedSentences.join('。') + '。';
             
-            const delay = 60000 + Math.random() * 60000; // 1-2分钟后标记为已收到
             const newMail = {
                 id: Date.now().toString(),
                 roleId: role.id,
