@@ -2405,6 +2405,11 @@
             });
         }
 
+        // --- 唯一ID生成器 (修复信件ID重复) ---
+        function generateUID() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+        }
+
         // --- 存储辅助 ---
         async function saveBackgrounds(bg) { await store.setItem('appBackgrounds', bg); }
         async function loadBackgrounds() { return await store.getItem('appBackgrounds') || { home: '', chat: '', group: '' }; }
@@ -3559,8 +3564,8 @@
         function composeMail() { const c = document.getElementById('compose-recipients'); c.innerHTML = ''; appData.roles.forEach(r => { const d = document.createElement('div'); d.className = 'flex-shrink-0 w-16 flex flex-col items-center gap-1 cursor-pointer'; d.onclick = () => selectRecipient(d, r.id); d.innerHTML = `<img src="${r.avatar}" class="w-12 h-12 rounded-full border-2 border-transparent"><span class="text-[10px]">${escapeHtml(r.name)}</span>`; c.appendChild(d); }); document.getElementById('compose-content').value = ''; document.getElementById('modal-compose').classList.remove('hidden'); }
         function selectRecipient(el, id) { selectedRecipientId = id; const all = document.getElementById('compose-recipients').children; for (let ch of all) ch.querySelector('img').className = 'w-12 h-12 rounded-full border-2 border-transparent'; el.querySelector('img').className = 'w-12 h-12 rounded-full border-2 border-amber-500 ring-2 ring-amber-200'; }
         function closeCompose() { document.getElementById('modal-compose').classList.add('hidden'); selectedRecipientId = null; }
-        async function sendMail() { if (!selectedRecipientId) { showToast('请选择收信人'); return; } const content = document.getElementById('compose-content').value.trim(); if (!content) { showToast('内容不能为空'); return; } const delay = 12*60*60*1000 + Math.random()*12*60*60*1000; appData.mails.push({ id: Date.now().toString(), roleId: selectedRecipientId, type: 'sent', content, time: Date.now(), replyTime: Date.now()+delay, replied: false }); await saveData(); closeCompose(); renderMailList(); showToast('投递成功'); }
-        function openLetterDetail(id) { const m = appData.mails.find(x => x.id === id); if (!m) return; currentViewingMailId = id; const role = appData.roles.find(r => r.id === m.roleId); document.getElementById('letter-date').textContent = new Date(m.time).toLocaleDateString('zh-CN', { weekday: 'long' }); document.getElementById('letter-footer-date').textContent = new Date(m.time).toLocaleDateString('zh-CN'); document.getElementById('letter-author').textContent = role?.name || '未知'; document.getElementById('letter-content').innerText = m.content; document.getElementById('modal-letter-detail').classList.remove('hidden'); }
+        async function sendMail() { if (!selectedRecipientId) { showToast('请选择收信人'); return; } const content = document.getElementById('compose-content').value.trim(); if (!content) { showToast('内容不能为空'); return; } const delay = 12*60*60*1000 + Math.random()*12*60*60*1000; appData.mails.push({ id: generateUID(), roleId: selectedRecipientId, type: 'sent', content, time: Date.now(), replyTime: Date.now()+delay, replied: false }); await saveData(); closeCompose(); renderMailList(); showToast('投递成功'); }
+        function openLetterDetail(id) { const m = appData.mails.find(x => x.id === id); if (!m) { showToast('信件未找到'); return; } currentViewingMailId = id; const role = appData.roles.find(r => r.id === m.roleId); document.getElementById('letter-date').textContent = new Date(m.time).toLocaleDateString('zh-CN', { weekday: 'long' }); document.getElementById('letter-footer-date').textContent = new Date(m.time).toLocaleDateString('zh-CN'); document.getElementById('letter-author').textContent = role?.name || '未知'; document.getElementById('letter-content').innerText = m.content; document.getElementById('modal-letter-detail').classList.remove('hidden'); }
         function closeLetterDetail() { document.getElementById('modal-letter-detail').classList.add('hidden'); currentViewingMailId = null; }
         function toggleLetterEdit() { 
             const div = document.getElementById('letter-content');
@@ -3931,7 +3936,7 @@
             }
             const replyContent = selectedSentences.join('。') + '。';
             const replyMail = {
-                id: Date.now().toString() + '_reply',
+                id: generateUID() + '_reply',
                 roleId: mail.roleId,
                 type: 'received',
                 content: replyContent,
@@ -4388,7 +4393,7 @@
             }, userTimeout);
         }
 
-        // --- 自动来信生成器 ---
+        // --- 自动来信生成器 (修复ID重复) ---
         function startAutoMailGenerator() {
             if (autoMailGeneratorTimer) clearTimeout(autoMailGeneratorTimer);
             const autoMail = appData.settings.autoMail;
@@ -4428,7 +4433,7 @@
             const content = selectedSentences.join('。') + '。';
             
             const newMail = {
-                id: Date.now().toString(),
+                id: generateUID(),
                 roleId: role.id,
                 type: 'received',
                 content: content,
