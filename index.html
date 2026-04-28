@@ -2248,7 +2248,8 @@
 <div id="action-sheet-container"></div>
 
 <script>
-        // --- 初始化图标 ---
+
+// --- 初始化图标 ---
         lucide.createIcons();
         
         // --- 预设背景 ---
@@ -2405,9 +2406,12 @@
             });
         }
 
-        // --- 唯一ID生成器 (修复信件ID重复) ---
+        // --- 唯一ID生成器 (修复信件ID重复问题) ---
         function generateUID() {
-            return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+            const timestamp = Date.now().toString(36);
+            const randomPart1 = Math.random().toString(36).substr(2, 9);
+            const randomPart2 = Math.floor(Math.random() * 100000).toString(36);
+            return timestamp + randomPart1 + randomPart2;
         }
 
         // --- 存储辅助 ---
@@ -3565,7 +3569,43 @@
         function selectRecipient(el, id) { selectedRecipientId = id; const all = document.getElementById('compose-recipients').children; for (let ch of all) ch.querySelector('img').className = 'w-12 h-12 rounded-full border-2 border-transparent'; el.querySelector('img').className = 'w-12 h-12 rounded-full border-2 border-amber-500 ring-2 ring-amber-200'; }
         function closeCompose() { document.getElementById('modal-compose').classList.add('hidden'); selectedRecipientId = null; }
         async function sendMail() { if (!selectedRecipientId) { showToast('请选择收信人'); return; } const content = document.getElementById('compose-content').value.trim(); if (!content) { showToast('内容不能为空'); return; } const delay = 12*60*60*1000 + Math.random()*12*60*60*1000; appData.mails.push({ id: generateUID(), roleId: selectedRecipientId, type: 'sent', content, time: Date.now(), replyTime: Date.now()+delay, replied: false }); await saveData(); closeCompose(); renderMailList(); showToast('投递成功'); }
-        function openLetterDetail(id) { const m = appData.mails.find(x => x.id === id); if (!m) { showToast('信件未找到'); return; } currentViewingMailId = id; const role = appData.roles.find(r => r.id === m.roleId); document.getElementById('letter-date').textContent = new Date(m.time).toLocaleDateString('zh-CN', { weekday: 'long' }); document.getElementById('letter-footer-date').textContent = new Date(m.time).toLocaleDateString('zh-CN'); document.getElementById('letter-author').textContent = role?.name || '未知'; document.getElementById('letter-content').innerText = m.content; document.getElementById('modal-letter-detail').classList.remove('hidden'); }
+
+        // --- 修复信件详情：打开前清空之前的内容，确保每次显示正确的信件 ---
+        function openLetterDetail(id) {
+            // 先清空之前的内容，避免残留
+            const contentDiv = document.getElementById('letter-content');
+            contentDiv.innerHTML = '';
+            contentDiv.contentEditable = false;
+            document.getElementById('letter-author').textContent = '';
+            document.getElementById('letter-date').textContent = '';
+            document.getElementById('letter-footer-date').textContent = '';
+            
+            // 重置编辑按钮状态
+            const btnEdit = document.getElementById('btn-letter-edit');
+            const btnSave = document.getElementById('btn-letter-save');
+            if (btnEdit) btnEdit.classList.remove('hidden');
+            if (btnSave) btnSave.classList.add('hidden');
+            
+            // 精确查找信件（使用字符串比较避免类型问题）
+            const m = appData.mails.find(x => String(x.id) === String(id));
+            if (!m) { 
+                showToast('信件未找到'); 
+                return; 
+            }
+            
+            currentViewingMailId = m.id;
+            const role = appData.roles.find(r => r.id === m.roleId);
+            
+            document.getElementById('letter-date').textContent = new Date(m.time).toLocaleDateString('zh-CN', { weekday: 'long' });
+            document.getElementById('letter-footer-date').textContent = new Date(m.time).toLocaleDateString('zh-CN');
+            document.getElementById('letter-author').textContent = role?.name || '未知';
+            
+            // 设置信件内容
+            contentDiv.innerText = m.content || '（信件内容为空）';
+            
+            document.getElementById('modal-letter-detail').classList.remove('hidden');
+        }
+
         function closeLetterDetail() { document.getElementById('modal-letter-detail').classList.add('hidden'); currentViewingMailId = null; }
         function toggleLetterEdit() { 
             const div = document.getElementById('letter-content');
@@ -4393,7 +4433,7 @@
             }, userTimeout);
         }
 
-        // --- 自动来信生成器 (修复ID重复) ---
+        // --- 自动来信生成器 ---
         function startAutoMailGenerator() {
             if (autoMailGeneratorTimer) clearTimeout(autoMailGeneratorTimer);
             const autoMail = appData.settings.autoMail;
