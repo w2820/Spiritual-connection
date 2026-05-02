@@ -72,6 +72,7 @@
             overscroll-behavior: none;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
             margin: 0;
             padding: 0;
             height: 100vh;
@@ -2199,9 +2200,9 @@
 <!-- 操作菜单容器 -->
 <div id="action-sheet-container"></div>
 
-<!-- 加号面板 -->
+<!-- 加号面板（恢复拍一拍按钮） -->
 <div id="plus-panel" class="action-sheet" style="display:none; z-index:350;">
-    <div class="flex justify-around items-center px-4 py-6">
+    <div class="flex justify-around items-center px-4 py-6 flex-wrap gap-y-4">
         <div class="flex flex-col items-center gap-2 cursor-pointer" onclick="showTransferModal(); closePlusPanel();">
             <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl" style="background:#FFF3E0; color:#F57C00;">💰</div>
             <span class="text-xs text-gray-600">转账</span>
@@ -2213,6 +2214,10 @@
         <div class="flex flex-col items-center gap-2 cursor-pointer" onclick="openStickerPicker(); closePlusPanel();">
             <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl" style="background:#F3E5F5; color:#7B1FA2;">🖼️</div>
             <span class="text-xs text-gray-600">表情包</span>
+        </div>
+        <div class="flex flex-col items-center gap-2 cursor-pointer" onclick="showPokeActionSheet(); closePlusPanel();">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl" style="background:#FFF9C4; color:#F9A825;">👋</div>
+            <span class="text-xs text-gray-600">拍一拍</span>
         </div>
     </div>
     <button class="action-sheet-btn action-sheet-cancel" onclick="closePlusPanel()">取消</button>
@@ -2527,7 +2532,7 @@ async function saveData() {
         const dataToSave = JSON.parse(JSON.stringify(appData));
         delete dataToSave.appearance?.backgrounds;
         await store.setItem('appData', dataToSave);
-        startAutoSendTimer(); startAutoCallTimer(); startAutoMailGenerator(); startAutoTransferTimer();
+        // 修复：不再重置自动定时器，避免频繁保存导致定时器永远无法触发
         if (document.getElementById('modal-settings-data') && !document.getElementById('modal-settings-data').classList.contains('hidden')) updateStorageDisplay();
     } catch (e) { showToast('保存失败，请清理数据'); }
 }
@@ -2847,10 +2852,35 @@ function createMessageElement(sender, content, time, quote = null, type = 'text'
     return div;
 }
 
-function attachLongPress(el, msg, senderName) { let timer; el.addEventListener('touchstart', () => { timer = setTimeout(() => showMessageActionSheet(msg, senderName), 500); }); el.addEventListener('touchend', () => clearTimeout(timer)); el.addEventListener('touchmove', () => clearTimeout(timer)); }
+function attachLongPress(el, msg, senderName) {
+    let timer;
+    el.addEventListener('touchstart', (e) => {
+        // 不清除默认行为，保留滚动，但清除可能出现的选区
+        timer = setTimeout(() => {
+            window.getSelection().removeAllRanges(); // 防止长按文本选中卡界面
+            showMessageActionSheet(msg, senderName);
+        }, 500);
+    });
+    el.addEventListener('touchend', () => {
+        clearTimeout(timer);
+        window.getSelection().removeAllRanges();
+    });
+    el.addEventListener('touchmove', () => {
+        clearTimeout(timer);
+    });
+    el.addEventListener('touchcancel', () => {
+        clearTimeout(timer);
+    });
+}
 function showMessageActionSheet(msg, senderName) {
     const container = document.getElementById('action-sheet-container'); const isMe = msg.sender === 'me';
-    container.innerHTML = `<div class="action-sheet-backdrop" onclick="closeActionSheet()"></div><div class="action-sheet"><button class="action-sheet-btn" onclick="copyMessageContent('${escapeHtml(msg.content).replace(/'/g, "\\'")}'); closeActionSheet()">复制</button><button class="action-sheet-btn" onclick='addFavorite(${JSON.stringify(msg).replace(/'/g, "\\'")}, "${senderName}"); closeActionSheet()'>收藏</button>${isMe ? '<button class="action-sheet-btn destructive" onclick="deleteMessage('+msg.id+'); closeActionSheet()">删除</button>' : ''}<button class="action-sheet-btn" onclick="quoteMessage('${msg.content.replace(/'/g, "\\'")}'); closeActionSheet()">引用</button><button class="action-sheet-btn action-sheet-cancel" onclick="closeActionSheet()">取消</button></div>`;
+    container.innerHTML = `<div class="action-sheet-backdrop" onclick="closeActionSheet()"></div><div class="action-sheet">
+        <button class="action-sheet-btn" onclick="copyMessageContent('${escapeHtml(msg.content).replace(/'/g, "\\'")}'); closeActionSheet()">复制</button>
+        <button class="action-sheet-btn" onclick='addFavorite(${JSON.stringify(msg).replace(/'/g, "\\'")}, "${senderName}"); closeActionSheet()'>收藏</button>
+        ${isMe ? '<button class="action-sheet-btn destructive" onclick="deleteMessage('+msg.id+'); closeActionSheet()">删除</button>' : ''}
+        <button class="action-sheet-btn" onclick="quoteMessage('${msg.content.replace(/'/g, "\\'")}'); closeActionSheet()">引用</button>
+        <button class="action-sheet-btn action-sheet-cancel" onclick="closeActionSheet()">取消</button>
+    </div>`;
 }
 function closeActionSheet() { document.getElementById('action-sheet-container').innerHTML = ''; }
 function copyMessageContent(text) { navigator.clipboard?.writeText(text); showToast('已复制'); }
@@ -3004,7 +3034,10 @@ async function saveSettings() {
     if (!appData.settings.autoMail) appData.settings.autoMail = {};
     appData.settings.autoMail.enabled = document.getElementById('setting-auto-mail-enabled-switch').classList.contains('active');
     appData.settings.autoMail.checkInterval = parseInt(document.getElementById('setting-auto-mail-interval').value) || 10;
-    await saveData(); closeChatSettings(); updateCallButtonVisibility(); startAutoCallTimer(); startAutoMailGenerator(); showToast('设置已保存');
+    await saveData(); closeChatSettings(); updateCallButtonVisibility();
+    // 设置保存后重启自动功能定时器
+    startAutoCallTimer(); startAutoMailGenerator(); startAutoTransferTimer();
+    showToast('设置已保存');
 }
 
 function openAppearanceSettings() { pageHistory.push('settings'); tempAppearance = JSON.parse(JSON.stringify(appData.appearance)); document.getElementById('modal-settings-main').classList.add('hidden'); document.getElementById('modal-appearance').classList.remove('hidden'); }
@@ -3167,11 +3200,21 @@ function closeMiniCallWindow(e) { e.stopPropagation(); if (callState.active) han
 function startDragMiniCall(e) { e.preventDefault(); const mini = document.getElementById('call-mini-window'), rect = mini.getBoundingClientRect(), clientX = e.touches ? e.touches[0].clientX : e.clientX, clientY = e.touches ? e.touches[0].clientY : e.clientY; dragOffsetX = clientX - rect.left; dragOffsetY = clientY - rect.top; isDraggingMini = true; function onDrag(ev) { if (!isDraggingMini) return; ev.preventDefault(); const x = (ev.touches ? ev.touches[0].clientX : ev.clientX) - dragOffsetX, y = (ev.touches ? ev.touches[0].clientY : ev.clientY) - dragOffsetY; mini.style.left = x + 'px'; mini.style.right = 'auto'; mini.style.bottom = 'auto'; mini.style.top = y + 'px'; } function onDragEnd() { isDraggingMini = false; window.removeEventListener('mousemove', onDrag); window.removeEventListener('touchmove', onDrag); window.removeEventListener('mouseup', onDragEnd); window.removeEventListener('touchend', onDragEnd); } window.addEventListener('mousemove', onDrag); window.addEventListener('touchmove', onDrag); window.addEventListener('mouseup', onDragEnd); window.addEventListener('touchend', onDragEnd); }
 function setCallWindowSize(size) { callState.windowSize = size; const card = document.getElementById('call-card'); if (size === 'mini') card.style.transform = 'scale(0.7)'; else if (size === 'small') card.style.transform = 'scale(0.85)'; else if (size === 'standard') card.style.transform = 'scale(1)'; else if (size === 'large') card.style.transform = 'scale(1.15)'; document.querySelectorAll('.call-size-btn').forEach(btn => { btn.classList.toggle('active', btn.dataset.size === size); }); if (appData.settings.call) appData.settings.call.windowSize = size; debouncedSaveData(); }
 async function handleCallBgUpload(input) { if (input.files?.[0]) { showToast('压缩中...'); const compressed = await compressImage(input.files[0], 800, 0.7); document.getElementById('call-bg').style.backgroundImage = `url(${compressed})`; if (!appData.settings.call) appData.settings.call = {}; appData.settings.call.background = compressed; debouncedSaveData(); } }
-function startAutoCallTimer() { if (autoCallTimer) clearTimeout(autoCallTimer); if (!appData.settings.autoCall?.enabled) return; const interval = (Math.random() * (appData.settings.autoCall.maxInterval - appData.settings.autoCall.minInterval) + appData.settings.autoCall.minInterval) * 60 * 1000; autoCallTimer = setTimeout(() => { checkAndTriggerAutoCall(); startAutoCallTimer(); }, interval); }
+function startAutoCallTimer() {
+    if (autoCallTimer) return;
+    if (!appData.settings.autoCall?.enabled) return;
+    const interval = (Math.random() * (appData.settings.autoCall.maxInterval - appData.settings.autoCall.minInterval) + appData.settings.autoCall.minInterval) * 60 * 1000;
+    autoCallTimer = setTimeout(() => { autoCallTimer = null; checkAndTriggerAutoCall(); startAutoCallTimer(); }, interval);
+}
 function checkAndTriggerAutoCall() { if (!appData.settings.autoCall?.enabled || callState.active) return; if (Math.random() * 100 < appData.settings.autoCall.probability) { const role = appData.roles[Math.floor(Math.random() * appData.roles.length)]; if (role) triggerIncomingCall(role); } }
 function triggerIncomingCall(role) { callState.active = true; callState.status = 'incoming'; callState.roleId = role.id; callState.roleName = role.name; callState.roleAvatar = role.avatar; callState.initiator = 'role'; callState.seconds = 0; document.getElementById('call-avatar').src = role.avatar; document.getElementById('call-name').textContent = role.name; document.getElementById('call-status').textContent = '邀请你视频通话...'; document.getElementById('call-timer').textContent = '00:00'; setCallWindowSize(callState.windowSize); updateCallActions(); document.getElementById('modal-call').classList.remove('hidden'); callState.userTimeoutTimer = setTimeout(() => { if (callState.active && callState.status === 'incoming') endCall('missed', 0); }, (appData.settings.autoCall?.userTimeout || 30) * 1000); }
 
-function startAutoMailGenerator() { if (autoMailGeneratorTimer) clearTimeout(autoMailGeneratorTimer); if (!appData.settings.autoMail?.enabled) return; const interval = (appData.settings.autoMail.checkInterval || 10) * 60 * 1000; autoMailGeneratorTimer = setTimeout(() => { checkAndGenerateAutoMail(); startAutoMailGenerator(); }, interval); }
+function startAutoMailGenerator() {
+    if (autoMailGeneratorTimer) return;
+    if (!appData.settings.autoMail?.enabled) return;
+    const interval = (appData.settings.autoMail.checkInterval || 10) * 60 * 1000;
+    autoMailGeneratorTimer = setTimeout(() => { autoMailGeneratorTimer = null; checkAndGenerateAutoMail(); startAutoMailGenerator(); }, interval);
+}
 function checkAndGenerateAutoMail() { appData.roles.forEach(role => { if (Math.random() * 100 < (role.autoMailProbability ?? 15)) generateAutoLetter(role); }); }
 function generateAutoLetter(role) { const allWords = []; appData.wordbanks.wordGroups.forEach(g => allWords.push(...g.words)); if (!allWords.length) allWords.push('今天不知道说什么好', '想你啦', '最近还好吗', '天气不错'); const content = Array.from({length: 3 + Math.floor(Math.random() * 6)}, () => allWords[Math.floor(Math.random() * allWords.length)]).join('。') + '。'; appData.mails.push({ id: generateUID(), roleId: role.id, type: 'received', content, time: Date.now(), replyTime: Date.now(), replied: true }); debouncedSaveData(); if (document.getElementById('page-mailbox') && document.getElementById('page-mailbox').classList.contains('active')) renderMailList(); }
 
@@ -3191,7 +3234,6 @@ function confirmTransfer() {
     appData.balance -= amount;
     lastManualTransferTime = Date.now();
     disableAutoTransferUntil = Date.now() + 5 * 60 * 1000;
-    startAutoTransferTimer();
     const record = { id: generateUID(), from: 'me', to: currentRoleId, toName: role.name, amount, note, time: Date.now(), status: 'pending', direction: 'sent' };
     appData.transferRecords.push(record);
     const msgContent = JSON.stringify({ type: 'transfer', amount, note, status: 'pending' });
@@ -3202,25 +3244,21 @@ function confirmTransfer() {
     debouncedSaveData();
     appendMessageToDOM('me', msgContent, Date.now(), null, 'transfer');
     
-    // 随机延迟 20-30 秒后角色收款
     const collectDelay = 20000 + Math.floor(Math.random() * 10000);
     setTimeout(() => {
         const pendingMsg = (appData.chats[currentRoleId] || []).find(m =>
             m.type === 'transfer' && m.sender === 'me' && m.content.includes(`"amount":${amount}`) && m.content.includes('"status":"pending"')
         );
         if (pendingMsg) {
-            // 更新我的气泡为“已被接收”
             pendingMsg.content = JSON.stringify({ type: 'transfer', amount, note, status: 'received' });
             record.status = 'received';
             appData.balance += amount;
-            // 插入角色左侧“已收款”气泡
             const roleReceivedMsg = { id: Date.now(), sender: currentRoleId, content: JSON.stringify({ type: 'transfer', amount, note, status: 'received' }), time: Date.now(), type: 'transfer' };
             appData.chats[currentRoleId].push(roleReceivedMsg);
             debouncedSaveData();
             if (currentChatType === 'role' && currentRoleId === record.to) {
-                renderChatMessages(); // 刷新界面
+                renderChatMessages();
             }
-            // 25% 概率触发 2-5 条随机消息
             if (Math.random() < 0.25) {
                 const allWords = []; appData.wordbanks.wordGroups.forEach(g => allWords.push(...g.words));
                 const stickers = appData.wordbanks.stickers || [];
@@ -3249,7 +3287,6 @@ function confirmTransfer() {
                     sendExtra(1);
                 }
             }
-            // 测试模式下角色延迟 20-30 秒给我转账
             if (appData.settings.transferTestMode) {
                 const roleTransferDelay = 20000 + Math.floor(Math.random() * 10000);
                 setTimeout(() => {
@@ -3266,14 +3303,11 @@ function collectTransfer(senderId, amount, note, cardElement) {
     if (record) { record.status = 'received'; appData.balance += amount; }
     if (currentChatType === 'role' && currentRoleId === senderId) {
         const msgs = appData.chats[currentRoleId] || [];
-        // 更新角色原气泡状态 (转账给你 → 已领取)
         const targetMsg = msgs.find(m => { if (m.type !== 'transfer' || m.sender !== senderId) return false; try { const d = JSON.parse(m.content); return d.amount === amount && d.status === 'pending'; } catch { return false; } });
         if (targetMsg) targetMsg.content = JSON.stringify({ type: 'transfer', amount, note, status: 'received' });
-        // 追加我自己的收款气泡 (右侧, 已收款)
         const myReceivedMsg = { id: Date.now(), sender: 'me', content: JSON.stringify({ type: 'transfer', amount, note, status: 'received' }), time: Date.now(), type: 'transfer' };
         appData.chats[currentRoleId].push(myReceivedMsg);
         debouncedSaveData();
-        // 重新渲染，避免重复追加
         renderChatMessages();
     }
     debouncedSaveData();
@@ -3309,11 +3343,11 @@ function sendRoleTransfer(role, force = false) {
 }
 
 function startAutoTransferTimer() {
-    if (autoTransferTimer) clearTimeout(autoTransferTimer);
+    if (autoTransferTimer) return;
     if (appData.settings.transferTestMode) return;
     if (!appData.transferSettings?.enabled) return;
     const interval = (appData.transferSettings.checkInterval || 30) * 60 * 1000;
-    autoTransferTimer = setTimeout(() => { checkAndTriggerAutoTransfer(); startAutoTransferTimer(); }, interval);
+    autoTransferTimer = setTimeout(() => { autoTransferTimer = null; checkAndTriggerAutoTransfer(); startAutoTransferTimer(); }, interval);
 }
 
 function checkAndTriggerAutoTransfer() {
@@ -3349,23 +3383,15 @@ async function saveTransferSettings() {
     appData.transferSettings.probability = parseInt(document.getElementById('setting-transfer-prob').value) || 15;
     appData.transferSettings.checkInterval = parseInt(document.getElementById('setting-transfer-interval').value) || 30;
     const testSwitch = document.getElementById('setting-transfer-test-switch');
-    const wasTestMode = appData.settings.transferTestMode;
-    if (testSwitch) appData.settings.transferTestMode = testSwitch.classList.contains('active');
-    await saveData();
-    closeTransferSettings();
-    if (appData.settings.transferTestMode && !wasTestMode && currentRoleId) {
+    appData.settings.transferTestMode = testSwitch ? testSwitch.classList.contains('active') : false;
+    await saveData(); closeTransferSettings();
+    if (appData.settings.transferTestMode && currentRoleId) {
         const role = appData.roles.find(r => r.id === currentRoleId);
-        if (role) {
-            const delay = Math.random() * (appData.settings.maxDelay - appData.settings.minDelay) * 1000 + appData.settings.minDelay * 1000;
-            setTimeout(() => sendRoleTransfer(role, true), delay);
-        }
+        if (role) sendRoleTransfer(role, true);
     }
-    startAutoTransferTimer();
+    autoTransferTimer = null; startAutoTransferTimer();
     showToast('转账设置已保存');
 }
-window.saveTransferSettings = saveTransferSettings;
-window.openTransferSettings = openTransferSettings;
-window.closeTransferSettings = closeTransferSettings;
 
 // ========== 重新设计的转账记录页面（含红包，可清空） ==========
 function openTransferRecords() {
@@ -3495,7 +3521,7 @@ async function clearAllBills() {
 }
 window.clearAllBills = clearAllBills;
 
-// ========== 红包功能（测试模式下角色立刻领取，延迟遵循回复速度） ==========
+// ========== 红包功能 ==========
 function showPlusPanel() {
     const panel = document.getElementById('plus-panel');
     panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
