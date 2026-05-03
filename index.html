@@ -2062,7 +2062,8 @@
             <div><label class="text-sm font-medium block mb-3">引用功能概率设置 (%)</label><div class="flex gap-4"><div class="flex-1"><span class="text-xs text-gray-400 block mb-1 text-center">引用我的消息</span><input type="number" id="setting-quote-my" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-center font-bold" value="10"></div><div class="flex-1"><span class="text-xs text-gray-400 block mb-1 text-center">引用他人消息</span><input type="number" id="setting-quote-other" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-center font-bold" value="5"></div></div></div>
             <div class="border-t border-gray-200 pt-4 mt-4"><h3 class="text-sm font-semibold mb-3">消息氛围</h3><div class="bg-gray-50 p-4 rounded-xl space-y-3"><p class="text-xs text-gray-400">角色回复时随机混入 Emoji 或图片表情</p><div class="grid grid-cols-2 gap-3 mt-3"><div><span class="text-xs text-gray-500 block mb-1">Emoji 混入概率 (%)</span><input type="number" id="setting-emoji-prob" min="0" max="100" value="20" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div><div><span class="text-xs text-gray-500 block mb-1">图片表情概率 (%)</span><input type="number" id="setting-sticker-prob" min="0" max="100" value="10" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div></div></div></div>
             <div class="border-t border-gray-200 pt-4 mt-4"><div class="flex items-center justify-between mb-3"><h3 class="text-sm font-semibold">群聊发言人数概率</h3><select id="group-prob-select" class="text-xs bg-gray-50 border border-gray-200 rounded-lg px-2 py-1" onchange="loadGroupProbConfig()"><option value="">选择群聊</option></select></div><div id="group-prob-config-panel" class="bg-gray-50 p-4 rounded-xl space-y-3 hidden"><p class="text-xs text-gray-500 mb-2">当前群成员数：<span id="group-member-count">0</span> 人</p><div id="group-prob-inputs" class="space-y-2"></div><p class="text-[10px] text-gray-400">各概率总和需为 100%</p><button onclick="saveCurrentGroupProb()" class="mt-2 w-full py-1.5 rounded-lg text-xs font-medium" style="background-color: var(--accent-light); color: var(--accent-color);">保存此群概率</button><p id="prob-error-msg" class="text-xs text-red-500 hidden mt-1"></p></div></div>
-            <div class="border-t border-gray-200 pt-4 mt-4"><h3 class="text-sm font-semibold mb-3">模拟视频通话</h3><div class="bg-gray-50 p-4 rounded-xl space-y-3"><div class="flex items-center justify-between"><span class="text-sm">显示通话按钮</span><div class="ios-switch" id="setting-call-enabled-switch" onclick="toggleSwitch(this)"></div></div><p class="text-xs text-gray-400">关闭后聊天头部将隐藏通话按钮</p><div class="grid grid-cols-2 gap-3 mt-3"><div><span class="text-xs text-gray-500 block mb-1">拒绝通话概率 (%)</span><input type="number" id="setting-call-reject-prob" min="0" max="100" value="20" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div><div><span class="text-xs text-gray-500 block mb-1">未接听概率 (%)</span><input type="number" id="setting-call-miss-prob" min="0" max="100" value="10" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div></div><div class="grid grid-cols-2 gap-3 mt-3"><div><span class="text-xs text-gray-500 block mb-1">最短通话 (分钟)</span><input type="number" id="setting-call-min-duration" min="0.1" max="30" step="0.1" value="0.5" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div><div><span class="text-xs text-gray-500 block mb-1">最长通话 (分钟)</span><input type="number" id="setting-call-max-duration" min="0.1" max="30" step="0.1" value="2" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div></div></div></div>
+            <div class="border-t border-gray-200 pt-4 mt-4"><h3 class="text-sm font-semibold mb-3">模拟视频通话</h3><div class="bg-gray-50 p-4 rounded-xl space-y-3"><div class="flex items-center justify-between"><span class="text-sm">显示通话按钮</span><div class="ios-switch" id="setting-call-enabled-switch" onclick="toggleSwitch(this)"></div></div><p class="text-xs text-gray-400">关闭后聊天头部将隐藏通话按钮</p><div class="grid grid-cols-2 gap-3 mt-3"><div><span class="text-xs text-gray-500 block mb-1">拒绝通话概率 (%)</span><input type="number" id="setting-call-reject-prob" min="0" max="100" value="20" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div><div><span class="text-xs text-gray-500 block mb-1">未接听概率 (%)</span><input type="number" id="setting-call-miss-prob" min="0" max="100" value="10" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div></div><div class="grid grid-cols-2 gap-3 mt-3"><div><span class="text-xs text-gray-500 block mb-1">最短通话 (分钟)</span><input type="number" id="setting-call-min-duration" min="0.1" max="30" step="0.1" value="0.5" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div><div><span class="text-xs text-gray-500 block mb-1">最长通话 (分钟)</span><input type="number" id="setting-call-max-duration" min="0.1" max="30" step="0.1" value="2" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div></div><!-- 来电铃声 -->
+            <div class="mt-3"><span class="text-xs text-gray-500 block mb-1">来电铃声 URL</span><input type="text" id="setting-call-ringtone" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm" placeholder="默认铃声"></div></div></div>
             <div class="border-t border-gray-200 pt-4 mt-4"><h3 class="text-sm font-semibold mb-3">自动来电</h3><div class="bg-gray-50 p-4 rounded-xl space-y-3"><div class="flex items-center justify-between"><span class="text-sm">启用角色主动来电</span><div class="ios-switch" id="setting-auto-call-enabled-switch" onclick="toggleSwitch(this)"></div></div><p class="text-xs text-gray-400">开启后角色会随机主动给你打电话</p><div class="grid grid-cols-2 gap-3 mt-3"><div><span class="text-xs text-gray-500 block mb-1">来电概率 (%)</span><input type="number" id="setting-auto-call-prob" min="0" max="100" value="30" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div><div><span class="text-xs text-gray-500 block mb-1">最小间隔 (分钟)</span><input type="number" id="setting-auto-call-min-interval" min="1" max="120" value="10" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div><div><span class="text-xs text-gray-500 block mb-1">最大间隔 (分钟)</span><input type="number" id="setting-auto-call-max-interval" min="1" max="120" value="30" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div><div><span class="text-xs text-gray-500 block mb-1">超时未接 (秒)</span><input type="number" id="setting-auto-call-user-timeout" min="5" max="60" value="30" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div></div><div class="grid grid-cols-2 gap-3 mt-3"><div><span class="text-xs text-gray-500 block mb-1">最短通话 (分钟)</span><input type="number" id="setting-auto-call-min-duration" min="0.1" max="30" step="0.1" value="0.5" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div><div><span class="text-xs text-gray-500 block mb-1">最长通话 (分钟)</span><input type="number" id="setting-auto-call-max-duration" min="0.1" max="30" step="0.1" value="3" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div></div></div></div>
             <div class="border-t border-gray-200 pt-4 mt-4"><h3 class="text-sm font-semibold mb-3">自动来信</h3><div class="bg-gray-50 p-4 rounded-xl space-y-3"><div class="flex items-center justify-between"><span class="text-sm">启用角色自动来信</span><div class="ios-switch" id="setting-auto-mail-enabled-switch" onclick="toggleSwitch(this)"></div></div><p class="text-xs text-gray-400">开启后角色会按各自概率自动给你写信</p><div class="grid grid-cols-2 gap-3 mt-3"><div><span class="text-xs text-gray-500 block mb-1">检查间隔 (分钟)</span><input type="number" id="setting-auto-mail-interval" min="1" max="120" value="10" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div></div></div></div>
         </div>
@@ -2194,13 +2195,16 @@
     <div class="close-music" onclick="closeMusicPlayer(event)">✕</div>
 </div>
 
+<!-- 来电铃声 (隐藏) -->
+<audio id="call-ringtone" loop preload="auto" style="display:none;" src="https://www.soundjay.com/phone/sounds/phone-ring-1.mp3"></audio>
+
 <!-- Toast 提示 -->
 <div id="toast" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/80 text-white px-6 py-3 rounded-full text-sm font-medium opacity-0 pointer-events-none transition-opacity duration-300 z-[120]"></div>
 
 <!-- 操作菜单容器 -->
 <div id="action-sheet-container"></div>
 
-<!-- 加号面板（恢复拍一拍按钮） -->
+<!-- 加号面板（已恢复拍一拍按钮） -->
 <div id="plus-panel" class="action-sheet" style="display:none; z-index:350;">
     <div class="flex justify-around items-center px-4 py-6 flex-wrap gap-y-4">
         <div class="flex flex-col items-center gap-2 cursor-pointer" onclick="showTransferModal(); closePlusPanel();">
@@ -2377,7 +2381,9 @@ const DEFAULT_DATA = {
         minDelay: 1, maxDelay: 3, autoSend: false, autoInterval: 30, autoSendProbability: 0.5,
         replyMode: 'single', quoteMyProb: 20, quoteOtherProb: 10, prob2: 20, prob3: 5,
         emojiProb: 20, stickerProb: 10,
-        call: { enabled: true, rejectProb: 20, missProb: 10, answerDelay: 2000, background: '', windowSize: 'standard', minDuration: 0.5, maxDuration: 2 },
+        // 多条回复间隔（秒）
+        multiMsgInterval: 2,
+        call: { enabled: true, rejectProb: 20, missProb: 10, answerDelay: 15000, background: '', windowSize: 'standard', minDuration: 0.5, maxDuration: 2, ringtone: '' },
         autoCall: { enabled: false, probability: 30, minInterval: 10, maxInterval: 30, userTimeout: 30, minDuration: 0.5, maxDuration: 3 },
         autoMail: { enabled: true, checkInterval: 10 },
         autoSendProbEnabled: false,
@@ -2436,7 +2442,7 @@ let editingImportantId = null;
 let currentImportantCover = '';
 let mailCheckTimer = null;
 let currentOnlineStatusRoleId = null;
-let callState = { active: false, status: 'idle', roleId: null, roleName: '', roleAvatar: '', timerInterval: null, seconds: 0, autoHangupTimer: null, miniMode: false, windowSize: 'standard', rejectProb: 20, missProb: 10, answerDelay: 2000, initiator: null, userTimeoutTimer: null };
+let callState = { active: false, status: 'idle', roleId: null, roleName: '', roleAvatar: '', timerInterval: null, seconds: 0, autoHangupTimer: null, miniMode: false, windowSize: 'standard', rejectProb: 20, missProb: 10, answerDelay: 15000, initiator: null, userTimeoutTimer: null };
 let isDraggingMini = false;
 let dragOffsetX = 0, dragOffsetY = 0;
 let autoCallTimer = null;
@@ -2445,6 +2451,218 @@ let autoTransferTimer = null;
 let currentOpenRedPacketId = null;
 let disableAutoTransferUntil = 0;
 let lastManualTransferTime = 0;
+
+// --- Web Audio API 铃音引擎 ---
+let audioCtx = null;
+let ringtoneInterval = null;
+let ringbackInterval = null;
+
+function ensureAudioContext() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+    return audioCtx;
+}
+
+// 舒缓琵琶曲风格铃音
+function playPipaStyleRingtone() {
+    stopRingtone();
+    stopRingback();
+    ensureAudioContext();
+    const ctx = audioCtx;
+
+    const melody = [
+        { freq: 392, dur: 0.5, wheel: true },
+        { freq: 440, dur: 0.5, wheel: false },
+        { freq: 494, dur: 0.5, wheel: false },
+        { freq: 587, dur: 0.5, wheel: true },
+        { freq: 587, dur: 0.35, wheel: false },
+        { freq: 494, dur: 0.35, wheel: false },
+        { freq: 440, dur: 0.35, wheel: false },
+        { freq: 392, dur: 0.35, wheel: false },
+        { freq: 330, dur: 0.4, wheel: false },
+        { freq: 392, dur: 0.4, wheel: false },
+        { freq: 330, dur: 0.4, wheel: false },
+        { freq: 392, dur: 0.4, wheel: false },
+        { freq: 330, dur: 0.4, wheel: false },
+        { freq: 247, dur: 0.4, wheel: false },
+        { freq: 392, dur: 0.4, wheel: false },
+        { freq: 392, dur: 0.35, wheel: false },
+        { freq: 440, dur: 0.35, wheel: false },
+        { freq: 494, dur: 0.35, wheel: false },
+        { freq: 587, dur: 0.35, wheel: false },
+        { freq: 784, dur: 1.2, wheel: true }
+    ];
+
+    function playPipaNote(freq, startTime, dur, withWheel) {
+        const osc1 = ctx.createOscillator();
+        const gain1 = ctx.createGain();
+        osc1.type = 'triangle';
+        osc1.frequency.value = freq;
+        gain1.gain.setValueAtTime(0, startTime);
+        gain1.gain.linearRampToValueAtTime(0.25, startTime + 0.01);
+        gain1.gain.exponentialRampToValueAtTime(0.001, startTime + dur * 1.2);
+        osc1.connect(gain1);
+        gain1.connect(ctx.destination);
+        osc1.start(startTime);
+        osc1.stop(startTime + dur * 1.3);
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.value = freq * 2;
+        gain2.gain.setValueAtTime(0, startTime);
+        gain2.gain.linearRampToValueAtTime(0.08, startTime + 0.01);
+        gain2.gain.exponentialRampToValueAtTime(0.001, startTime + dur * 0.7);
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.start(startTime);
+        osc2.stop(startTime + dur * 0.8);
+        if (withWheel) {
+            for (let i = 1; i <= 2; i++) {
+                const wt = startTime + i * 0.06;
+                if (wt > startTime + dur) break;
+                const wOsc = ctx.createOscillator();
+                const wGain = ctx.createGain();
+                wOsc.type = 'triangle';
+                wOsc.frequency.value = freq * 0.995;
+                wGain.gain.setValueAtTime(0, wt);
+                wGain.gain.linearRampToValueAtTime(0.15, wt + 0.005);
+                wGain.gain.exponentialRampToValueAtTime(0.001, wt + 0.08);
+                wOsc.connect(wGain);
+                wGain.connect(ctx.destination);
+                wOsc.start(wt);
+                wOsc.stop(wt + 0.1);
+            }
+        }
+        if (withWheel) {
+            osc1.frequency.setValueAtTime(freq * 0.97, startTime + 0.04);
+            osc1.frequency.linearRampToValueAtTime(freq * 1.02, startTime + 0.12);
+            osc1.frequency.linearRampToValueAtTime(freq * 1.00, startTime + 0.2);
+        }
+    }
+
+    let t = ctx.currentTime + 0.05;
+    melody.forEach(note => {
+        playPipaNote(note.freq, t, note.dur, note.wheel);
+        t += note.dur + 0.06;
+    });
+    const totalTime = t - ctx.currentTime;
+    ringtoneInterval = setInterval(() => {
+        if (!audioCtx) return;
+        let start = audioCtx.currentTime + 0.05;
+        melody.forEach(note => {
+            playPipaNote(note.freq, start, note.dur, note.wheel);
+            start += note.dur + 0.06;
+        });
+    }, totalTime * 1000);
+}
+
+// 回铃音（拨出等待音，同样琵琶旋律）
+function playRingbackTone() {
+    stopRingtone();
+    stopRingback();
+    ensureAudioContext();
+    const ctx = audioCtx;
+    const melody = [
+        { freq: 392, dur: 0.5, wheel: true },
+        { freq: 440, dur: 0.5, wheel: false },
+        { freq: 494, dur: 0.5, wheel: false },
+        { freq: 587, dur: 0.5, wheel: true },
+        { freq: 587, dur: 0.35, wheel: false },
+        { freq: 494, dur: 0.35, wheel: false },
+        { freq: 440, dur: 0.35, wheel: false },
+        { freq: 392, dur: 0.35, wheel: false },
+        { freq: 330, dur: 0.4, wheel: false },
+        { freq: 392, dur: 0.4, wheel: false },
+        { freq: 330, dur: 0.4, wheel: false },
+        { freq: 392, dur: 0.4, wheel: false },
+        { freq: 330, dur: 0.4, wheel: false },
+        { freq: 247, dur: 0.4, wheel: false },
+        { freq: 392, dur: 0.4, wheel: false },
+        { freq: 392, dur: 0.35, wheel: false },
+        { freq: 440, dur: 0.35, wheel: false },
+        { freq: 494, dur: 0.35, wheel: false },
+        { freq: 587, dur: 0.35, wheel: false },
+        { freq: 784, dur: 1.2, wheel: true }
+    ];
+    function playPipaNote(freq, startTime, dur, withWheel) {
+        const osc1 = ctx.createOscillator();
+        const gain1 = ctx.createGain();
+        osc1.type = 'triangle';
+        osc1.frequency.value = freq;
+        gain1.gain.setValueAtTime(0, startTime);
+        gain1.gain.linearRampToValueAtTime(0.2, startTime + 0.01);
+        gain1.gain.exponentialRampToValueAtTime(0.001, startTime + dur * 1.2);
+        osc1.connect(gain1);
+        gain1.connect(ctx.destination);
+        osc1.start(startTime);
+        osc1.stop(startTime + dur * 1.3);
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.value = freq * 2;
+        gain2.gain.setValueAtTime(0, startTime);
+        gain2.gain.linearRampToValueAtTime(0.06, startTime + 0.01);
+        gain2.gain.exponentialRampToValueAtTime(0.001, startTime + dur * 0.7);
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.start(startTime);
+        osc2.stop(startTime + dur * 0.8);
+        if (withWheel) {
+            for (let i = 1; i <= 2; i++) {
+                const wt = startTime + i * 0.06;
+                if (wt > startTime + dur) break;
+                const wOsc = ctx.createOscillator();
+                const wGain = ctx.createGain();
+                wOsc.type = 'triangle';
+                wOsc.frequency.value = freq * 0.995;
+                wGain.gain.setValueAtTime(0, wt);
+                wGain.gain.linearRampToValueAtTime(0.12, wt + 0.005);
+                wGain.gain.exponentialRampToValueAtTime(0.001, wt + 0.08);
+                wOsc.connect(wGain);
+                wGain.connect(ctx.destination);
+                wOsc.start(wt);
+                wOsc.stop(wt + 0.1);
+            }
+        }
+    }
+    let t = ctx.currentTime + 0.05;
+    melody.forEach(note => {
+        playPipaNote(note.freq, t, note.dur, note.wheel);
+        t += note.dur + 0.06;
+    });
+    const totalTime = t - ctx.currentTime;
+    ringbackInterval = setInterval(() => {
+        if (!audioCtx) return;
+        let start = audioCtx.currentTime + 0.05;
+        melody.forEach(note => {
+            playPipaNote(note.freq, start, note.dur, note.wheel);
+            start += note.dur + 0.06;
+        });
+    }, totalTime * 1000);
+}
+
+function stopRingtone() {
+    if (ringtoneInterval) {
+        clearInterval(ringtoneInterval);
+        ringtoneInterval = null;
+    }
+}
+
+function stopRingback() {
+    if (ringbackInterval) {
+        clearInterval(ringbackInterval);
+        ringbackInterval = null;
+    }
+}
+
+function stopAllRingtones() {
+    stopRingtone();
+    stopRingback();
+}
 
 // --- localforage 实例 ---
 const store = localforage.createInstance({ name: 'SpiritualConnectionV2' });
@@ -2513,9 +2731,9 @@ function formatBytes(bytes) { if (bytes < 1024) return bytes + 'B'; if (bytes < 
 
 async function updateStorageDisplay() {
     const usage = await calculateStorageUsage();
-    const maxBytes = 50 * 1024 * 1024;
+    const maxBytes = 500 * 1024 * 1024; // 修改为 500MB
     const percent = Math.min(100, (usage.total / maxBytes) * 100).toFixed(1);
-    document.getElementById('storage-total-text').textContent = `${formatBytes(usage.total)} / ~50MB (${percent}%)`;
+    document.getElementById('storage-total-text').textContent = `${formatBytes(usage.total)} / ~500MB (${percent}%)`;
     document.getElementById('chat-storage-size').textContent = formatBytes(usage.chat);
     document.getElementById('settings-storage-size').textContent = formatBytes(usage.settings);
     document.getElementById('media-storage-size').textContent = formatBytes(usage.media);
@@ -2532,7 +2750,6 @@ async function saveData() {
         const dataToSave = JSON.parse(JSON.stringify(appData));
         delete dataToSave.appearance?.backgrounds;
         await store.setItem('appData', dataToSave);
-        // 修复：不再重置自动定时器，避免频繁保存导致定时器永远无法触发
         if (document.getElementById('modal-settings-data') && !document.getElementById('modal-settings-data').classList.contains('hidden')) updateStorageDisplay();
     } catch (e) { showToast('保存失败，请清理数据'); }
 }
@@ -2596,7 +2813,8 @@ async function loadData() {
         if (!appData.importantDays) appData.importantDays = [{ id: '1', name: '4.21黎宝和领戒指', date: '2025-04-21', type: 'anniversary', cover: '' }];
         if (!appData.favoriteMessages) appData.favoriteMessages = [];
         if (!appData.settings.autoSendProbability) appData.settings.autoSendProbability = 0.5;
-        if (!appData.settings.call) appData.settings.call = { enabled: true, rejectProb: 20, missProb: 10, answerDelay: 2000, background: '', windowSize: 'standard', minDuration: 0.5, maxDuration: 2 };
+        if (!appData.settings.call) appData.settings.call = { enabled: true, rejectProb: 20, missProb: 10, answerDelay: 15000, background: '', windowSize: 'standard', minDuration: 0.5, maxDuration: 2, ringtone: '' };
+        if (!appData.settings.call.ringtone) appData.settings.call.ringtone = '';
         if (!appData.settings.autoCall) appData.settings.autoCall = { enabled: false, probability: 30, minInterval: 10, maxInterval: 30, userTimeout: 30, minDuration: 0.5, maxDuration: 3 };
         if (!appData.settings.autoMail) appData.settings.autoMail = { enabled: true, checkInterval: 10 };
         if (appData.settings.emojiProb === undefined) appData.settings.emojiProb = 20;
@@ -2604,6 +2822,7 @@ async function loadData() {
         if (appData.settings.autoSendProbEnabled === undefined) appData.settings.autoSendProbEnabled = false;
         if (appData.settings.autoSendProbPercent === undefined) appData.settings.autoSendProbPercent = 50;
         if (appData.settings.transferTestMode === undefined) appData.settings.transferTestMode = false;
+        if (appData.settings.multiMsgInterval === undefined) appData.settings.multiMsgInterval = 2;
         appData.roles.forEach(r => { if (!r.lastAutoSendTime) r.lastAutoSendTime = Date.now(); if (!r.lastLoveRefresh) r.lastLoveRefresh = 0; if (!r.currentLoveState) r.currentLoveState = null; if (!r.pokeMyText) r.pokeMyText = '哥哥，我超爱你 😍😍'; if (!r.pokeTheirText) r.pokeTheirText = '老婆，我们永远不分开 😂😂'; if (!r.onlineStatus) r.onlineStatus = { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 }; if (r.autoMailProbability === undefined) r.autoMailProbability = 15; });
         if (!appData.transferSettings) appData.transferSettings = { enabled: true, minAmount: 5.20, maxAmount: 200, probability: 15, checkInterval: 30 };
         if (!appData.transferRecords) appData.transferRecords = [];
@@ -2855,9 +3074,8 @@ function createMessageElement(sender, content, time, quote = null, type = 'text'
 function attachLongPress(el, msg, senderName) {
     let timer;
     el.addEventListener('touchstart', (e) => {
-        // 不清除默认行为，保留滚动，但清除可能出现的选区
         timer = setTimeout(() => {
-            window.getSelection().removeAllRanges(); // 防止长按文本选中卡界面
+            window.getSelection().removeAllRanges();
             showMessageActionSheet(msg, senderName);
         }, 500);
     });
@@ -2908,6 +3126,8 @@ function triggerRoleReply() {
         tip.classList.remove('active'); const all = []; appData.wordbanks.wordGroups.forEach(g => all.push(...g.words)); if (all.length === 0) return;
         const prob2 = appData.settings.prob2 || 0, prob3 = appData.settings.prob3 || 0; const rand = Math.random() * 100; let msgCount = 1;
         if (rand < prob2) msgCount = 2; else if (rand < prob2 + prob3) msgCount = 3;
+        const intervalSec = appData.settings.multiMsgInterval || 2;
+        const intervalMs = intervalSec * 1000;
         const sendNext = (count) => { if (count <= 0) return;
             let content = all[Math.floor(Math.random() * all.length)], type = 'text', quote = null;
             const msgs = appData.chats[currentRoleId] || [], lastMe = msgs.slice().reverse().find(m => m.sender === 'me');
@@ -2917,7 +3137,7 @@ function triggerRoleReply() {
             const msg = { id: Date.now() + count, sender: currentRoleId, content, time: Date.now(), quote, type }; appData.chats[currentRoleId].push(msg); role.lastActive = Date.now(); debouncedSaveData();
             appendMessageToDOM(currentRoleId, content, Date.now(), quote, type); sendNotificationIfNeeded(`${role.name} 发来消息`, content);
             if (Math.random() < 0.15) { setTimeout(() => { const pokeText = role.pokeTheirText || '拍了拍你'; const pokeMsg = { id: Date.now() + count + 100, sender: currentRoleId, content: pokeText, time: Date.now(), type: 'poke' }; appData.chats[currentRoleId].push(pokeMsg); debouncedSaveData(); appendMessageToDOM(currentRoleId, pokeText, Date.now(), null, 'poke'); }, 400); }
-            if (count > 1) setTimeout(() => sendNext(count - 1), 800);
+            if (count > 1) setTimeout(() => sendNext(count - 1), intervalMs);
         }; sendNext(msgCount);
     }, delay);
 }
@@ -2979,6 +3199,8 @@ function openChatSettings() {
     document.getElementById('setting-quote-other').value = appData.settings.quoteOtherProb;
     document.getElementById('setting-emoji-prob').value = appData.settings.emojiProb || 20;
     document.getElementById('setting-sticker-prob').value = appData.settings.stickerProb || 10;
+    // 多条回复间隔
+    document.getElementById('setting-multi-interval').value = appData.settings.multiMsgInterval || 2;
     populateGroupSelect();
     document.getElementById('group-prob-config-panel').classList.add('hidden');
     const errorMsg = document.getElementById('prob-error-msg'); if (errorMsg) errorMsg.classList.add('hidden');
@@ -2988,6 +3210,7 @@ function openChatSettings() {
     document.getElementById('setting-call-miss-prob').value = appData.settings.call?.missProb ?? 10;
     document.getElementById('setting-call-min-duration').value = appData.settings.call?.minDuration ?? 0.5;
     document.getElementById('setting-call-max-duration').value = appData.settings.call?.maxDuration ?? 2;
+    document.getElementById('setting-call-ringtone').value = appData.settings.call?.ringtone || '';
     const autoCall = appData.settings.autoCall || { enabled: false, probability: 30, minInterval: 10, maxInterval: 30, userTimeout: 30, minDuration: 0.5, maxDuration: 3 };
     document.getElementById('setting-auto-call-enabled-switch').classList.toggle('active', autoCall.enabled);
     document.getElementById('setting-auto-call-prob').value = autoCall.probability;
@@ -3017,12 +3240,14 @@ async function saveSettings() {
     appData.settings.quoteOtherProb = parseInt(document.getElementById('setting-quote-other').value) || 0;
     appData.settings.emojiProb = parseInt(document.getElementById('setting-emoji-prob').value) || 20;
     appData.settings.stickerProb = parseInt(document.getElementById('setting-sticker-prob').value) || 10;
+    appData.settings.multiMsgInterval = parseInt(document.getElementById('setting-multi-interval').value) || 2;
     if (!appData.settings.call) appData.settings.call = {};
     appData.settings.call.enabled = document.getElementById('setting-call-enabled-switch').classList.contains('active');
     appData.settings.call.rejectProb = parseInt(document.getElementById('setting-call-reject-prob').value) || 20;
     appData.settings.call.missProb = parseInt(document.getElementById('setting-call-miss-prob').value) || 10;
     appData.settings.call.minDuration = parseFloat(document.getElementById('setting-call-min-duration').value) || 0.5;
     appData.settings.call.maxDuration = parseFloat(document.getElementById('setting-call-max-duration').value) || 2;
+    appData.settings.call.ringtone = document.getElementById('setting-call-ringtone').value.trim();
     if (!appData.settings.autoCall) appData.settings.autoCall = {};
     appData.settings.autoCall.enabled = document.getElementById('setting-auto-call-enabled-switch').classList.contains('active');
     appData.settings.autoCall.probability = parseInt(document.getElementById('setting-auto-call-prob').value) || 30;
@@ -3035,7 +3260,6 @@ async function saveSettings() {
     appData.settings.autoMail.enabled = document.getElementById('setting-auto-mail-enabled-switch').classList.contains('active');
     appData.settings.autoMail.checkInterval = parseInt(document.getElementById('setting-auto-mail-interval').value) || 10;
     await saveData(); closeChatSettings(); updateCallButtonVisibility();
-    // 设置保存后重启自动功能定时器
     startAutoCallTimer(); startAutoMailGenerator(); startAutoTransferTimer();
     showToast('设置已保存');
 }
@@ -3056,7 +3280,19 @@ function openRoleManagement() { pageHistory.push('settings'); roleManagementTab 
 function closeRoleManagement() { document.getElementById('modal-role-management').classList.add('hidden'); if (pageHistory.pop() === 'settings') document.getElementById('modal-settings-main').classList.remove('hidden'); }
 function switchRoleManagementTab(tab) { roleManagementTab = tab; const listRoles = document.getElementById('role-management-list'), listGroups = document.getElementById('group-management-list'), createBtn = document.getElementById('mgmt-create-btn'), tabRoles = document.getElementById('mgmt-tab-roles'), tabGroups = document.getElementById('mgmt-tab-groups'); if (tab === 'roles') { tabRoles.style.color = 'var(--tab-active-text)'; tabRoles.style.borderColor = 'var(--tab-active-border)'; tabGroups.style.color = ''; tabGroups.style.borderColor = ''; listRoles.classList.remove('hidden'); listGroups.classList.add('hidden'); createBtn.textContent = '新建角色'; createBtn.onclick = () => { openCreateRole(); closeRoleManagement(); }; renderRoleManagementList(); } else { tabGroups.style.color = 'var(--tab-active-text)'; tabGroups.style.borderColor = 'var(--tab-active-border)'; tabRoles.style.color = ''; tabRoles.style.borderColor = ''; listRoles.classList.add('hidden'); listGroups.classList.remove('hidden'); createBtn.textContent = '新建群聊'; createBtn.onclick = () => { openCreateGroup(); closeRoleManagement(); }; renderGroupManagementList(); } }
 function renderRoleManagementList() { const list = document.getElementById('role-management-list'); list.innerHTML = ''; appData.roles.forEach(r => { const d = document.createElement('div'); d.className = 'bg-gray-50 p-4 rounded-2xl flex items-center justify-between'; d.innerHTML = `<div class="flex items-center gap-3"><img src="${r.avatar}" class="w-10 h-10 rounded-full"><div><h3 class="font-bold text-sm">${escapeHtml(r.name)}</h3></div></div><div class="flex gap-2"><button onclick="editRole('${r.id}')" class="p-2 bg-white text-amber-600 rounded-full"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button onclick="deleteRole('${r.id}')" class="p-2 bg-white text-red-500 rounded-full"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`; list.appendChild(d); }); lucide.createIcons(); }
-function renderGroupManagementList() { const list = document.getElementById('group-management-list'); list.innerHTML = ''; if (!appData.groups.length) { list.innerHTML = '<div class="text-center text-gray-400 py-8">暂无群聊</div>'; return; } appData.groups.forEach(g => { const d = document.createElement('div'); d.className = 'bg-gray-50 p-4 rounded-2xl flex items-center justify-between'; d.innerHTML = `<div class="flex items-center gap-3"><img src="${g.avatar || DEFAULT_GROUP_AVATAR}" class="w-10 h-10 rounded-full"><div><h3 class="font-bold text-sm">${escapeHtml(g.name)}</h3><p class="text-xs text-gray-400">${g.members.length}人</p></div></div><div class="flex gap-2"><button onclick="deleteGroup('${g.id}')" class="p-2 bg-white text-red-500 rounded-full"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`; list.appendChild(d); }); lucide.createIcons(); }
+function renderGroupManagementList() { const list = document.getElementById('group-management-list'); list.innerHTML = ''; if (!appData.groups.length) { list.innerHTML = '<div class="text-center text-gray-400 py-8">暂无群聊</div>'; return; } appData.groups.forEach(g => { const d = document.createElement('div'); d.className = 'bg-gray-50 p-4 rounded-2xl flex items-center justify-between'; d.innerHTML = `<div class="flex items-center gap-3"><img src="${g.avatar || DEFAULT_GROUP_AVATAR}" class="w-10 h-10 rounded-full"><div><h3 class="font-bold text-sm">${escapeHtml(g.name)}</h3><p class="text-xs text-gray-400">${g.members.length}人</p></div></div><div class="flex gap-2"><button onclick="clearGroupChatRecord('${g.id}')" class="p-2 bg-white text-orange-500 rounded-full" title="清空群聊天"><i data-lucide="eraser" class="w-4 h-4"></i></button><button onclick="deleteGroup('${g.id}')" class="p-2 bg-white text-red-500 rounded-full"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`; list.appendChild(d); }); lucide.createIcons(); }
+async function clearGroupChatRecord(groupId) {
+    showConfirm('清空该群聊的所有聊天记录？', async () => {
+        if (appData.groupChats[groupId]) {
+            appData.groupChats[groupId] = [];
+        }
+        await saveData();
+        if (currentChatType === 'group' && currentGroupId === groupId) {
+            renderChatMessages();
+        }
+        showToast('群聊记录已清空');
+    });
+}
 function deleteGroup(groupId) { showConfirm('删除群聊将同时清空聊天记录，确定？', async () => { appData.groups = appData.groups.filter(g => g.id !== groupId); delete appData.groupChats[groupId]; await saveData(); renderGroupManagementList(); renderGroupList(); if (currentChatType === 'group' && currentGroupId === groupId) goBack(); showToast('群聊已删除'); }); }
 function editRole(id) { const r = appData.roles.find(x => x.id === id); if (!r) return; const m = document.getElementById('modal-create-role'); m.querySelector('h2').textContent = '编辑角色'; document.getElementById('role-name-input').value = r.name; document.getElementById('role-avatar-preview').src = r.avatar; document.getElementById('role-group-prob').value = r.groupProb ?? 50; document.getElementById('role-group-prob-val').textContent = (r.groupProb ?? 50) + '%'; document.getElementById('role-mail-prob').value = r.autoMailProbability ?? 15; document.getElementById('role-mail-prob-val').textContent = (r.autoMailProbability ?? 15) + '%'; const btn = m.querySelector('button[onclick="saveRole()"]'); const oc = btn.getAttribute('onclick'); btn.removeAttribute('onclick'); btn.onclick = async () => { r.name = document.getElementById('role-name-input').value.trim(); r.avatar = document.getElementById('role-avatar-preview').src; r.groupProb = parseInt(document.getElementById('role-group-prob').value); r.autoMailProbability = parseInt(document.getElementById('role-mail-prob').value) || 15; await saveData(); renderRoleList(); closeCreateRole(); openRoleManagement(); showToast('更新成功'); btn.setAttribute('onclick', oc); }; m.classList.remove('hidden'); }
 function deleteRole(id) { showConfirm('删除角色？', async () => { appData.roles = appData.roles.filter(x => x.id !== id); delete appData.chats[id]; await saveData(); openRoleManagement(); renderRoleList(); renderGroupList(); showToast('已删除'); }); }
@@ -3071,7 +3307,88 @@ function initNotificationSwitch() { if (!('Notification' in window)) { document.
 function updateNotificationUI() { const sw = document.getElementById('notification-switch'), statusText = document.getElementById('notification-status-text'); if (!('Notification' in window)) return; if (Notification.permission === 'granted') { sw.classList.add('active'); statusText.textContent = '已开启 (对方回复时提醒)'; notificationPermissionGranted = true; } else if (Notification.permission === 'denied') { sw.classList.remove('active'); statusText.textContent = '已拒绝 (请在浏览器设置中开启)'; notificationPermissionGranted = false; } else { sw.classList.remove('active'); statusText.textContent = '点击开关请求权限'; notificationPermissionGranted = false; } }
 async function toggleNotificationPermission() { if (!('Notification' in window)) { showToast('浏览器不支持通知'); return; } if (Notification.permission === 'granted') { showToast('通知已开启，如需关闭请在浏览器设置中操作'); return; } if (Notification.permission === 'denied') { showToast('通知权限已被拒绝，请在浏览器设置中开启'); return; } try { const permission = await Notification.requestPermission(); if (permission === 'granted') { notificationPermissionGranted = true; new Notification('Spiritual connection', { body: '通知已开启！当对方回复时我们会提醒您。', icon: appData.userProfile?.avatar || DEFAULT_AVATAR }); showToast('通知已开启'); } else { notificationPermissionGranted = false; showToast('通知权限被拒绝'); } updateNotificationUI(); } catch (e) { showToast('无法请求通知权限'); } }
 function sendNotificationIfNeeded(title, body) { if (notificationPermissionGranted && document.visibilityState === 'hidden') new Notification(title, { body, icon: appData.userProfile?.avatar || DEFAULT_AVATAR }); }
-function exportData() { const jsonStr = JSON.stringify(appData, null, 2); const blob = new Blob([jsonStr], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `spiritual_connection_${new Date().toISOString().slice(0,10)}.json`; a.click(); showToast('导出成功'); setTimeout(() => URL.revokeObjectURL(a.href), 60000); }
+
+// --- 备份/恢复新方案 ---
+function copyBackupToClipboard() {
+    const jsonStr = JSON.stringify(appData, null, 2);
+    navigator.clipboard.writeText(jsonStr).then(() => {
+        showToast('备份数据已复制到剪贴板！可粘贴到备忘录保存');
+    }).catch(() => {
+        showToast('复制失败，请手动选择文本复制');
+    });
+}
+function openRestoreFromClipboardModal() {
+    // 创建一个模态对话框让用户粘贴备份内容
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.style.zIndex = '1200';
+    overlay.innerHTML = `
+        <div class="modal-card" style="max-width:400px;width:90%;">
+            <h3 class="text-lg font-bold mb-4">从备份恢复</h3>
+            <p class="text-xs text-gray-500 mb-2">请将之前复制的备份数据粘贴到下方文本框中，然后点击“恢复”。</p>
+            <textarea id="restore-backup-textarea" class="w-full h-40 bg-gray-100 rounded-xl p-3 text-sm outline-none resize-none" placeholder="在此粘贴备份数据..."></textarea>
+            <div class="flex gap-3 mt-4">
+                <button id="restore-cancel-btn" class="flex-1 py-2.5 rounded-xl border border-gray-200 font-medium">取消</button>
+                <button id="restore-confirm-btn" class="flex-1 py-2.5 rounded-xl text-white font-medium shadow-lg" style="background-color: var(--button-primary-bg);">恢复</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+    const cancelBtn = overlay.querySelector('#restore-cancel-btn');
+    const confirmBtn = overlay.querySelector('#restore-confirm-btn');
+    const textarea = overlay.querySelector('#restore-backup-textarea');
+    cancelBtn.onclick = () => {
+        document.body.removeChild(overlay);
+    };
+    confirmBtn.onclick = () => {
+        const content = textarea.value.trim();
+        if (!content) {
+            showToast('请粘贴备份内容');
+            return;
+        }
+        try {
+            const data = JSON.parse(content);
+            if (data.roles && data.chats) {
+                showConfirm('确定要恢复该备份吗？当前数据将被覆盖。', async () => {
+                    appData = data;
+                    if (!appData.wordbanks.wordGroups) appData.wordbanks.wordGroups = [{ name: '默认', words: [...(appData.wordbanks.replies || [])] }];
+                    if (!appData.favoriteMessages) appData.favoriteMessages = [];
+                    if (!appData.transferSettings) appData.transferSettings = { enabled: true, minAmount: 5.20, maxAmount: 200, probability: 15, checkInterval: 30 };
+                    if (!appData.transferRecords) appData.transferRecords = [];
+                    if (!appData.redPackets) appData.redPackets = [];
+                    if (!appData.userProfile) appData.userProfile = { nickname: '我', avatar: DEFAULT_AVATAR };
+                    if (!appData.balance) appData.balance = 1000000;
+                    await saveData();
+                    await initAppearance();
+                    renderRoleList();
+                    renderGroupList();
+                    showToast('数据已恢复');
+                });
+            } else {
+                showToast('无效的备份数据');
+            }
+        } catch (e) {
+            showToast('数据格式错误，无法解析');
+        }
+        document.body.removeChild(overlay);
+    };
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            document.body.removeChild(overlay);
+        }
+    });
+}
+
+function exportData() {
+    const jsonStr = JSON.stringify(appData, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `spiritual_connection_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    showToast('导出成功');
+    setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+}
 function importData() { const i = document.createElement('input'); i.type = 'file'; i.accept = '.json'; i.onchange = e => { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = async ev => { try { const d = JSON.parse(ev.target.result); if (d.roles && d.chats) { showConfirm('导入将覆盖现有数据，确定？', async () => { appData = d; if (!appData.wordbanks.wordGroups) appData.wordbanks.wordGroups = [{ name: '默认', words: [...(appData.wordbanks.replies || [])] }]; if (d.appearance?.backgrounds) await saveBackgrounds(d.appearance.backgrounds); if (!appData.favoriteMessages) appData.favoriteMessages = []; if (!appData.transferSettings) appData.transferSettings = { enabled: true, minAmount: 5.20, maxAmount: 200, probability: 15, checkInterval: 30 }; if (!appData.transferRecords) appData.transferRecords = []; if (!appData.redPackets) appData.redPackets = []; if (!appData.userProfile) appData.userProfile = { nickname: '我', avatar: DEFAULT_AVATAR }; if (!appData.balance) appData.balance = 1000000; await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('导入成功'); }); } else showToast('无效文件'); } catch { showToast('解析失败'); } }; r.readAsText(f); }; i.click(); }
 async function clearChatRecords() { showConfirm('清空所有聊天记录？', async () => { appData.chats = {}; appData.groupChats = {}; unreadCounts = {}; await saveUnreadCounts(); appData.roles.forEach(r => r.lastActive = Date.now()); await saveData(); renderRoleList(); if (currentChatType === 'role') renderChatMessages(); updateStorageDisplay(); showToast('已清空'); }); }
 async function resetAllData() { showConfirm('重置所有数据？不可恢复！', async () => { appData = JSON.parse(JSON.stringify(DEFAULT_DATA)); await saveBackgrounds({ home: '', chat: '', group: '' }); await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('已重置'); }); }
@@ -3188,26 +3505,141 @@ async function savePokeSettings() { const role = appData.roles.find(r => r.id ==
 function executePoke() { if (currentChatType !== 'role' || !currentRoleId) return; const role = appData.roles.find(r => r.id === currentRoleId); if (!role) return; const pokeText = role.pokeMyText || '哥哥，我超爱你 😍😍'; const msg = { id: Date.now(), sender: 'me', content: pokeText, time: Date.now(), type: 'poke' }; if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = []; appData.chats[currentRoleId].push(msg); debouncedSaveData(); appendMessageToDOM('me', pokeText, Date.now(), null, 'poke'); }
 
 function updateCallButtonVisibility() { const btn = document.getElementById('call-button'); if (!btn) return; btn.style.display = (appData.settings.call?.enabled !== false && currentChatType === 'role' && currentRoleId) ? 'block' : 'none'; }
-function startCall() { if (currentChatType !== 'role' || !currentRoleId) { showToast('仅支持在单人聊天中使用'); return; } if (callState.active) { showToast('通话已在进行中'); return; } const role = appData.roles.find(r => r.id === currentRoleId); if (!role) return; callState.roleId = role.id; callState.roleName = role.name; callState.roleAvatar = role.avatar; callState.rejectProb = appData.settings.call?.rejectProb ?? 20; callState.missProb = appData.settings.call?.missProb ?? 10; callState.answerDelay = appData.settings.call?.answerDelay ?? 2000; callState.windowSize = appData.settings.call?.windowSize ?? 'standard'; callState.active = true; callState.status = 'calling'; callState.initiator = 'user'; callState.seconds = 0; document.getElementById('call-avatar').src = role.avatar; document.getElementById('call-name').textContent = role.name; document.getElementById('call-status').textContent = '呼叫中...'; document.getElementById('call-timer').textContent = '00:00'; const bg = appData.settings.call?.background; document.getElementById('call-bg').style.backgroundImage = bg ? `url(${bg})` : 'none'; setCallWindowSize(callState.windowSize); updateCallActions(); document.getElementById('modal-call').classList.remove('hidden'); setTimeout(() => { if (!callState.active || callState.status !== 'calling' || callState.initiator !== 'user') return; const rand = Math.random() * 100; if (rand < callState.rejectProb) { callState.status = 'rejected'; document.getElementById('call-status').textContent = '对方拒绝了通话'; setTimeout(() => endCall('rejected'), 2000); } else if (rand < callState.rejectProb + callState.missProb) { callState.status = 'missed'; document.getElementById('call-status').textContent = '对方未接听'; setTimeout(() => endCall('missed'), 2000); } else { callState.status = 'connected'; document.getElementById('call-status').textContent = '通话中'; startCallTimer(); const minDur = (appData.settings.call?.minDuration || 0.5) * 60, maxDur = (appData.settings.call?.maxDuration || 2) * 60; callState.autoHangupTimer = setTimeout(() => { if (callState.active && callState.status === 'connected') hangUpCall(true); }, (minDur + Math.random() * (maxDur - minDur)) * 1000); updateCallActions(); } }, callState.answerDelay); }
+function startCall() {
+    if (currentChatType !== 'role' || !currentRoleId) { showToast('仅支持在单人聊天中使用'); return; }
+    if (callState.active) { showToast('通话已在进行中'); return; }
+    const role = appData.roles.find(r => r.id === currentRoleId);
+    if (!role) return;
+    callState.roleId = role.id;
+    callState.roleName = role.name;
+    callState.roleAvatar = role.avatar;
+    callState.rejectProb = appData.settings.call?.rejectProb ?? 20;
+    callState.missProb = appData.settings.call?.missProb ?? 10;
+    callState.answerDelay = 15000;
+    callState.windowSize = appData.settings.call?.windowSize ?? 'standard';
+    callState.active = true;
+    callState.status = 'calling';
+    callState.initiator = 'user';
+    callState.seconds = 0;
+    document.getElementById('call-avatar').src = role.avatar;
+    document.getElementById('call-name').textContent = role.name;
+    document.getElementById('call-status').textContent = '呼叫中...';
+    document.getElementById('call-timer').textContent = '00:00';
+    const bg = appData.settings.call?.background;
+    document.getElementById('call-bg').style.backgroundImage = bg ? `url(${bg})` : 'none';
+    setCallWindowSize(callState.windowSize);
+    updateCallActions();
+    document.getElementById('modal-call').classList.remove('hidden');
+    playRingbackTone();
+    setTimeout(() => {
+        if (!callState.active || callState.status !== 'calling' || callState.initiator !== 'user') return;
+        const rand = Math.random() * 100;
+        if (rand < callState.rejectProb) {
+            callState.status = 'rejected';
+            stopAllRingtones();
+            document.getElementById('call-status').textContent = '对方拒绝了通话';
+            setTimeout(() => endCall('rejected'), 2000);
+        } else if (rand < callState.rejectProb + callState.missProb) {
+            callState.status = 'missed';
+            stopAllRingtones();
+            document.getElementById('call-status').textContent = '对方未接听';
+            setTimeout(() => endCall('missed'), 2000);
+        } else {
+            callState.status = 'connected';
+            stopAllRingtones();
+            document.getElementById('call-status').textContent = '通话中';
+            startCallTimer();
+            const minDur = (appData.settings.call?.minDuration || 0.5) * 60;
+            const maxDur = (appData.settings.call?.maxDuration || 2) * 60;
+            callState.autoHangupTimer = setTimeout(() => {
+                if (callState.active && callState.status === 'connected') hangUpCall(true);
+            }, (minDur + Math.random() * (maxDur - minDur)) * 1000);
+            updateCallActions();
+        }
+    }, callState.answerDelay);
+}
 function startCallTimer() { if (callState.timerInterval) clearInterval(callState.timerInterval); callState.timerInterval = setInterval(() => { callState.seconds++; const mins = Math.floor(callState.seconds / 60), secs = callState.seconds % 60, timeStr = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`; document.getElementById('call-timer').textContent = timeStr; if (callState.miniMode) document.getElementById('call-mini-timer').textContent = timeStr; }, 1000); }
-function hangUpCall(isAuto = false) { if (!callState.active) return; endCall(callState.status === 'connected' ? 'ended' : callState.status, callState.seconds, isAuto); }
-function answerCall() { if (!callState.active || callState.status !== 'incoming') return; if (callState.userTimeoutTimer) clearTimeout(callState.userTimeoutTimer); callState.status = 'connected'; document.getElementById('call-status').textContent = '通话中'; startCallTimer(); const minDur = (appData.settings.autoCall?.minDuration || 0.5) * 60, maxDur = (appData.settings.autoCall?.maxDuration || 3) * 60; callState.autoHangupTimer = setTimeout(() => { if (callState.active && callState.status === 'connected') hangUpCall(true); }, (minDur + Math.random() * (maxDur - minDur)) * 1000); updateCallActions(); }
-function rejectIncomingCall() { if (!callState.active || callState.status !== 'incoming') return; if (callState.userTimeoutTimer) clearTimeout(callState.userTimeoutTimer); endCall('rejected', 0); }
-function endCall(status, duration = 0, isAuto = false) { if (callState.timerInterval) clearInterval(callState.timerInterval); if (callState.autoHangupTimer) clearTimeout(callState.autoHangupTimer); if (callState.userTimeoutTimer) clearTimeout(callState.userTimeoutTimer); const mins = Math.floor(duration / 60), secs = duration % 60, timeStr = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`; let message = ''; if (status === 'rejected') message = callState.initiator === 'user' ? '对方拒绝了通话' : '你拒绝了通话'; else if (status === 'missed') message = callState.initiator === 'user' ? '对方未接听' : `「${callState.roleName}」的通话未接听`; else message = `通话时长 ${timeStr}`; document.getElementById('call-status').textContent = message; document.getElementById('call-timer').textContent = timeStr; setTimeout(() => { document.getElementById('modal-call').classList.add('hidden'); document.getElementById('call-mini-window').style.display = 'none'; callState.miniMode = false; if (currentChatType === 'role' && currentRoleId === callState.roleId) { let sysMsg = ''; if (status === 'rejected') sysMsg = callState.initiator === 'user' ? '对方拒绝了通话' : '你拒绝了通话'; else if (status === 'missed') sysMsg = callState.initiator === 'user' ? '对方未接听' : `「${callState.roleName}」的通话未接听`; else sysMsg = `通话时长 ${timeStr}`; const msg = { id: Date.now(), sender: 'system', content: sysMsg, time: Date.now(), type: status === 'missed' ? 'call_missed' : 'call' }; if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = []; appData.chats[currentRoleId].push(msg); debouncedSaveData(); appendMessageToDOM('system', sysMsg, Date.now(), null, msg.type); } else if (callState.roleId) { if (!appData.chats[callState.roleId]) appData.chats[callState.roleId] = []; let sysMsg = ''; if (status === 'missed') sysMsg = `「${callState.roleName}」的通话未接听`; else if (status === 'rejected') sysMsg = callState.initiator === 'user' ? '对方拒绝了通话' : '你拒绝了通话'; else sysMsg = `通话时长 ${timeStr}`; const msg = { id: Date.now(), sender: 'system', content: sysMsg, time: Date.now(), type: status === 'missed' ? 'call_missed' : 'call' }; appData.chats[callState.roleId].push(msg); debouncedSaveData(); if (currentRoleId !== callState.roleId) incrementUnread(callState.roleId); } callState.active = false; callState.initiator = null; debouncedSaveData(); }, 1500); }
+function hangUpCall(isAuto = false) { if (!callState.active) return; stopAllRingtones(); endCall(callState.status === 'connected' ? 'ended' : callState.status, callState.seconds, isAuto); }
+function answerCall() { if (!callState.active || callState.status !== 'incoming') return; stopAllRingtones(); if (callState.userTimeoutTimer) clearTimeout(callState.userTimeoutTimer); callState.status = 'connected'; document.getElementById('call-status').textContent = '通话中'; startCallTimer(); const minDur = (appData.settings.autoCall?.minDuration || 0.5) * 60, maxDur = (appData.settings.autoCall?.maxDuration || 3) * 60; callState.autoHangupTimer = setTimeout(() => { if (callState.active && callState.status === 'connected') hangUpCall(true); }, (minDur + Math.random() * (maxDur - minDur)) * 1000); updateCallActions(); }
+function rejectIncomingCall() { if (!callState.active || callState.status !== 'incoming') return; stopAllRingtones(); if (callState.userTimeoutTimer) clearTimeout(callState.userTimeoutTimer); endCall('rejected', 0); }
+function endCall(status, duration = 0, isAuto = false) { stopAllRingtones(); if (callState.timerInterval) clearInterval(callState.timerInterval); if (callState.autoHangupTimer) clearTimeout(callState.autoHangupTimer); if (callState.userTimeoutTimer) clearTimeout(callState.userTimeoutTimer); const mins = Math.floor(duration / 60), secs = duration % 60, timeStr = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`; let message = ''; if (status === 'rejected') message = callState.initiator === 'user' ? '对方拒绝了通话' : '你拒绝了通话'; else if (status === 'missed') message = callState.initiator === 'user' ? '对方未接听' : `「${callState.roleName}」的通话未接听`; else message = `通话时长 ${timeStr}`; document.getElementById('call-status').textContent = message; document.getElementById('call-timer').textContent = timeStr; setTimeout(() => { document.getElementById('modal-call').classList.add('hidden'); document.getElementById('call-mini-window').style.display = 'none'; callState.miniMode = false; if (currentChatType === 'role' && currentRoleId === callState.roleId) { let sysMsg = ''; if (status === 'rejected') sysMsg = callState.initiator === 'user' ? '对方拒绝了通话' : '你拒绝了通话'; else if (status === 'missed') sysMsg = callState.initiator === 'user' ? '对方未接听' : `「${callState.roleName}」的通话未接听`; else sysMsg = `通话时长 ${timeStr}`; const msg = { id: Date.now(), sender: 'system', content: sysMsg, time: Date.now(), type: status === 'missed' ? 'call_missed' : 'call' }; if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = []; appData.chats[currentRoleId].push(msg); debouncedSaveData(); appendMessageToDOM('system', sysMsg, Date.now(), null, msg.type); } else if (callState.roleId) { if (!appData.chats[callState.roleId]) appData.chats[callState.roleId] = []; let sysMsg = ''; if (status === 'missed') sysMsg = `「${callState.roleName}」的通话未接听`; else if (status === 'rejected') sysMsg = callState.initiator === 'user' ? '对方拒绝了通话' : '你拒绝了通话'; else sysMsg = `通话时长 ${timeStr}`; const msg = { id: Date.now(), sender: 'system', content: sysMsg, time: Date.now(), type: status === 'missed' ? 'call_missed' : 'call' }; appData.chats[callState.roleId].push(msg); debouncedSaveData(); if (currentRoleId !== callState.roleId) incrementUnread(callState.roleId); } callState.active = false; callState.initiator = null; debouncedSaveData(); }, 1500); }
 function updateCallActions() { const container = document.getElementById('call-actions'); if (!container) return; if (callState.status === 'incoming') container.innerHTML = `<button class="call-btn call-btn-answer" onclick="answerCall()"><i data-lucide="phone"></i></button><button class="call-btn call-btn-hangup" onclick="rejectIncomingCall()"><i data-lucide="phone-off"></i></button>`; else if (callState.status === 'calling' && callState.initiator === 'user') container.innerHTML = `<button class="call-btn call-btn-hangup" onclick="hangUpCall()"><i data-lucide="phone-off"></i></button>`; else if (callState.status === 'connected') container.innerHTML = `<button class="call-btn call-btn-mini" onclick="toggleMiniCallWindow()"><i data-lucide="minimize-2"></i></button><button class="call-btn call-btn-hangup" onclick="hangUpCall()"><i data-lucide="phone-off"></i></button>`; else container.innerHTML = `<button class="call-btn call-btn-hangup" onclick="hangUpCall()"><i data-lucide="phone-off"></i></button>`; lucide.createIcons(); }
-function toggleMiniCallWindow() { if (!callState.active) return; callState.miniMode = true; document.getElementById('modal-call').classList.add('hidden'); const mini = document.getElementById('call-mini-window'); document.getElementById('call-mini-avatar').src = callState.roleAvatar; document.getElementById('call-mini-timer').textContent = document.getElementById('call-timer').textContent; mini.style.display = 'flex'; mini.style.left = 'auto'; mini.style.right = '20px'; mini.style.bottom = '100px'; }
+function toggleMiniCallWindow() { if (!callState.active) return; if (callState.miniMode) {
+        callState.miniMode = false;
+        document.getElementById('call-mini-window').style.display = 'none';
+        document.getElementById('modal-call').classList.remove('hidden');
+        document.getElementById('call-card').style.transform = '';
+    } else {
+        callState.miniMode = true;
+        document.getElementById('modal-call').classList.add('hidden');
+        const mini = document.getElementById('call-mini-window');
+        document.getElementById('call-mini-avatar').src = callState.roleAvatar;
+        document.getElementById('call-mini-timer').textContent = document.getElementById('call-timer').textContent;
+        mini.style.display = 'flex';
+        mini.style.left = 'auto';
+        mini.style.right = '20px';
+        mini.style.bottom = '100px';
+    }
+}
 function closeMiniCallWindow(e) { e.stopPropagation(); if (callState.active) hangUpCall(); document.getElementById('call-mini-window').style.display = 'none'; callState.miniMode = false; }
-function startDragMiniCall(e) { e.preventDefault(); const mini = document.getElementById('call-mini-window'), rect = mini.getBoundingClientRect(), clientX = e.touches ? e.touches[0].clientX : e.clientX, clientY = e.touches ? e.touches[0].clientY : e.clientY; dragOffsetX = clientX - rect.left; dragOffsetY = clientY - rect.top; isDraggingMini = true; function onDrag(ev) { if (!isDraggingMini) return; ev.preventDefault(); const x = (ev.touches ? ev.touches[0].clientX : ev.clientX) - dragOffsetX, y = (ev.touches ? ev.touches[0].clientY : ev.clientY) - dragOffsetY; mini.style.left = x + 'px'; mini.style.right = 'auto'; mini.style.bottom = 'auto'; mini.style.top = y + 'px'; } function onDragEnd() { isDraggingMini = false; window.removeEventListener('mousemove', onDrag); window.removeEventListener('touchmove', onDrag); window.removeEventListener('mouseup', onDragEnd); window.removeEventListener('touchend', onDragEnd); } window.addEventListener('mousemove', onDrag); window.addEventListener('touchmove', onDrag); window.addEventListener('mouseup', onDragEnd); window.addEventListener('touchend', onDragEnd); }
+function startDragMiniCall(e) {
+    e.preventDefault();
+    const mini = document.getElementById('call-mini-window');
+    const rect = mini.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    dragOffsetX = clientX - rect.left;
+    dragOffsetY = clientY - rect.top;
+    isDraggingMini = true;
+    let hasMoved = false;
+    function onDrag(ev) {
+        if (!isDraggingMini) return;
+        ev.preventDefault();
+        const x = (ev.touches ? ev.touches[0].clientX : ev.clientX) - dragOffsetX;
+        const y = (ev.touches ? ev.touches[0].clientY : ev.clientY) - dragOffsetY;
+        if (Math.abs(x - (clientX - dragOffsetX)) > 5 || Math.abs(y - (clientY - dragOffsetY)) > 5) hasMoved = true;
+        mini.style.left = x + 'px';
+        mini.style.right = 'auto';
+        mini.style.bottom = 'auto';
+        mini.style.top = y + 'px';
+    }
+    function onDragEnd() {
+        isDraggingMini = false;
+        window.removeEventListener('mousemove', onDrag);
+        window.removeEventListener('touchmove', onDrag);
+        window.removeEventListener('mouseup', onDragEnd);
+        window.removeEventListener('touchend', onDragEnd);
+        if (!hasMoved) {
+            toggleMiniCallWindow();
+        }
+    }
+    window.addEventListener('mousemove', onDrag);
+    window.addEventListener('touchmove', onDrag);
+    window.addEventListener('mouseup', onDragEnd);
+    window.addEventListener('touchend', onDragEnd);
+}
 function setCallWindowSize(size) { callState.windowSize = size; const card = document.getElementById('call-card'); if (size === 'mini') card.style.transform = 'scale(0.7)'; else if (size === 'small') card.style.transform = 'scale(0.85)'; else if (size === 'standard') card.style.transform = 'scale(1)'; else if (size === 'large') card.style.transform = 'scale(1.15)'; document.querySelectorAll('.call-size-btn').forEach(btn => { btn.classList.toggle('active', btn.dataset.size === size); }); if (appData.settings.call) appData.settings.call.windowSize = size; debouncedSaveData(); }
 async function handleCallBgUpload(input) { if (input.files?.[0]) { showToast('压缩中...'); const compressed = await compressImage(input.files[0], 800, 0.7); document.getElementById('call-bg').style.backgroundImage = `url(${compressed})`; if (!appData.settings.call) appData.settings.call = {}; appData.settings.call.background = compressed; debouncedSaveData(); } }
+
 function startAutoCallTimer() {
-    if (autoCallTimer) return;
+    if (autoCallTimer) { clearTimeout(autoCallTimer); autoCallTimer = null; }
     if (!appData.settings.autoCall?.enabled) return;
-    const interval = (Math.random() * (appData.settings.autoCall.maxInterval - appData.settings.autoCall.minInterval) + appData.settings.autoCall.minInterval) * 60 * 1000;
-    autoCallTimer = setTimeout(() => { autoCallTimer = null; checkAndTriggerAutoCall(); startAutoCallTimer(); }, interval);
+    const intervalMs = (Math.random() * (appData.settings.autoCall.maxInterval - appData.settings.autoCall.minInterval) + appData.settings.autoCall.minInterval) * 60 * 1000;
+    autoCallTimer = setTimeout(() => { autoCallTimer = null; checkAndTriggerAutoCall(); startAutoCallTimer(); }, intervalMs);
 }
 function checkAndTriggerAutoCall() { if (!appData.settings.autoCall?.enabled || callState.active) return; if (Math.random() * 100 < appData.settings.autoCall.probability) { const role = appData.roles[Math.floor(Math.random() * appData.roles.length)]; if (role) triggerIncomingCall(role); } }
-function triggerIncomingCall(role) { callState.active = true; callState.status = 'incoming'; callState.roleId = role.id; callState.roleName = role.name; callState.roleAvatar = role.avatar; callState.initiator = 'role'; callState.seconds = 0; document.getElementById('call-avatar').src = role.avatar; document.getElementById('call-name').textContent = role.name; document.getElementById('call-status').textContent = '邀请你视频通话...'; document.getElementById('call-timer').textContent = '00:00'; setCallWindowSize(callState.windowSize); updateCallActions(); document.getElementById('modal-call').classList.remove('hidden'); callState.userTimeoutTimer = setTimeout(() => { if (callState.active && callState.status === 'incoming') endCall('missed', 0); }, (appData.settings.autoCall?.userTimeout || 30) * 1000); }
+function triggerIncomingCall(role) {
+    callState.active = true; callState.status = 'incoming'; callState.roleId = role.id; callState.roleName = role.name; callState.roleAvatar = role.avatar; callState.initiator = 'role'; callState.seconds = 0;
+    document.getElementById('call-avatar').src = role.avatar;
+    document.getElementById('call-name').textContent = role.name;
+    document.getElementById('call-status').textContent = '邀请你视频通话...';
+    document.getElementById('call-timer').textContent = '00:00';
+    setCallWindowSize(callState.windowSize);
+    updateCallActions();
+    document.getElementById('modal-call').classList.remove('hidden');
+    callState.userTimeoutTimer = setTimeout(() => { if (callState.active && callState.status === 'incoming') endCall('missed', 0); }, (appData.settings.autoCall?.userTimeout || 30) * 1000);
+    playPipaStyleRingtone();
+}
 
 function startAutoMailGenerator() {
     if (autoMailGeneratorTimer) return;
@@ -3243,7 +3675,7 @@ function confirmTransfer() {
     closeTransferModal();
     debouncedSaveData();
     appendMessageToDOM('me', msgContent, Date.now(), null, 'transfer');
-    
+
     const collectDelay = 20000 + Math.floor(Math.random() * 10000);
     setTimeout(() => {
         const pendingMsg = (appData.chats[currentRoleId] || []).find(m =>
@@ -3364,8 +3796,8 @@ function checkAndTriggerAutoTransfer() {
 }
 
 // ========== 转账设置（含测试模式开关） ==========
-function openTransferSettings() { 
-    const s = appData.transferSettings; 
+function openTransferSettings() {
+    const s = appData.transferSettings;
     document.getElementById('setting-auto-transfer-switch').classList.toggle('active', s.enabled);
     document.getElementById('setting-transfer-min').value = s.minAmount;
     document.getElementById('setting-transfer-max').value = s.maxAmount;
@@ -3376,7 +3808,7 @@ function openTransferSettings() {
     document.getElementById('modal-transfer-settings').classList.remove('hidden');
 }
 function closeTransferSettings() { document.getElementById('modal-transfer-settings').classList.add('hidden'); }
-async function saveTransferSettings() { 
+async function saveTransferSettings() {
     appData.transferSettings.enabled = document.getElementById('setting-auto-transfer-switch').classList.contains('active');
     appData.transferSettings.minAmount = parseFloat(document.getElementById('setting-transfer-min').value) || 5.20;
     appData.transferSettings.maxAmount = parseFloat(document.getElementById('setting-transfer-max').value) || 200;
@@ -3524,11 +3956,23 @@ window.clearAllBills = clearAllBills;
 // ========== 红包功能 ==========
 function showPlusPanel() {
     const panel = document.getElementById('plus-panel');
-    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    if (!panel) return;
+    if (panel.style.display === 'none' || !panel.style.display) {
+        panel.style.display = 'block';
+        panel.style.zIndex = '360';
+    } else {
+        panel.style.display = 'none';
+    }
     const transferBtn = panel.querySelector('[onclick*="showTransferModal"]');
-    if (transferBtn) transferBtn.parentElement.style.display = (currentChatType === 'role') ? '' : 'none';
+    if (transferBtn) {
+        transferBtn.parentElement.style.display = (currentChatType === 'role') ? '' : 'none';
+    }
+    const redpacketBtn = panel.querySelector('[onclick*="showRedPacketModal"]');
+    if (redpacketBtn) {
+        redpacketBtn.parentElement.style.display = '';
+    }
 }
-function closePlusPanel() { document.getElementById('plus-panel').style.display = 'none'; }
+function closePlusPanel() { const panel = document.getElementById('plus-panel'); if (panel) { panel.style.display = 'none'; panel.style.zIndex = '350'; } }
 
 function showRedPacketModal() {
     const isGroup = currentChatType === 'group';
@@ -3569,49 +4013,94 @@ function sendRedPacket() {
     debouncedSaveData();
     appendMessageToDOM('me', content, Date.now(), null, 'redpacket');
     closeRedPacketSend();
-    if (appData.settings.transferTestMode && !isGroup && currentRoleId) {
-        const delay = Math.random() * (appData.settings.maxDelay - appData.settings.minDelay) * 1000 + appData.settings.minDelay * 1000;
-        setTimeout(() => {
-            autoCollectRedPacketByRole(packet);
-        }, delay);
-    }
-}
 
-function autoCollectRedPacketByRole(packet) {
-    if (!packet || packet.records.length >= packet.count) return;
-    if (packet.records.find(r => r.userId === currentRoleId)) return;
-    const remaining = packet.totalAmount - packet.records.reduce((s,r)=>s+r.amount, 0);
-    const remainCount = packet.count - packet.records.length;
-    let amount;
-    if (packet.type === 'random') {
-        if (remainCount <= 1) amount = Math.round(remaining * 100) / 100;
-        else {
-            const max = remaining / remainCount * 2;
-            amount = Math.round((Math.random() * max + 0.01) * 100) / 100;
-            if (amount > remaining) amount = Math.round(remaining * 100) / 100;
-            if (amount < 0.01) amount = 0.01;
+    if (isGroup) {
+        const group = appData.groups.find(g => g.id === currentGroupId);
+        if (group) {
+            group.members.forEach(memberId => {
+                if (memberId === 'me') return;
+                const minDelay = 8000;
+                const maxDelay = 60000;
+                const randomDelay = minDelay + Math.floor(Math.random() * (maxDelay - minDelay));
+                setTimeout(() => {
+                    if (packet.records.length >= packet.count) return;
+                    const remaining = packet.totalAmount - packet.records.reduce((s,r)=>s+r.amount, 0);
+                    const remainCount = packet.count - packet.records.length;
+                    let amount;
+                    if (remainCount <= 1) {
+                        amount = Math.round(remaining * 100) / 100;
+                    } else {
+                        const max = remaining / remainCount * 2;
+                        amount = Math.round((Math.random() * max + 0.01) * 100) / 100;
+                        if (amount > remaining) amount = Math.round(remaining * 100) / 100;
+                        if (amount < 0.01) amount = 0.01;
+                    }
+                    packet.records.push({ userId: memberId, amount, time: Date.now() });
+                    appData.balance += amount;
+                    if (packet.records.length >= packet.count) packet.status = 'finished';
+                    else packet.status = 'opened';
+                    const role = appData.roles.find(r => r.id === memberId);
+                    const sysText = `🧧 ${role?.name || '成员'}领取了你的红包`;
+                    if (!appData.groupChats[currentGroupId]) appData.groupChats[currentGroupId] = [];
+                    appData.groupChats[currentGroupId].push({ id: Date.now(), sender: 'system', content: sysText, time: Date.now(), type: 'system' });
+                    debouncedSaveData();
+                    if (currentChatType === 'group' && currentGroupId === group.id) {
+                        appendMessageToDOM('system', sysText, Date.now(), null, 'system');
+                    }
+                    const chatMsgs = appData.groupChats[currentGroupId];
+                    const targetMsg = chatMsgs?.find(m => m.type === 'redpacket' && m.sender === 'me' && m.content.includes(packet.id));
+                    if (targetMsg) {
+                        const data = JSON.parse(targetMsg.content);
+                        data.receivedCount = packet.records.length;
+                        data.status = packet.status === 'finished' ? 'received' : 'opened';
+                        targetMsg.content = JSON.stringify(data);
+                        if (currentChatType === 'group' && currentGroupId === group.id) {
+                            renderChatMessages();
+                        }
+                    }
+                }, randomDelay);
+            });
         }
     } else {
-        amount = Math.round((packet.totalAmount / packet.count) * 100) / 100;
-    }
-    packet.records.push({ userId: currentRoleId, amount, time: Date.now() });
-    if (packet.records.length >= packet.count) packet.status = 'finished';
-    else packet.status = 'opened';
-    if (currentChatType === 'role' && currentRoleId) {
-        const chatMsgs = appData.chats[currentRoleId];
-        const targetMsg = chatMsgs?.find(m => m.type === 'redpacket' && m.sender === 'me' && m.content.includes(packet.id));
-        if (targetMsg) {
-            const data = JSON.parse(targetMsg.content);
-            data.receivedCount = packet.records.length;
-            data.status = packet.status === 'finished' ? 'received' : 'opened';
-            targetMsg.content = JSON.stringify(data);
-        }
-        const role = appData.roles.find(r => r.id === currentRoleId);
-        const sysText = `${role?.name || '角色'}领取了你的红包`;
-        const sysMsg = { id: Date.now(), sender: 'system', content: sysText, time: Date.now(), type: 'system' };
-        appData.chats[currentRoleId].push(sysMsg);
-        debouncedSaveData();
-        renderChatMessages();
+        const delay = 8000 + Math.floor(Math.random() * 7000);
+        setTimeout(() => {
+            const pkt = appData.redPackets.find(p => p.id === packet.id);
+            if (!pkt || pkt.records.length >= pkt.count) return;
+            const remaining = pkt.totalAmount - pkt.records.reduce((s,r)=>s+r.amount, 0);
+            const remainCount = pkt.count - pkt.records.length;
+            let amount;
+            if (remainCount <= 1) {
+                amount = Math.round(remaining * 100) / 100;
+            } else {
+                const max = remaining / remainCount * 2;
+                amount = Math.round((Math.random() * max + 0.01) * 100) / 100;
+                if (amount > remaining) amount = Math.round(remaining * 100) / 100;
+                if (amount < 0.01) amount = 0.01;
+            }
+            pkt.records.push({ userId: currentRoleId, amount, time: Date.now() });
+            appData.balance += amount;
+            if (pkt.records.length >= pkt.count) pkt.status = 'finished';
+            else pkt.status = 'opened';
+            const role = appData.roles.find(r => r.id === currentRoleId);
+            const sysText = `🧧 ${role?.name || '角色'}领取了你的红包`;
+            if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = [];
+            appData.chats[currentRoleId].push({ id: Date.now(), sender: 'system', content: sysText, time: Date.now(), type: 'system' });
+            debouncedSaveData();
+            if (currentChatType === 'role' && currentRoleId) {
+                appendMessageToDOM('system', sysText, Date.now(), null, 'system');
+            }
+            const chatMsgs = appData.chats[currentRoleId];
+            const targetMsg = chatMsgs?.find(m => m.type === 'redpacket' && m.sender === 'me' && m.content.includes(pkt.id));
+            if (targetMsg) {
+                const data = JSON.parse(targetMsg.content);
+                data.receivedCount = pkt.records.length;
+                data.status = pkt.status === 'finished' ? 'received' : 'opened';
+                targetMsg.content = JSON.stringify(data);
+                if (currentChatType === 'role' && currentRoleId) {
+                    renderChatMessages();
+                }
+            }
+        }, delay);
     }
 }
 
@@ -3794,6 +4283,8 @@ window.collectTransfer = collectTransfer; window.openTransferRecords = openTrans
 window.closeTransferRecords = closeTransferRecords;
 window.openUserProfile = openUserProfile; window.saveUserProfile = saveUserProfile;
 window.handleProfileAvatarUpload = handleProfileAvatarUpload;
+window.copyBackupToClipboard = copyBackupToClipboard;
+window.openRestoreFromClipboardModal = openRestoreFromClipboardModal;
 
 window.startCall = startCall; window.hangUpCall = hangUpCall; window.answerCall = answerCall; window.rejectIncomingCall = rejectIncomingCall;
 window.toggleMiniCallWindow = toggleMiniCallWindow; window.closeMiniCallWindow = closeMiniCallWindow; window.startDragMiniCall = startDragMiniCall;
@@ -3803,7 +4294,7 @@ window.showPokeActionSheet = showPokeActionSheet; window.openPokeSettingsFromShe
 window.savePokeSettings = savePokeSettings; window.executePoke = executePoke; window.updatePokePreview = updatePokePreview;
 window.updateSelectedMemberCount = updateSelectedMemberCount; window.handleGroupAvatarUpload = handleGroupAvatarUpload;
 window.loadGroupProbConfig = loadGroupProbConfig; window.saveCurrentGroupProb = saveCurrentGroupProb; window.switchRoleManagementTab = switchRoleManagementTab;
-window.deleteGroup = deleteGroup; window.openStats = openStats; window.closeStats = closeStats; window.switchStatsTab = switchStatsTab;
+window.deleteGroup = deleteGroup; window.clearGroupChatRecord = clearGroupChatRecord; window.openStats = openStats; window.closeStats = closeStats; window.switchStatsTab = switchStatsTab;
 window.runMsgSearch = runMsgSearch; window.clearSearch = clearSearch; window.addFavorite = addFavorite; window.removeFavorite = removeFavorite;
 window.batchFavorite = batchFavorite; window.showRoleWordCloud = showRoleWordCloud; window.showGlobalWordCloud = showGlobalWordCloud;
 window.copyMessageContent = copyMessageContent; window.deleteMessage = deleteMessage; window.quoteMessage = quoteMessage; window.closeActionSheet = closeActionSheet;
@@ -3863,6 +4354,15 @@ function openStats() { document.getElementById('modal-settings-advanced').classL
 function closeStats() { document.getElementById('modal-stats').classList.add('hidden'); }
 function switchStatsTab(tab) { currentStatsTab = tab; ['stats','search','favorites','wordcloud'].forEach(t => { document.getElementById(`${t}-panel`).style.display = t === tab ? 'block' : 'none'; document.getElementById(`${t}-tab-btn`)?.classList.toggle('active', t === tab); }); if (tab === 'stats') renderStatsOverview(); else if (tab === 'favorites') renderFavoritesList(); else if (tab === 'wordcloud') renderWordCloud(); }
 
+// --- 触摸解锁音频（首次交互后允许自动播放）---
+document.addEventListener('click', unlockAudioOnce);
+document.addEventListener('touchstart', unlockAudioOnce);
+function unlockAudioOnce() {
+    ensureAudioContext();
+    document.removeEventListener('click', unlockAudioOnce);
+    document.removeEventListener('touchstart', unlockAudioOnce);
+}
+
 // 启动动画
 window.addEventListener('DOMContentLoaded', startSplashAnimation);
 function startSplashAnimation() { const quotes = ["遇见你，是所有故事的开始","我携满天星辰以赠你，仍觉星辰不及你","心若有所向，何惧道阻且长","温柔是宝藏，你也是","世间万物，皆不如你","目光所及，全都是你"]; const quoteText = document.getElementById("quoteText"), progressBar = document.getElementById("progressBar"), statusText = document.getElementById("statusText"); const loadingCard = document.getElementById("loadingCard"), splashScreen = document.getElementById("splash-screen"); let idx = 0, progress = 0; document.getElementById("titleText").innerHTML = 'Spiritual connection'.split('').map((c,i) => `<span style="animation-delay:${i*0.08}s">${c}</span>`).join(''); function showQuote() { quoteText.innerHTML = ""; let text = quotes[idx++ % quotes.length]; text.split('').forEach((c,i) => { let s = document.createElement("span"); s.textContent = c; s.style.animationDelay = `${i*0.07}s`; quoteText.appendChild(s); }); } function createStars() { const c = document.getElementById("starsContainer"); for(let i=0;i<120;i++){ let s = document.createElement("div"); s.className = "star"; let x=(Math.random()-0.5)*1400, y=(Math.random()-0.5)*1400; s.style.setProperty("--x",x+"px"); s.style.setProperty("--y",y+"px"); s.style.left=Math.random()*100+"vw"; s.style.top=Math.random()*100+"vh"; s.style.animationDelay=Math.random()*1.2+"s"; c.appendChild(s); } } createStars(); setTimeout(() => loadingCard.classList.add("visible"), 300); showQuote(); setInterval(showQuote, 3200); let timer = setInterval(() => { progress += Math.random()*1.5+0.5; if(progress>=100) progress=100; progressBar.style.width = progress+"%"; statusText.textContent = "正在连接中..."; if(progress>=100){ clearInterval(timer); statusText.textContent = "连接成功"; setTimeout(() => { splashScreen.classList.add("hidden"); loadData(); }, 1000); } }, 100); }
@@ -3877,5 +4377,7 @@ function refreshLovePanel() { const now = Date.now(), role = appData.roles.find(
 function toggleLovePanel() { const m = document.getElementById('modal-love-panel'); if (m.classList.contains('hidden')) { if (currentRoleId) refreshLovePanel(); else if (appData.roles.length>0) { currentRoleId = appData.roles[0].id; refreshLovePanel(); } m.classList.remove('hidden'); } else m.classList.add('hidden'); }
 window.toggleLovePanel = toggleLovePanel;
 </script>
+
+    
 </body>
 </html>
