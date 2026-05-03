@@ -2034,7 +2034,7 @@
         <div class="bg-white rounded-2xl p-4 shadow-sm border mb-6">
             <label class="text-xs font-bold text-gray-500 uppercase block mb-2">上传图片</label>
             <div class="flex gap-2">
-                <label class="flex-1 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl px-4 py-3 text-center cursor-pointer hover:border-amber-500 transition"><input type="file" accept="image/*" class="hidden" onchange="handleStickerUpload(this)"><div class="flex flex-col items-center gap-1"><i data-lucide="image-plus" class="w-5 h-5 text-gray-400"></i><span class="text-xs text-gray-500">点击选择图片</span></div></label>
+                <label class="flex-1 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl px-4 py-3 text-center cursor-pointer hover:border-amber-500 transition"><input type="file" accept="image/*" class="hidden" multiple onchange="handleStickerUpload(this)"><div class="flex flex-col items-center gap-1"><i data-lucide="image-plus" class="w-5 h-5 text-gray-400"></i><span class="text-xs text-gray-500">点击选择图片</span></div></label>
                 <button onclick="clearSelectedStickers()" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-sm font-medium border border-red-100 active:bg-red-100 transition">清空选中</button>
             </div>
         </div>
@@ -2064,6 +2064,14 @@
             <div class="border-t border-gray-200 pt-4 mt-4"><div class="flex items-center justify-between mb-3"><h3 class="text-sm font-semibold">群聊发言人数概率</h3><select id="group-prob-select" class="text-xs bg-gray-50 border border-gray-200 rounded-lg px-2 py-1" onchange="loadGroupProbConfig()"><option value="">选择群聊</option></select></div><div id="group-prob-config-panel" class="bg-gray-50 p-4 rounded-xl space-y-3 hidden"><p class="text-xs text-gray-500 mb-2">当前群成员数：<span id="group-member-count">0</span> 人</p><div id="group-prob-inputs" class="space-y-2"></div><p class="text-[10px] text-gray-400">各概率总和需为 100%</p><button onclick="saveCurrentGroupProb()" class="mt-2 w-full py-1.5 rounded-lg text-xs font-medium" style="background-color: var(--accent-light); color: var(--accent-color);">保存此群概率</button><p id="prob-error-msg" class="text-xs text-red-500 hidden mt-1"></p></div></div>
             <div class="border-t border-gray-200 pt-4 mt-4"><h3 class="text-sm font-semibold mb-3">模拟视频通话</h3><div class="bg-gray-50 p-4 rounded-xl space-y-3"><div class="flex items-center justify-between"><span class="text-sm">显示通话按钮</span><div class="ios-switch" id="setting-call-enabled-switch" onclick="toggleSwitch(this)"></div></div><p class="text-xs text-gray-400">关闭后聊天头部将隐藏通话按钮</p><div class="grid grid-cols-2 gap-3 mt-3"><div><span class="text-xs text-gray-500 block mb-1">拒绝通话概率 (%)</span><input type="number" id="setting-call-reject-prob" min="0" max="100" value="20" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div><div><span class="text-xs text-gray-500 block mb-1">未接听概率 (%)</span><input type="number" id="setting-call-miss-prob" min="0" max="100" value="10" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div></div><div class="grid grid-cols-2 gap-3 mt-3"><div><span class="text-xs text-gray-500 block mb-1">最短通话 (分钟)</span><input type="number" id="setting-call-min-duration" min="0.1" max="30" step="0.1" value="0.5" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div><div><span class="text-xs text-gray-500 block mb-1">最长通话 (分钟)</span><input type="number" id="setting-call-max-duration" min="0.1" max="30" step="0.1" value="2" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div></div><!-- 来电铃声 -->
             <div class="mt-3"><span class="text-xs text-gray-500 block mb-1">来电铃声 URL</span><input type="text" id="setting-call-ringtone" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm" placeholder="默认铃声"></div></div></div>
+            <div class="border-t border-gray-200 pt-4 mt-4"><h3 class="text-sm font-semibold mb-3">多条回复间隔</h3>
+            <div class="bg-gray-50 p-4 rounded-xl space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm">间隔时间 (秒)</span>
+                    <input type="number" id="setting-multi-interval" min="1" max="10" value="2" class="w-20 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm">
+                </div>
+                <p class="text-xs text-gray-400">角色连续回复多条消息时，每条之间的等待秒数</p>
+            </div></div>
             <div class="border-t border-gray-200 pt-4 mt-4"><h3 class="text-sm font-semibold mb-3">自动来电</h3><div class="bg-gray-50 p-4 rounded-xl space-y-3"><div class="flex items-center justify-between"><span class="text-sm">启用角色主动来电</span><div class="ios-switch" id="setting-auto-call-enabled-switch" onclick="toggleSwitch(this)"></div></div><p class="text-xs text-gray-400">开启后角色会随机主动给你打电话</p><div class="grid grid-cols-2 gap-3 mt-3"><div><span class="text-xs text-gray-500 block mb-1">来电概率 (%)</span><input type="number" id="setting-auto-call-prob" min="0" max="100" value="30" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div><div><span class="text-xs text-gray-500 block mb-1">最小间隔 (分钟)</span><input type="number" id="setting-auto-call-min-interval" min="1" max="120" value="10" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div><div><span class="text-xs text-gray-500 block mb-1">最大间隔 (分钟)</span><input type="number" id="setting-auto-call-max-interval" min="1" max="120" value="30" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div><div><span class="text-xs text-gray-500 block mb-1">超时未接 (秒)</span><input type="number" id="setting-auto-call-user-timeout" min="5" max="60" value="30" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div></div><div class="grid grid-cols-2 gap-3 mt-3"><div><span class="text-xs text-gray-500 block mb-1">最短通话 (分钟)</span><input type="number" id="setting-auto-call-min-duration" min="0.1" max="30" step="0.1" value="0.5" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div><div><span class="text-xs text-gray-500 block mb-1">最长通话 (分钟)</span><input type="number" id="setting-auto-call-max-duration" min="0.1" max="30" step="0.1" value="3" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div></div></div></div>
             <div class="border-t border-gray-200 pt-4 mt-4"><h3 class="text-sm font-semibold mb-3">自动来信</h3><div class="bg-gray-50 p-4 rounded-xl space-y-3"><div class="flex items-center justify-between"><span class="text-sm">启用角色自动来信</span><div class="ios-switch" id="setting-auto-mail-enabled-switch" onclick="toggleSwitch(this)"></div></div><p class="text-xs text-gray-400">开启后角色会按各自概率自动给你写信</p><div class="grid grid-cols-2 gap-3 mt-3"><div><span class="text-xs text-gray-500 block mb-1">检查间隔 (分钟)</span><input type="number" id="setting-auto-mail-interval" min="1" max="120" value="10" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div></div></div></div>
         </div>
@@ -2080,8 +2088,10 @@
             <div class="storage-categories"><div class="storage-category"><div class="cat-icon">💬</div><div class="cat-size" id="chat-storage-size">0KB</div><div class="cat-label">聊天记录</div></div><div class="storage-category"><div class="cat-icon">⚙️</div><div class="cat-size" id="settings-storage-size">0KB</div><div class="cat-label">设置数据</div></div><div class="storage-category"><div class="cat-icon">🖼️</div><div class="cat-size" id="media-storage-size">0KB</div><div class="cat-label">图片媒体</div></div></div>
             <div class="storage-progress-bar"><div class="storage-progress-fill" id="storage-progress-fill" style="width:0%"></div></div>
         </div>
-        <div class="grid grid-cols-2 gap-4 mb-6">
-            <button onclick="exportData()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-2"><i data-lucide="download" class="w-5 h-5" style="color: var(--accent-color);"></i><span class="text-xs font-medium">全量备份</span></button>
+        <div class="grid grid-cols-3 gap-4 mb-6">
+            <button onclick="exportData()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-2"><i data-lucide="download" class="w-5 h-5" style="color: var(--accent-color);"></i><span class="text-xs font-medium">下载备份</span></button>
+            <button onclick="copyBackupToClipboard()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-2"><i data-lucide="copy" class="w-5 h-5" style="color: var(--accent-color);"></i><span class="text-xs font-medium">复制备份</span></button>
+            <button onclick="openRestoreFromClipboardModal()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-2"><i data-lucide="clipboard-paste" class="w-5 h-5" style="color: var(--accent-color);"></i><span class="text-xs font-medium">粘贴恢复</span></button>
             <button onclick="importData()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-2"><i data-lucide="upload" class="w-5 h-5" style="color: var(--accent-color);"></i><span class="text-xs font-medium">恢复备份</span></button>
             <button onclick="clearChatRecords()" class="bg-red-50 p-4 rounded-2xl flex flex-col items-center gap-2"><i data-lucide="trash-2" class="w-5 h-5 text-red-500"></i><span class="text-xs font-medium text-red-700">清空聊天</span></button>
             <button onclick="resetAllData()" class="bg-red-50 p-4 rounded-2xl flex flex-col items-center gap-2"><i data-lucide="trash" class="w-5 h-5 text-red-500"></i><span class="text-xs font-medium text-red-700">重置全部</span></button>
@@ -2760,7 +2770,9 @@ function startAutoSendTimer() {
     if (autoSendTimer) clearInterval(autoSendTimer);
     autoSendTimer = setInterval(() => {
         if (!appData.settings.autoSend) return;
-        const now = Date.now(), interval = appData.settings.autoInterval * 60 * 1000, prob = appData.settings.autoSendProbability;
+        const now = Date.now(), interval = appData.settings.autoInterval * 60 * 1000;
+        // 群聊主动发送概率：使用百分比换算
+        const prob = appData.settings.autoSendProbEnabled ? (appData.settings.autoSendProbPercent / 100) : 0.5;
         appData.roles.forEach(role => {
             const last = role.lastAutoSendTime || role.lastActive || now;
             if (now - last >= interval) {
@@ -2769,7 +2781,11 @@ function startAutoSendTimer() {
                 role.lastAutoSendTime = now;
             }
         });
-        if (appData.groups.length > 0 && Math.random() < prob) { const group = appData.groups[Math.floor(Math.random() * appData.groups.length)]; if (group) triggerGroupAutoReply(group); }
+        // 群聊自动回复：每分钟有一定概率触发
+        if (appData.groups.length > 0 && Math.random() < prob) {
+            const group = appData.groups[Math.floor(Math.random() * appData.groups.length)];
+            if (group) triggerGroupAutoReply(group);
+        }
     }, 60000);
 }
 
@@ -2939,7 +2955,16 @@ function openGroupChat(groupId) {
     renderChatMessages(); updateCallButtonVisibility();
 }
 
-function goBack() { document.getElementById('page-chat').classList.remove('active'); document.getElementById('page-home').classList.add('active'); currentChatType = 'role'; currentRoleId = null; currentGroupId = null; }
+// 返回主界面时刷新列表
+function goBack() {
+    document.getElementById('page-chat').classList.remove('active');
+    document.getElementById('page-home').classList.add('active');
+    currentChatType = 'role';
+    currentRoleId = null;
+    currentGroupId = null;
+    renderRoleList();
+    renderGroupList();
+}
 
 function renderChatMessages() {
     const c = document.getElementById('chat-messages'); c.innerHTML = '';
@@ -3199,7 +3224,6 @@ function openChatSettings() {
     document.getElementById('setting-quote-other').value = appData.settings.quoteOtherProb;
     document.getElementById('setting-emoji-prob').value = appData.settings.emojiProb || 20;
     document.getElementById('setting-sticker-prob').value = appData.settings.stickerProb || 10;
-    // 多条回复间隔
     document.getElementById('setting-multi-interval').value = appData.settings.multiMsgInterval || 2;
     populateGroupSelect();
     document.getElementById('group-prob-config-panel').classList.add('hidden');
@@ -3482,7 +3506,18 @@ async function saveEmojis() { appData.wordbanks.emojis = [...tempEmojis]; await 
 function openStickerLibrary() { pageHistory.push('library'); tempStickers = [...appData.wordbanks.stickers]; renderStickerGrid(); document.getElementById('modal-library-main').classList.add('hidden'); document.getElementById('modal-library-sticker').classList.add('active'); }
 function closeStickerLibrary() { document.getElementById('modal-library-sticker').classList.remove('active'); if (pageHistory.pop() === 'library') document.getElementById('modal-library-main').classList.remove('hidden'); }
 function renderStickerGrid() { const g = document.getElementById('sticker-grid'); g.innerHTML = ''; tempStickers.forEach((s,i) => { const d = document.createElement('div'); d.innerHTML = `<img src="${s}" class="sticker-item" data-index="${i}">`; d.querySelector('img').onclick = () => d.querySelector('img').classList.toggle('selected'); g.appendChild(d); }); document.getElementById('sticker-count').textContent = tempStickers.length; }
-async function handleStickerUpload(input) { if (input.files?.[0]) { showToast('压缩中...'); const compressed = await compressImage(input.files[0], 300, 0.7); tempStickers.push(compressed); renderStickerGrid(); } }
+async function handleStickerUpload(input) {
+    const files = input.files;
+    if (!files || files.length === 0) return;
+    showToast(`正在处理 ${files.length} 张图片...`);
+    for (let i = 0; i < files.length; i++) {
+        const compressed = await compressImage(files[i], 300, 0.7);
+        tempStickers.push(compressed);
+    }
+    renderStickerGrid();
+    showToast(`已添加 ${files.length} 个表情包`);
+    input.value = ''; // 清空 input
+}
 function clearSelectedStickers() { const selected = document.querySelectorAll('.sticker-item.selected'), indexes = [...selected].map(img => parseInt(img.dataset.index)).sort((a,b)=>b-a); indexes.forEach(i => tempStickers.splice(i,1)); renderStickerGrid(); }
 async function saveStickers() { appData.wordbanks.stickers = [...tempStickers]; await saveData(); closeStickerLibrary(); showToast('保存成功'); }
 
@@ -4228,15 +4263,17 @@ function renderStickerPickerGrid() {
     });
 }
 async function quickStickerUpload(input) {
-    if (input.files?.[0]) {
-        showToast('压缩中...');
-        const compressed = await compressImage(input.files[0], 300, 0.7);
+    const files = input.files;
+    if (!files || files.length === 0) return;
+    showToast(`正在处理 ${files.length} 张图片...`);
+    for (let i = 0; i < files.length; i++) {
+        const compressed = await compressImage(files[i], 300, 0.7);
         appData.wordbanks.stickers.push(compressed);
         debouncedSaveData();
-        renderStickerPickerGrid();
-        showToast('表情已添加');
-        input.value = '';
     }
+    renderStickerPickerGrid();
+    showToast(`已添加 ${files.length} 个表情包`);
+    input.value = '';
 }
 function sendStickerMessage(src) {
     const msg = { id: Date.now(), sender: 'me', content: src, time: Date.now(), type: 'image' };
@@ -4377,7 +4414,6 @@ function refreshLovePanel() { const now = Date.now(), role = appData.roles.find(
 function toggleLovePanel() { const m = document.getElementById('modal-love-panel'); if (m.classList.contains('hidden')) { if (currentRoleId) refreshLovePanel(); else if (appData.roles.length>0) { currentRoleId = appData.roles[0].id; refreshLovePanel(); } m.classList.remove('hidden'); } else m.classList.add('hidden'); }
 window.toggleLovePanel = toggleLovePanel;
 </script>
-
     
 </body>
 </html>
