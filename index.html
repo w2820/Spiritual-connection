@@ -75,7 +75,8 @@
             -webkit-user-select: none;
             margin: 0;
             padding: 0;
-            height: 100vh;
+            height: 100dvh; /* 动态视口，适配移动端浏览器工具栏 */
+            height: 100vh; /* fallback */
             overflow: hidden;
         }
         /* 滚动条隐藏 */
@@ -289,7 +290,8 @@
         .page {
             display: none;
             flex-direction: column;
-            height: 100vh;
+            height: 100dvh; /* 动态视口 */
+            height: 100vh; /* fallback */
             width: 100vw;
             position: fixed;
             top: 0;
@@ -329,12 +331,13 @@
 
         /* 启动页 */
         .splash-screen {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
+            height: 100vh;
             background-color: #f0f8f4; display: flex; align-items: center; justify-content: center;
             z-index: 99999; transition: opacity 0.8s ease, visibility 0.8s ease;
         }
         .splash-screen.hidden { opacity: 0; visibility: hidden; }
-        .stars-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
+        .stars-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100dvh; height: 100vh; z-index: -1; pointer-events: none; }
         .star {
             position: absolute; width: 2.5px; height: 2.5px; background: #ffffff;
             border-radius: 50%; box-shadow: 0 0 6px rgba(100, 180, 140, 0.9);
@@ -395,18 +398,28 @@
         .progress-bar::after { content: ''; position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 9px; height: 9px; background: #fff; border-radius: 50%; box-shadow: 0 0 5px rgba(100, 180, 140, 0.7); }
         .status-text { font-size: 0.8rem; color: #64b48c; opacity: 0.85; }
 
-        /* ========== 主界面音乐卡片 ========== */
+        /* ========== 主界面音乐卡片（悬浮可拖动） ========== */
         #music-player-card {
-            display: flex;
+            display: none; /* 默认隐藏，JS控制 */
             align-items: center;
             gap: 10px;
-            background: var(--bg-secondary);
-            margin: 8px 16px;
+            position: fixed;
+            top: 70px;      /* 初始位置，紧贴header下方 */
+            right: 16px;
+            z-index: 50;
             padding: 10px 14px;
             border-radius: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.6);
             font-size: 13px;
+            cursor: grab;
+            touch-action: none; /* 防止拖动时页面滚动 */
+        }
+        #music-player-card:active {
+            cursor: grabbing;
         }
         #music-player-card .music-card-cover {
             width: 40px; height: 40px;
@@ -2050,17 +2063,17 @@
             </div>
         </div>
     </header>
-    <!-- 主界面音乐卡片 -->
-    <div id="music-player-card" style="display: none;">
+    <!-- 主界面音乐卡片（悬浮层，由 JS 控制显隐和拖动） -->
+    <div id="music-player-card">
         <div class="music-card-cover" id="music-card-cover">🎵</div>
         <div class="music-card-info">
             <div class="music-card-title" id="music-card-title">未选择</div>
             <div class="music-card-artist" id="music-card-artist">点击下方音乐库</div>
         </div>
         <div class="music-card-controls">
-            <button class="music-card-btn" id="music-card-prev" onclick="prevMusic()">⏮️</button>
-            <button class="music-card-btn" id="music-card-play" onclick="togglePlayMusic()">▶️</button>
-            <button class="music-card-btn" id="music-card-next" onclick="nextMusic()">⏭️</button>
+            <button class="music-card-btn" id="music-card-prev" onclick="prevMusic(); event.stopPropagation();">⏮️</button>
+            <button class="music-card-btn" id="music-card-play" onclick="togglePlayMusic(); event.stopPropagation();">▶️</button>
+            <button class="music-card-btn" id="music-card-next" onclick="nextMusic(); event.stopPropagation();">⏭️</button>
         </div>
     </div>
     <div class="flex border-b bg-white px-4 pt-2" style="background-color: var(--header-bg);">
@@ -2073,16 +2086,8 @@
             <p>还没有角色，快去创建吧</p>
         </div>
     </main>
-    <div class="relative flex-1">
-        <main class="absolute inset-0 overflow-auto p-4 space-y-3 scrollbar-hide hidden" id="group-list"></main>
-        <!-- 群聊空状态提示已恢复 -->
-        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div class="text-center text-gray-400 hidden" id="empty-group-tip">
-                <i data-lucide="users" class="w-16 h-16 mx-auto mb-4 opacity-50"></i>
-                <p>还没有群聊，点击➕创建群聊</p>
-            </div>
-        </div>
-    </div>
+    <main class="flex-1 overflow-auto p-4 space-y-3 scrollbar-hide hidden" id="group-list"></main>
+    <!-- 群聊空状态提示已移至group-list内部渲染 -->
     <div class="absolute bottom-8 right-6 safe-bottom z-20">
         <button onclick="openCreateMenu()" class="text-white p-4 rounded-full shadow-lg active:scale-90 transition-transform duration-200" style="background-color: var(--button-primary-bg); color: var(--button-primary-text);">
             <i data-lucide="plus" class="w-7 h-7"></i>
@@ -2522,7 +2527,6 @@
 
 <!-- 聊天节奏设置界面 -->
 <div id="modal-settings-chat" class="modal-overlay hidden">
-    <!-- 保持不变，省略... -->
     <div class="modal-card max-h-[90vh] overflow-y-auto">
         <div class="flex items-center gap-2 mb-6"><i data-lucide="message-square" class="w-6 h-6" style="color: var(--accent-color);"></i><h2 class="text-xl font-bold">聊天设置</h2></div>
         <div class="space-y-6 mb-8">
@@ -2545,7 +2549,6 @@
 
 <!-- 数据管理界面 -->
 <div id="modal-settings-data" class="modal-overlay hidden">
-    <!-- 不变 -->
     <div class="modal-card">
         <div class="flex items-center gap-2 mb-6"><i data-lucide="database" class="w-6 h-6" style="color: var(--accent-color);"></i><h2 class="text-xl font-bold">数据管理</h2></div>
         <div class="storage-usage-card">
@@ -2622,7 +2625,6 @@
 
 <!-- 消息统计 -->
 <div id="modal-stats" class="modal-overlay hidden">
-    <!-- 不变 -->
     <div class="modal-card max-w-md max-h-[85vh] overflow-hidden flex flex-col"><div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold"><i class="fas fa-chart-bar mr-2" style="color: var(--accent-color);"></i>消息统计</h2><button onclick="closeStats()" class="p-2 rounded-full hover:bg-gray-100"><i data-lucide="x" class="w-5 h-5"></i></button></div><div class="stats-tab-bar"><button class="stats-nav-btn active" id="stats-tab-btn" onclick="switchStatsTab('stats')">统计</button><button class="stats-nav-btn" id="search-tab-btn" onclick="switchStatsTab('search')">搜索</button><button class="stats-nav-btn" id="favorites-tab-btn" onclick="switchStatsTab('favorites')">收藏</button><button class="stats-nav-btn" id="wordcloud-tab-btn" onclick="switchStatsTab('wordcloud')">词云</button></div><div class="flex-1 overflow-auto"><div id="stats-panel"><div id="stats-content" class="space-y-3"></div></div><div id="search-panel" style="display:none;"><div class="stats-search-box"><div class="flex gap-2 mb-2"><div class="relative flex-1"><i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i><input type="text" id="msg-search-input" placeholder="搜索聊天内容..." class="w-full pl-9 pr-3 py-2 bg-gray-100 rounded-xl text-sm border-none outline-none"></div><button onclick="runMsgSearch()" class="text-white px-4 py-2 rounded-xl text-sm" style="background-color: var(--button-primary-bg);">搜索</button></div><div class="flex gap-2 text-xs"><input type="date" id="msg-search-date-from" class="bg-gray-100 rounded-lg px-2 py-1 border-none"><span class="text-gray-400">至</span><input type="date" id="msg-search-date-to" class="bg-gray-100 rounded-lg px-2 py-1 border-none"><button onclick="clearSearch()" class="text-gray-500 px-2">重置</button></div></div><div id="msg-search-results" class="mt-3"></div></div><div id="favorites-panel" style="display:none;"><div class="flex justify-end mb-2"><button onclick="batchFavorite()" class="text-xs px-3 py-1 rounded-full" style="background-color: var(--accent-light); color: var(--accent-color);">批量收藏</button></div><div id="favorites-list"></div></div><div id="wordcloud-panel" style="display:none;"><div id="wordcloud-container" class="wordcloud-container"></div><p class="text-xs text-gray-400 text-center mt-2">基于聊天记录生成词云</p></div></div></div>
 </div>
 
@@ -2920,7 +2922,7 @@
                 <option value="">选择书籍...</option>
             </select>
         </div>
-        <!-- 新增：定位选择 -->
+        <!-- 定位选择 -->
         <div class="flex items-center gap-2 mt-3" id="moment-location-row">
             <button onclick="openMomentLocationPicker()" class="text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full flex items-center gap-1">
                 <i data-lucide="map-pin" class="w-3.5 h-3.5"></i><span id="moment-location-btn-text">添加位置</span>
@@ -3325,6 +3327,11 @@ let currentReplyingTo = null;
 let tempMomentCommentBank = [];
 let tempAddressLibrary = [];
 
+// 音乐卡片拖动相关
+let isDraggingMusicCard = false;
+let musicCardStartX = 0, musicCardStartY = 0;
+let musicCardInitLeft = 0, musicCardInitTop = 0;
+
 // 新增：朋友圈定位临时存储
 let selectedMomentLocation = null;
 
@@ -3615,7 +3622,7 @@ function formatBytes(bytes) { if (bytes < 1024) return bytes + 'B'; if (bytes < 
 
 async function updateStorageDisplay() {
     const usage = await calculateStorageUsage();
-    const maxBytes = 500 * 1024 * 1024;
+    const maxBytes = 500 * 1024 * 1024; // 引用限制 500MB，无变动
     const percent = Math.min(100, (usage.total / maxBytes) * 100).toFixed(1);
     document.getElementById('storage-total-text').textContent = `${formatBytes(usage.total)} / ~500MB (${percent}%)`;
     document.getElementById('chat-storage-size').textContent = formatBytes(usage.chat);
@@ -3723,7 +3730,14 @@ async function loadData() {
         if (!appData.redPackets) appData.redPackets = [];
         if (!appData.userProfile) appData.userProfile = { nickname: '我', avatar: DEFAULT_AVATAR };
         if (!appData.balance || appData.balance === 10000) appData.balance = 1000000;
-        if (!appData.moments) appData.moments = [];
+        if (!appData.moments || appData.moments.length === 0) {
+            // 确保持久化存储为空时才补初始动态
+            if (!stored || !stored.moments || stored.moments.length === 0) {
+                appData.moments = JSON.parse(JSON.stringify(DEFAULT_DATA.moments));
+            } else {
+                appData.moments = [];
+            }
+        }
         if (!appData.momentPhotos) appData.momentPhotos = [];
         if (!appData.songLibrary || appData.songLibrary.length < 50) appData.songLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.songLibrary));
         if (!appData.bookLibrary || appData.bookLibrary.length === 0) appData.bookLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.bookLibrary));
@@ -3743,6 +3757,24 @@ async function loadData() {
     if (coverAvatar) coverAvatar.src = (appData.userProfile && appData.userProfile.avatar) ? appData.userProfile.avatar : DEFAULT_AVATAR;
     updateMusicPlayerCardVisibility();
     musicAudio.addEventListener('ended', () => { stopMusic(); updateMusicCardUI(); });
+    // 动态设置聊天页高度（针对谷歌浏览器移动端）
+    updateChatPageHeight();
+    window.addEventListener('resize', updateChatPageHeight);
+    window.addEventListener('orientationchange', updateChatPageHeight);
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', updateChatPageHeight);
+    }
+}
+
+function updateChatPageHeight() {
+    const chatPage = document.getElementById('page-chat');
+    if (chatPage) {
+        chatPage.style.height = window.innerHeight + 'px';
+    }
+    // 同时更新其他全屏页面
+    document.querySelectorAll('.page').forEach(p => {
+        if (p.id !== 'page-chat') p.style.height = window.innerHeight + 'px';
+    });
 }
 
 function applyMomentCover() {
@@ -3843,11 +3875,10 @@ function renderGroupList() {
     const container = document.getElementById('group-list'), empty = document.getElementById('empty-group-tip'); if (!container) return;
     const cards = container.querySelectorAll('.group-card'); cards.forEach(c => c.remove());
     if (!appData.groups?.length) {
-        if (empty) empty.classList.remove('hidden');
-        else showToast('群聊空状态提示元素缺失');
+        container.innerHTML = '<div class="text-center text-gray-400 mt-20"><i data-lucide="users" class="w-16 h-16 mx-auto mb-4 opacity-50"></i><p>还没有群聊，点击➕创建群聊</p></div>';
         return;
     }
-    if (empty) empty.classList.add('hidden');
+    container.innerHTML = '';
     appData.groups.forEach(g => {
         const unread = unreadCounts['group_' + g.id] || 0, badge = unread ? `<div class="absolute top-2 right-2 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">${unread>99?'99+':unread}</div>` : '';
         const card = document.createElement('div'); card.className = 'group-card flex items-center gap-3 relative'; card.onclick = () => openGroupChat(g.id);
@@ -3870,6 +3901,7 @@ function openChat(roleId) {
     document.getElementById('chat-title').textContent = role.name; refreshRoleOnlineStatus(role);
     document.getElementById('chat-subtitle').textContent = role.onlineStatus?.currentStatus || '在线';
     document.getElementById('page-home').classList.remove('active'); document.getElementById('page-chat').classList.add('active');
+    updateChatPageHeight();
     renderChatMessages(); updateCallButtonVisibility();
 }
 
@@ -3878,6 +3910,7 @@ function openGroupChat(groupId) {
     clearUnread('group_' + groupId);
     document.getElementById('chat-title').textContent = group.name; document.getElementById('chat-subtitle').textContent = `${group.members.length}人`;
     document.getElementById('page-home').classList.remove('active'); document.getElementById('page-chat').classList.add('active');
+    updateChatPageHeight();
     renderChatMessages(); updateCallButtonVisibility();
 }
 
@@ -4621,12 +4654,60 @@ async function saveUserProfile() { const nickname = document.getElementById('pro
 function updateMusicPlayerCardVisibility() {
     const card = document.getElementById('music-player-card');
     if (!card) return;
-    if (appData.settings.musicPlayerEnabled) {
+    if (appData.settings.musicPlayerEnabled && document.getElementById('page-home').classList.contains('active')) {
         card.style.display = 'flex';
     } else {
         card.style.display = 'none';
         stopMusic();
     }
+    // 绑定拖动事件
+    bindMusicCardDrag();
+}
+
+function bindMusicCardDrag() {
+    const card = document.getElementById('music-player-card');
+    if (!card || card.dataset.dragBound === 'true') return;
+    card.dataset.dragBound = 'true';
+    card.addEventListener('touchstart', startDragMusicCard, { passive: false });
+    card.addEventListener('mousedown', startDragMusicCard);
+}
+
+function startDragMusicCard(e) {
+    if (e.target.closest('.music-card-btn')) return; // 不拖按钮
+    e.preventDefault();
+    const card = document.getElementById('music-player-card');
+    const rect = card.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    musicCardStartX = clientX;
+    musicCardStartY = clientY;
+    musicCardInitLeft = rect.left;
+    musicCardInitTop = rect.top;
+    isDraggingMusicCard = true;
+    let hasMoved = false;
+    function onMove(ev) {
+        if (!isDraggingMusicCard) return;
+        ev.preventDefault();
+        const x = (ev.touches ? ev.touches[0].clientX : ev.clientX);
+        const y = (ev.touches ? ev.touches[0].clientY : ev.clientY);
+        const dx = x - musicCardStartX;
+        const dy = y - musicCardStartY;
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) hasMoved = true;
+        card.style.left = (musicCardInitLeft + dx) + 'px';
+        card.style.top = (musicCardInitTop + dy) + 'px';
+        card.style.right = 'auto';
+    }
+    function onEnd() {
+        isDraggingMusicCard = false;
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('touchmove', onMove);
+        window.removeEventListener('mouseup', onEnd);
+        window.removeEventListener('touchend', onEnd);
+    }
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('mouseup', onEnd);
+    window.addEventListener('touchend', onEnd);
 }
 
 function updateMusicCardUI() {
@@ -4860,7 +4941,6 @@ function renderMomentList(filter = 'all') {
             const card = document.createElement('div');
             card.className = 'moment-card';
             card.onclick = (e) => { if (!e.target.closest('.moment-delete-btn') && !e.target.closest('.moment-actions button')) showMomentDetail(moment.id); };
-            // 删除按钮：无论谁发的都显示删除按钮
             const delBtn = document.createElement('button');
             delBtn.className = 'moment-delete-btn';
             delBtn.innerHTML = '✖️';
@@ -4919,7 +4999,6 @@ function renderMomentList(filter = 'all') {
                     cardHTML += `<div style="background:#f0f0f0;border-radius:8px;padding:8px;margin:8px 0;display:flex;align-items:center;gap:8px;"><span>📚</span><span>${escapeHtml(book.title)} - ${escapeHtml(book.author)}</span></div>`;
                 }
             }
-            // 显示定位
             if (moment.location) {
                 cardHTML += `<div class="moment-location">📍 ${escapeHtml(moment.location)}</div>`;
             }
@@ -5028,7 +5107,6 @@ function showMomentDetail(momentId) {
             postHTML += `<div style="background:#f0f0f0;border-radius:8px;padding:8px;margin:8px 0;display:flex;align-items:center;gap:8px;"><span>📚</span><span>${escapeHtml(book.title)} - ${escapeHtml(book.author)}</span></div>`;
         }
     }
-    // 显示定位
     if (moment.location) {
         postHTML += `<div class="moment-location">📍 ${escapeHtml(moment.location)}</div>`;
     }
@@ -5077,7 +5155,6 @@ function showMomentDetail(momentId) {
                 <img class="comment-avatar" src="${commenterAvatar}" alt="${escapeHtml(commenterName)}">
                 <div class="comment-body">${bodyHTML}</div>
                 <button class="comment-reply-btn" onclick="event.stopPropagation(); startReplyToComment('${comment.roleId}', '${escapeHtml(commenterName)}', '${comment.id || ''}')">回复</button>`;
-            // 长按删除逻辑
             addCommentLongPress(commentDiv, moment, index);
             commentsBlock.appendChild(commentDiv);
         });
@@ -5090,17 +5167,19 @@ function showMomentDetail(momentId) {
     }
 }
 
-// 新增：评论长按删除（仅删除单条评论）
 function addCommentLongPress(el, moment, commentIndex) {
     let timer;
     el.addEventListener('touchstart', (e) => {
         timer = setTimeout(() => {
             showConfirm('删除这条评论？', async () => {
                 moment.comments.splice(commentIndex, 1);
-                // 清理 commenters 如果该用户没有其他评论
                 await saveData();
-                showMomentDetail(moment.id);
-                renderMomentList(currentMomentFilter);
+                if (document.getElementById('page-moment-detail').classList.contains('active') && currentDetailMomentId === moment.id) {
+                    showMomentDetail(moment.id);
+                }
+                if (document.getElementById('page-moments').classList.contains('active')) {
+                    renderMomentList(currentMomentFilter);
+                }
             });
         }, 500);
     });
@@ -5249,7 +5328,6 @@ async function handleMomentImageUpload(input) { const files = input.files; if (!
 function populateSongSelector() { const select = document.getElementById('moment-music-selector'); select.innerHTML = '<option value="">选择歌曲...</option>'; appData.songLibrary.forEach(song => { select.innerHTML += `<option value="${song.id}">${escapeHtml(song.title)} - ${escapeHtml(song.artist)}</option>`; }); }
 function populateBookSelector() { const select = document.getElementById('moment-book-selector'); select.innerHTML = '<option value="">选择书籍...</option>'; appData.bookLibrary.forEach(book => { select.innerHTML += `<option value="${book.id}">${escapeHtml(book.title)} - ${escapeHtml(book.author)}</option>`; }); }
 
-// 新增：朋友圈定位选择
 function openMomentLocationPicker() {
     const list = document.getElementById('address-picker-list');
     const addresses = appData.addressLibrary || [];
@@ -5323,7 +5401,6 @@ function generateAutoMoment(role) {
     const textPool = ['今天天气真好 ☀️', '又是元气满满的一天', '午后的阳光让人想睡觉', '突然想吃火锅了 🍲', '今天也辛苦啦 ✨']; textSources.forEach(t => { if (Math.random() < 0.3) textPool.push(t); });
     const content = textPool[Math.floor(Math.random() * textPool.length)];
     const moment = { id: generateUID(), roleId: role.id, type, content, images: images || [], musicId: musicId || null, bookId: bookId || null, time: Date.now(), likes: [], comments: [], commenters: [] };
-    // 15%概率添加定位
     if (Math.random() < 0.15 && appData.addressLibrary && appData.addressLibrary.length > 0) {
         moment.location = appData.addressLibrary[Math.floor(Math.random() * appData.addressLibrary.length)];
     }
@@ -5586,7 +5663,6 @@ function renderAddressLibrary() {
     });
 }
 
-// 新增：使用弹窗添加地址（替代 prompt）
 function openAddressAddModal() {
     document.getElementById('new-address-input').value = '';
     document.getElementById('modal-address-add').classList.add('active');
@@ -5615,7 +5691,6 @@ async function saveAddressLibrary() {
     showToast('地址库已保存');
 }
 
-// 更新全局挂载的新函数
 window.openAddressAddModal = openAddressAddModal;
 window.closeAddressAddModal = closeAddressAddModal;
 window.confirmAddAddress = confirmAddAddress;
@@ -5623,8 +5698,7 @@ window.openMomentLocationPicker = openMomentLocationPicker;
 window.closeMomentLocationPicker = closeMomentLocationPicker;
 window.clearMomentLocation = clearMomentLocation;
 window.openAddressLibraryFromPicker = openAddressLibraryFromPicker;
-// 保留原有 addAddressItem，但不再使用 prompt，替换为新弹窗入口
-window.addAddressItem = openAddressAddModal; // 兼容旧调用
+window.addAddressItem = openAddressAddModal;
 
 // 挂载全局窗口函数
 window.showPlusPanel = showPlusPanel; window.closePlusPanel = closePlusPanel;
@@ -5760,7 +5834,7 @@ function unlockAudioOnce() { ensureAudioContext(); document.removeEventListener(
 
 window.addEventListener('DOMContentLoaded', startSplashAnimation);
 function startSplashAnimation() { 
-    updateDate(); // 提前更新日期
+    updateDate();
     const quotes = ["遇见你，是所有故事的开始","我携满天星辰以赠你，仍觉星辰不及你","心若有所向，何惧道阻且长","温柔是宝藏，你也是","世间万物，皆不如你","目光所及，全都是你"]; 
     const quoteText = document.getElementById("quoteText"), progressBar = document.getElementById("progressBar"), statusText = document.getElementById("statusText"); 
     const loadingCard = document.getElementById("loadingCard"), splashScreen = document.getElementById("splash-screen"); 
