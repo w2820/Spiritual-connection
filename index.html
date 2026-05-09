@@ -3339,7 +3339,7 @@ let disableAutoTransferUntil = 0;
 let lastManualTransferTime = 0;
 let momentTimer = null;
 let momentCommentTimer = null;
-let momentLikeTimer = null; // 新增：自动点赞定时器
+let momentLikeTimer = null;
 let currentMomentType = 'text';
 let tempMomentImages = [];
 let currentMomentFilter = 'all';
@@ -3413,10 +3413,7 @@ function playCustomRingtone() {
     if (audio && appData.settings.call?.ringtone) {
         audio.src = appData.settings.call.ringtone;
         audio.load();
-        audio.play().then(() => {
-            // 自定义铃声播放成功
-        }).catch(() => {
-            // 失败则播放合成回铃音
+        audio.play().catch(() => {
             playRingbackTone();
         });
     } else {
@@ -3611,7 +3608,15 @@ function stopRingback() {
         audioCtx = null;
     }
 }
-function stopAllRingtones() { stopRingtone(); stopRingback(); }
+function stopAllRingtones() {
+    stopRingtone();
+    stopRingback();
+    const audio = document.getElementById('call-ringtone');
+    if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+    }
+}
 
 // --- localforage 实例 ---
 const store = localforage.createInstance({ name: 'SpiritualConnectionV2' });
@@ -4570,7 +4575,6 @@ function startCall() {
     setCallWindowSize(callState.windowSize);
     updateCallActions();
     document.getElementById('modal-call').classList.remove('hidden');
-    // 使用自定义铃声（如果设置），失败回退到合成回铃音
     playCustomRingtone();
     setTimeout(() => {
         if (!callState.active || callState.status !== 'calling' || callState.initiator !== 'user') return;
@@ -4604,6 +4608,7 @@ function hangUpCall(isAuto = false) { if (!callState.active) return; stopAllRing
 function answerCall() { if (!callState.active || callState.status !== 'incoming') return; stopAllRingtones(); if (callState.userTimeoutTimer) clearTimeout(callState.userTimeoutTimer); callState.status = 'connected'; document.getElementById('call-status').textContent = '通话中'; startCallTimer(); const minDur = (appData.settings.autoCall?.minDuration || 0.5) * 60, maxDur = (appData.settings.autoCall?.maxDuration || 3) * 60; callState.autoHangupTimer = setTimeout(() => { if (callState.active && callState.status === 'connected') hangUpCall(true); }, (minDur + Math.random() * (maxDur - minDur)) * 1000); updateCallActions(); }
 function rejectIncomingCall() { if (!callState.active || callState.status !== 'incoming') return; stopAllRingtones(); if (callState.userTimeoutTimer) clearTimeout(callState.userTimeoutTimer); endCall('rejected', 0); }
 function endCall(status, duration = 0, isAuto = false) { 
+    callState.active = false;
     stopAllRingtones(); 
     if (callState.timerInterval) clearInterval(callState.timerInterval); 
     if (callState.autoHangupTimer) clearTimeout(callState.autoHangupTimer); 
@@ -5203,7 +5208,6 @@ function renderMomentList(filter = 'all') {
             const card = document.createElement('div');
             card.className = 'moment-card';
             card.onclick = (e) => { if (!e.target.closest('.moment-delete-btn') && !e.target.closest('.moment-actions button')) showMomentDetail(moment.id); };
-            // 所有动态都显示删除按钮
             const delBtn = document.createElement('button');
             delBtn.className = 'moment-delete-btn';
             delBtn.innerHTML = '✖️';
@@ -5426,7 +5430,7 @@ function showMomentDetail(momentId) {
     document.getElementById('detail-comment-input').value = '';
     const navDeleteBtn = document.getElementById('detail-delete-nav-btn');
     if (navDeleteBtn) {
-        navDeleteBtn.style.display = moment.roleId === 'me' ? 'block' : 'none';
+        navDeleteBtn.style.display = 'block';
     }
 }
 
@@ -5828,7 +5832,7 @@ function startMomentCommentTimer() {
     }, 10 * 60 * 1000);
 }
 
-// 新增：自动点赞定时器，每隔8-15分钟随机给最近3天的动态点赞
+// 自动点赞定时器，每隔8-15分钟随机给最近3天的动态点赞
 function startMomentLikeTimer() {
     if (momentLikeTimer) clearInterval(momentLikeTimer);
     momentLikeTimer = setInterval(() => {
