@@ -3833,6 +3833,7 @@ async function loadData() {
     window.addEventListener('orientationchange', updateChatPageHeight);
     if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', updateChatPageHeight);
+        window.visualViewport.addEventListener('scroll', updateChatPageHeight);
     }
     const ringtoneAudio = document.getElementById('call-ringtone');
     if (ringtoneAudio) {
@@ -3843,12 +3844,27 @@ async function loadData() {
 
 function updateChatPageHeight() {
     const chatPage = document.getElementById('page-chat');
-    if (chatPage) {
-        chatPage.style.height = window.innerHeight + 'px';
+    if (!chatPage || !chatPage.classList.contains('active')) return;
+    const header = chatPage.querySelector('header');
+    const footer = chatPage.querySelector('footer');
+    const messagesEl = document.getElementById('chat-messages');
+    if (!header || !footer || !messagesEl) return;
+    const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    const offsetTop = window.visualViewport ? window.visualViewport.offsetTop : 0;
+    const safeBottom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('env(safe-area-inset-bottom)')) || 0;
+    const headerHeight = header.offsetHeight;
+    const footerHeight = footer.offsetHeight;
+    const keyboardHeight = window.innerHeight - vh - offsetTop;
+    if (keyboardHeight > 50) {
+        chatPage.style.height = vh + 'px';
+        messagesEl.style.height = (vh - headerHeight - footerHeight - safeBottom) + 'px';
+        messagesEl.style.maxHeight = messagesEl.style.height;
+    } else {
+        chatPage.style.height = '';
+        messagesEl.style.height = '';
+        messagesEl.style.maxHeight = '';
     }
-    document.querySelectorAll('.page').forEach(p => {
-        if (p.id !== 'page-chat') p.style.height = window.innerHeight + 'px';
-    });
+    scrollToBottom();
 }
 
 function applyMomentCover() {
@@ -4017,6 +4033,17 @@ function goBack() {
     currentGroupId = null;
     renderRoleList();
     renderGroupList();
+    // 重置聊天页面样式
+    const chatPage = document.getElementById('page-chat');
+    if (chatPage) {
+        chatPage.style.height = '';
+        chatPage.style.transform = '';
+    }
+    const messagesEl = document.getElementById('chat-messages');
+    if (messagesEl) {
+        messagesEl.style.height = '';
+        messagesEl.style.maxHeight = '';
+    }
 }
 
 function renderChatMessages() {
