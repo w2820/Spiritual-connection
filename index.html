@@ -99,6 +99,7 @@
         }
 
         /* ========== 气泡样式（优化宽度控制，防止竖排） ========== */
+        /* 角色接收的消息气泡（完全保留原始设计，不做调整） */
         .bubble-left {
             background: linear-gradient(to bottom, #D8E7F2, #FAF5EC) !important;
             border-radius: 13px 13px 13px 13px !important;
@@ -125,7 +126,7 @@
             content: "";
             position: absolute;
             left: -6px;
-            top: -1px;
+            top: 20px;                  /* 固定为20px，指向头像中心（头像高度40px） */
             width: 20px;
             height: 16px;
             background: #D8E7F2;
@@ -147,6 +148,7 @@
             z-index: 2;
             pointer-events: none;
         }
+        /* 我发送的消息气泡（修复竖排问题：使用 max-width:100%，统一 white-space:normal） */
         .bubble-right {
             background: linear-gradient(to bottom, #F9E8EE, #FAF5EC) !important;
             border-radius: 13px 13px 13px 13px !important;
@@ -156,7 +158,7 @@
             color: #686A67 !important;
             padding: 6px 12px !important;
             max-width: 100% !important;
-            width: fit-content !important;
+            width: auto !important;
             min-width: 20px !important;
             word-wrap: break-word !important;
             white-space: normal !important;
@@ -169,11 +171,12 @@
             display: inline-block !important;
             flex-shrink: 0 !important;
         }
+        /* 短文本场景下保持正常横向排列（不再覆盖 white-space） */
         .bubble-right::after {
             content: "";
             position: absolute;
             right: -12px;
-            top: -3px;
+            top: 20px;                  /* 固定为20px，指向头像中心 */
             width: 20px;
             height: 20px;
             background: #F9E8EE;
@@ -225,6 +228,17 @@
             font-weight: 500 !important;
             position: relative;
             overflow: visible !important;
+        }
+        /* 右侧消息行，确保头像始终可见 */
+        .flex.w-full.justify-end {
+            flex-wrap: nowrap !important;
+            align-items: flex-start !important;  /* 顶部对齐，让尖角固定在20px位置指向头像中心 */
+        }
+        .flex.w-full.justify-end > .flex-shrink-0.w-10.h-10 {
+            flex-shrink: 0 !important;
+            margin-left: 4px !important;
+            z-index: 5;
+            position: relative;
         }
 
         /* 时间戳防止压缩 */
@@ -1314,6 +1328,111 @@
             max-width: 320px;
             width: 90%;
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        /* ========== 字卡库列表样式（防止上栏遮挡点击） ========== */
+        #modal-library-words .flex-1.overflow-auto .flex.gap-2.mb-3 {
+            position: relative;
+            z-index: 1;
+            overflow: visible;
+        }
+        #modal-library-words .flex-1.overflow-auto .flex.gap-2.mb-4 {
+            position: relative;
+            z-index: 1;
+            overflow: visible;
+        }
+        #word-card-list {
+            position: relative;
+            z-index: 5;
+        }
+        .word-card-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #f0f0f0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+            transition: all 0.2s;
+            position: relative;
+            z-index: 5;
+        }
+        .word-card-item.blocked {
+            background: #fff5f5;
+            border-color: #ffcccc;
+            opacity: 0.65;
+        }
+        .word-card-item.blocked .word-card-text {
+            text-decoration: line-through;
+            color: #999;
+        }
+        .word-card-item.editing {
+            flex-direction: column;
+            align-items: stretch;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(130,203,178,0.2);
+        }
+        .word-card-text {
+            flex: 1;
+            font-size: 15px;
+            word-break: break-all;
+            white-space: pre-wrap;
+            min-width: 0;
+        }
+        .word-card-group-tag {
+            font-size: 11px;
+            background: var(--accent-light);
+            color: var(--accent-color);
+            padding: 2px 8px;
+            border-radius: 10px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .word-card-actions {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 10;
+        }
+        .word-card-actions button {
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            position: relative;
+        }
+        .word-card-edit-row {
+            display: flex;
+            gap: 6px;
+            width: 100%;
+            margin-bottom: 6px;
+        }
+        .word-card-edit-row input {
+            flex: 1;
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+        .word-card-edit-actions {
+            display: flex;
+            gap: 6px;
+            justify-content: flex-end;
+        }
+        .word-card-edit-actions button {
+            padding: 4px 14px;
+            border-radius: 16px;
+            font-size: 12px;
+            cursor: pointer;
         }
 
         /* ========== 转账气泡样式 - 橙黄色 ========== */
@@ -2434,33 +2553,25 @@
     <div class="safe-top bg-white border-b border-gray-100 p-4 flex items-center" style="background-color: var(--header-bg);">
         <button onclick="closeWordCardLibrary()" class="p-2 -ml-2 rounded-full hover:bg-gray-100"><i data-lucide="chevron-left" class="w-6 h-6"></i></button>
         <h2 class="text-lg font-bold ml-2">字卡词库</h2>
+        <button class="ml-auto px-3 py-1.5 rounded-full text-xs font-medium shadow-sm" style="background-color: var(--button-primary-bg); color: var(--button-primary-text);" onclick="openAddGroupModal()">+ 新增分组</button>
     </div>
     <div class="flex-1 overflow-auto p-4 bg-gray-50">
-        <div class="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
-            <button onclick="openBatchAddWordsModal()" class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-medium shadow-sm">批量添加</button>
+        <!-- 操作按钮行 -->
+        <div class="flex gap-2 mb-3 flex-wrap">
+            <button onclick="addNewWordCard()" class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-medium shadow-sm">+ 新增字卡</button>
+            <button onclick="openBatchAddWordsModal()" class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-medium shadow-sm">批量导入</button>
             <button onclick="processWords('unique')" class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-medium shadow-sm">查重</button>
-            <button onclick="processWords('remove_punct')" class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-medium shadow-sm">去标点</button>
-            <button onclick="exportWords()" class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-medium shadow-sm flex items-center gap-1"><i data-lucide="download" class="w-3 h-3"></i>导出</button>
-            <label class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-medium shadow-sm flex items-center gap-1 cursor-pointer"><i data-lucide="upload" class="w-3 h-3"></i>导入<input type="file" accept=".txt,.json" class="hidden" onchange="importWords(this)"></label>
-            <button onclick="openAddGroupModal()" class="px-3 py-1.5 text-white border rounded-full text-xs font-medium shadow-sm" style="background-color: var(--button-primary-bg); border-color: var(--button-primary-bg);">+ 新增分组</button>
+            <button onclick="exportWords()" class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-medium shadow-sm">导出</button>
+            <label class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-medium shadow-sm cursor-pointer">导入<input type="file" accept=".txt,.json" class="hidden" onchange="importWords(this)"></label>
         </div>
-        <div class="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide" id="word-groups"><button onclick="switchWordGroup('all')" class="px-3 py-1 text-white rounded-full text-xs font-medium shadow-md whitespace-nowrap" style="background-color: var(--accent-color);">全部</button></div>
-        <div class="bg-white rounded-2xl p-4 shadow-sm border mb-4">
-            <div class="words-editor-header">
-                <label class="text-xs font-bold text-gray-500 uppercase">词条编辑区</label>
-                <div class="words-actions">
-                    <button class="words-action-btn" onclick="selectAllWords()">全选</button>
-                    <button class="words-action-btn" onclick="copyWords()">复制</button>
-                    <span class="text-[10px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full" id="word-count">0 条</span>
-                </div>
-            </div>
-            <textarea id="word-editor" class="w-full h-64 bg-gray-50 rounded-xl p-3 text-sm outline-none resize-none" placeholder="在此输入或粘贴词条，每行一条..."></textarea>
-            <p class="text-[10px] text-gray-400 mt-2" id="word-editor-tip">提示：切换到具体分组可编辑内容</p>
+        <!-- 分组标签栏 -->
+        <div class="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide" id="word-groups"></div>
+        <!-- 统计信息 -->
+        <div class="flex justify-between items-center mb-3">
+            <span class="text-xs text-gray-500" id="word-list-stats">共 0 条 · 已屏蔽 0 条</span>
         </div>
-        <div class="bg-white rounded-2xl p-4 shadow-sm border">
-            <label class="text-xs font-bold text-gray-500 uppercase block mb-2">快捷添加</label>
-            <div class="flex gap-2"><input type="text" id="new-word-input" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm" placeholder="输入新词条"><button onclick="addWord()" class="text-white px-4 py-2 rounded-xl text-sm font-medium shadow-md active:scale-95 transition" style="background-color: var(--button-primary-bg); color: var(--button-primary-text);">添加</button></div>
-        </div>
+        <!-- 字卡列表容器 -->
+        <div id="word-card-list" class="space-y-2"></div>
     </div>
     <div class="safe-bottom p-4 bg-white border-t border-gray-100" style="background-color: var(--footer-bg); border-color: var(--footer-border);">
         <button onclick="saveWords()" class="w-full text-white p-3 rounded-xl font-bold shadow-lg active:scale-[0.98] transition" style="background-color: var(--button-primary-bg); color: var(--button-primary-text);">保存并应用</button>
@@ -3124,7 +3235,31 @@
     </div>
 </div>
 
+<!-- ========== 新增：编辑字卡模态框 ========== -->
+<div id="modal-edit-word" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 320px;">
+        <h3 class="text-lg font-bold mb-4">编辑字卡</h3>
+        <input type="text" id="edit-word-input" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm mb-4" placeholder="请输入新内容">
+        <div class="flex gap-3">
+            <button onclick="closeEditWordModal()" class="flex-1 py-2.5 rounded-xl border border-gray-200 font-medium">取消</button>
+            <button onclick="confirmEditWord()" class="flex-1 py-2.5 rounded-xl text-white font-medium shadow-lg" style="background-color: var(--button-primary-bg);">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========== 新增：移动分组模态框 ========== -->
+<div id="modal-move-word" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 320px;">
+        <h3 class="text-lg font-bold mb-4">移动到分组</h3>
+        <div id="move-group-list" class="max-h-60 overflow-y-auto mb-4 space-y-2"></div>
+        <div class="flex gap-3">
+            <button onclick="closeMoveWordModal()" class="flex-1 py-2.5 rounded-xl border border-gray-200 font-medium">取消</button>
+        </div>
+    </div>
+</div>
+
 <script>
+
 // --- 初始化图标 ---
 lucide.createIcons();
 
@@ -3169,7 +3304,7 @@ const DEFAULT_DATA = {
         weathers: ['阳光明媚', '阴雨绵绵', '绿意盎然', '大雪纷飞', '秋高气爽', '雷电交加'],
         quotes: ['每一天都因为有你而特别 ✨', '你是我这一生等了半世未拆的礼物 🎁', '山河远阔，人间烟火，无一是你，无一不是你 🌊', '我见众生皆草木，唯有见你是青山 🍃', '海底月是天上月，眼前人是心上人 🌙', '你是落日弥漫的橘，天边透亮的星 🌟', '谷雨生百谷，你是我生命里最饱满的那颗。'],
         replies: ['贴贴', '爱你', '在干嘛？', '吃饭了吗？', '想你了', '今天天气真好'],
-        wordGroups: [{ name: '默认', words: ['贴贴', '爱你', '在干嘛？', '吃饭了吗？', '想你了', '今天天气真好', '你是我的', '不许看别人', '我会永远在你身边', '加油', '抱抱', '嗯', '好的', '知道了', '晚安', '早安', '午安'] }],
+        wordGroups: [{ name: '默认', words: [{ text: '贴贴', blocked: false }, { text: '爱你', blocked: false }, { text: '在干嘛？', blocked: false }, { text: '吃饭了吗？', blocked: false }, { text: '想你了', blocked: false }, { text: '今天天气真好', blocked: false }, { text: '你是我的', blocked: false }, { text: '不许看别人', blocked: false }, { text: '我会永远在你身边', blocked: false }, { text: '加油', blocked: false }, { text: '抱抱', blocked: false }, { text: '嗯', blocked: false }, { text: '好的', blocked: false }, { text: '知道了', blocked: false }, { text: '晚安', blocked: false }, { text: '早安', blocked: false }, { text: '午安', blocked: false }] }],
         emojis: ['😊', '😂', '❤️', '👍', '🎉', '🔥', '😭', '😍', '🥰', '😘'],
         stickers: []
     },
@@ -3694,7 +3829,11 @@ async function updateStorageDisplay() {
     document.getElementById('storage-progress-fill').style.width = percent + '%';
 }
 
-function syncAllReplies() { const all = []; appData.wordbanks.wordGroups.forEach(g => all.push(...g.words)); appData.wordbanks.replies = [...new Set(all)]; }
+function syncAllReplies() { 
+    const all = []; 
+    appData.wordbanks.wordGroups.forEach(g => g.words.forEach(w => { if (typeof w === 'object') all.push(w.text); else all.push(w); })); 
+    appData.wordbanks.replies = [...new Set(all)]; 
+}
 
 async function saveData() {
     try {
@@ -3732,7 +3871,7 @@ function startAutoSendTimer() {
 }
 
 function sendAutoMessageForRole(role) {
-    const all = []; appData.wordbanks.wordGroups.forEach(g => all.push(...g.words)); if (all.length === 0) return;
+    const all = getActiveWordList(); if (all.length === 0) return;
     let content = all[Math.floor(Math.random() * all.length)], type = 'text';
     if (appData.wordbanks.stickers.length > 0 && Math.random() * 100 < (appData.settings.stickerProb || 10)) { type = 'image'; content = appData.wordbanks.stickers[Math.floor(Math.random() * appData.wordbanks.stickers.length)]; }
     else { if (Math.random() * 100 < (appData.settings.emojiProb || 20) && appData.wordbanks.emojis.length > 0) content += ' ' + appData.wordbanks.emojis[Math.floor(Math.random() * appData.wordbanks.emojis.length)]; }
@@ -3749,7 +3888,7 @@ function triggerGroupAutoReply(group) {
     const rand = Math.random() * 100; let cumulative = 0, selectedCount = 1;
     for (let i = 1; i <= memberCount; i++) { cumulative += probConfig[i.toString()] || 0; if (rand < cumulative) { selectedCount = i; break; } }
     const speakers = [...group.members].sort(() => Math.random() - 0.5).slice(0, Math.min(selectedCount, memberCount));
-    const allWords = []; appData.wordbanks.wordGroups.forEach(g => allWords.push(...g.words)); if (allWords.length === 0) return;
+    const allWords = getActiveWordList(); if (allWords.length === 0) return;
     if (!appData.groupChats[group.id]) appData.groupChats[group.id] = [];
     speakers.forEach((speakerId, index) => { setTimeout(() => {
         let content = allWords[Math.floor(Math.random() * allWords.length)], type = 'text';
@@ -3762,10 +3901,26 @@ function triggerGroupAutoReply(group) {
 
 function getDefaultProbConfig(count) { const config = {}; for (let i = 1; i <= count; i++) config[i] = Math.floor(100 / count); const sum = Object.values(config).reduce((a,b)=>a+b,0); if (sum < 100) config[1] += 100 - sum; return config; }
 
+// 获取所有未被屏蔽的字卡文本
+function getActiveWordList() {
+    const active = [];
+    appData.wordbanks.wordGroups.forEach(g => {
+        g.words.forEach(w => {
+            if (typeof w === 'object') { if (!w.blocked) active.push(w.text); }
+            else { active.push(w); }
+        });
+    });
+    return active.length ? active : ['贴贴', '爱你'];
+}
+
 async function loadData() {
     try {
         const stored = await store.getItem('appData'); appData = stored || JSON.parse(JSON.stringify(DEFAULT_DATA));
         if (!appData.wordbanks.wordGroups) appData.wordbanks.wordGroups = [{ name: '默认', words: [...(appData.wordbanks.replies || [])] }];
+        // 确保 words 是对象数组
+        appData.wordbanks.wordGroups.forEach(g => {
+            g.words = g.words.map(w => typeof w === 'string' ? { text: w, blocked: false } : w);
+        });
         if (!appData.groups) appData.groups = []; appData.groups.forEach(g => { if (!g.avatar) g.avatar = DEFAULT_GROUP_AVATAR; if (!g.replyCountProb) g.replyCountProb = {}; });
         if (!appData.groupChats) appData.groupChats = {};
         if (!appData.importantDays) appData.importantDays = [{ id: '1', name: '4.21黎宝和领戒指', date: '2025-04-21', type: 'anniversary', cover: '' }];
@@ -4033,7 +4188,6 @@ function goBack() {
     currentGroupId = null;
     renderRoleList();
     renderGroupList();
-    // 重置聊天页面样式
     const chatPage = document.getElementById('page-chat');
     if (chatPage) {
         chatPage.style.height = '';
@@ -4060,6 +4214,7 @@ function getQuotePreview(msg) {
     return msg.content ? msg.content.substring(0, 20) : '';
 }
 
+// ========== 修改点：时间戳放在气泡外部，对齐方式改为 items-start 使尖角与头像顶部平齐 ==========
 function createMessageElement(sender, content, time, quote = null, type = 'text') {
     const isMe = sender === 'me';
     const myProfile = appData.userProfile || { nickname: '我', avatar: DEFAULT_AVATAR };
@@ -4067,7 +4222,9 @@ function createMessageElement(sender, content, time, quote = null, type = 'text'
     if (isMe) { avatar = myProfile.avatar || DEFAULT_AVATAR; name = myProfile.nickname || '我'; }
     else if (sender === 'system') { avatar = ''; name = ''; }
     else { const role = appData.roles.find(r => r.id === sender); avatar = role?.avatar || DEFAULT_AVATAR; name = role?.name || '未知'; }
-    const div = document.createElement('div'); div.className = `flex w-full ${isMe ? 'justify-end' : 'justify-start'} animate-fade-in mb-5`;
+    const div = document.createElement('div'); 
+    // 使用 items-start 使气泡顶部与头像顶部对齐，尖角固定在距顶部20px处指向头像中心
+    div.className = `flex w-full ${isMe ? 'justify-end items-start' : 'justify-start items-start'} animate-fade-in mb-4`;
     const ts = new Date(time).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
 
     if (type === 'poke') {
@@ -4092,10 +4249,10 @@ function createMessageElement(sender, content, time, quote = null, type = 'text'
         const clickable = !isMe && data.status === 'pending' ? ' clickable' : '';
         const onClickAttr = (!isMe && data.status === 'pending') ? ` onclick="event.stopPropagation(); collectTransfer('${sender}', ${data.amount}, '${data.note || ''}', this)"` : '';
         div.innerHTML = `
-        <div class="${isMe ? '' : 'flex-shrink-0 w-10 h-10 mr-3 mt-1'}">
-            ${!isMe ? `<img src="${avatar}" class="w-full h-full rounded-full object-cover border border-gray-100">` : ''}
+        <div class="${isMe ? 'order-2' : 'order-1'} flex-shrink-0 w-10 h-10 mr-2 ml-2">
+            <img src="${avatar}" class="w-full h-full rounded-full object-cover border border-gray-100">
         </div>
-        <div class="flex flex-col ${isMe ? 'items-end' : ''}">
+        <div class="flex flex-col ${isMe ? 'order-1 items-end' : 'order-2 items-start'} max-w-[70%]">
             ${!isMe ? `<div class="text-sm font-bold text-gray-700 mb-1">${escapeHtml(name)}</div>` : ''}
             <div class="bubble-transfer ${directionClass}${collectedClass}${clickable}"${onClickAttr}>
                 <div class="transfer-icon-circle">⇄</div>
@@ -4105,9 +4262,8 @@ function createMessageElement(sender, content, time, quote = null, type = 'text'
                     <div class="transfer-bottom-label">${bottomLabel}</div>
                 </div>
             </div>
-            <span class="text-xs text-gray-400 mt-1 message-time">${ts}</span>
-        </div>
-        ${isMe ? `<div class="flex-shrink-0 w-10 h-10 ml-3 mt-1"><img src="${myProfile.avatar || DEFAULT_AVATAR}" class="w-full h-full rounded-full object-cover border border-gray-100"></div>` : ''}`;
+            <span class="text-xs text-gray-400 mt-1 ${isMe ? 'text-right' : 'text-left'}">${ts}</span>
+        </div>`;
     } else if (type === 'redpacket') {
         let data; try { data = JSON.parse(content); } catch(e) { data = { blessing: content, totalAmount: 0, count: 1 }; }
         const isGroup = data.chatType === 'group';
@@ -4115,10 +4271,10 @@ function createMessageElement(sender, content, time, quote = null, type = 'text'
         const openedClass = data.status === 'received' || data.status === 'opened' ? ' redpacket-opened' : '';
         const directionClass = isMe ? 'bubble-redpacket-right' : 'bubble-redpacket-left';
         div.innerHTML = `
-        <div class="${isMe ? '' : 'flex-shrink-0 w-10 h-10 mr-3 mt-1'}">
-            ${!isMe ? `<img src="${avatar}" class="w-full h-full rounded-full object-cover border border-gray-100">` : ''}
+        <div class="${isMe ? 'order-2' : 'order-1'} flex-shrink-0 w-10 h-10 mr-2 ml-2">
+            <img src="${avatar}" class="w-full h-full rounded-full object-cover border border-gray-100">
         </div>
-        <div class="flex flex-col ${isMe ? 'items-end' : ''}">
+        <div class="flex flex-col ${isMe ? 'order-1 items-end' : 'order-2 items-start'} max-w-[70%]">
             ${!isMe ? `<div class="text-sm font-bold text-gray-700 mb-1">${escapeHtml(name)}</div>` : ''}
             <div class="bubble-redpacket ${directionClass}${openedClass}" onclick="event.stopPropagation(); openRedPacket('${data.id}')">
                 <div class="redpacket-icon-box">福</div>
@@ -4128,28 +4284,27 @@ function createMessageElement(sender, content, time, quote = null, type = 'text'
                     <div class="redpacket-progress">${statusText}</div>
                 </div>
             </div>
-            <span class="text-xs text-gray-400 mt-1 message-time">${ts}</span>
-        </div>
-        ${isMe ? `<div class="flex-shrink-0 w-10 h-10 ml-3 mt-1"><img src="${myProfile.avatar || DEFAULT_AVATAR}" class="w-full h-full rounded-full object-cover border border-gray-100"></div>` : ''}`;
+            <span class="text-xs text-gray-400 mt-1 ${isMe ? 'text-right' : 'text-left'}">${ts}</span>
+        </div>`;
     } else if (type === 'image') {
         const imgTag = `<img src="${content}" style="max-width:120px; max-height:90px; border-radius:4px; display:block;">`;
         if (!isMe) {
-            div.innerHTML = `<div class="flex-shrink-0 w-10 h-10 mr-3 mt-1"><img src="${avatar}" class="w-full h-full rounded-full object-cover border border-gray-100"></div>
-            <div class="flex flex-col max-w-[75%]">
+            div.innerHTML = `<div class="flex-shrink-0 w-10 h-10 mr-3"><img src="${avatar}" class="w-full h-full rounded-full object-cover border border-gray-100"></div>
+            <div class="flex flex-col max-w-[70%]">
                 <div class="text-sm font-bold text-gray-700 mb-1">${escapeHtml(name)}</div>
                 <div class="flex items-end gap-2">
                     <div class="bubble-left" style="background:transparent; box-shadow:none; padding:0;">${imgTag}</div>
-                    <span class="text-xs text-gray-400 mb-2.5 message-time">${ts}</span>
                 </div>
+                <span class="text-xs text-gray-400 mt-1">${ts}</span>
             </div>`;
         } else {
-            div.innerHTML = `<div class="flex flex-col items-end max-w-[75%]">
+            div.innerHTML = `<div class="flex flex-col items-end max-w-[70%]">
                 <div class="flex items-end gap-2">
-                    <span class="text-xs text-gray-400 mb-2.5 message-time">${ts}</span>
                     <div class="bubble-right" style="background:transparent; box-shadow:none; padding:0;">${imgTag}</div>
                 </div>
+                <span class="text-xs text-gray-400 mt-1">${ts}</span>
             </div>
-            <div class="flex-shrink-0 w-10 h-10 ml-3 mt-1"><img src="${myProfile.avatar || DEFAULT_AVATAR}" class="w-full h-full rounded-full object-cover border border-gray-100"></div>`;
+            <div class="flex-shrink-0 w-10 h-10 ml-3"><img src="${myProfile.avatar || DEFAULT_AVATAR}" class="w-full h-full rounded-full object-cover border border-gray-100"></div>`;
         }
     } else {
         let qt = '';
@@ -4165,20 +4320,24 @@ function createMessageElement(sender, content, time, quote = null, type = 'text'
             }
         }
         if (!isMe) {
-            div.innerHTML = `<div class="flex-shrink-0 w-10 h-10 mr-3 mt-1"><img src="${avatar}" class="w-full h-full rounded-full object-cover border border-gray-100"></div>
-            <div class="flex flex-col max-w-[75%]">
+            // 左侧角色消息：头像在左，气泡在右，时间戳在气泡下方左对齐
+            div.innerHTML = `<div class="flex-shrink-0 w-10 h-10 mr-3"><img src="${avatar}" class="w-full h-full rounded-full object-cover border border-gray-100"></div>
+            <div class="flex flex-col max-w-[70%]">
                 <div class="text-sm font-bold text-gray-700 mb-1">${escapeHtml(name)}</div>
                 <div class="flex items-end gap-2">
-                    <div class="bubble-left text-gray-900">${qt}${escapeHtml(content)}</div>
-                    <span class="text-xs text-gray-400 mb-2.5 message-time">${ts}</span>
+                    <div class="bubble-left text-gray-900" style="max-width:100%; word-break:break-all; overflow-wrap:break-word; white-space:pre-wrap;">${qt}${escapeHtml(content)}</div>
                 </div>
+                <span class="text-xs text-gray-400 mt-1 text-left">${ts}</span>
             </div>`;
         } else {
-            div.innerHTML = `<div class="flex flex-col items-end max-w-[75%]">
-                ${qt ? `<div class="bubble-right text-white" style="display:block; width:100%;">${qt}${escapeHtml(content)}</div>` : `<div class="flex items-end gap-2"><span class="text-xs text-gray-400 mb-2.5 message-time">${ts}</span><div class="bubble-right text-white">${escapeHtml(content)}</div></div>`}
-                ${qt ? `<span class="text-xs text-gray-400 mt-1 message-time">${ts}</span>` : ''}
+            // 右侧用户消息：时间戳在气泡下方右对齐，头像在右
+            div.innerHTML = `<div class="flex flex-col items-end max-w-[70%]">
+                <div class="flex items-end gap-2">
+                    <div class="bubble-right text-white" style="max-width:100%; word-break:break-all; overflow-wrap:break-word; white-space:pre-wrap;">${qt}${escapeHtml(content)}</div>
+                </div>
+                <span class="text-xs text-gray-400 mt-1 text-right">${ts}</span>
             </div>
-            <div class="flex-shrink-0 w-10 h-10 ml-3 mt-1"><img src="${myProfile.avatar || DEFAULT_AVATAR}" class="w-full h-full rounded-full object-cover border border-gray-100"></div>`;
+            <div class="flex-shrink-0 w-10 h-10 ml-3"><img src="${myProfile.avatar || DEFAULT_AVATAR}" class="w-full h-full rounded-full object-cover border border-gray-100"></div>`;
         }
     }
     if (!['poke','call','call_missed','transfer','redpacket'].includes(type) && sender !== 'system') {
@@ -4245,7 +4404,7 @@ function triggerRoleReply() {
     const delay = Math.random() * (appData.settings.maxDelay - appData.settings.minDelay) * 1000 + appData.settings.minDelay * 1000;
     const tip = document.getElementById('typing-indicator'); document.getElementById('typing-avatar').src = role.avatar; document.getElementById('typing-name').textContent = role.name; tip.classList.add('active');
     setTimeout(async () => {
-        tip.classList.remove('active'); const all = []; appData.wordbanks.wordGroups.forEach(g => all.push(...g.words)); if (all.length === 0) return;
+        tip.classList.remove('active'); const all = getActiveWordList(); if (all.length === 0) return;
         const prob2 = appData.settings.prob2 || 0, prob3 = appData.settings.prob3 || 0; const rand = Math.random() * 100; let msgCount = 1;
         if (rand < prob2) msgCount = 2; else if (rand < prob2 + prob3) msgCount = 3;
         const intervalSec = appData.settings.multiMsgInterval || 2; const intervalMs = intervalSec * 1000;
@@ -4277,7 +4436,7 @@ function triggerGroupReply() {
     const delay = Math.random() * (appData.settings.maxDelay - appData.settings.minDelay) * 1000 + appData.settings.minDelay * 1000;
     setTimeout(() => { tip.classList.remove('active'); if (!appData.groupChats[currentGroupId]) appData.groupChats[currentGroupId] = [];
         speakers.forEach((speakerId, index) => { setTimeout(() => {
-            let content = (() => { const aw = []; appData.wordbanks.wordGroups.forEach(g => aw.push(...g.words)); return aw.length ? aw[Math.floor(Math.random() * aw.length)] : ''; })(), type = 'text';
+            let content = (() => { const aw = getActiveWordList(); return aw.length ? aw[Math.floor(Math.random() * aw.length)] : ''; })(), type = 'text';
             if (!content) return;
             if (appData.wordbanks.stickers.length > 0 && Math.random() * 100 < (appData.settings.stickerProb || 10)) { type = 'image'; content = appData.wordbanks.stickers[Math.floor(Math.random() * appData.wordbanks.stickers.length)]; }
             else { if (Math.random() * 100 < (appData.settings.emojiProb || 20) && appData.wordbanks.emojis.length > 0) content += ' ' + appData.wordbanks.emojis[Math.floor(Math.random() * appData.wordbanks.emojis.length)]; }
@@ -4364,7 +4523,6 @@ function loadAndTestRingtone() {
     audio.src = url;
     audio.load();
     audio.play().then(() => {
-        // 播放2秒后暂停，表示加载成功
         setTimeout(() => {
             audio.pause();
             audio.currentTime = 0;
@@ -4463,10 +4621,10 @@ function sendNotificationIfNeeded(title, body) { if (notificationPermissionGrant
 
 // --- 备份/恢复新方案 ---
 function copyBackupToClipboard() { const jsonStr = JSON.stringify(appData, null, 2); navigator.clipboard.writeText(jsonStr).then(() => { showToast('备份数据已复制到剪贴板！可粘贴到备忘录保存'); }).catch(() => { showToast('复制失败，请手动选择文本复制'); }); }
-function openRestoreFromClipboardModal() { const overlay = document.createElement('div'); overlay.className = 'modal-overlay'; overlay.style.zIndex = '1200'; overlay.innerHTML = `<div class="modal-card" style="max-width:400px;width:90%;"><h3 class="text-lg font-bold mb-4">从备份恢复</h3><p class="text-xs text-gray-500 mb-2">请将之前复制的备份数据粘贴到下方文本框中，然后点击"恢复"。</p><textarea id="restore-backup-textarea" class="w-full h-40 bg-gray-100 rounded-xl p-3 text-sm outline-none resize-none" placeholder="在此粘贴备份数据..."></textarea><div class="flex gap-3 mt-4"><button id="restore-cancel-btn" class="flex-1 py-2.5 rounded-xl border border-gray-200 font-medium">取消</button><button id="restore-confirm-btn" class="flex-1 py-2.5 rounded-xl text-white font-medium shadow-lg" style="background-color: var(--button-primary-bg);">恢复</button></div></div>`; document.body.appendChild(overlay); const cancelBtn = overlay.querySelector('#restore-cancel-btn'); const confirmBtn = overlay.querySelector('#restore-confirm-btn'); const textarea = overlay.querySelector('#restore-backup-textarea'); cancelBtn.onclick = () => { document.body.removeChild(overlay); }; confirmBtn.onclick = () => { const content = textarea.value.trim(); if (!content) { showToast('请粘贴备份内容'); return; } try { const data = JSON.parse(content); if (data.roles && data.chats) { showConfirm('确定要恢复该备份吗？当前数据将被覆盖。', async () => { appData = data; if (!appData.wordbanks.wordGroups) appData.wordbanks.wordGroups = [{ name: '默认', words: [...(appData.wordbanks.replies || [])] }]; if (!appData.favoriteMessages) appData.favoriteMessages = []; if (!appData.transferSettings) appData.transferSettings = { enabled: true, minAmount: 5.20, maxAmount: 200, probability: 15, checkInterval: 30 }; if (!appData.transferRecords) appData.transferRecords = []; if (!appData.redPackets) appData.redPackets = []; if (!appData.userProfile) appData.userProfile = { nickname: '我', avatar: DEFAULT_AVATAR }; if (!appData.balance) appData.balance = 1000000; if (!appData.moments || appData.moments.length === 0) appData.moments = JSON.parse(JSON.stringify(DEFAULT_DATA.moments)); if (!appData.momentPhotos) appData.momentPhotos = []; if (!appData.songLibrary || appData.songLibrary.length < 50) appData.songLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.songLibrary)); if (!appData.bookLibrary || appData.bookLibrary.length === 0) appData.bookLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.bookLibrary)); if (!appData.momentCommentBank) appData.momentCommentBank = [...DEFAULT_DATA.momentCommentBank]; if (!appData.musicLibrary) appData.musicLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.musicLibrary)); if (!appData.addressLibrary) appData.addressLibrary = [...DEFAULT_DATA.addressLibrary]; if (appData.settings.momentCover === undefined) appData.settings.momentCover = ''; await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('数据已恢复'); updateMusicPlayerCardVisibility(); }); } else { showToast('无效的备份数据'); } } catch (e) { showToast('数据格式错误，无法解析'); } document.body.removeChild(overlay); }; overlay.addEventListener('click', (e) => { if (e.target === overlay) { document.body.removeChild(overlay); } }); }
+function openRestoreFromClipboardModal() { const overlay = document.createElement('div'); overlay.className = 'modal-overlay'; overlay.style.zIndex = '1200'; overlay.innerHTML = `<div class="modal-card" style="max-width:400px;width:90%;"><h3 class="text-lg font-bold mb-4">从备份恢复</h3><p class="text-xs text-gray-500 mb-2">请将之前复制的备份数据粘贴到下方文本框中，然后点击"恢复"。</p><textarea id="restore-backup-textarea" class="w-full h-40 bg-gray-100 rounded-xl p-3 text-sm outline-none resize-none" placeholder="在此粘贴备份数据..."></textarea><div class="flex gap-3 mt-4"><button id="restore-cancel-btn" class="flex-1 py-2.5 rounded-xl border border-gray-200 font-medium">取消</button><button id="restore-confirm-btn" class="flex-1 py-2.5 rounded-xl text-white font-medium shadow-lg" style="background-color: var(--button-primary-bg);">恢复</button></div></div>`; document.body.appendChild(overlay); const cancelBtn = overlay.querySelector('#restore-cancel-btn'); const confirmBtn = overlay.querySelector('#restore-confirm-btn'); const textarea = overlay.querySelector('#restore-backup-textarea'); cancelBtn.onclick = () => { document.body.removeChild(overlay); }; confirmBtn.onclick = () => { const content = textarea.value.trim(); if (!content) { showToast('请粘贴备份内容'); return; } try { const data = JSON.parse(content); if (data.roles && data.chats) { showConfirm('确定要恢复该备份吗？当前数据将被覆盖。', async () => { appData = data; if (!appData.wordbanks.wordGroups) appData.wordbanks.wordGroups = [{ name: '默认', words: [...(appData.wordbanks.replies || [])] }]; appData.wordbanks.wordGroups.forEach(g => { g.words = g.words.map(w => typeof w === 'string' ? { text: w, blocked: false } : w); }); if (!appData.favoriteMessages) appData.favoriteMessages = []; if (!appData.transferSettings) appData.transferSettings = { enabled: true, minAmount: 5.20, maxAmount: 200, probability: 15, checkInterval: 30 }; if (!appData.transferRecords) appData.transferRecords = []; if (!appData.redPackets) appData.redPackets = []; if (!appData.userProfile) appData.userProfile = { nickname: '我', avatar: DEFAULT_AVATAR }; if (!appData.balance) appData.balance = 1000000; if (!appData.moments || appData.moments.length === 0) appData.moments = JSON.parse(JSON.stringify(DEFAULT_DATA.moments)); if (!appData.momentPhotos) appData.momentPhotos = []; if (!appData.songLibrary || appData.songLibrary.length < 50) appData.songLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.songLibrary)); if (!appData.bookLibrary || appData.bookLibrary.length === 0) appData.bookLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.bookLibrary)); if (!appData.momentCommentBank) appData.momentCommentBank = [...DEFAULT_DATA.momentCommentBank]; if (!appData.musicLibrary) appData.musicLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.musicLibrary)); if (!appData.addressLibrary) appData.addressLibrary = [...DEFAULT_DATA.addressLibrary]; if (appData.settings.momentCover === undefined) appData.settings.momentCover = ''; await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('数据已恢复'); updateMusicPlayerCardVisibility(); }); } else { showToast('无效的备份数据'); } } catch (e) { showToast('数据格式错误，无法解析'); } document.body.removeChild(overlay); }; overlay.addEventListener('click', (e) => { if (e.target === overlay) { document.body.removeChild(overlay); } }); }
 
 function exportData() { const jsonStr = JSON.stringify(appData, null, 2); const blob = new Blob([jsonStr], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `spiritual_connection_${new Date().toISOString().slice(0,10)}.json`; a.click(); showToast('导出成功'); setTimeout(() => URL.revokeObjectURL(a.href), 60000); }
-function importData() { const i = document.createElement('input'); i.type = 'file'; i.accept = '.json'; i.onchange = e => { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = async ev => { try { const d = JSON.parse(ev.target.result); if (d.roles && d.chats) { showConfirm('导入将覆盖现有数据，确定？', async () => { appData = d; if (!appData.wordbanks.wordGroups) appData.wordbanks.wordGroups = [{ name: '默认', words: [...(appData.wordbanks.replies || [])] }]; if (d.appearance?.backgrounds) await saveBackgrounds(d.appearance.backgrounds); if (!appData.favoriteMessages) appData.favoriteMessages = []; if (!appData.transferSettings) appData.transferSettings = { enabled: true, minAmount: 5.20, maxAmount: 200, probability: 15, checkInterval: 30 }; if (!appData.transferRecords) appData.transferRecords = []; if (!appData.redPackets) appData.redPackets = []; if (!appData.userProfile) appData.userProfile = { nickname: '我', avatar: DEFAULT_AVATAR }; if (!appData.balance) appData.balance = 1000000; if (!appData.moments || appData.moments.length === 0) appData.moments = JSON.parse(JSON.stringify(DEFAULT_DATA.moments)); if (!appData.momentPhotos) appData.momentPhotos = []; if (!appData.songLibrary || appData.songLibrary.length < 50) appData.songLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.songLibrary)); if (!appData.bookLibrary || appData.bookLibrary.length === 0) appData.bookLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.bookLibrary)); if (!appData.momentCommentBank) appData.momentCommentBank = [...DEFAULT_DATA.momentCommentBank]; if (!appData.musicLibrary) appData.musicLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.musicLibrary)); if (!appData.addressLibrary) appData.addressLibrary = [...DEFAULT_DATA.addressLibrary]; if (appData.settings.momentCover === undefined) appData.settings.momentCover = ''; await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('导入成功'); updateMusicPlayerCardVisibility(); }); } else showToast('无效文件'); } catch { showToast('解析失败'); } }; r.readAsText(f); }; i.click(); }
+function importData() { const i = document.createElement('input'); i.type = 'file'; i.accept = '.json'; i.onchange = e => { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = async ev => { try { const d = JSON.parse(ev.target.result); if (d.roles && d.chats) { showConfirm('导入将覆盖现有数据，确定？', async () => { appData = d; if (!appData.wordbanks.wordGroups) appData.wordbanks.wordGroups = [{ name: '默认', words: [...(appData.wordbanks.replies || [])] }]; appData.wordbanks.wordGroups.forEach(g => { g.words = g.words.map(w => typeof w === 'string' ? { text: w, blocked: false } : w); }); if (d.appearance?.backgrounds) await saveBackgrounds(d.appearance.backgrounds); if (!appData.favoriteMessages) appData.favoriteMessages = []; if (!appData.transferSettings) appData.transferSettings = { enabled: true, minAmount: 5.20, maxAmount: 200, probability: 15, checkInterval: 30 }; if (!appData.transferRecords) appData.transferRecords = []; if (!appData.redPackets) appData.redPackets = []; if (!appData.userProfile) appData.userProfile = { nickname: '我', avatar: DEFAULT_AVATAR }; if (!appData.balance) appData.balance = 1000000; if (!appData.moments || appData.moments.length === 0) appData.moments = JSON.parse(JSON.stringify(DEFAULT_DATA.moments)); if (!appData.momentPhotos) appData.momentPhotos = []; if (!appData.songLibrary || appData.songLibrary.length < 50) appData.songLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.songLibrary)); if (!appData.bookLibrary || appData.bookLibrary.length === 0) appData.bookLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.bookLibrary)); if (!appData.momentCommentBank) appData.momentCommentBank = [...DEFAULT_DATA.momentCommentBank]; if (!appData.musicLibrary) appData.musicLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.musicLibrary)); if (!appData.addressLibrary) appData.addressLibrary = [...DEFAULT_DATA.addressLibrary]; if (appData.settings.momentCover === undefined) appData.settings.momentCover = ''; await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('导入成功'); updateMusicPlayerCardVisibility(); }); } else showToast('无效文件'); } catch { showToast('解析失败'); } }; r.readAsText(f); }; i.click(); }
 async function clearChatRecords() { showConfirm('清空所有聊天记录？', async () => { appData.chats = {}; appData.groupChats = {}; unreadCounts = {}; await saveUnreadCounts(); appData.roles.forEach(r => r.lastActive = Date.now()); await saveData(); renderRoleList(); if (currentChatType === 'role') renderChatMessages(); updateStorageDisplay(); showToast('已清空'); }); }
 async function resetAllData() { showConfirm('重置所有数据？不可恢复！', async () => { appData = JSON.parse(JSON.stringify(DEFAULT_DATA)); await saveBackgrounds({ home: '', chat: '', group: '' }); await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('已重置'); }); }
 
@@ -4525,7 +4683,7 @@ function refreshRoleOnlineStatus(role) { if (!role.onlineStatus || !role.onlineS
 
 // --- 回信生成 ---
 function startMailReplyChecker() { if (mailCheckTimer) clearInterval(mailCheckTimer); mailCheckTimer = setInterval(() => { const sentMails = appData.mails.filter(m => m.type === 'sent' && !m.replied && m.replyTime <= Date.now()); sentMails.forEach(mail => { generateReplyForMail(mail); }); }, 60000); }
-function generateReplyForMail(mail) { const allWords = []; appData.wordbanks.wordGroups.forEach(g => allWords.push(...g.words)); if (!allWords.length) allWords.push('今天不知道说什么好', '想你啦', '最近还好吗', '天气不错'); const sentenceCount = 10 + Math.floor(Math.random() * 11); const selectedSentences = []; for (let i = 0; i < sentenceCount; i++) selectedSentences.push(allWords[Math.floor(Math.random() * allWords.length)]); const replyMail = { id: generateUID() + '_reply', roleId: mail.roleId, type: 'received', content: selectedSentences.join('。') + '。', time: Date.now(), replyTo: mail.id }; appData.mails.push(replyMail); mail.replied = true; debouncedSaveData(); if (document.getElementById('page-mailbox') && document.getElementById('page-mailbox').classList.contains('active')) renderMailList(); }
+function generateReplyForMail(mail) { const allWords = []; appData.wordbanks.wordGroups.forEach(g => g.words.forEach(w => { if (typeof w === 'object') allWords.push(w.text); else allWords.push(w); })); if (!allWords.length) allWords.push('今天不知道说什么好', '想你啦', '最近还好吗', '天气不错'); const sentenceCount = 10 + Math.floor(Math.random() * 11); const selectedSentences = []; for (let i = 0; i < sentenceCount; i++) selectedSentences.push(allWords[Math.floor(Math.random() * allWords.length)]); const replyMail = { id: generateUID() + '_reply', roleId: mail.roleId, type: 'received', content: selectedSentences.join('。') + '。', time: Date.now(), replyTo: mail.id }; appData.mails.push(replyMail); mail.replied = true; debouncedSaveData(); if (document.getElementById('page-mailbox') && document.getElementById('page-mailbox').classList.contains('active')) renderMailList(); }
 
 // --- 状态词库/内容库 ---
 function openStatusWordbank() { pageHistory.push('advanced'); tempStatusData = { moods: [...appData.wordbanks.moods], weathers: [...appData.wordbanks.weathers], quotes: [...appData.wordbanks.quotes] }; switchStatusTab('moods'); document.getElementById('modal-settings-advanced').classList.add('hidden'); document.getElementById('modal-status-wordbank').classList.add('active'); }
@@ -4535,22 +4693,251 @@ function addStatusItem() { const v = document.getElementById('new-status-input')
 async function saveStatusWordbank() { tempStatusData[currentStatusTab] = document.getElementById('status-editor').value.split(/\n+/).map(s=>s.trim()).filter(Boolean); appData.wordbanks.moods = tempStatusData.moods; appData.wordbanks.weathers = tempStatusData.weathers; appData.wordbanks.quotes = tempStatusData.quotes; await saveData(); closeStatusWordbank(); showToast('保存成功'); }
 function openContentLibrary() { pageHistory.push('advanced'); document.getElementById('modal-settings-advanced').classList.add('hidden'); document.getElementById('modal-library-main').classList.remove('hidden'); }
 function closeContentLibrary() { document.getElementById('modal-library-main').classList.add('hidden'); if (pageHistory.pop() === 'advanced') document.getElementById('modal-settings-advanced').classList.remove('hidden'); }
-function openWordCardLibrary() { pageHistory.push('library'); tempWordGroups = JSON.parse(JSON.stringify(appData.wordbanks.wordGroups)); currentWordGroup = 'all'; renderWordGroups(); loadGroupWords(); document.getElementById('modal-library-main').classList.add('hidden'); document.getElementById('modal-library-words').classList.add('active'); }
+function openWordCardLibrary() { pageHistory.push('library'); tempWordGroups = JSON.parse(JSON.stringify(appData.wordbanks.wordGroups)); currentWordGroup = 'all'; renderWordGroups(); renderWordCardList(); document.getElementById('modal-library-main').classList.add('hidden'); document.getElementById('modal-library-words').classList.add('active'); }
 function closeWordCardLibrary() { document.getElementById('modal-library-words').classList.remove('active'); if (pageHistory.pop() === 'library') document.getElementById('modal-library-main').classList.remove('hidden'); }
 function renderWordGroups() { const c = document.getElementById('word-groups'); c.innerHTML = ''; const allBtn = document.createElement('button'); allBtn.className = `px-3 py-1 rounded-full text-xs font-medium shadow-md whitespace-nowrap ${currentWordGroup==='all'?'text-white':'bg-white'}`; allBtn.textContent = '全部'; allBtn.onclick = () => switchWordGroup('all'); c.appendChild(allBtn); tempWordGroups.forEach((g,i) => { const btn = document.createElement('button'); btn.className = `px-3 py-1 rounded-full text-xs font-medium shadow-md whitespace-nowrap ${currentWordGroup===i?'text-white':'bg-white'}`; btn.textContent = g.name; btn.onclick = () => switchWordGroup(i); c.appendChild(btn); }); }
-function switchWordGroup(g) { if (currentWordGroup !== 'all') saveCurrentEditorToTemp(); currentWordGroup = g; renderWordGroups(); loadGroupWords(); }
-function loadGroupWords() { let words = []; const editor = document.getElementById('word-editor'); if (currentWordGroup === 'all') { tempWordGroups.forEach(g => words.push(...g.words)); words = [...new Set(words)]; editor.readOnly = true; } else { words = tempWordGroups[currentWordGroup].words; editor.readOnly = false; } editor.value = words.join('\n'); document.getElementById('word-count').textContent = words.length + ' 条'; }
-function saveCurrentEditorToTemp() { if (currentWordGroup !== 'all') { const words = document.getElementById('word-editor').value.split(/\n+/).map(s=>s.trim()).filter(Boolean); tempWordGroups[currentWordGroup].words = words; } }
+function switchWordGroup(g) { currentWordGroup = g; renderWordGroups(); renderWordCardList(); }
+
+// ========== 字卡列表渲染：完全动态绑定 ==========
+function findWordByFlatIndex(flatIndex) {
+    if (currentWordGroup === 'all') {
+        let count = 0;
+        for (let gi = 0; gi < tempWordGroups.length; gi++) {
+            const group = tempWordGroups[gi];
+            if (flatIndex < count + group.words.length) {
+                return { groupIndex: gi, wordIndex: flatIndex - count, wordObj: group.words[flatIndex - count] };
+            }
+            count += group.words.length;
+        }
+        return null;
+    } else {
+        const gi = parseInt(currentWordGroup);
+        if (isNaN(gi) || gi < 0 || gi >= tempWordGroups.length) return null;
+        const group = tempWordGroups[gi];
+        if (flatIndex < 0 || flatIndex >= group.words.length) return null;
+        return { groupIndex: gi, wordIndex: flatIndex, wordObj: group.words[flatIndex] };
+    }
+}
+
+function renderWordCardList() {
+    const container = document.getElementById('word-card-list');
+    container.innerHTML = '';
+    let flatWords = [];
+    if (currentWordGroup === 'all') {
+        tempWordGroups.forEach((g, gi) => {
+            g.words.forEach((w, wi) => {
+                flatWords.push({ wordObj: w, groupIndex: gi, wordIndex: wi, groupName: g.name });
+            });
+        });
+    } else {
+        const idx = parseInt(currentWordGroup);
+        if (idx >= 0 && idx < tempWordGroups.length) {
+            tempWordGroups[idx].words.forEach((w, wi) => {
+                flatWords.push({ wordObj: w, groupIndex: idx, wordIndex: wi, groupName: tempWordGroups[idx].name });
+            });
+        }
+    }
+
+    const total = flatWords.length;
+    const blockedCount = flatWords.filter(f => f.wordObj && typeof f.wordObj === 'object' && f.wordObj.blocked).length;
+    document.getElementById('word-list-stats').textContent = `共 ${total} 条 · 已屏蔽 ${blockedCount} 条`;
+
+    flatWords.forEach((item) => {
+        const w = item.wordObj;
+        const text = typeof w === 'object' ? w.text : w;
+        const blocked = typeof w === 'object' ? w.blocked : false;
+        const groupName = item.groupName;
+        const groupIndex = item.groupIndex;
+        const wordIndex = item.wordIndex;
+
+        const card = document.createElement('div');
+        card.className = `word-card-item${blocked ? ' blocked' : ''}`;
+        card.dataset.groupIndex = groupIndex;
+        card.dataset.wordIndex = wordIndex;
+
+        const textSpan = document.createElement('span');
+        textSpan.className = 'word-card-text';
+        textSpan.textContent = text;
+
+        const tagSpan = document.createElement('span');
+        tagSpan.className = 'word-card-group-tag';
+        tagSpan.textContent = groupName;
+
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'word-card-actions';
+
+        const editBtn = document.createElement('button');
+        editBtn.title = '编辑';
+        editBtn.innerHTML = '✏️';
+        editBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const gi = parseInt(this.closest('.word-card-item').dataset.groupIndex);
+            const wi = parseInt(this.closest('.word-card-item').dataset.wordIndex);
+            editWordCardByIndex(gi, wi);
+        });
+
+        const moveBtn = document.createElement('button');
+        moveBtn.title = '移动到分组';
+        moveBtn.innerHTML = '📁';
+        moveBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const gi = parseInt(this.closest('.word-card-item').dataset.groupIndex);
+            const wi = parseInt(this.closest('.word-card-item').dataset.wordIndex);
+            moveWordCardByIndex(gi, wi);
+        });
+
+        const toggleBtn = document.createElement('button');
+        toggleBtn.title = blocked ? '取消屏蔽' : '屏蔽';
+        toggleBtn.innerHTML = blocked ? '✅' : '🚫';
+        toggleBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const gi = parseInt(this.closest('.word-card-item').dataset.groupIndex);
+            const wi = parseInt(this.closest('.word-card-item').dataset.wordIndex);
+            toggleBlockWordCardByIndex(gi, wi);
+        });
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.title = '删除';
+        deleteBtn.style.color = '#e74c3c';
+        deleteBtn.innerHTML = '✖️';
+        deleteBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const gi = parseInt(this.closest('.word-card-item').dataset.groupIndex);
+            const wi = parseInt(this.closest('.word-card-item').dataset.wordIndex);
+            deleteWordCardByIndex(gi, wi);
+        });
+
+        actionsDiv.appendChild(editBtn);
+        actionsDiv.appendChild(moveBtn);
+        actionsDiv.appendChild(toggleBtn);
+        actionsDiv.appendChild(deleteBtn);
+
+        card.appendChild(textSpan);
+        card.appendChild(tagSpan);
+        card.appendChild(actionsDiv);
+        container.appendChild(card);
+    });
+}
+
+// 全局变量，存储当前要编辑/移动的字卡位置
+let pendingEditGroupIndex = null;
+let pendingEditWordIndex = null;
+let pendingMoveGroupIndex = null;
+let pendingMoveWordIndex = null;
+
+function editWordCardByIndex(groupIndex, wordIndex) {
+    const wordObj = tempWordGroups[groupIndex].words[wordIndex];
+    if (!wordObj) return;
+    const currentText = typeof wordObj === 'object' ? wordObj.text : wordObj;
+    pendingEditGroupIndex = groupIndex;
+    pendingEditWordIndex = wordIndex;
+    document.getElementById('edit-word-input').value = currentText;
+    document.getElementById('modal-edit-word').classList.remove('hidden');
+}
+
+function confirmEditWord() {
+    const newText = document.getElementById('edit-word-input').value.trim();
+    if (!newText) {
+        showToast('内容不能为空');
+        return;
+    }
+    const wordObj = tempWordGroups[pendingEditGroupIndex].words[pendingEditWordIndex];
+    if (typeof wordObj === 'object') {
+        wordObj.text = newText;
+    } else {
+        tempWordGroups[pendingEditGroupIndex].words[pendingEditWordIndex] = { text: newText, blocked: false };
+    }
+    renderWordCardList();
+    closeEditWordModal();
+    showToast('修改成功');
+}
+
+function closeEditWordModal() {
+    document.getElementById('modal-edit-word').classList.add('hidden');
+    pendingEditGroupIndex = null;
+    pendingEditWordIndex = null;
+}
+
+function moveWordCardByIndex(groupIndex, wordIndex) {
+    pendingMoveGroupIndex = groupIndex;
+    pendingMoveWordIndex = wordIndex;
+    // 渲染可选分组列表
+    const container = document.getElementById('move-group-list');
+    container.innerHTML = '';
+    tempWordGroups.forEach((group, idx) => {
+        if (idx === groupIndex) return; // 不能移动到自身
+        const btn = document.createElement('button');
+        btn.className = 'w-full text-left p-3 rounded-lg bg-gray-50 hover:bg-gray-100 mb-2';
+        btn.textContent = group.name;
+        btn.onclick = () => {
+            const word = tempWordGroups[pendingMoveGroupIndex].words[pendingMoveWordIndex];
+            tempWordGroups[pendingMoveGroupIndex].words.splice(pendingMoveWordIndex, 1);
+            tempWordGroups[idx].words.push(word);
+            renderWordCardList();
+            closeMoveWordModal();
+            showToast(`已移动到「${group.name}」`);
+        };
+        container.appendChild(btn);
+    });
+    if (container.children.length === 0) {
+        container.innerHTML = '<div class="text-center text-gray-400 py-4">没有其他分组</div>';
+    }
+    document.getElementById('modal-move-word').classList.remove('hidden');
+}
+
+function closeMoveWordModal() {
+    document.getElementById('modal-move-word').classList.add('hidden');
+    pendingMoveGroupIndex = null;
+    pendingMoveWordIndex = null;
+}
+
+// 旧函数兼容
+function addNewWordCard() {
+    if (currentWordGroup === 'all') {
+        showToast('请先切换到具体分组');
+        return;
+    }
+    const idx = parseInt(currentWordGroup);
+    if (idx >= 0 && idx < tempWordGroups.length) {
+        const newText = prompt('输入新字卡内容');
+        if (newText && newText.trim()) {
+            tempWordGroups[idx].words.push({ text: newText.trim(), blocked: false });
+            renderWordCardList();
+        }
+    }
+}
+function editWordCard(index) { const found = findWordByFlatIndex(index); if (found) editWordCardByIndex(found.groupIndex, found.wordIndex); }
+function moveWordCard(index) { const found = findWordByFlatIndex(index); if (found) moveWordCardByIndex(found.groupIndex, found.wordIndex); }
+function toggleBlockWordCard(index) { const found = findWordByFlatIndex(index); if (found) toggleBlockWordCardByIndex(found.groupIndex, found.wordIndex); }
+function deleteWordCard(index) { const found = findWordByFlatIndex(index); if (found) deleteWordCardByIndex(found.groupIndex, found.wordIndex); }
+function toggleBlockWordCardByIndex(groupIndex, wordIndex) {
+    if (groupIndex < 0 || groupIndex >= tempWordGroups.length) return;
+    const wordObj = tempWordGroups[groupIndex].words[wordIndex];
+    if (!wordObj) return;
+    if (typeof wordObj === 'object') {
+        wordObj.blocked = !wordObj.blocked;
+    } else {
+        tempWordGroups[groupIndex].words[wordIndex] = { text: wordObj, blocked: true };
+    }
+    renderWordCardList();
+}
+function deleteWordCardByIndex(groupIndex, wordIndex) {
+    if (groupIndex < 0 || groupIndex >= tempWordGroups.length) return;
+    tempWordGroups[groupIndex].words.splice(wordIndex, 1);
+    renderWordCardList();
+}
+
 function openAddGroupModal() { document.getElementById('new-group-name').value = ''; document.getElementById('modal-add-group').classList.add('active'); }
 function closeAddGroupModal() { document.getElementById('modal-add-group').classList.remove('active'); }
-function confirmAddGroup() { const name = document.getElementById('new-group-name').value.trim(); if (!name) { showToast('请输入名称'); return; } if (tempWordGroups.some(g => g.name === name)) { showToast('已存在'); return; } if (currentWordGroup !== 'all') saveCurrentEditorToTemp(); tempWordGroups.push({ name, words: [] }); currentWordGroup = tempWordGroups.length - 1; renderWordGroups(); loadGroupWords(); closeAddGroupModal(); }
-function addWord() { const v = document.getElementById('new-word-input').value.trim(); if (!v) return; if (currentWordGroup === 'all') { showToast('请先切换到具体分组'); return; } saveCurrentEditorToTemp(); tempWordGroups[currentWordGroup].words.push(v); loadGroupWords(); document.getElementById('new-word-input').value = ''; }
-async function saveWords() { if (currentWordGroup !== 'all') saveCurrentEditorToTemp(); appData.wordbanks.wordGroups = JSON.parse(JSON.stringify(tempWordGroups)); await saveData(); closeWordCardLibrary(); showToast('保存成功'); }
-function processWords(type) { if (currentWordGroup === 'all') { showToast('请切换到分组'); return; } let arr = document.getElementById('word-editor').value.split(/\n+/).map(s=>s.trim()).filter(Boolean); if (type === 'unique') arr = [...new Set(arr)]; if (type === 'remove_punct') arr = arr.map(s => s.replace(/[^\w\u4e00-\u9fa5\s]/g, '').trim()).filter(Boolean); document.getElementById('word-editor').value = arr.join('\n'); saveCurrentEditorToTemp(); loadGroupWords(); }
-function exportWords() { const content = document.getElementById('word-editor').value; const blob = new Blob([content], { type: 'text/plain' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `words_${Date.now()}.txt`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 60000); }
-function importWords(input) { if (currentWordGroup === 'all') { showToast('请切换到分组'); return; } const f = input.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = e => { document.getElementById('word-editor').value = e.target.result; saveCurrentEditorToTemp(); loadGroupWords(); }; r.readAsText(f); }
-function selectAllWords() { const editor = document.getElementById('word-editor'); editor.select(); editor.focus(); editor.setSelectionRange(0, editor.value.length); }
-function copyWords() { const editor = document.getElementById('word-editor'), content = editor.value, lines = content.split('\n').filter(line => line.trim() !== ''); navigator.clipboard?.writeText(content).then(() => { showToast(`已复制 ${lines.length} 条词条`); }).catch(() => { editor.select(); document.execCommand('copy'); showToast(`已复制 ${lines.length} 条词条`); }); }
+function confirmAddGroup() { const name = document.getElementById('new-group-name').value.trim(); if (!name) { showToast('请输入名称'); return; } if (tempWordGroups.some(g => g.name === name)) { showToast('已存在'); return; } tempWordGroups.push({ name, words: [] }); currentWordGroup = tempWordGroups.length - 1; renderWordGroups(); renderWordCardList(); closeAddGroupModal(); }
+function addWord() { const v = document.getElementById('new-word-input')?.value.trim(); if (!v) return; if (currentWordGroup === 'all') { showToast('请先切换到具体分组'); return; } const idx = parseInt(currentWordGroup); if (idx >= 0 && idx < tempWordGroups.length) { tempWordGroups[idx].words.push({ text: v, blocked: false }); renderWordCardList(); document.getElementById('new-word-input').value = ''; } }
+async function saveWords() { appData.wordbanks.wordGroups = JSON.parse(JSON.stringify(tempWordGroups)); await saveData(); closeWordCardLibrary(); showToast('保存成功'); }
+function processWords(type) { if (currentWordGroup === 'all') { showToast('请切换到分组'); return; } const idx = parseInt(currentWordGroup); if (idx < 0 || idx >= tempWordGroups.length) return; let arr = tempWordGroups[idx].words.map(w => typeof w === 'object' ? w.text : w); if (type === 'unique') arr = [...new Set(arr)]; if (type === 'remove_punct') arr = arr.map(s => s.replace(/[^\w\u4e00-\u9fa5\s]/g, '').trim()).filter(Boolean); tempWordGroups[idx].words = arr.map(text => ({ text, blocked: false })); renderWordCardList(); }
+function exportWords() { const content = appData.wordbanks.wordGroups.map(g => g.words.map(w => typeof w === 'object' ? w.text : w).join('\n')).join('\n'); const blob = new Blob([content], { type: 'text/plain' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `words_${Date.now()}.txt`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 60000); }
+function importWords(input) { if (currentWordGroup === 'all') { showToast('请切换到分组'); return; } const f = input.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = e => { const lines = e.target.result.split(/[\r\n]+/).filter(line => line.trim()); const idx = parseInt(currentWordGroup); if (idx >= 0 && idx < tempWordGroups.length) { const existing = new Set(tempWordGroups[idx].words.map(w => typeof w === 'object' ? w.text : w)); lines.forEach(line => { if (!existing.has(line)) { tempWordGroups[idx].words.push({ text: line, blocked: false }); existing.add(line); } }); renderWordCardList(); } }; r.readAsText(f); }
+
+function selectAllWords() { }
+function copyWords() { }
 window.selectAllWords = selectAllWords; window.copyWords = copyWords;
 function openEmojiLibrary() { pageHistory.push('library'); tempEmojis = [...appData.wordbanks.emojis]; renderEmojiGrid(); document.getElementById('modal-library-main').classList.add('hidden'); document.getElementById('modal-library-emoji').classList.add('active'); }
 function closeEmojiLibrary() { document.getElementById('modal-library-emoji').classList.remove('active'); if (pageHistory.pop() === 'library') document.getElementById('modal-library-main').classList.remove('hidden'); }
@@ -4690,7 +5077,7 @@ function triggerIncomingCall(role) { callState.active = true; callState.status =
 
 function startAutoMailGenerator() { if (autoMailGeneratorTimer) { clearTimeout(autoMailGeneratorTimer); autoMailGeneratorTimer = null; } if (!appData.settings.autoMail?.enabled) return; const interval = (appData.settings.autoMail.checkInterval || 10) * 60 * 1000; autoMailGeneratorTimer = setTimeout(() => { autoMailGeneratorTimer = null; checkAndGenerateAutoMail(); startAutoMailGenerator(); }, interval); }
 function checkAndGenerateAutoMail() { appData.roles.forEach(role => { if (Math.random() * 100 < (role.autoMailProbability ?? 15)) generateAutoLetter(role); }); }
-function generateAutoLetter(role) { const allWords = []; appData.wordbanks.wordGroups.forEach(g => allWords.push(...g.words)); if (!allWords.length) allWords.push('今天不知道说什么好', '想你啦', '最近还好吗', '天气不错'); const content = Array.from({length: 3 + Math.floor(Math.random() * 6)}, () => allWords[Math.floor(Math.random() * allWords.length)]).join('。') + '。'; appData.mails.push({ id: generateUID(), roleId: role.id, type: 'received', content, time: Date.now(), replyTime: Date.now(), replied: true }); debouncedSaveData(); if (document.getElementById('page-mailbox') && document.getElementById('page-mailbox').classList.contains('active')) renderMailList(); }
+function generateAutoLetter(role) { const allWords = []; appData.wordbanks.wordGroups.forEach(g => g.words.forEach(w => { if (typeof w === 'object') allWords.push(w.text); else allWords.push(w); })); if (!allWords.length) allWords.push('今天不知道说什么好', '想你啦', '最近还好吗', '天气不错'); const content = Array.from({length: 3 + Math.floor(Math.random() * 6)}, () => allWords[Math.floor(Math.random() * allWords.length)]).join('。') + '。'; appData.mails.push({ id: generateUID(), roleId: role.id, type: 'received', content, time: Date.now(), replyTime: Date.now(), replied: true }); debouncedSaveData(); if (document.getElementById('page-mailbox') && document.getElementById('page-mailbox').classList.contains('active')) renderMailList(); }
 
 // ========== 转账功能 ==========
 function showTransferModal() { if (currentChatType !== 'role' || !currentRoleId) { showToast('仅支持在单人聊天中使用'); return; } const role = appData.roles.find(r => r.id === currentRoleId); if (!role) return; document.getElementById('transfer-recipient-name').textContent = `转给 ${role.name}`; document.getElementById('transfer-amount').value = ''; document.getElementById('transfer-note').value = ''; document.getElementById('modal-transfer').classList.remove('hidden'); }
@@ -4734,7 +5121,7 @@ function confirmTransfer() {
                 renderChatMessages();
             }
             if (Math.random() < 0.25) {
-                const allWords = []; appData.wordbanks.wordGroups.forEach(g => allWords.push(...g.words));
+                const allWords = getActiveWordList();
                 const stickers = appData.wordbanks.stickers || [];
                 if (allWords.length > 0 || stickers.length > 0) {
                     const msgCount = 2 + Math.floor(Math.random() * 4);
@@ -5746,7 +6133,7 @@ function generateAutoMoment(role) {
     if (typeRand < 50) { type = 'text'; } else if (typeRand < 70) { type = 'music'; if (appData.songLibrary.length > 0) musicId = appData.songLibrary[Math.floor(Math.random() * appData.songLibrary.length)].id; else type = 'text'; }
     else if (typeRand < 85) { type = 'book'; if (appData.bookLibrary.length > 0) bookId = appData.bookLibrary[Math.floor(Math.random() * appData.bookLibrary.length)].id; else type = 'text'; }
     else { type = 'image'; if (appData.momentPhotos && appData.momentPhotos.length > 0) { const count = 1 + Math.floor(Math.random() * Math.min(3, appData.momentPhotos.length)); const shuffled = [...appData.momentPhotos].sort(() => Math.random() - 0.5); images = shuffled.slice(0, count); } else type = 'text'; }
-    const textSources = []; appData.wordbanks.wordGroups.forEach(g => textSources.push(...g.words));
+    const textSources = []; appData.wordbanks.wordGroups.forEach(g => g.words.forEach(w => { if (typeof w === 'object') textSources.push(w.text); else textSources.push(w); }));
     const textPool = ['今天天气真好 ☀️', '又是元气满满的一天', '午后的阳光让人想睡觉', '突然想吃火锅了 🍲', '今天也辛苦啦 ✨']; textSources.forEach(t => { if (Math.random() < 0.3) textPool.push(t); });
     const content = textPool[Math.floor(Math.random() * textPool.length)];
     const moment = { id: generateUID(), roleId: role.id, type, content, images: images || [], musicId: musicId || null, bookId: bookId || null, time: Date.now(), likes: [], comments: [], commenters: [] };
@@ -6053,14 +6440,14 @@ function batchAddWords() {
     let targetGroup;
     if (selectVal === 'current') {
         if (currentWordGroup === 'all') { showToast('请先切换到具体分组，或在下拉框中选择分组'); return; }
-        targetGroup = tempWordGroups[currentWordGroup];
+        targetGroup = tempWordGroups[parseInt(currentWordGroup)];
     } else { targetGroup = tempWordGroups[parseInt(selectVal)]; }
     if (!targetGroup) return;
-    const existingTexts = new Set(targetGroup.words);
+    const existingTexts = new Set(targetGroup.words.map(w => typeof w === 'object' ? w.text : w));
     let addedCount = 0;
-    lines.forEach(line => { if (!existingTexts.has(line)) { targetGroup.words.push(line); existingTexts.add(line); addedCount++; } });
+    lines.forEach(line => { if (!existingTexts.has(line)) { targetGroup.words.push({ text: line, blocked: false }); existingTexts.add(line); addedCount++; } });
     closeBatchAddWordsModal();
-    if (currentWordGroup !== 'all') loadGroupWords();
+    renderWordCardList();
     showToast(`已添加 ${addedCount} 条，去重 ${lines.length - addedCount} 条`);
 }
 
@@ -6276,7 +6663,7 @@ function getSolarTerm(date) { const y = date.getFullYear(), m = date.getMonth() 
 function getFestivalGreeting(date) { const solarHolidays = { '1,1': '元旦快乐', '2,14': '情人节快乐', '3,8': '女神节快乐', '4,1': '愚人节快乐', '5,1': '劳动节快乐', '6,1': '儿童节快乐', '10,1': '国庆快乐', '12,25': '圣诞快乐' }; return solarHolidays[`${date.getMonth()+1},${date.getDate()}`] || null; }
 function getRandomEngGreeting() { return ['GOOD MORNING', 'GOOD AFTERNOON', 'GOOD EVENING', 'HELLO THERE', 'NICE DAY', 'BE HAPPY'][Math.floor(Math.random()*6)]; }
 function getRandomCnCompliment() { return ['今天也要开心哦', '你值得所有美好', '又是喜欢你的一天', '全世界你最可爱', '你笑起来真好看', '今天也要加油鸭', '元气满满', '愿你被世界温柔以待'][Math.floor(Math.random()*8)]; }
-function getRandomLoveQuotes(count = 4) { const allWords = []; appData.wordbanks.wordGroups.forEach(g => allWords.push(...g.words)); if (!allWords.length) return ['贴贴', '爱你', '在干嘛？', '想你了']; return [...new Set([...allWords].sort(() => Math.random() - 0.5))].slice(0, count); }
+function getRandomLoveQuotes(count = 4) { const allWords = getActiveWordList(); if (!allWords.length) return ['贴贴', '爱你', '在干嘛？', '想你了']; return [...new Set([...allWords].sort(() => Math.random() - 0.5))].slice(0, count); }
 function refreshLovePanel() { const now = Date.now(), role = appData.roles.find(r => r.id === currentRoleId); if (!role) return; if (!role.lastLoveRefresh || (now - role.lastLoveRefresh) > 12*60*60*1000 || !role.currentLoveState) { const today = new Date(), dateStr = today.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }), solarTerm = getSolarTerm(today), festival = getFestivalGreeting(today); let headerEng, headerCn, seasonEmoji; if (solarTerm) { seasonEmoji = solarTerm.emoji; headerEng = solarTerm.eng; headerCn = solarTerm.greeting; } else if (festival) { seasonEmoji = '🎉'; headerEng = festival.toUpperCase().replace(/快乐/g, ''); headerCn = festival; } else { seasonEmoji = today.getMonth()<2?'❄️':(today.getMonth()<5?'🌸':(today.getMonth()<8?'☀️':(today.getMonth()<11?'🍂':'❄️'))); headerEng = getRandomEngGreeting(); headerCn = getRandomCnCompliment(); } const mood = appData.wordbanks.moods[Math.floor(Math.random()*appData.wordbanks.moods.length)] || '开心', moodEmojis = { '开心': '😊', '难过': '😢', '生气': '😠', '平淡': '😐', '兴奋': '🤩', '疲惫': '😫', '期待': '🤗', '害羞': '😳' }, quotes = getRandomLoveQuotes(3+Math.floor(Math.random()*3)); role.currentLoveState = { dateStr, seasonEmoji, headerEng, headerCn, mood, moodEmoji: moodEmojis[mood]||'😊', weather: appData.wordbanks.weathers[Math.floor(Math.random()*appData.wordbanks.weathers.length)]||'晴朗', status: appData.wordbanks.moods[Math.floor(Math.random()*appData.wordbanks.moods.length)]||'一切都好', quotes, footerQuote: appData.wordbanks.quotes[Math.floor(Math.random()*appData.wordbanks.quotes.length)]||'每一天都因为有你而特别 ✨' }; role.lastLoveRefresh = now; debouncedSaveData(); } const s = role.currentLoveState; document.getElementById('love-header-date').textContent = s.dateStr; document.getElementById('season-emoji').textContent = s.seasonEmoji; document.getElementById('love-header-eng').textContent = s.headerEng; document.getElementById('love-header-cn').textContent = s.headerCn; document.getElementById('love-mood-emoji').textContent = s.moodEmoji; document.getElementById('love-mood-name').textContent = s.mood; document.getElementById('love-weather').textContent = s.weather; document.getElementById('love-status').textContent = s.status; document.getElementById('love-quote-list').innerHTML = s.quotes.map(q => `<div class="love-quote-item">${escapeHtml(q)}</div>`).join(''); document.getElementById('love-footer-quote').textContent = s.footerQuote; }
 function toggleLovePanel() { const m = document.getElementById('modal-love-panel'); if (m.classList.contains('hidden')) { if (currentRoleId) refreshLovePanel(); else if (appData.roles.length>0) { currentRoleId = appData.roles[0].id; refreshLovePanel(); } m.classList.remove('hidden'); } else m.classList.add('hidden'); }
 window.toggleLovePanel = toggleLovePanel;
