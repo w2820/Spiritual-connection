@@ -126,7 +126,7 @@
             content: "";
             position: absolute;
             left: -6px;
-            top: 20px;                  /* 固定为20px，指向头像中心（头像高度40px） */
+            top: 20px;
             width: 20px;
             height: 16px;
             background: #D8E7F2;
@@ -176,7 +176,7 @@
             content: "";
             position: absolute;
             right: -12px;
-            top: 20px;                  /* 固定为20px，指向头像中心 */
+            top: 20px;
             width: 20px;
             height: 20px;
             background: #F9E8EE;
@@ -232,7 +232,7 @@
         /* 右侧消息行，确保头像始终可见 */
         .flex.w-full.justify-end {
             flex-wrap: nowrap !important;
-            align-items: flex-start !important;  /* 顶部对齐，让尖角固定在20px位置指向头像中心 */
+            align-items: flex-start !important;
         }
         .flex.w-full.justify-end > .flex-shrink-0.w-10.h-10 {
             flex-shrink: 0 !important;
@@ -2561,6 +2561,8 @@
             <button onclick="addNewWordCard()" class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-medium shadow-sm">+ 新增字卡</button>
             <button onclick="openBatchAddWordsModal()" class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-medium shadow-sm">批量导入</button>
             <button onclick="processWords('unique')" class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-medium shadow-sm">查重</button>
+            <button onclick="processWords('remove_punct')" class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-medium shadow-sm">去标点</button>
+            <button onclick="processWords('remove_letters')" class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-medium shadow-sm">去字母</button>
             <button onclick="exportWords()" class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-medium shadow-sm">导出</button>
             <label class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-medium shadow-sm cursor-pointer">导入<input type="file" accept=".txt,.json" class="hidden" onchange="importWords(this)"></label>
         </div>
@@ -4214,7 +4216,7 @@ function getQuotePreview(msg) {
     return msg.content ? msg.content.substring(0, 20) : '';
 }
 
-// ========== 修改点：时间戳放在气泡外部，对齐方式改为 items-start 使尖角与头像顶部平齐 ==========
+// ========== 时间戳放在气泡外部，对齐方式改为 items-start 使尖角与头像顶部平齐 ==========
 function createMessageElement(sender, content, time, quote = null, type = 'text') {
     const isMe = sender === 'me';
     const myProfile = appData.userProfile || { nickname: '我', avatar: DEFAULT_AVATAR };
@@ -4932,7 +4934,26 @@ function closeAddGroupModal() { document.getElementById('modal-add-group').class
 function confirmAddGroup() { const name = document.getElementById('new-group-name').value.trim(); if (!name) { showToast('请输入名称'); return; } if (tempWordGroups.some(g => g.name === name)) { showToast('已存在'); return; } tempWordGroups.push({ name, words: [] }); currentWordGroup = tempWordGroups.length - 1; renderWordGroups(); renderWordCardList(); closeAddGroupModal(); }
 function addWord() { const v = document.getElementById('new-word-input')?.value.trim(); if (!v) return; if (currentWordGroup === 'all') { showToast('请先切换到具体分组'); return; } const idx = parseInt(currentWordGroup); if (idx >= 0 && idx < tempWordGroups.length) { tempWordGroups[idx].words.push({ text: v, blocked: false }); renderWordCardList(); document.getElementById('new-word-input').value = ''; } }
 async function saveWords() { appData.wordbanks.wordGroups = JSON.parse(JSON.stringify(tempWordGroups)); await saveData(); closeWordCardLibrary(); showToast('保存成功'); }
-function processWords(type) { if (currentWordGroup === 'all') { showToast('请切换到分组'); return; } const idx = parseInt(currentWordGroup); if (idx < 0 || idx >= tempWordGroups.length) return; let arr = tempWordGroups[idx].words.map(w => typeof w === 'object' ? w.text : w); if (type === 'unique') arr = [...new Set(arr)]; if (type === 'remove_punct') arr = arr.map(s => s.replace(/[^\w\u4e00-\u9fa5\s]/g, '').trim()).filter(Boolean); tempWordGroups[idx].words = arr.map(text => ({ text, blocked: false })); renderWordCardList(); }
+
+// 修改 processWords 函数以支持去标点符号和去英文字母
+function processWords(type) {
+    if (currentWordGroup === 'all') { showToast('请切换到分组'); return; }
+    const idx = parseInt(currentWordGroup);
+    if (idx < 0 || idx >= tempWordGroups.length) return;
+    let arr = tempWordGroups[idx].words.map(w => typeof w === 'object' ? w.text : w);
+    if (type === 'unique') {
+        arr = [...new Set(arr)];
+    } else if (type === 'remove_punct') {
+        // 去除标点符号（保留字母、数字、中文、空格，删除逗号、句号、引号、冒号等）
+        arr = arr.map(s => s.replace(/[^\w\u4e00-\u9fa5\s]/g, '').trim()).filter(Boolean);
+    } else if (type === 'remove_letters') {
+        // 去除英文字母（A-Z a-z）
+        arr = arr.map(s => s.replace(/[a-zA-Z]/g, '').trim()).filter(Boolean);
+    }
+    tempWordGroups[idx].words = arr.map(text => ({ text, blocked: false }));
+    renderWordCardList();
+}
+
 function exportWords() { const content = appData.wordbanks.wordGroups.map(g => g.words.map(w => typeof w === 'object' ? w.text : w).join('\n')).join('\n'); const blob = new Blob([content], { type: 'text/plain' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `words_${Date.now()}.txt`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 60000); }
 function importWords(input) { if (currentWordGroup === 'all') { showToast('请切换到分组'); return; } const f = input.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = e => { const lines = e.target.result.split(/[\r\n]+/).filter(line => line.trim()); const idx = parseInt(currentWordGroup); if (idx >= 0 && idx < tempWordGroups.length) { const existing = new Set(tempWordGroups[idx].words.map(w => typeof w === 'object' ? w.text : w)); lines.forEach(line => { if (!existing.has(line)) { tempWordGroups[idx].words.push({ text: line, blocked: false }); existing.add(line); } }); renderWordCardList(); } }; r.readAsText(f); }
 
