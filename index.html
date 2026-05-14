@@ -4230,9 +4230,24 @@ function createMessageElement(sender, content, time, quote = null, type = 'text'
     const ts = new Date(time).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
 
     if (type === 'poke') {
-        div.className = 'poke-system-message'; const pokeRole = appData.roles.find(r => r.id === sender);
-        const roleName = pokeRole?.name || '角色'; const pokeText = isMe ? `我拍了拍"${roleName}"：${content}` : `${name}拍了拍你：${content}`;
-        div.innerHTML = `<span>${escapeHtml(pokeText)}</span>`;
+        div.className = 'poke-system-message';
+        let roleName = '';
+        if (isMe) {
+            // 用户主动戳角色：需要获取当前聊天角色的名称
+            if (currentChatType === 'role' && currentRoleId) {
+                const targetRole = appData.roles.find(r => r.id === currentRoleId);
+                roleName = targetRole?.name || '角色';
+            } else {
+                roleName = '角色';
+            }
+            const pokeText = `我拍了拍"${roleName}"：${content}`;
+            div.innerHTML = `<span>${escapeHtml(pokeText)}</span>`;
+        } else {
+            // 角色戳用户
+            roleName = name;
+            const pokeText = `${roleName}拍了拍你：${content}`;
+            div.innerHTML = `<span>${escapeHtml(pokeText)}</span>`;
+        }
     } else if (type === 'call' || type === 'call_missed') {
         div.className = 'call-system-message'; div.innerHTML = `<span>${escapeHtml(content)}</span>`;
     } else if (sender === 'system') {
@@ -4985,7 +5000,15 @@ function copySourceCode() { const ta = document.getElementById('source-code-cont
 
 function showPokeActionSheet() { if (currentChatType !== 'role' || !currentRoleId) { showToast('仅支持在单人聊天中使用'); return; } document.getElementById('action-sheet-container').innerHTML = `<div class="action-sheet-backdrop" onclick="closeActionSheet()"></div><div class="action-sheet"><button class="action-sheet-btn" onclick="openPokeSettingsFromSheet(); closeActionSheet()">戳一戳设置</button><button class="action-sheet-btn" onclick="executePoke(); closeActionSheet()">戳一戳角色</button><button class="action-sheet-btn action-sheet-cancel" onclick="closeActionSheet()">取消</button></div>`; }
 function openPokeSettingsFromSheet() { const role = appData.roles.find(r => r.id === currentRoleId); if (!role) return; document.getElementById('poke-role-avatar').src = role.avatar; document.getElementById('poke-role-name').textContent = role.name; document.getElementById('poke-my-text').value = role.pokeMyText || '哥哥，我超爱你 😍😍'; document.getElementById('poke-their-text').value = role.pokeTheirText || '老婆，我们永远不分开 😂😂'; updatePokePreview(); document.getElementById('modal-poke-settings').classList.remove('hidden'); }
-function updatePokePreview() { document.getElementById('poke-preview-text').innerHTML = `我发出的：我拍了拍角色：${escapeHtml(document.getElementById('poke-my-text').value || '哥哥，我超爱你 😍😍')}<br>对方发出的：拍了拍你：${escapeHtml(document.getElementById('poke-their-text').value || '老婆，我们永远不分开 😂😂')}`; }
+
+// ========== 修正戳一戳预览函数，动态显示角色名，修复模板字符串语法 ==========
+function updatePokePreview() {
+    const roleName = document.getElementById('poke-role-name').textContent || '角色';
+    const myText = document.getElementById('poke-my-text').value || '哥哥，我超爱你 😍😍';
+    const theirText = document.getElementById('poke-their-text').value || '老婆，我们永远不分开 😂😂';
+    document.getElementById('poke-preview-text').innerHTML = `我拍了拍"${escapeHtml(roleName)}"：${escapeHtml(myText)}<br>${escapeHtml(roleName)}拍了拍你：${escapeHtml(theirText)}`;
+}
+
 function closePokeSettings() { document.getElementById('modal-poke-settings').classList.add('hidden'); }
 async function savePokeSettings() { const role = appData.roles.find(r => r.id === currentRoleId); if (!role) return; role.pokeMyText = document.getElementById('poke-my-text').value.trim() || '哥哥，我超爱你 😍😍'; role.pokeTheirText = document.getElementById('poke-their-text').value.trim() || '老婆，我们永远不分开 😂😂'; await saveData(); closePokeSettings(); showToast('戳一戳设置已保存'); }
 function executePoke() { if (currentChatType !== 'role' || !currentRoleId) return; const role = appData.roles.find(r => r.id === currentRoleId); if (!role) return; const pokeText = role.pokeMyText || '哥哥，我超爱你 😍😍'; const msg = { id: Date.now(), sender: 'me', content: pokeText, time: Date.now(), type: 'poke' }; if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = []; appData.chats[currentRoleId].push(msg); debouncedSaveData(); appendMessageToDOM('me', pokeText, Date.now(), null, 'poke'); }
@@ -6695,5 +6718,3 @@ window.addEventListener('beforeunload', function() {
 });
 
 </script>
-</body>
-</html>
