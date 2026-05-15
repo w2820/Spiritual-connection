@@ -4969,7 +4969,64 @@ function processWords(type) {
     renderWordCardList();
 }
 
-function exportWords() { const content = appData.wordbanks.wordGroups.map(g => g.words.map(w => typeof w === 'object' ? w.text : w).join('\n')).join('\n'); const blob = new Blob([content], { type: 'text/plain' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `words_${Date.now()}.txt`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 60000); }
+// ========== 更新导出功能：支持分组导出 ==========
+function exportWords() {
+    // 获取当前词库编辑状态下的分组（未保存的更改也能导出）
+    const groups = tempWordGroups;
+    if (!groups || groups.length === 0) {
+        showToast('暂无词库数据');
+        return;
+    }
+    // 构建分组列表字符串
+    let groupListStr = '';
+    groups.forEach((g, idx) => {
+        groupListStr += `${idx + 1}. ${g.name} (${g.words.length}条)\n`;
+    });
+    const userInput = window.prompt(
+        '请输入要导出的分组名称或序号（留空或取消则导出全部）\n\n可用分组：\n' + groupListStr,
+        ''
+    );
+    if (userInput === null) return; // 取消
+
+    let selectedGroup = null;
+    // 尝试按序号解析
+    const num = parseInt(userInput, 10);
+    if (!isNaN(num) && num >= 1 && num <= groups.length) {
+        selectedGroup = groups[num - 1];
+    } else {
+        // 按名称匹配（忽略大小写）
+        const inputName = userInput.trim();
+        selectedGroup = groups.find(g => g.name === inputName);
+        if (!selectedGroup && inputName !== '') {
+            showToast(`未找到分组“${inputName}”，将导出全部词库`);
+            selectedGroup = null;
+        }
+    }
+
+    let content = '';
+    if (selectedGroup) {
+        // 导出单个分组：每行一个词条
+        content = selectedGroup.words.map(w => typeof w === 'object' ? w.text : w).join('\n');
+    } else {
+        // 导出全部：每个分组的词条直接拼接（一行一个）
+        content = groups.flatMap(g => g.words.map(w => typeof w === 'object' ? w.text : w)).join('\n');
+    }
+
+    if (!content) {
+        showToast('所选分组没有词条');
+        return;
+    }
+
+    const blob = new Blob([content], { type: 'text/plain' });
+    const a = document.createElement('a');
+    const filename = selectedGroup ? `words_${selectedGroup.name}_${Date.now()}.txt` : `words_all_${Date.now()}.txt`;
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+    showToast(`已导出${selectedGroup ? `分组“${selectedGroup.name}”` : '全部词库'}`);
+}
+
 function importWords(input) { if (currentWordGroup === 'all') { showToast('请切换到分组'); return; } const f = input.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = e => { const lines = e.target.result.split(/[\r\n]+/).filter(line => line.trim()); const idx = parseInt(currentWordGroup); if (idx >= 0 && idx < tempWordGroups.length) { const existing = new Set(tempWordGroups[idx].words.map(w => typeof w === 'object' ? w.text : w)); lines.forEach(line => { if (!existing.has(line)) { tempWordGroups[idx].words.push({ text: line, blocked: false }); existing.add(line); } }); renderWordCardList(); } }; r.readAsText(f); }
 
 function selectAllWords() { }
@@ -6718,3 +6775,6 @@ window.addEventListener('beforeunload', function() {
 });
 
 </script>
+
+</body>
+</html>
