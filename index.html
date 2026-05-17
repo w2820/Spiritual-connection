@@ -6779,7 +6779,7 @@ window.addEventListener('beforeunload', function() {
     clearAllTimers();
 });
 
-// ==================== 运势占卜模块（完全修复版 V3） ====================
+// ==================== 运势占卜模块（最终稳定版 - 单张编辑 + 批量导入 + 抽牌修复） ====================
 
 // ---------- 辅助函数 ----------
 function escapeHtml(s) { if (!s) return ''; return s.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m]); }
@@ -6830,17 +6830,359 @@ async function clearAllHistory() { fortuneHistory = []; saveHistory(); window.di
 
 async function loadLenormandLibrary() { try { const stored = await imageStore.getItem(LENORMAND_LIB_KEY); lenormandLibrary = (stored && Array.isArray(stored)) ? stored : []; lenormandLibrary.forEach(img => { if (!img.meaning) img.meaning = `【${img.name}】\n暂无详细解读，请编辑。`; }); } catch(e) { lenormandLibrary = []; } }
 async function saveLenormandLibrary() { try { await imageStore.setItem(LENORMAND_LIB_KEY, lenormandLibrary); return true; } catch(e) { showToast('保存失败'); return false; } }
-async function addLenormandImage(file, customName, customMeaning) { const compressed = await compressImage(file, 300, 0.6); const name = (customName || file.name.replace(/\.[^/.]+$/, '') || '雷诺曼').substring(0, 20); const meaning = customMeaning || `【${name}】\n暂无详细解读。`; const newImg = { id: Date.now() + '_' + Math.random().toString(36).substr(2, 6), name, meaning, dataUrl: compressed, createdAt: Date.now() }; lenormandLibrary.push(newImg); const saved = await saveLenormandLibrary(); if (!saved) { lenormandLibrary.pop(); showToast('添加失败'); return null; } return newImg; }
-async function deleteImage(id) { const index = lenormandLibrary.findIndex(img => img.id == id); if (index === -1) return false; lenormandLibrary.splice(index, 1); const saved = await saveLenormandLibrary(); if (!saved) { await loadLenormandLibrary(); return false; } return true; }
-async function editMeaning(id) { const img = lenormandLibrary.find(i => i.id == id); if (!img) return; const newName = await new Promise(resolve => { const div = document.createElement('div'); div.className = 'modal-overlay'; div.style.zIndex = '2000'; div.innerHTML = `<div class="modal-card" style="max-width:360px;"><h3 class="text-lg font-bold mb-4">修改牌名</h3><input type="text" id="modal-input" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm mb-4" value="${escapeHtml(img.name)}" autofocus><div class="flex gap-3"><button class="flex-1 py-2 rounded-xl border border-gray-200" id="modal-cancel">取消</button><button class="flex-1 py-2 rounded-xl text-white" id="modal-confirm" style="background:var(--accent-color);">确定</button></div></div>`; document.body.appendChild(div); const input = div.querySelector('#modal-input'); div.querySelector('#modal-confirm').onclick = () => { resolve(input.value); div.remove(); }; div.querySelector('#modal-cancel').onclick = () => { resolve(null); div.remove(); }; input.focus(); }); if (newName && newName.trim()) img.name = newName.trim().substring(0, 20); const newMeaning = await new Promise(resolve => { const div = document.createElement('div'); div.className = 'modal-overlay'; div.style.zIndex = '2000'; div.innerHTML = `<div class="modal-card" style="max-width:400px;"><h3 class="text-lg font-bold mb-4">修改牌意</h3><textarea id="modal-textarea" rows="6" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm mb-4">${escapeHtml(img.meaning)}</textarea><div class="flex gap-3"><button class="flex-1 py-2 rounded-xl border border-gray-200" id="modal-cancel">取消</button><button class="flex-1 py-2 rounded-xl text-white" id="modal-confirm" style="background:var(--accent-color);">确定</button></div></div>`; document.body.appendChild(div); const textarea = div.querySelector('#modal-textarea'); div.querySelector('#modal-confirm').onclick = () => { resolve(textarea.value); div.remove(); }; div.querySelector('#modal-cancel').onclick = () => { resolve(null); div.remove(); }; textarea.focus(); }); if (newMeaning !== null) img.meaning = newMeaning; await saveLenormandLibrary(); window.dispatchEvent(new Event('lenormandLibraryChanged')); showToast('已更新'); }
-function drawRandomImages(count) { if (!lenormandLibrary.length) return []; const shuffled = [...lenormandLibrary]; for (let i = shuffled.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; } return shuffled.slice(0, count); }
-function drawTarot(count) { const shuffled = [...tarotCards]; for (let i = shuffled.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; } return shuffled.slice(0, count); }
-function getDailyFortune() { const levels = ['大吉','中吉','小吉','末吉','凶','大凶']; const level = levels[Math.floor(Math.random() * levels.length)]; const phrase = fortunePhrases[level][Math.floor(Math.random() * fortunePhrases[level].length)]; return { level, phrase, desc: `${level} · ${phrase}` }; }
 
-function showInputModal(title, defaultValue, callback) { const div = document.createElement('div'); div.className = 'modal-overlay'; div.style.zIndex = '2000'; div.innerHTML = `<div class="modal-card" style="max-width:360px;"><h3 class="text-lg font-bold mb-4">${escapeHtml(title)}</h3><input type="text" id="modal-input" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm mb-4" value="${escapeHtml(defaultValue)}" autofocus><div class="flex gap-3"><button class="flex-1 py-2 rounded-xl border border-gray-200" id="modal-cancel">取消</button><button class="flex-1 py-2 rounded-xl text-white" id="modal-confirm" style="background:var(--accent-color);">确定</button></div></div>`; document.body.appendChild(div); const input = div.querySelector('#modal-input'); div.querySelector('#modal-confirm').onclick = () => { callback(input.value); div.remove(); }; div.querySelector('#modal-cancel').onclick = () => div.remove(); input.focus(); }
-function showTextareaModal(title, defaultValue, callback) { const div = document.createElement('div'); div.className = 'modal-overlay'; div.style.zIndex = '2000'; div.innerHTML = `<div class="modal-card" style="max-width:400px;"><h3 class="text-lg font-bold mb-4">${escapeHtml(title)}</h3><textarea id="modal-textarea" rows="6" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm mb-4">${escapeHtml(defaultValue)}</textarea><div class="flex gap-3"><button class="flex-1 py-2 rounded-xl border border-gray-200" id="modal-cancel">取消</button><button class="flex-1 py-2 rounded-xl text-white" id="modal-confirm" style="background:var(--accent-color);">确定</button></div></div>`; document.body.appendChild(div); const textarea = div.querySelector('#modal-textarea'); div.querySelector('#modal-confirm').onclick = () => { callback(textarea.value); div.remove(); }; div.querySelector('#modal-cancel').onclick = () => div.remove(); textarea.focus(); }
+// 批量上传
+async function addMultipleImages(files) {
+    const tempImages = [];
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const compressed = await compressImage(file, 300, 0.6);
+        const defaultName = file.name.replace(/\.[^/.]+$/, '') || '雷诺曼';
+        tempImages.push({
+            id: Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+            name: defaultName.substring(0, 20),
+            meaning: `【${defaultName.substring(0, 20)}】\n暂无详细解读，请编辑。`,
+            dataUrl: compressed,
+            createdAt: Date.now()
+        });
+    }
+    for (const img of tempImages) lenormandLibrary.push(img);
+    const saved = await saveLenormandLibrary();
+    if (!saved) { showToast('保存失败'); return false; }
+    showToast(`已添加 ${files.length} 张图片，请打开「批量编辑」完善信息`);
+    return true;
+}
 
-// 管理库界面
+async function deleteImage(id) {
+    const index = lenormandLibrary.findIndex(img => img.id == id);
+    if (index === -1) return false;
+    lenormandLibrary.splice(index, 1);
+    const saved = await saveLenormandLibrary();
+    if (!saved) { await loadLenormandLibrary(); return false; }
+    return true;
+}
+
+// ---------- 单张编辑功能 ----------
+async function editSingleCard(id) {
+    const img = lenormandLibrary.find(i => i.id == id);
+    if (!img) return;
+    const div = document.createElement('div');
+    div.className = 'modal-overlay';
+    div.style.zIndex = '1500';
+    div.innerHTML = `
+        <div class="modal-card" style="max-width:500px;">
+            <h3 class="text-lg font-bold mb-4">编辑牌面信息</h3>
+            <label class="text-sm font-medium">牌名</label>
+            <input type="text" id="edit-single-name" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 mb-3" value="${escapeHtml(img.name)}" maxlength="20">
+            <label class="text-sm font-medium">牌意解读</label>
+            <textarea id="edit-single-meaning" rows="8" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 mb-4">${escapeHtml(img.meaning)}</textarea>
+            <div class="flex gap-3">
+                <button id="edit-single-cancel" class="flex-1 py-2 rounded-xl border border-gray-200">取消</button>
+                <button id="edit-single-save" class="flex-1 py-2 rounded-xl text-white" style="background:var(--accent-color);">保存</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(div);
+    const nameInput = div.querySelector('#edit-single-name');
+    const meaningTextarea = div.querySelector('#edit-single-meaning');
+    div.querySelector('#edit-single-save').onclick = async () => {
+        img.name = nameInput.value.substring(0, 20);
+        img.meaning = meaningTextarea.value;
+        const saved = await saveLenormandLibrary();
+        if (saved) {
+            showToast('修改已保存');
+            div.remove();
+            // 刷新管理库网格
+            if (currentManager) {
+                const grid = currentManager.querySelector('#lib-grid');
+                if (grid) {
+                    const renderGrid = () => {
+                        if (!lenormandLibrary.length) { grid.innerHTML = '<div class="col-span-3 text-center text-gray-400 py-8">暂无图片，请点击上方上传</div>'; return; }
+                        let html = '';
+                        lenormandLibrary.forEach(img => {
+                            html += `<div class="relative group"><img src="${img.dataUrl}" class="w-full aspect-square object-cover rounded-lg border cursor-pointer" onclick="window._showMeaning('${img.id}')"><div class="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1 truncate">${escapeHtml(img.name)}</div><div class="absolute top-1 right-1 flex gap-1"><button class="w-5 h-5 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition" onclick="event.stopPropagation(); window._editSingle('${img.id}')">✏️</button><button class="w-5 h-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition" onclick="event.stopPropagation(); window._delCard('${img.id}')">✕</button></div></div>`;
+                        });
+                        grid.innerHTML = html;
+                    };
+                    renderGrid();
+                }
+            }
+        } else {
+            showToast('保存失败');
+        }
+    };
+    div.querySelector('#edit-single-cancel').onclick = () => div.remove();
+}
+
+// ---------- 解析文本（按数字序号，保留全部内容） ----------
+function parseLenormandText(text) {
+    const blocks = [];
+    const lines = text.split(/\r?\n/);
+    let currentNumber = null;
+    let currentName = '';
+    let currentLines = [];
+    
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const match = line.match(/^(\d+)\.\s*(.*)$/);
+        if (match) {
+            if (currentNumber !== null) {
+                blocks.push({
+                    number: currentNumber,
+                    name: currentName,
+                    fullText: currentLines.join('\n').trim()
+                });
+            }
+            currentNumber = parseInt(match[1]);
+            const afterNumber = match[2];
+            let name = afterNumber;
+            const nameMatch = afterNumber.match(/^([^（( \t]+)/);
+            if (nameMatch) name = nameMatch[1];
+            currentName = name;
+            currentLines = [line];
+        } else {
+            if (currentNumber !== null) {
+                currentLines.push(line);
+            }
+        }
+    }
+    if (currentNumber !== null) {
+        blocks.push({
+            number: currentNumber,
+            name: currentName,
+            fullText: currentLines.join('\n').trim()
+        });
+    }
+    return blocks;
+}
+
+// ---------- 批量编辑模态框（仅批量编辑，不影响单张编辑） ----------
+let currentBatchEditor = null;
+async function openBatchEditor() {
+    if (currentBatchEditor) { currentBatchEditor.remove(); currentBatchEditor = null; }
+    await loadLenormandLibrary();
+    if (lenormandLibrary.length === 0) { showToast('没有图片可编辑'); return; }
+    const editor = document.createElement('div');
+    editor.className = 'modal-overlay';
+    editor.style.zIndex = '1400';
+    editor.innerHTML = `
+        <div class="modal-card" style="max-width:800px; width:95%; max-height:85vh; display:flex; flex-direction:column;">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">📝 批量编辑牌意</h2>
+                <button id="close-editor" class="p-2 rounded-full hover:bg-gray-100">✕</button>
+            </div>
+            <div style="overflow-y:auto; flex:1;">
+                <table style="width:100%; border-collapse:collapse;">
+                    <thead><tr><th style="text-align:left; padding:8px;">预览</th><th style="text-align:left; padding:8px;">牌名</th><th style="text-align:left; padding:8px;">牌意解读</th></tr></thead>
+                    <tbody id="batch-edit-tbody"></tbody>
+                </table>
+            </div>
+            <div style="display:flex; gap:12px; margin-top:16px; flex-wrap:wrap;">
+                <button id="import-text-btn" class="flex-1 bg-gray-100 py-2 rounded-xl">📄 从简单文本导入（每行 牌名|牌意）</button>
+                <button id="import-full-btn" class="flex-1 bg-gray-100 py-2 rounded-xl">📚 从完整文本导入（按序号1. 2. 3.分割）</button>
+                <button id="save-batch-btn" class="flex-1 text-white py-2 rounded-xl" style="background:var(--accent-color);">保存全部修改</button>
+                <button id="close-batch-btn" class="flex-1 bg-gray-200 py-2 rounded-xl">关闭</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(editor);
+    currentBatchEditor = editor;
+
+    const tbody = editor.querySelector('#batch-edit-tbody');
+    function renderBatchList() {
+        tbody.innerHTML = '';
+        lenormandLibrary.forEach((img, idx) => {
+            const row = tbody.insertRow();
+            row.style.borderBottom = '1px solid #eee';
+            const cellPreview = row.insertCell(0);
+            cellPreview.style.padding = '8px';
+            const previewImg = document.createElement('img');
+            previewImg.src = img.dataUrl;
+            previewImg.style.width = '50px';
+            previewImg.style.height = '50px';
+            previewImg.style.objectFit = 'cover';
+            previewImg.style.borderRadius = '8px';
+            cellPreview.appendChild(previewImg);
+            const cellName = row.insertCell(1);
+            cellName.style.padding = '8px';
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.value = img.name;
+            nameInput.maxLength = 20;
+            nameInput.style.width = '120px';
+            nameInput.style.padding = '6px';
+            nameInput.style.borderRadius = '8px';
+            nameInput.style.border = '1px solid #ddd';
+            nameInput.dataset.idx = idx;
+            nameInput.addEventListener('change', (e) => { lenormandLibrary[idx].name = e.target.value.substring(0,20); });
+            cellName.appendChild(nameInput);
+            const cellMeaning = row.insertCell(2);
+            cellMeaning.style.padding = '8px';
+            const meaningTextarea = document.createElement('textarea');
+            meaningTextarea.value = img.meaning;
+            meaningTextarea.rows = 3;
+            meaningTextarea.style.width = '100%';
+            meaningTextarea.style.padding = '6px';
+            meaningTextarea.style.borderRadius = '8px';
+            meaningTextarea.style.border = '1px solid #ddd';
+            meaningTextarea.dataset.idx = idx;
+            meaningTextarea.addEventListener('change', (e) => { lenormandLibrary[idx].meaning = e.target.value; });
+            cellMeaning.appendChild(meaningTextarea);
+        });
+    }
+    renderBatchList();
+
+    // 简单文本导入
+    editor.querySelector('#import-text-btn').onclick = () => {
+        const modalDiv = document.createElement('div');
+        modalDiv.className = 'modal-overlay';
+        modalDiv.style.zIndex = '1500';
+        modalDiv.innerHTML = `
+            <div class="modal-card" style="max-width:500px;">
+                <h3 class="text-lg font-bold mb-2">从简单文本导入牌意</h3>
+                <p class="text-xs text-gray-500 mb-3">每行一条，格式：牌名 | 牌意  或  牌名 牌意（用|或空格分隔）<br>将按顺序匹配当前图片列表</p>
+                <textarea id="import-textarea" rows="6" class="w-full bg-gray-50 rounded-xl p-2 text-sm"></textarea>
+                <div class="flex gap-3 mt-4">
+                    <button id="import-cancel" class="flex-1 py-2 rounded-xl border">取消</button>
+                    <button id="import-confirm" class="flex-1 py-2 rounded-xl text-white" style="background:var(--accent-color);">导入并覆盖</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modalDiv);
+        const importTextarea = modalDiv.querySelector('#import-textarea');
+        modalDiv.querySelector('#import-confirm').onclick = () => {
+            const text = importTextarea.value;
+            const lines = text.split(/\r?\n/);
+            let matched = 0;
+            for (let i = 0; i < lines.length && i < lenormandLibrary.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                let name = '', meaning = '';
+                if (line.includes('|')) {
+                    const parts = line.split('|');
+                    name = parts[0].trim();
+                    meaning = parts.slice(1).join('|').trim();
+                } else {
+                    const firstSpace = line.indexOf(' ');
+                    if (firstSpace !== -1) {
+                        name = line.substring(0, firstSpace).trim();
+                        meaning = line.substring(firstSpace + 1).trim();
+                    } else {
+                        name = line;
+                        meaning = '（待补充解读）';
+                    }
+                }
+                if (name) {
+                    lenormandLibrary[i].name = name.substring(0, 20);
+                    if (meaning) lenormandLibrary[i].meaning = meaning;
+                    matched++;
+                }
+            }
+            renderBatchList();
+            modalDiv.remove();
+            showToast(`已匹配 ${matched} 张牌`);
+        };
+        modalDiv.querySelector('#import-cancel').onclick = () => modalDiv.remove();
+    };
+
+    // 完整文本导入（带预览匹配）
+    editor.querySelector('#import-full-btn').onclick = () => {
+        const modalDiv = document.createElement('div');
+        modalDiv.className = 'modal-overlay';
+        modalDiv.style.zIndex = '1500';
+        modalDiv.innerHTML = `
+            <div class="modal-card" style="max-width:700px; width:90%;">
+                <h3 class="text-lg font-bold mb-2">从完整文本导入（按序号1. 2. 3.分割）</h3>
+                <p class="text-xs text-gray-500 mb-3">
+                    粘贴包含数字序号的文本（如“1. 骑士 ... 2. 四叶草 ...”），程序将按顺序匹配当前图片。<br>
+                    <strong>下方会显示预览匹配结果，确认无误后再点击“确认导入”。</strong>
+                </p>
+                <textarea id="full-import-textarea" rows="8" class="w-full bg-gray-50 rounded-xl p-2 text-sm font-mono"></textarea>
+                <div id="import-preview" style="font-size:12px; margin-top:8px; max-height:200px; overflow-y:auto; background:#f9f9f9; padding:6px; border-radius:8px;"></div>
+                <div class="flex gap-3 mt-4">
+                    <button id="full-import-cancel" class="flex-1 py-2 rounded-xl border">取消</button>
+                    <button id="full-import-confirm" class="flex-1 py-2 rounded-xl text-white" style="background:var(--accent-color);">确认导入</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modalDiv);
+        const textarea = modalDiv.querySelector('#full-import-textarea');
+        const previewDiv = modalDiv.querySelector('#import-preview');
+        
+        const updatePreview = () => {
+            const raw = textarea.value;
+            if (!raw.trim()) { previewDiv.innerHTML = ''; return; }
+            const blocks = parseLenormandText(raw);
+            if (blocks.length === 0) {
+                previewDiv.innerHTML = '<span style="color:red;">解析失败，请检查文本格式（必须包含“1. ”这样的序号）</span>';
+                return;
+            }
+            let html = `<div style="margin-bottom:8px;">✅ 解析到 <strong>${blocks.length}</strong> 个牌块，当前图片数量：<strong>${lenormandLibrary.length}</strong></div>`;
+            html += '<table style="width:100%; border-collapse:collapse; font-size:12px;">';
+            html += '<tr><th>序号</th><th>牌名</th><th>将匹配给图片索引</th></tr>';
+            const matchCount = Math.min(blocks.length, lenormandLibrary.length);
+            for (let i = 0; i < matchCount; i++) {
+                html += `<tr><td>${blocks[i].number}</td><td>${escapeHtml(blocks[i].name)}</td><td>第 ${i+1} 张图（当前牌名: ${escapeHtml(lenormandLibrary[i].name)}）</td></tr>`;
+            }
+            if (blocks.length > lenormandLibrary.length) {
+                html += `<tr><td colspan="3" style="color:orange;">⚠️ 文本块数(${blocks.length})多于图片数(${lenormandLibrary.length})，仅匹配前${matchCount}张</td></tr>`;
+            } else if (blocks.length < lenormandLibrary.length) {
+                html += `<tr><td colspan="3" style="color:orange;">⚠️ 图片数多于文本块数，后${lenormandLibrary.length - blocks.length}张图片不会被覆盖</td></tr>`;
+            }
+            html += '</table>';
+            previewDiv.innerHTML = html;
+        };
+        textarea.addEventListener('input', updatePreview);
+        
+        modalDiv.querySelector('#full-import-confirm').onclick = () => {
+            const rawText = textarea.value;
+            if (!rawText.trim()) { showToast('请粘贴文本'); return; }
+            const blocks = parseLenormandText(rawText);
+            if (blocks.length === 0) { showToast('解析失败'); return; }
+            const matchCount = Math.min(blocks.length, lenormandLibrary.length);
+            if (matchCount === 0) { showToast('没有图片可匹配'); modalDiv.remove(); return; }
+            for (let i = 0; i < matchCount; i++) {
+                lenormandLibrary[i].name = blocks[i].name.substring(0, 20);
+                lenormandLibrary[i].meaning = `【${blocks[i].name}】\n${blocks[i].fullText}`;
+            }
+            renderBatchList();
+            modalDiv.remove();
+            showToast(`已导入前 ${matchCount} 张牌的完整牌意`);
+        };
+        modalDiv.querySelector('#full-import-cancel').onclick = () => modalDiv.remove();
+        updatePreview();
+    };
+
+    editor.querySelector('#save-batch-btn').onclick = async () => {
+        const saved = await saveLenormandLibrary();
+        if (saved) {
+            showToast('所有修改已保存');
+            editor.remove();
+            currentBatchEditor = null;
+            if (currentManager) {
+                await loadLenormandLibrary();
+                const grid = currentManager.querySelector('#lib-grid');
+                if (grid) {
+                    const renderGrid = () => {
+                        if (!lenormandLibrary.length) { grid.innerHTML = '<div class="col-span-3 text-center text-gray-400 py-8">暂无图片，请点击上方上传</div>'; return; }
+                        let html = '';
+                        lenormandLibrary.forEach(img => {
+                            html += `<div class="relative group"><img src="${img.dataUrl}" class="w-full aspect-square object-cover rounded-lg border cursor-pointer" onclick="window._showMeaning('${img.id}')"><div class="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1 truncate">${escapeHtml(img.name)}</div><div class="absolute top-1 right-1 flex gap-1"><button class="w-5 h-5 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition" onclick="event.stopPropagation(); window._editSingle('${img.id}')">✏️</button><button class="w-5 h-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition" onclick="event.stopPropagation(); window._delCard('${img.id}')">✕</button></div></div>`;
+                        });
+                        grid.innerHTML = html;
+                    };
+                    renderGrid();
+                }
+            }
+        } else {
+            showToast('保存失败，请重试');
+        }
+    };
+    editor.querySelector('#close-batch-btn').onclick = () => { editor.remove(); currentBatchEditor = null; };
+    editor.querySelector('#close-editor').onclick = () => { editor.remove(); currentBatchEditor = null; };
+}
+
+// ---------- 管理库界面 ----------
 let currentManager = null;
 async function openLibraryManager() {
     if (currentManager) { currentManager.remove(); currentManager = null; }
@@ -6848,7 +7190,22 @@ async function openLibraryManager() {
     const manager = document.createElement('div');
     manager.className = 'modal-overlay';
     manager.style.zIndex = '1300';
-    manager.innerHTML = `<div class="modal-card" style="max-width:500px; width:90%; max-height:80vh; display:flex; flex-direction:column;"><div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold">📇 雷诺曼图片库</h2><button id="close-manager" class="p-2 rounded-full hover:bg-gray-100">✕</button></div><label class="w-full border-2 border-dashed border-gray-300 rounded-xl p-3 text-center cursor-pointer mb-4"><input type="file" id="upload-images" accept="image/*" multiple style="display:none;"><i class="fas fa-cloud-upload-alt text-2xl text-gray-400"></i><p class="text-xs text-gray-500">点击选择多张图片（每张会弹窗输入牌名和牌意）</p></label><div id="lib-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; overflow-y:auto; max-height:55vh;"></div><div class="mt-4"><button id="close-manager-bottom" class="w-full bg-gray-100 p-2 rounded-xl">关闭</button></div></div>`;
+    manager.innerHTML = `
+        <div class="modal-card" style="max-width:500px; width:90%; max-height:80vh; display:flex; flex-direction:column;">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">📇 雷诺曼图片库</h2>
+                <button id="close-manager" class="p-2 rounded-full hover:bg-gray-100">✕</button>
+            </div>
+            <label class="w-full border-2 border-dashed border-gray-300 rounded-xl p-3 text-center cursor-pointer mb-4">
+                <input type="file" id="upload-images" accept="image/*" multiple style="display:none;">
+                <i class="fas fa-cloud-upload-alt text-2xl text-gray-400"></i>
+                <p class="text-xs text-gray-500">点击选择多张图片（上传后自动打开批量编辑）</p>
+            </label>
+            <div id="lib-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; overflow-y:auto; max-height:55vh;"></div>
+            <div class="mt-4"><button id="batch-edit-btn" class="w-full bg-gray-100 p-2 rounded-xl mt-1">📝 批量编辑牌意</button></div>
+            <div class="mt-2"><button id="close-manager-bottom" class="w-full bg-gray-100 p-2 rounded-xl">关闭</button></div>
+        </div>
+    `;
     document.body.appendChild(manager);
     currentManager = manager;
 
@@ -6858,7 +7215,7 @@ async function openLibraryManager() {
         if (!lenormandLibrary.length) { grid.innerHTML = '<div class="col-span-3 text-center text-gray-400 py-8">暂无图片，请点击上方上传</div>'; return; }
         let html = '';
         lenormandLibrary.forEach(img => {
-            html += `<div class="relative group"><img src="${img.dataUrl}" class="w-full aspect-square object-cover rounded-lg border cursor-pointer" onclick="window._showMeaning('${img.id}')"><div class="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1 truncate">${escapeHtml(img.name)}</div><div class="absolute top-1 right-1 flex gap-1"><button class="w-5 h-5 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition" onclick="event.stopPropagation(); window._editCard('${img.id}')">✏️</button><button class="w-5 h-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition" onclick="event.stopPropagation(); window._delCard('${img.id}')">✕</button></div></div>`;
+            html += `<div class="relative group"><img src="${img.dataUrl}" class="w-full aspect-square object-cover rounded-lg border cursor-pointer" onclick="window._showMeaning('${img.id}')"><div class="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1 truncate">${escapeHtml(img.name)}</div><div class="absolute top-1 right-1 flex gap-1"><button class="w-5 h-5 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition" onclick="event.stopPropagation(); window._editSingle('${img.id}')">✏️</button><button class="w-5 h-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition" onclick="event.stopPropagation(); window._delCard('${img.id}')">✕</button></div></div>`;
         });
         grid.innerHTML = html;
     };
@@ -6867,36 +7224,77 @@ async function openLibraryManager() {
         const files = Array.from(e.target.files);
         if (!files.length) return;
         showToast(`正在处理 ${files.length} 张图片...`);
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            const defaultName = file.name.replace(/\.[^/.]+$/, '') || '雷诺曼';
-            const name = await new Promise(resolve => showInputModal(`第 ${i+1} 张牌名（最多20字）`, defaultName.substring(0,20), resolve));
-            if (!name) continue;
-            const meaning = await new Promise(resolve => showTextareaModal(`【${name}】的牌意解读`, `【${name}】\n请描述这张牌的象征与解读。`, resolve));
-            await addLenormandImage(file, name, meaning);
-        }
+        await addMultipleImages(files);
         await loadLenormandLibrary();
         renderGrid();
+        openBatchEditor();  // 上传后自动打开批量编辑
         uploadInput.value = '';
-        showToast(`已添加 ${files.length} 张图片`);
     };
 
-    window._showMeaning = (id) => { const img = lenormandLibrary.find(i => i.id == id); if (img) alert(`【${img.name}】\n\n牌意解读：\n${img.meaning}`); };
-    window._editCard = async (id) => { await editMeaning(id); await loadLenormandLibrary(); renderGrid(); };
-    window._delCard = async (id) => { showConfirm(`确定删除「${lenormandLibrary.find(i=>i.id==id)?.name}」？`, async (ok) => { if (ok) { await deleteImage(id); await loadLenormandLibrary(); renderGrid(); showToast('已删除'); } }); };
+    window._showMeaning = (id) => {
+        const img = lenormandLibrary.find(i => i.id == id);
+        if (img) alert(`【${img.name}】\n\n${img.meaning}`);
+    };
+    window._editSingle = async (id) => {
+        await editSingleCard(id);
+    };
+    window._delCard = async (id) => {
+        showConfirm(`确定删除「${lenormandLibrary.find(i=>i.id==id)?.name}」？`, async (ok) => {
+            if (ok) {
+                await deleteImage(id);
+                await loadLenormandLibrary();
+                renderGrid();
+                showToast('已删除');
+            }
+        });
+    };
     window._refreshManager = () => { loadLenormandLibrary().then(renderGrid); };
 
     const onLibChange = () => { loadLenormandLibrary().then(renderGrid); };
     window.addEventListener('lenormandLibraryChanged', onLibChange);
-    manager.addEventListener('remove', () => { window.removeEventListener('lenormandLibraryChanged', onLibChange); delete window._showMeaning; delete window._editCard; delete window._delCard; delete window._refreshManager; });
+    manager.addEventListener('remove', () => {
+        window.removeEventListener('lenormandLibraryChanged', onLibChange);
+        delete window._showMeaning;
+        delete window._editSingle;
+        delete window._delCard;
+        delete window._refreshManager;
+    });
 
     renderGrid();
     const close = () => { manager.remove(); currentManager = null; };
     manager.querySelectorAll('#close-manager, #close-manager-bottom').forEach(btn => btn.onclick = close);
+    manager.querySelector('#batch-edit-btn').onclick = () => openBatchEditor();
 }
 
-// 占卜主界面
+// ---------- 占卜主界面（修复抽牌） ----------
 let currentFortuneModal = null;
+
+function drawTarot(count) {
+    const shuffled = [...tarotCards];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled.slice(0, count);
+}
+
+function drawRandomImages(count) {
+    if (!lenormandLibrary.length) return [];
+    const shuffled = [...lenormandLibrary];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled.slice(0, count);
+}
+
+function getDailyFortune() {
+    const levels = ['大吉','中吉','小吉','末吉','凶','大凶'];
+    const level = levels[Math.floor(Math.random() * levels.length)];
+    const phrase = fortunePhrases[level][Math.floor(Math.random() * fortunePhrases[level].length)];
+    return { level, phrase, desc: `${level} · ${phrase}` };
+}
+
 async function openFortune() {
     await loadLenormandLibrary();
     await loadHistory();
@@ -6912,30 +7310,177 @@ async function openFortune() {
     modal.querySelectorAll('#close-fortune, #close-fortune-bottom').forEach(btn => btn.onclick = close);
 
     const tabs = modal.querySelectorAll('[data-tab]');
-    const panes = { daily: modal.querySelector('#daily-pane'), tarot: modal.querySelector('#tarot-pane'), lenormand: modal.querySelector('#lenormand-pane'), history: modal.querySelector('#history-pane') };
-    tabs.forEach(tab => { tab.onclick = () => { const tabName = tab.getAttribute('data-tab'); tabs.forEach(t => t.classList.remove('active')); tab.classList.add('active'); Object.values(panes).forEach(p => p.style.display = 'none'); panes[tabName].style.display = 'block'; if (tabName === 'history') renderHistory(); }; });
+    const panes = {
+        daily: modal.querySelector('#daily-pane'),
+        tarot: modal.querySelector('#tarot-pane'),
+        lenormand: modal.querySelector('#lenormand-pane'),
+        history: modal.querySelector('#history-pane')
+    };
+    tabs.forEach(tab => {
+        tab.onclick = () => {
+            const tabName = tab.getAttribute('data-tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            Object.values(panes).forEach(p => p.style.display = 'none');
+            panes[tabName].style.display = 'block';
+            if (tabName === 'history') renderHistory();
+        };
+    });
 
-    modal.querySelector('#draw-daily').onclick = () => { const f = getDailyFortune(); modal.querySelector('#daily-level').innerHTML = f.level; modal.querySelector('#daily-phrase').innerHTML = f.desc; addRecord('每日运势', '', f.desc); showToast('今日运势已抽取'); };
-    modal.querySelector('#tarot-1').onclick = () => drawTarotCards(1);
-    modal.querySelector('#tarot-3').onclick = () => drawTarotCards(3);
-    const drawTarotCards = (count) => { const q = modal.querySelector('#tarot-question').value.trim(); const cards = drawTarot(count); let html = q ? `<div class="text-sm text-gray-500 mb-2">📝 问题：${escapeHtml(q)}</div>` : ''; cards.forEach((c, i) => { const rev = Math.random() < 0.3; const ori = rev ? '逆位' : '正位'; const meaning = rev ? c.reversed : c.upright; html += `<div class="bg-white rounded-xl p-3 mb-2 flex gap-3 shadow-sm"><div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-2xl">${c.icon}</div><div><div class="font-bold">${escapeHtml(c.name)} <span class="text-xs ${rev?'text-red-500':'text-green-600'}">${ori}</span></div><div class="text-sm text-gray-600">💡 ${escapeHtml(meaning)}</div></div></div>`; }); html += `<button onclick="copyResult(this)" class="mt-2 text-xs text-amber-600 border border-amber-300 rounded-full px-3 py-1">📋 复制结果</button>`; modal.querySelector('#tarot-result').innerHTML = html; addRecord('塔罗', q, cards.map(c=>c.name).join('、')); };
-    modal.querySelector('#leno-1').onclick = () => drawLeno(1);
-    modal.querySelector('#leno-3').onclick = () => drawLeno(3);
+    // 每日运势
+    modal.querySelector('#draw-daily').onclick = () => {
+        const f = getDailyFortune();
+        modal.querySelector('#daily-level').innerHTML = f.level;
+        modal.querySelector('#daily-phrase').innerHTML = f.desc;
+        addRecord('每日运势', '', f.desc);
+        showToast('今日运势已抽取');
+    };
+
+    // 塔罗占卜
+    modal.querySelector('#tarot-1').onclick = () => {
+        const q = modal.querySelector('#tarot-question').value.trim();
+        const cards = drawTarot(1);
+        let html = q ? `<div class="text-sm text-gray-500 mb-2">📝 问题：${escapeHtml(q)}</div>` : '';
+        cards.forEach(c => {
+            const rev = Math.random() < 0.3;
+            const ori = rev ? '逆位' : '正位';
+            const meaning = rev ? c.reversed : c.upright;
+            html += `<div class="bg-white rounded-xl p-3 mb-2 flex gap-3 shadow-sm">
+                        <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-2xl">${c.icon}</div>
+                        <div><div class="font-bold">${escapeHtml(c.name)} <span class="text-xs ${rev?'text-red-500':'text-green-600'}">${ori}</span></div><div class="text-sm text-gray-600">💡 ${escapeHtml(meaning)}</div></div>
+                    </div>`;
+        });
+        html += `<button onclick="copyResult(this)" class="mt-2 text-xs text-amber-600 border border-amber-300 rounded-full px-3 py-1">📋 复制结果</button>`;
+        modal.querySelector('#tarot-result').innerHTML = html;
+        addRecord('塔罗', q, cards.map(c=>c.name).join('、'));
+    };
+    modal.querySelector('#tarot-3').onclick = () => {
+        const q = modal.querySelector('#tarot-question').value.trim();
+        const cards = drawTarot(3);
+        let html = q ? `<div class="text-sm text-gray-500 mb-2">📝 问题：${escapeHtml(q)}</div>` : '';
+        cards.forEach((c, idx) => {
+            const rev = Math.random() < 0.3;
+            const ori = rev ? '逆位' : '正位';
+            const meaning = rev ? c.reversed : c.upright;
+            html += `<div class="bg-white rounded-xl p-3 mb-2 flex gap-3 shadow-sm">
+                        <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-2xl">${c.icon}</div>
+                        <div><div class="font-bold">${escapeHtml(c.name)} <span class="text-xs ${rev?'text-red-500':'text-green-600'}">${ori}</span></div><div class="text-sm text-gray-600">💡 ${escapeHtml(meaning)}</div></div>
+                    </div>`;
+        });
+        html += `<button onclick="copyResult(this)" class="mt-2 text-xs text-amber-600 border border-amber-300 rounded-full px-3 py-1">📋 复制结果</button>`;
+        modal.querySelector('#tarot-result').innerHTML = html;
+        addRecord('塔罗', q, cards.map(c=>c.name).join('、'));
+    };
+
+    // 雷诺曼占卜
+    modal.querySelector('#leno-1').onclick = () => {
+        if (!lenormandLibrary.length) {
+            showToast('雷诺曼图片库为空，请先上传图片');
+            return;
+        }
+        const q = modal.querySelector('#leno-question').value.trim();
+        const images = drawRandomImages(1);
+        let html = q ? `<div class="text-sm text-gray-500 mb-2">📝 问题：${escapeHtml(q)}</div>` : '';
+        images.forEach(img => {
+            html += `<div class="bg-white rounded-xl p-3 mb-3 flex gap-3 shadow-sm">
+                        <div class="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center cursor-pointer" onclick="window._showMeaningPopup('${img.id}')">
+                            <img src="${img.dataUrl}" class="max-w-full max-h-full object-contain">
+                        </div>
+                        <div class="flex-1">
+                            <div class="font-bold cursor-pointer" onclick="window._showMeaningPopup('${img.id}')">${escapeHtml(img.name)}</div>
+                            <div class="text-sm text-gray-700 mt-1 line-clamp-2" style="max-height:3em; overflow-y:auto;">${escapeHtml(img.meaning.substring(0, 100))}${img.meaning.length > 100 ? '...' : ''}</div>
+                        </div>
+                    </div>`;
+        });
+        html += `<button onclick="copyResult(this)" class="mt-2 text-xs text-amber-600 border border-amber-300 rounded-full px-3 py-1">📋 复制结果</button>`;
+        modal.querySelector('#leno-result').innerHTML = html;
+        addRecord('雷诺曼', q, images.map(img=>img.name).join('、'));
+    };
+    modal.querySelector('#leno-3').onclick = () => {
+        if (!lenormandLibrary.length) {
+            showToast('雷诺曼图片库为空，请先上传图片');
+            return;
+        }
+        const q = modal.querySelector('#leno-question').value.trim();
+        const images = drawRandomImages(3);
+        let html = q ? `<div class="text-sm text-gray-500 mb-2">📝 问题：${escapeHtml(q)}</div>` : '';
+        images.forEach(img => {
+            html += `<div class="bg-white rounded-xl p-3 mb-3 flex gap-3 shadow-sm">
+                        <div class="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center cursor-pointer" onclick="window._showMeaningPopup('${img.id}')">
+                            <img src="${img.dataUrl}" class="max-w-full max-h-full object-contain">
+                        </div>
+                        <div class="flex-1">
+                            <div class="font-bold cursor-pointer" onclick="window._showMeaningPopup('${img.id}')">${escapeHtml(img.name)}</div>
+                            <div class="text-sm text-gray-700 mt-1 line-clamp-2" style="max-height:3em; overflow-y:auto;">${escapeHtml(img.meaning.substring(0, 100))}${img.meaning.length > 100 ? '...' : ''}</div>
+                        </div>
+                    </div>`;
+        });
+        html += `<button onclick="copyResult(this)" class="mt-2 text-xs text-amber-600 border border-amber-300 rounded-full px-3 py-1">📋 复制结果</button>`;
+        modal.querySelector('#leno-result').innerHTML = html;
+        addRecord('雷诺曼', q, images.map(img=>img.name).join('、'));
+    };
     modal.querySelector('#manage-lib').onclick = () => openLibraryManager();
-    const drawLeno = (count) => { if (!lenormandLibrary.length) { showToast('雷诺曼图片库为空，请先上传图片'); return; } const q = modal.querySelector('#leno-question').value.trim(); const images = drawRandomImages(count); let html = q ? `<div class="text-sm text-gray-500 mb-2">📝 问题：${escapeHtml(q)}</div>` : ''; images.forEach((img, idx) => { html += `<div class="bg-white rounded-xl p-3 mb-3 flex gap-3 shadow-sm"><div class="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center cursor-pointer" onclick="window._showMeaningPopup('${img.id}')"><img src="${img.dataUrl}" class="max-w-full max-h-full object-contain"></div><div class="flex-1"><div class="font-bold cursor-pointer" onclick="window._showMeaningPopup('${img.id}')">${escapeHtml(img.name)}</div><div class="text-sm text-gray-700 mt-1 line-clamp-2" style="max-height:3em; overflow-y:auto;">${escapeHtml(img.meaning.substring(0, 100))}${img.meaning.length > 100 ? '...' : ''}</div></div></div>`; }); html += `<button onclick="copyResult(this)" class="mt-2 text-xs text-amber-600 border border-amber-300 rounded-full px-3 py-1">📋 复制结果</button>`; modal.querySelector('#leno-result').innerHTML = html; addRecord('雷诺曼', q, images.map(img=>img.name).join('、')); };
-    window._showMeaningPopup = (id) => { const img = lenormandLibrary.find(i => i.id == id); if (img) alert(`【${img.name}】\n\n牌意解读：\n${img.meaning}`); };
-    
-    const renderHistory = () => { const container = modal.querySelector('#history-list'); if (!container) return; if (!fortuneHistory.length) { container.innerHTML = '<div class="text-center text-gray-400 py-8">暂无占卜记录</div>'; return; } let html = ''; fortuneHistory.forEach(rec => { html += `<div class="bg-gray-50 rounded-xl p-3 border-l-4 border-amber-400"><div class="flex justify-between text-xs text-gray-500 mb-1"><span>${escapeHtml(rec.type)} · ${escapeHtml(rec.time)}</span><button onclick="window._delRecord(${rec.id})" class="text-red-400">✖️</button></div>${rec.question ? `<div class="text-xs text-gray-600 mb-1">问：${escapeHtml(rec.question)}</div>` : ''}<div class="text-sm font-medium">${escapeHtml(rec.result)}</div></div>`; }); container.innerHTML = html; };
-    
-    window._delRecord = (id) => { showConfirm('删除这条记录？', (ok) => { if (ok) { fortuneHistory = fortuneHistory.filter(r => r.id !== id); saveHistory(); if (document.body.contains(modal)) renderHistory(); showToast('已删除'); } }); };
-    
-    modal.querySelector('#clear-history').onclick = () => { showConfirm('清空所有占卜记录？', async (ok) => { if (ok) { await clearAllHistory(); if (document.body.contains(modal)) renderHistory(); } }); };
-    
-    const onHistoryChange = () => { loadHistory().then(() => { if (document.body.contains(modal)) renderHistory(); }); };
+
+    window._showMeaningPopup = (id) => {
+        const img = lenormandLibrary.find(i => i.id == id);
+        if (img) alert(`【${img.name}】\n\n${img.meaning}`);
+    };
+
+    // 历史记录渲染
+    const renderHistory = () => {
+        const container = modal.querySelector('#history-list');
+        if (!container) return;
+        if (!fortuneHistory.length) {
+            container.innerHTML = '<div class="text-center text-gray-400 py-8">暂无占卜记录</div>';
+            return;
+        }
+        let html = '';
+        fortuneHistory.forEach(rec => {
+            html += `<div class="bg-gray-50 rounded-xl p-3 border-l-4 border-amber-400">
+                        <div class="flex justify-between text-xs text-gray-500 mb-1">
+                            <span>${escapeHtml(rec.type)} · ${escapeHtml(rec.time)}</span>
+                            <button onclick="window._delRecord(${rec.id})" class="text-red-400">✖️</button>
+                        </div>
+                        ${rec.question ? `<div class="text-xs text-gray-600 mb-1">问：${escapeHtml(rec.question)}</div>` : ''}
+                        <div class="text-sm font-medium">${escapeHtml(rec.result)}</div>
+                    </div>`;
+        });
+        container.innerHTML = html;
+    };
+    window._delRecord = (id) => {
+        showConfirm('删除这条记录？', (ok) => {
+            if (ok) {
+                fortuneHistory = fortuneHistory.filter(r => r.id !== id);
+                saveHistory();
+                if (document.body.contains(modal)) renderHistory();
+                showToast('已删除');
+            }
+        });
+    };
+    modal.querySelector('#clear-history').onclick = () => {
+        showConfirm('清空所有占卜记录？', async (ok) => {
+            if (ok) {
+                await clearAllHistory();
+                if (document.body.contains(modal)) renderHistory();
+            }
+        });
+    };
+    const onHistoryChange = () => {
+        loadHistory().then(() => {
+            if (document.body.contains(modal)) renderHistory();
+        });
+    };
     window.addEventListener('fortuneHistoryChanged', onHistoryChange);
-    modal.addEventListener('remove', () => { window.removeEventListener('fortuneHistoryChanged', onHistoryChange); if (window._delRecord === _delRecord) delete window._delRecord; delete window._showMeaningPopup; });
-    
-    window.copyResult = (btn) => { const container = btn.closest('.tab-pane') || btn.parentElement; const text = container.innerText; navigator.clipboard.writeText(text).then(() => showToast('已复制')); };
+    modal.addEventListener('remove', () => {
+        window.removeEventListener('fortuneHistoryChanged', onHistoryChange);
+        if (window._delRecord === _delRecord) delete window._delRecord;
+        delete window._showMeaningPopup;
+    });
+    window.copyResult = (btn) => {
+        const container = btn.closest('.tab-pane') || btn.parentElement;
+        const text = container.innerText;
+        navigator.clipboard.writeText(text).then(() => showToast('已复制'));
+    };
     renderHistory();
     modal.classList.remove('hidden');
 }
