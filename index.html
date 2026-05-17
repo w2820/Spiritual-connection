@@ -3839,13 +3839,8 @@ function syncAllReplies() {
 
 async function saveData() {
     try {
-        // 单人聊天保留最近100条，群聊保留最近100条
-        Object.keys(appData.chats).forEach(k => { 
-            if (appData.chats[k].length > 100) appData.chats[k] = appData.chats[k].slice(-100); 
-        });
-        Object.keys(appData.groupChats).forEach(k => { 
-            if (appData.groupChats[k].length > 100) appData.groupChats[k] = appData.groupChats[k].slice(-100); 
-        });
+        Object.keys(appData.chats).forEach(k => { if (appData.chats[k].length > 30) appData.chats[k] = appData.chats[k].slice(-30); });
+        Object.keys(appData.groupChats).forEach(k => { if (appData.groupChats[k].length > 100) appData.groupChats[k] = appData.groupChats[k].slice(-100); });
         syncAllReplies();
         const dataToSave = JSON.parse(JSON.stringify(appData));
         delete dataToSave.appearance?.backgrounds;
@@ -4654,14 +4649,14 @@ async function resetAllData() { showConfirm('重置所有数据？不可恢复�
 function openMailbox() { pageHistory.push('advanced'); document.getElementById('modal-settings-advanced').classList.add('hidden'); document.getElementById('page-mailbox').classList.add('active'); renderMailList(); }
 function closeMailbox() { document.getElementById('page-mailbox').classList.remove('active'); if (pageHistory.pop() === 'advanced') document.getElementById('modal-settings-advanced').classList.remove('hidden'); }
 function switchMailTab(t) { currentMailTab = t; document.getElementById('tab-sent').className = `flex-1 py-2 rounded-lg text-sm font-medium ${t==='sent'?'bg-white shadow-sm':''} text-[#8B5E3C]`; document.getElementById('tab-received').className = `flex-1 py-2 rounded-lg text-sm font-medium ${t==='received'?'bg-white shadow-sm':''} text-[#8B5E3C]`; renderMailList(); }
-function renderMailList() { const l = document.getElementById('mail-list'); l.innerHTML = ''; const ms = appData.mails.filter(m => currentMailTab === 'sent' ? m.type === 'sent' : m.type === 'received'); if (!ms.length) { l.innerHTML = '<div class="text-center text-gray-400 py-10">暂无信件</div>'; return; } ms.forEach(m => { const role = appData.roles.find(r => r.id === m.roleId), ava = role?.avatar || DEFAULT_AVATAR, name = role?.name || '未知'; let stat = ''; if (currentMailTab === 'sent') { if (m.replied) stat = '<span class="text-xs text-green-600 bg-green-50 px-2 rounded-full">已回复</span>'; else { const h = Math.ceil((m.replyTime - Date.now())/3600000); stat = `<span class="text-xs text-amber-600 bg-amber-50 px-2 rounded-full">等待回复(${h>0?h:'<1'}h)</span>`; } } const d = document.createElement('div'); d.className = 'bg-white p-4 rounded-xl shadow-sm border border-[#E8D5B8] flex items-center justify-between cursor-pointer'; d.onclick = () => openLetterDetail(m.id); d.innerHTML = `<div class="flex items-center gap-3 flex-1"><img src="${ava}" class="w-10 h-10 rounded-full"><div class="flex-1 min-w-0"><p class="text-sm font-bold truncate">${currentMailTab==='sent'?'寄给':'来自'} ${escapeHtml(name)}</p><p class="text-xs text-gray-400 truncate">${escapeHtml(m.content.substring(0,20))}...</p>${stat}</div></div><div class="flex items-center gap-2"><div class="text-xs text-gray-400">${new Date(m.time).toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</div><button onclick="deleteMail('${m.id}'); event.stopPropagation();" class="p-1.5 text-gray-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`; l.appendChild(d); }); lucide.createIcons(); }
+function renderMailList() { const l = document.getElementById('mail-list'); l.innerHTML = ''; const ms = appData.mails.filter(m => currentMailTab === 'sent' ? m.type === 'sent' : m.type === 'received'); if (!ms.length) { l.innerHTML = '<div class="text-center text-gray-400 py-10">暂无信件</div>'; return; } ms.forEach(m => { const role = appData.roles.find(r => r.id === m.roleId), ava = role?.avatar || DEFAULT_AVATAR, name = role?.name || '未知'; let stat = ''; if (currentMailTab === 'sent') { if (m.replied) stat = '<span class="text-xs text-green-600 bg-green-50 px-2 rounded-full">已回复</span>'; else { const h = Math.ceil((m.replyTime - Date.now())/3600000); stat = `<span class="text-xs text-amber-600 bg-amber-50 px-2 rounded-full">等待回复(${h>0?h:'<1'}h)</span>`; } } const d = document.createElement('div'); d.className = 'bg-white p-4 rounded-xl shadow-sm border border-[#E8D5B8] flex items-center justify-between cursor-pointer'; d.onclick = () => openLetterDetail(m.id); d.innerHTML = `<div class="flex items-center gap-3 flex-1"><img src="${ava}" class="w-10 h-10 rounded-full"><div class="flex-1 min-w-0"><p class="text-sm font-bold truncate">${currentMailTab==='sent'?'寄给':'来自'} ${escapeHtml(name)}</p><p class="text-xs text-gray-400 truncate">${escapeHtml(m.content.substring(0,20))}...</p>${stat}</div></div><div class="flex items-center gap-2"><div class="text-xs text-gray-400">${new Date(m.time).toLocaleDateString()}</div><button onclick="deleteMail('${m.id}'); event.stopPropagation();" class="p-1.5 text-gray-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`; l.appendChild(d); }); lucide.createIcons(); }
 function deleteMail(id) { showConfirm('删除信件？', async () => { appData.mails = appData.mails.filter(m => m.id !== id); await saveData(); renderMailList(); if (currentViewingMailId === id) closeLetterDetail(); showToast('已删除'); }); }
 function composeMail() { const c = document.getElementById('compose-recipients'); c.innerHTML = ''; appData.roles.forEach(r => { const d = document.createElement('div'); d.className = 'flex-shrink-0 w-16 flex flex-col items-center gap-1 cursor-pointer'; d.onclick = () => selectRecipient(d, r.id); d.innerHTML = `<img src="${r.avatar}" class="w-12 h-12 rounded-full border-2 border-transparent"><span class="text-[10px]">${escapeHtml(r.name)}</span>`; c.appendChild(d); }); document.getElementById('compose-content').value = ''; document.getElementById('modal-compose').classList.remove('hidden'); }
 function selectRecipient(el, id) { selectedRecipientId = id; const all = document.getElementById('compose-recipients').children; for (let ch of all) ch.querySelector('img').className = 'w-12 h-12 rounded-full border-2 border-transparent'; el.querySelector('img').className = 'w-12 h-12 rounded-full border-2 border-amber-500 ring-2 ring-amber-200'; }
 function closeCompose() { document.getElementById('modal-compose').classList.add('hidden'); selectedRecipientId = null; }
 async function sendMail() { if (!selectedRecipientId) { showToast('请选择收信人'); return; } const content = document.getElementById('compose-content').value.trim(); if (!content) { showToast('内容不能为空'); return; } const delay = 12*60*60*1000 + Math.random()*12*60*60*1000; appData.mails.push({ id: generateUID(), roleId: selectedRecipientId, type: 'sent', content, time: Date.now(), replyTime: Date.now()+delay, replied: false }); await saveData(); closeCompose(); renderMailList(); showToast('投递成功'); }
 
-function openLetterDetail(id) { const contentDiv = document.getElementById('letter-content'); contentDiv.innerHTML = ''; contentDiv.contentEditable = false; document.getElementById('letter-author').textContent = ''; document.getElementById('letter-date').content = ''; document.getElementById('letter-footer-date').textContent = ''; const btnEdit = document.getElementById('btn-letter-edit'), btnSave = document.getElementById('btn-letter-save'); if (btnEdit) btnEdit.classList.remove('hidden'); if (btnSave) btnSave.classList.add('hidden'); const m = appData.mails.find(x => String(x.id) === String(id)); if (!m) { showToast('信件未找到'); return; } currentViewingMailId = m.id; const role = appData.roles.find(r => r.id === m.roleId); const fullTime = new Date(m.time).toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', weekday: 'long' }); document.getElementById('letter-date').textContent = fullTime; document.getElementById('letter-footer-date').textContent = new Date(m.time).toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }); document.getElementById('letter-author').textContent = role?.name || '未知'; contentDiv.innerText = m.content || '（信件内容为空）'; document.getElementById('modal-letter-detail').classList.remove('hidden'); }
+function openLetterDetail(id) { const contentDiv = document.getElementById('letter-content'); contentDiv.innerHTML = ''; contentDiv.contentEditable = false; document.getElementById('letter-author').textContent = ''; document.getElementById('letter-date').content = ''; document.getElementById('letter-footer-date').textContent = ''; const btnEdit = document.getElementById('btn-letter-edit'), btnSave = document.getElementById('btn-letter-save'); if (btnEdit) btnEdit.classList.remove('hidden'); if (btnSave) btnSave.classList.add('hidden'); const m = appData.mails.find(x => String(x.id) === String(id)); if (!m) { showToast('信件未找到'); return; } currentViewingMailId = m.id; const role = appData.roles.find(r => r.id === m.roleId); document.getElementById('letter-date').textContent = new Date(m.time).toLocaleDateString('zh-CN', { weekday: 'long' }); document.getElementById('letter-footer-date').textContent = new Date(m.time).toLocaleDateString('zh-CN'); document.getElementById('letter-author').textContent = role?.name || '未知'; contentDiv.innerText = m.content || '（信件内容为空）'; document.getElementById('modal-letter-detail').classList.remove('hidden'); }
 function closeLetterDetail() { document.getElementById('modal-letter-detail').classList.add('hidden'); currentViewingMailId = null; }
 function toggleLetterEdit() { const div = document.getElementById('letter-content'), btnEdit = document.getElementById('btn-letter-edit'), btnSave = document.getElementById('btn-letter-save'); div.contentEditable = true; div.classList.add('letter-content-div-editing'); btnEdit.classList.add('hidden'); btnSave.classList.remove('hidden'); div.focus(); }
 async function saveLetterEdit() { const div = document.getElementById('letter-content'), btnEdit = document.getElementById('btn-letter-edit'), btnSave = document.getElementById('btn-letter-save'); const m = appData.mails.find(x => x.id === currentViewingMailId); if (!m) return; m.content = div.innerText; await saveData(); div.contentEditable = false; div.classList.remove('letter-content-div-editing'); btnEdit.classList.remove('hidden'); btnSave.classList.add('hidden'); renderMailList(); showToast('保存成功'); }
@@ -6779,7 +6774,7 @@ window.addEventListener('beforeunload', function() {
     clearAllTimers();
 });
 
-// ==================== 运势占卜模块（最终稳定版 - 单张编辑 + 批量导入 + 抽牌修复） ====================
+// ==================== 运势占卜模块（最终稳定版 - 含管理库导入导出） ====================
 
 // ---------- 辅助函数 ----------
 function escapeHtml(s) { if (!s) return ''; return s.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m]); }
@@ -6850,6 +6845,7 @@ async function addMultipleImages(files) {
     const saved = await saveLenormandLibrary();
     if (!saved) { showToast('保存失败'); return false; }
     showToast(`已添加 ${files.length} 张图片，请打开「批量编辑」完善信息`);
+    openBatchEditor();
     return true;
 }
 
@@ -6862,7 +6858,7 @@ async function deleteImage(id) {
     return true;
 }
 
-// ---------- 单张编辑功能 ----------
+// 单张编辑
 async function editSingleCard(id) {
     const img = lenormandLibrary.find(i => i.id == id);
     if (!img) return;
@@ -6892,7 +6888,6 @@ async function editSingleCard(id) {
         if (saved) {
             showToast('修改已保存');
             div.remove();
-            // 刷新管理库网格
             if (currentManager) {
                 const grid = currentManager.querySelector('#lib-grid');
                 if (grid) {
@@ -6921,7 +6916,6 @@ function parseLenormandText(text) {
     let currentNumber = null;
     let currentName = '';
     let currentLines = [];
-    
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
         const match = line.match(/^(\d+)\.\s*(.*)$/);
@@ -6956,7 +6950,7 @@ function parseLenormandText(text) {
     return blocks;
 }
 
-// ---------- 批量编辑模态框（仅批量编辑，不影响单张编辑） ----------
+// ---------- 批量编辑模态框 ----------
 let currentBatchEditor = null;
 async function openBatchEditor() {
     if (currentBatchEditor) { currentBatchEditor.remove(); currentBatchEditor = null; }
@@ -6973,7 +6967,7 @@ async function openBatchEditor() {
             </div>
             <div style="overflow-y:auto; flex:1;">
                 <table style="width:100%; border-collapse:collapse;">
-                    <thead><tr><th style="text-align:left; padding:8px;">预览</th><th style="text-align:left; padding:8px;">牌名</th><th style="text-align:left; padding:8px;">牌意解读</th></tr></thead>
+                    <thead><tr><th style="text-align:left; padding:8px;">预览</th><th style="text-align:left; padding:8px;">牌名</th><th style="text-align:left; padding:8px;">牌意解读</th></td></thead>
                     <tbody id="batch-edit-tbody"></tbody>
                 </table>
             </div>
@@ -7085,7 +7079,7 @@ async function openBatchEditor() {
         modalDiv.querySelector('#import-cancel').onclick = () => modalDiv.remove();
     };
 
-    // 完整文本导入（带预览匹配）
+    // 完整文本导入
     editor.querySelector('#import-full-btn').onclick = () => {
         const modalDiv = document.createElement('div');
         modalDiv.className = 'modal-overlay';
@@ -7093,10 +7087,7 @@ async function openBatchEditor() {
         modalDiv.innerHTML = `
             <div class="modal-card" style="max-width:700px; width:90%;">
                 <h3 class="text-lg font-bold mb-2">从完整文本导入（按序号1. 2. 3.分割）</h3>
-                <p class="text-xs text-gray-500 mb-3">
-                    粘贴包含数字序号的文本（如“1. 骑士 ... 2. 四叶草 ...”），程序将按顺序匹配当前图片。<br>
-                    <strong>下方会显示预览匹配结果，确认无误后再点击“确认导入”。</strong>
-                </p>
+                <p class="text-xs text-gray-500 mb-3">粘贴包含数字序号的文本，程序将按顺序匹配当前图片。</p>
                 <textarea id="full-import-textarea" rows="8" class="w-full bg-gray-50 rounded-xl p-2 text-sm font-mono"></textarea>
                 <div id="import-preview" style="font-size:12px; margin-top:8px; max-height:200px; overflow-y:auto; background:#f9f9f9; padding:6px; border-radius:8px;"></div>
                 <div class="flex gap-3 mt-4">
@@ -7108,46 +7099,34 @@ async function openBatchEditor() {
         document.body.appendChild(modalDiv);
         const textarea = modalDiv.querySelector('#full-import-textarea');
         const previewDiv = modalDiv.querySelector('#import-preview');
-        
         const updatePreview = () => {
             const raw = textarea.value;
             if (!raw.trim()) { previewDiv.innerHTML = ''; return; }
             const blocks = parseLenormandText(raw);
-            if (blocks.length === 0) {
-                previewDiv.innerHTML = '<span style="color:red;">解析失败，请检查文本格式（必须包含“1. ”这样的序号）</span>';
-                return;
-            }
-            let html = `<div style="margin-bottom:8px;">✅ 解析到 <strong>${blocks.length}</strong> 个牌块，当前图片数量：<strong>${lenormandLibrary.length}</strong></div>`;
-            html += '<table style="width:100%; border-collapse:collapse; font-size:12px;">';
-            html += '<tr><th>序号</th><th>牌名</th><th>将匹配给图片索引</th></tr>';
+            if (blocks.length === 0) { previewDiv.innerHTML = '<span style="color:red;">解析失败</span>'; return; }
+            let html = `<div>解析到 <strong>${blocks.length}</strong> 个牌块，当前图片：${lenormandLibrary.length}</div>`;
+            html += '<table style="width:100%;font-size:12px;">';
             const matchCount = Math.min(blocks.length, lenormandLibrary.length);
             for (let i = 0; i < matchCount; i++) {
-                html += `<tr><td>${blocks[i].number}</td><td>${escapeHtml(blocks[i].name)}</td><td>第 ${i+1} 张图（当前牌名: ${escapeHtml(lenormandLibrary[i].name)}）</td></tr>`;
-            }
-            if (blocks.length > lenormandLibrary.length) {
-                html += `<tr><td colspan="3" style="color:orange;">⚠️ 文本块数(${blocks.length})多于图片数(${lenormandLibrary.length})，仅匹配前${matchCount}张</td></tr>`;
-            } else if (blocks.length < lenormandLibrary.length) {
-                html += `<tr><td colspan="3" style="color:orange;">⚠️ 图片数多于文本块数，后${lenormandLibrary.length - blocks.length}张图片不会被覆盖</td></tr>`;
+                html += `<tr><td>${blocks[i].number}</td><td>${escapeHtml(blocks[i].name)}</td><td>→ 第${i+1}张图</td></tr>`;
             }
             html += '</table>';
             previewDiv.innerHTML = html;
         };
         textarea.addEventListener('input', updatePreview);
-        
         modalDiv.querySelector('#full-import-confirm').onclick = () => {
             const rawText = textarea.value;
             if (!rawText.trim()) { showToast('请粘贴文本'); return; }
             const blocks = parseLenormandText(rawText);
             if (blocks.length === 0) { showToast('解析失败'); return; }
             const matchCount = Math.min(blocks.length, lenormandLibrary.length);
-            if (matchCount === 0) { showToast('没有图片可匹配'); modalDiv.remove(); return; }
             for (let i = 0; i < matchCount; i++) {
                 lenormandLibrary[i].name = blocks[i].name.substring(0, 20);
                 lenormandLibrary[i].meaning = `【${blocks[i].name}】\n${blocks[i].fullText}`;
             }
             renderBatchList();
             modalDiv.remove();
-            showToast(`已导入前 ${matchCount} 张牌的完整牌意`);
+            showToast(`已导入前 ${matchCount} 张牌`);
         };
         modalDiv.querySelector('#full-import-cancel').onclick = () => modalDiv.remove();
         updatePreview();
@@ -7182,7 +7161,7 @@ async function openBatchEditor() {
     editor.querySelector('#close-editor').onclick = () => { editor.remove(); currentBatchEditor = null; };
 }
 
-// ---------- 管理库界面 ----------
+// ---------- 管理库界面（含导出/导入按钮） ----------
 let currentManager = null;
 async function openLibraryManager() {
     if (currentManager) { currentManager.remove(); currentManager = null; }
@@ -7202,7 +7181,11 @@ async function openLibraryManager() {
                 <p class="text-xs text-gray-500">点击选择多张图片（上传后自动打开批量编辑）</p>
             </label>
             <div id="lib-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; overflow-y:auto; max-height:55vh;"></div>
-            <div class="mt-4"><button id="batch-edit-btn" class="w-full bg-gray-100 p-2 rounded-xl mt-1">📝 批量编辑牌意</button></div>
+            <div class="mt-4 flex gap-2">
+                <button id="batch-edit-btn" class="flex-1 bg-gray-100 p-2 rounded-xl">📝 批量编辑</button>
+                <button id="export-lib-btn" class="flex-1 bg-green-100 p-2 rounded-xl">📤 导出牌库</button>
+                <button id="import-lib-btn" class="flex-1 bg-blue-100 p-2 rounded-xl">📥 导入牌库</button>
+            </div>
             <div class="mt-2"><button id="close-manager-bottom" class="w-full bg-gray-100 p-2 rounded-xl">关闭</button></div>
         </div>
     `;
@@ -7227,7 +7210,7 @@ async function openLibraryManager() {
         await addMultipleImages(files);
         await loadLenormandLibrary();
         renderGrid();
-        openBatchEditor();  // 上传后自动打开批量编辑
+        openBatchEditor();
         uploadInput.value = '';
     };
 
@@ -7235,9 +7218,7 @@ async function openLibraryManager() {
         const img = lenormandLibrary.find(i => i.id == id);
         if (img) alert(`【${img.name}】\n\n${img.meaning}`);
     };
-    window._editSingle = async (id) => {
-        await editSingleCard(id);
-    };
+    window._editSingle = async (id) => { await editSingleCard(id); };
     window._delCard = async (id) => {
         showConfirm(`确定删除「${lenormandLibrary.find(i=>i.id==id)?.name}」？`, async (ok) => {
             if (ok) {
@@ -7249,6 +7230,46 @@ async function openLibraryManager() {
         });
     };
     window._refreshManager = () => { loadLenormandLibrary().then(renderGrid); };
+
+    // 导出牌库
+    manager.querySelector('#export-lib-btn').onclick = async () => {
+        let fortuneHistory = [];
+        try { const h = localStorage.getItem(FORTUNE_HISTORY_KEY); fortuneHistory = h ? JSON.parse(h) : []; } catch(e) {}
+        let lib = [];
+        try { const stored = await imageStore.getItem(LENORMAND_LIB_KEY); lib = stored || []; } catch(e) {}
+        const exportData = { version: 1, fortuneHistory: fortuneHistory, lenormandLibrary: lib };
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `lenormand_backup_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        showToast('雷诺曼牌库已导出');
+    };
+
+    // 导入牌库
+    manager.querySelector('#import-lib-btn').onclick = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = async e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async ev => {
+                try {
+                    const data = JSON.parse(ev.target.result);
+                    if (data.fortuneHistory) localStorage.setItem(FORTUNE_HISTORY_KEY, JSON.stringify(data.fortuneHistory));
+                    if (data.lenormandLibrary) await imageStore.setItem(LENORMAND_LIB_KEY, data.lenormandLibrary);
+                    await loadLenormandLibrary();
+                    await loadHistory();
+                    renderGrid();
+                    showToast('导入成功');
+                } catch(e) { showToast('文件格式错误'); }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
+    };
 
     const onLibChange = () => { loadLenormandLibrary().then(renderGrid); };
     window.addEventListener('lenormandLibraryChanged', onLibChange);
@@ -7266,7 +7287,7 @@ async function openLibraryManager() {
     manager.querySelector('#batch-edit-btn').onclick = () => openBatchEditor();
 }
 
-// ---------- 占卜主界面（修复抽牌） ----------
+// ---------- 占卜主界面 ----------
 let currentFortuneModal = null;
 
 function drawTarot(count) {
@@ -7310,177 +7331,27 @@ async function openFortune() {
     modal.querySelectorAll('#close-fortune, #close-fortune-bottom').forEach(btn => btn.onclick = close);
 
     const tabs = modal.querySelectorAll('[data-tab]');
-    const panes = {
-        daily: modal.querySelector('#daily-pane'),
-        tarot: modal.querySelector('#tarot-pane'),
-        lenormand: modal.querySelector('#lenormand-pane'),
-        history: modal.querySelector('#history-pane')
-    };
-    tabs.forEach(tab => {
-        tab.onclick = () => {
-            const tabName = tab.getAttribute('data-tab');
-            tabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            Object.values(panes).forEach(p => p.style.display = 'none');
-            panes[tabName].style.display = 'block';
-            if (tabName === 'history') renderHistory();
-        };
-    });
+    const panes = { daily: modal.querySelector('#daily-pane'), tarot: modal.querySelector('#tarot-pane'), lenormand: modal.querySelector('#lenormand-pane'), history: modal.querySelector('#history-pane') };
+    tabs.forEach(tab => { tab.onclick = () => { const tabName = tab.getAttribute('data-tab'); tabs.forEach(t => t.classList.remove('active')); tab.classList.add('active'); Object.values(panes).forEach(p => p.style.display = 'none'); panes[tabName].style.display = 'block'; if (tabName === 'history') renderHistory(); }; });
 
-    // 每日运势
-    modal.querySelector('#draw-daily').onclick = () => {
-        const f = getDailyFortune();
-        modal.querySelector('#daily-level').innerHTML = f.level;
-        modal.querySelector('#daily-phrase').innerHTML = f.desc;
-        addRecord('每日运势', '', f.desc);
-        showToast('今日运势已抽取');
-    };
-
-    // 塔罗占卜
-    modal.querySelector('#tarot-1').onclick = () => {
-        const q = modal.querySelector('#tarot-question').value.trim();
-        const cards = drawTarot(1);
-        let html = q ? `<div class="text-sm text-gray-500 mb-2">📝 问题：${escapeHtml(q)}</div>` : '';
-        cards.forEach(c => {
-            const rev = Math.random() < 0.3;
-            const ori = rev ? '逆位' : '正位';
-            const meaning = rev ? c.reversed : c.upright;
-            html += `<div class="bg-white rounded-xl p-3 mb-2 flex gap-3 shadow-sm">
-                        <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-2xl">${c.icon}</div>
-                        <div><div class="font-bold">${escapeHtml(c.name)} <span class="text-xs ${rev?'text-red-500':'text-green-600'}">${ori}</span></div><div class="text-sm text-gray-600">💡 ${escapeHtml(meaning)}</div></div>
-                    </div>`;
-        });
-        html += `<button onclick="copyResult(this)" class="mt-2 text-xs text-amber-600 border border-amber-300 rounded-full px-3 py-1">📋 复制结果</button>`;
-        modal.querySelector('#tarot-result').innerHTML = html;
-        addRecord('塔罗', q, cards.map(c=>c.name).join('、'));
-    };
-    modal.querySelector('#tarot-3').onclick = () => {
-        const q = modal.querySelector('#tarot-question').value.trim();
-        const cards = drawTarot(3);
-        let html = q ? `<div class="text-sm text-gray-500 mb-2">📝 问题：${escapeHtml(q)}</div>` : '';
-        cards.forEach((c, idx) => {
-            const rev = Math.random() < 0.3;
-            const ori = rev ? '逆位' : '正位';
-            const meaning = rev ? c.reversed : c.upright;
-            html += `<div class="bg-white rounded-xl p-3 mb-2 flex gap-3 shadow-sm">
-                        <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-2xl">${c.icon}</div>
-                        <div><div class="font-bold">${escapeHtml(c.name)} <span class="text-xs ${rev?'text-red-500':'text-green-600'}">${ori}</span></div><div class="text-sm text-gray-600">💡 ${escapeHtml(meaning)}</div></div>
-                    </div>`;
-        });
-        html += `<button onclick="copyResult(this)" class="mt-2 text-xs text-amber-600 border border-amber-300 rounded-full px-3 py-1">📋 复制结果</button>`;
-        modal.querySelector('#tarot-result').innerHTML = html;
-        addRecord('塔罗', q, cards.map(c=>c.name).join('、'));
-    };
-
-    // 雷诺曼占卜
-    modal.querySelector('#leno-1').onclick = () => {
-        if (!lenormandLibrary.length) {
-            showToast('雷诺曼图片库为空，请先上传图片');
-            return;
-        }
-        const q = modal.querySelector('#leno-question').value.trim();
-        const images = drawRandomImages(1);
-        let html = q ? `<div class="text-sm text-gray-500 mb-2">📝 问题：${escapeHtml(q)}</div>` : '';
-        images.forEach(img => {
-            html += `<div class="bg-white rounded-xl p-3 mb-3 flex gap-3 shadow-sm">
-                        <div class="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center cursor-pointer" onclick="window._showMeaningPopup('${img.id}')">
-                            <img src="${img.dataUrl}" class="max-w-full max-h-full object-contain">
-                        </div>
-                        <div class="flex-1">
-                            <div class="font-bold cursor-pointer" onclick="window._showMeaningPopup('${img.id}')">${escapeHtml(img.name)}</div>
-                            <div class="text-sm text-gray-700 mt-1 line-clamp-2" style="max-height:3em; overflow-y:auto;">${escapeHtml(img.meaning.substring(0, 100))}${img.meaning.length > 100 ? '...' : ''}</div>
-                        </div>
-                    </div>`;
-        });
-        html += `<button onclick="copyResult(this)" class="mt-2 text-xs text-amber-600 border border-amber-300 rounded-full px-3 py-1">📋 复制结果</button>`;
-        modal.querySelector('#leno-result').innerHTML = html;
-        addRecord('雷诺曼', q, images.map(img=>img.name).join('、'));
-    };
-    modal.querySelector('#leno-3').onclick = () => {
-        if (!lenormandLibrary.length) {
-            showToast('雷诺曼图片库为空，请先上传图片');
-            return;
-        }
-        const q = modal.querySelector('#leno-question').value.trim();
-        const images = drawRandomImages(3);
-        let html = q ? `<div class="text-sm text-gray-500 mb-2">📝 问题：${escapeHtml(q)}</div>` : '';
-        images.forEach(img => {
-            html += `<div class="bg-white rounded-xl p-3 mb-3 flex gap-3 shadow-sm">
-                        <div class="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center cursor-pointer" onclick="window._showMeaningPopup('${img.id}')">
-                            <img src="${img.dataUrl}" class="max-w-full max-h-full object-contain">
-                        </div>
-                        <div class="flex-1">
-                            <div class="font-bold cursor-pointer" onclick="window._showMeaningPopup('${img.id}')">${escapeHtml(img.name)}</div>
-                            <div class="text-sm text-gray-700 mt-1 line-clamp-2" style="max-height:3em; overflow-y:auto;">${escapeHtml(img.meaning.substring(0, 100))}${img.meaning.length > 100 ? '...' : ''}</div>
-                        </div>
-                    </div>`;
-        });
-        html += `<button onclick="copyResult(this)" class="mt-2 text-xs text-amber-600 border border-amber-300 rounded-full px-3 py-1">📋 复制结果</button>`;
-        modal.querySelector('#leno-result').innerHTML = html;
-        addRecord('雷诺曼', q, images.map(img=>img.name).join('、'));
-    };
+    modal.querySelector('#draw-daily').onclick = () => { const f = getDailyFortune(); modal.querySelector('#daily-level').innerHTML = f.level; modal.querySelector('#daily-phrase').innerHTML = f.desc; addRecord('每日运势', '', f.desc); showToast('今日运势已抽取'); };
+    modal.querySelector('#tarot-1').onclick = () => { const q = modal.querySelector('#tarot-question').value.trim(); const cards = drawTarot(1); let html = q ? `<div class="text-sm text-gray-500 mb-2">📝 问题：${escapeHtml(q)}</div>` : ''; cards.forEach(c => { const rev = Math.random() < 0.3; const ori = rev ? '逆位' : '正位'; const meaning = rev ? c.reversed : c.upright; html += `<div class="bg-white rounded-xl p-3 mb-2 flex gap-3 shadow-sm"><div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-2xl">${c.icon}</div><div><div class="font-bold">${escapeHtml(c.name)} <span class="text-xs ${rev?'text-red-500':'text-green-600'}">${ori}</span></div><div class="text-sm text-gray-600">💡 ${escapeHtml(meaning)}</div></div></div>`; }); html += `<button onclick="copyResult(this)" class="mt-2 text-xs text-amber-600 border border-amber-300 rounded-full px-3 py-1">📋 复制结果</button>`; modal.querySelector('#tarot-result').innerHTML = html; addRecord('塔罗', q, cards.map(c=>c.name).join('、')); };
+    modal.querySelector('#tarot-3').onclick = () => { const q = modal.querySelector('#tarot-question').value.trim(); const cards = drawTarot(3); let html = q ? `<div class="text-sm text-gray-500 mb-2">📝 问题：${escapeHtml(q)}</div>` : ''; cards.forEach((c, idx) => { const rev = Math.random() < 0.3; const ori = rev ? '逆位' : '正位'; const meaning = rev ? c.reversed : c.upright; html += `<div class="bg-white rounded-xl p-3 mb-2 flex gap-3 shadow-sm"><div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-2xl">${c.icon}</div><div><div class="font-bold">${escapeHtml(c.name)} <span class="text-xs ${rev?'text-red-500':'text-green-600'}">${ori}</span></div><div class="text-sm text-gray-600">💡 ${escapeHtml(meaning)}</div></div></div>`; }); html += `<button onclick="copyResult(this)" class="mt-2 text-xs text-amber-600 border border-amber-300 rounded-full px-3 py-1">📋 复制结果</button>`; modal.querySelector('#tarot-result').innerHTML = html; addRecord('塔罗', q, cards.map(c=>c.name).join('、')); };
+    modal.querySelector('#leno-1').onclick = () => { if (!lenormandLibrary.length) { showToast('雷诺曼图片库为空，请先上传图片'); return; } const q = modal.querySelector('#leno-question').value.trim(); const images = drawRandomImages(1); let html = q ? `<div class="text-sm text-gray-500 mb-2">📝 问题：${escapeHtml(q)}</div>` : ''; images.forEach(img => { html += `<div class="bg-white rounded-xl p-3 mb-3 flex gap-3 shadow-sm"><div class="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center cursor-pointer" onclick="window._showMeaningPopup('${img.id}')"><img src="${img.dataUrl}" class="max-w-full max-h-full object-contain"></div><div class="flex-1"><div class="font-bold cursor-pointer" onclick="window._showMeaningPopup('${img.id}')">${escapeHtml(img.name)}</div><div class="text-sm text-gray-700 mt-1 line-clamp-2" style="max-height:3em; overflow-y:auto;">${escapeHtml(img.meaning.substring(0, 100))}${img.meaning.length > 100 ? '...' : ''}</div></div></div>`; }); html += `<button onclick="copyResult(this)" class="mt-2 text-xs text-amber-600 border border-amber-300 rounded-full px-3 py-1">📋 复制结果</button>`; modal.querySelector('#leno-result').innerHTML = html; addRecord('雷诺曼', q, images.map(img=>img.name).join('、')); };
+    modal.querySelector('#leno-3').onclick = () => { if (!lenormandLibrary.length) { showToast('雷诺曼图片库为空，请先上传图片'); return; } const q = modal.querySelector('#leno-question').value.trim(); const images = drawRandomImages(3); let html = q ? `<div class="text-sm text-gray-500 mb-2">📝 问题：${escapeHtml(q)}</div>` : ''; images.forEach(img => { html += `<div class="bg-white rounded-xl p-3 mb-3 flex gap-3 shadow-sm"><div class="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center cursor-pointer" onclick="window._showMeaningPopup('${img.id}')"><img src="${img.dataUrl}" class="max-w-full max-h-full object-contain"></div><div class="flex-1"><div class="font-bold cursor-pointer" onclick="window._showMeaningPopup('${img.id}')">${escapeHtml(img.name)}</div><div class="text-sm text-gray-700 mt-1 line-clamp-2" style="max-height:3em; overflow-y:auto;">${escapeHtml(img.meaning.substring(0, 100))}${img.meaning.length > 100 ? '...' : ''}</div></div></div>`; }); html += `<button onclick="copyResult(this)" class="mt-2 text-xs text-amber-600 border border-amber-300 rounded-full px-3 py-1">📋 复制结果</button>`; modal.querySelector('#leno-result').innerHTML = html; addRecord('雷诺曼', q, images.map(img=>img.name).join('、')); };
     modal.querySelector('#manage-lib').onclick = () => openLibraryManager();
 
     window._showMeaningPopup = (id) => {
         const img = lenormandLibrary.find(i => i.id == id);
         if (img) alert(`【${img.name}】\n\n${img.meaning}`);
     };
-
-    // 历史记录渲染
-    const renderHistory = () => {
-        const container = modal.querySelector('#history-list');
-        if (!container) return;
-        if (!fortuneHistory.length) {
-            container.innerHTML = '<div class="text-center text-gray-400 py-8">暂无占卜记录</div>';
-            return;
-        }
-        let html = '';
-        fortuneHistory.forEach(rec => {
-            html += `<div class="bg-gray-50 rounded-xl p-3 border-l-4 border-amber-400">
-                        <div class="flex justify-between text-xs text-gray-500 mb-1">
-                            <span>${escapeHtml(rec.type)} · ${escapeHtml(rec.time)}</span>
-                            <button onclick="window._delRecord(${rec.id})" class="text-red-400">✖️</button>
-                        </div>
-                        ${rec.question ? `<div class="text-xs text-gray-600 mb-1">问：${escapeHtml(rec.question)}</div>` : ''}
-                        <div class="text-sm font-medium">${escapeHtml(rec.result)}</div>
-                    </div>`;
-        });
-        container.innerHTML = html;
-    };
-    window._delRecord = (id) => {
-        showConfirm('删除这条记录？', (ok) => {
-            if (ok) {
-                fortuneHistory = fortuneHistory.filter(r => r.id !== id);
-                saveHistory();
-                if (document.body.contains(modal)) renderHistory();
-                showToast('已删除');
-            }
-        });
-    };
-    modal.querySelector('#clear-history').onclick = () => {
-        showConfirm('清空所有占卜记录？', async (ok) => {
-            if (ok) {
-                await clearAllHistory();
-                if (document.body.contains(modal)) renderHistory();
-            }
-        });
-    };
-    const onHistoryChange = () => {
-        loadHistory().then(() => {
-            if (document.body.contains(modal)) renderHistory();
-        });
-    };
+    const renderHistory = () => { const container = modal.querySelector('#history-list'); if (!container) return; if (!fortuneHistory.length) { container.innerHTML = '<div class="text-center text-gray-400 py-8">暂无占卜记录</div>'; return; } let html = ''; fortuneHistory.forEach(rec => { html += `<div class="bg-gray-50 rounded-xl p-3 border-l-4 border-amber-400"><div class="flex justify-between text-xs text-gray-500 mb-1"><span>${escapeHtml(rec.type)} · ${escapeHtml(rec.time)}</span><button onclick="window._delRecord(${rec.id})" class="text-red-400">✖️</button></div>${rec.question ? `<div class="text-xs text-gray-600 mb-1">问：${escapeHtml(rec.question)}</div>` : ''}<div class="text-sm font-medium">${escapeHtml(rec.result)}</div></div>`; }); container.innerHTML = html; };
+    window._delRecord = (id) => { showConfirm('删除这条记录？', (ok) => { if (ok) { fortuneHistory = fortuneHistory.filter(r => r.id !== id); saveHistory(); if (document.body.contains(modal)) renderHistory(); showToast('已删除'); } }); };
+    modal.querySelector('#clear-history').onclick = () => { showConfirm('清空所有占卜记录？', async (ok) => { if (ok) { await clearAllHistory(); if (document.body.contains(modal)) renderHistory(); } }); };
+    const onHistoryChange = () => { loadHistory().then(() => { if (document.body.contains(modal)) renderHistory(); }); };
     window.addEventListener('fortuneHistoryChanged', onHistoryChange);
-    modal.addEventListener('remove', () => {
-        window.removeEventListener('fortuneHistoryChanged', onHistoryChange);
-        if (window._delRecord === _delRecord) delete window._delRecord;
-        delete window._showMeaningPopup;
-    });
-    window.copyResult = (btn) => {
-        const container = btn.closest('.tab-pane') || btn.parentElement;
-        const text = container.innerText;
-        navigator.clipboard.writeText(text).then(() => showToast('已复制'));
-    };
+    modal.addEventListener('remove', () => { window.removeEventListener('fortuneHistoryChanged', onHistoryChange); if (window._delRecord === _delRecord) delete window._delRecord; delete window._showMeaningPopup; });
+    window.copyResult = (btn) => { const container = btn.closest('.tab-pane') || btn.parentElement; const text = container.innerText; navigator.clipboard.writeText(text).then(() => showToast('已复制')); };
     renderHistory();
     modal.classList.remove('hidden');
 }
