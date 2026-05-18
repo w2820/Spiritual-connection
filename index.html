@@ -4645,22 +4645,229 @@ function importData() { const i = document.createElement('input'); i.type = 'fil
 async function clearChatRecords() { showConfirm('清空所有聊天记录？', async () => { appData.chats = {}; appData.groupChats = {}; unreadCounts = {}; await saveUnreadCounts(); appData.roles.forEach(r => r.lastActive = Date.now()); await saveData(); renderRoleList(); if (currentChatType === 'role') renderChatMessages(); updateStorageDisplay(); showToast('已清空'); }); }
 async function resetAllData() { showConfirm('重置所有数据？不可恢复！', async () => { appData = JSON.parse(JSON.stringify(DEFAULT_DATA)); await saveBackgrounds({ home: '', chat: '', group: '' }); await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('已重置'); }); }
 
-// --- 信箱 ---
-function openMailbox() { pageHistory.push('advanced'); document.getElementById('modal-settings-advanced').classList.add('hidden'); document.getElementById('page-mailbox').classList.add('active'); renderMailList(); }
-function closeMailbox() { document.getElementById('page-mailbox').classList.remove('active'); if (pageHistory.pop() === 'advanced') document.getElementById('modal-settings-advanced').classList.remove('hidden'); }
-function switchMailTab(t) { currentMailTab = t; document.getElementById('tab-sent').className = `flex-1 py-2 rounded-lg text-sm font-medium ${t==='sent'?'bg-white shadow-sm':''} text-[#8B5E3C]`; document.getElementById('tab-received').className = `flex-1 py-2 rounded-lg text-sm font-medium ${t==='received'?'bg-white shadow-sm':''} text-[#8B5E3C]`; renderMailList(); }
-function renderMailList() { const l = document.getElementById('mail-list'); l.innerHTML = ''; const ms = appData.mails.filter(m => currentMailTab === 'sent' ? m.type === 'sent' : m.type === 'received'); if (!ms.length) { l.innerHTML = '<div class="text-center text-gray-400 py-10">暂无信件</div>'; return; } ms.forEach(m => { const role = appData.roles.find(r => r.id === m.roleId), ava = role?.avatar || DEFAULT_AVATAR, name = role?.name || '未知'; let stat = ''; if (currentMailTab === 'sent') { if (m.replied) stat = '<span class="text-xs text-green-600 bg-green-50 px-2 rounded-full">已回复</span>'; else { const h = Math.ceil((m.replyTime - Date.now())/3600000); stat = `<span class="text-xs text-amber-600 bg-amber-50 px-2 rounded-full">等待回复(${h>0?h:'<1'}h)</span>`; } } const d = document.createElement('div'); d.className = 'bg-white p-4 rounded-xl shadow-sm border border-[#E8D5B8] flex items-center justify-between cursor-pointer'; d.onclick = () => openLetterDetail(m.id); d.innerHTML = `<div class="flex items-center gap-3 flex-1"><img src="${ava}" class="w-10 h-10 rounded-full"><div class="flex-1 min-w-0"><p class="text-sm font-bold truncate">${currentMailTab==='sent'?'寄给':'来自'} ${escapeHtml(name)}</p><p class="text-xs text-gray-400 truncate">${escapeHtml(m.content.substring(0,20))}...</p>${stat}</div></div><div class="flex items-center gap-2"><div class="text-xs text-gray-400">${new Date(m.time).toLocaleDateString()}</div><button onclick="deleteMail('${m.id}'); event.stopPropagation();" class="p-1.5 text-gray-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`; l.appendChild(d); }); lucide.createIcons(); }
-function deleteMail(id) { showConfirm('删除信件？', async () => { appData.mails = appData.mails.filter(m => m.id !== id); await saveData(); renderMailList(); if (currentViewingMailId === id) closeLetterDetail(); showToast('已删除'); }); }
-function composeMail() { const c = document.getElementById('compose-recipients'); c.innerHTML = ''; appData.roles.forEach(r => { const d = document.createElement('div'); d.className = 'flex-shrink-0 w-16 flex flex-col items-center gap-1 cursor-pointer'; d.onclick = () => selectRecipient(d, r.id); d.innerHTML = `<img src="${r.avatar}" class="w-12 h-12 rounded-full border-2 border-transparent"><span class="text-[10px]">${escapeHtml(r.name)}</span>`; c.appendChild(d); }); document.getElementById('compose-content').value = ''; document.getElementById('modal-compose').classList.remove('hidden'); }
-function selectRecipient(el, id) { selectedRecipientId = id; const all = document.getElementById('compose-recipients').children; for (let ch of all) ch.querySelector('img').className = 'w-12 h-12 rounded-full border-2 border-transparent'; el.querySelector('img').className = 'w-12 h-12 rounded-full border-2 border-amber-500 ring-2 ring-amber-200'; }
-function closeCompose() { document.getElementById('modal-compose').classList.add('hidden'); selectedRecipientId = null; }
-async function sendMail() { if (!selectedRecipientId) { showToast('请选择收信人'); return; } const content = document.getElementById('compose-content').value.trim(); if (!content) { showToast('内容不能为空'); return; } const delay = 12*60*60*1000 + Math.random()*12*60*60*1000; appData.mails.push({ id: generateUID(), roleId: selectedRecipientId, type: 'sent', content, time: Date.now(), replyTime: Date.now()+delay, replied: false }); await saveData(); closeCompose(); renderMailList(); showToast('投递成功'); }
+// ==================== 信箱模块（完整代码，时间显示已修正） ====================
 
-function openLetterDetail(id) { const contentDiv = document.getElementById('letter-content'); contentDiv.innerHTML = ''; contentDiv.contentEditable = false; document.getElementById('letter-author').textContent = ''; document.getElementById('letter-date').content = ''; document.getElementById('letter-footer-date').textContent = ''; const btnEdit = document.getElementById('btn-letter-edit'), btnSave = document.getElementById('btn-letter-save'); if (btnEdit) btnEdit.classList.remove('hidden'); if (btnSave) btnSave.classList.add('hidden'); const m = appData.mails.find(x => String(x.id) === String(id)); if (!m) { showToast('信件未找到'); return; } currentViewingMailId = m.id; const role = appData.roles.find(r => r.id === m.roleId); document.getElementById('letter-date').textContent = new Date(m.time).toLocaleDateString('zh-CN', { weekday: 'long' }); document.getElementById('letter-footer-date').textContent = new Date(m.time).toLocaleDateString('zh-CN'); document.getElementById('letter-author').textContent = role?.name || '未知'; contentDiv.innerText = m.content || '（信件内容为空）'; document.getElementById('modal-letter-detail').classList.remove('hidden'); }
-function closeLetterDetail() { document.getElementById('modal-letter-detail').classList.add('hidden'); currentViewingMailId = null; }
-function toggleLetterEdit() { const div = document.getElementById('letter-content'), btnEdit = document.getElementById('btn-letter-edit'), btnSave = document.getElementById('btn-letter-save'); div.contentEditable = true; div.classList.add('letter-content-div-editing'); btnEdit.classList.add('hidden'); btnSave.classList.remove('hidden'); div.focus(); }
-async function saveLetterEdit() { const div = document.getElementById('letter-content'), btnEdit = document.getElementById('btn-letter-edit'), btnSave = document.getElementById('btn-letter-save'); const m = appData.mails.find(x => x.id === currentViewingMailId); if (!m) return; m.content = div.innerText; await saveData(); div.contentEditable = false; div.classList.remove('letter-content-div-editing'); btnEdit.classList.remove('hidden'); btnSave.classList.add('hidden'); renderMailList(); showToast('保存成功'); }
-function deleteCurrentLetter() { if (currentViewingMailId) deleteMail(currentViewingMailId); }
+function openMailbox() {
+    pageHistory.push('advanced');
+    document.getElementById('modal-settings-advanced').classList.add('hidden');
+    document.getElementById('page-mailbox').classList.add('active');
+    renderMailList();
+}
+
+function closeMailbox() {
+    document.getElementById('page-mailbox').classList.remove('active');
+    if (pageHistory.pop() === 'advanced') document.getElementById('modal-settings-advanced').classList.remove('hidden');
+}
+
+function switchMailTab(t) {
+    currentMailTab = t;
+    const sentTab = document.getElementById('tab-sent');
+    const receivedTab = document.getElementById('tab-received');
+    if (t === 'sent') {
+        sentTab.className = 'flex-1 py-2 rounded-lg text-sm font-medium bg-white shadow-sm text-[#8B5E3C]';
+        receivedTab.className = 'flex-1 py-2 rounded-lg text-sm font-medium text-[#8B5E3C] hover:bg-white/50';
+    } else {
+        receivedTab.className = 'flex-1 py-2 rounded-lg text-sm font-medium bg-white shadow-sm text-[#8B5E3C]';
+        sentTab.className = 'flex-1 py-2 rounded-lg text-sm font-medium text-[#8B5E3C] hover:bg-white/50';
+    }
+    renderMailList();
+}
+
+function renderMailList() {
+    const container = document.getElementById('mail-list');
+    container.innerHTML = '';
+    const mails = appData.mails.filter(m => currentMailTab === 'sent' ? m.type === 'sent' : m.type === 'received');
+    if (!mails.length) {
+        container.innerHTML = '<div class="text-center text-gray-400 py-10">暂无信件</div>';
+        return;
+    }
+    mails.forEach(m => {
+        const role = appData.roles.find(r => r.id === m.roleId);
+        const avatar = role?.avatar || DEFAULT_AVATAR;
+        const name = role?.name || '未知';
+        let statusHtml = '';
+        if (currentMailTab === 'sent') {
+            if (m.replied) {
+                statusHtml = '<span class="text-xs text-green-600 bg-green-50 px-2 rounded-full">已回复</span>';
+            } else {
+                const hoursLeft = Math.ceil((m.replyTime - Date.now()) / 3600000);
+                statusHtml = `<span class="text-xs text-amber-600 bg-amber-50 px-2 rounded-full">等待回复(${hoursLeft > 0 ? hoursLeft : '<1'}h)</span>`;
+            }
+        }
+        const timeStr = new Date(m.time).toLocaleString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        const card = document.createElement('div');
+        card.className = 'bg-white p-4 rounded-xl shadow-sm border border-[#E8D5B8] flex items-center justify-between cursor-pointer';
+        card.onclick = () => openLetterDetail(m.id);
+        card.innerHTML = `
+            <div class="flex items-center gap-3 flex-1">
+                <img src="${avatar}" class="w-10 h-10 rounded-full">
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold truncate">${currentMailTab === 'sent' ? '寄给' : '来自'} ${escapeHtml(name)}</p>
+                    <p class="text-xs text-gray-400 truncate">${escapeHtml(m.content.substring(0, 20))}...</p>
+                    ${statusHtml}
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="text-xs text-gray-400">${timeStr}</div>
+                <button onclick="deleteMail('${m.id}'); event.stopPropagation();" class="p-1.5 text-gray-400 hover:text-red-500">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+    lucide.createIcons();
+}
+
+function deleteMail(id) {
+    showConfirm('删除信件？', async () => {
+        appData.mails = appData.mails.filter(m => m.id !== id);
+        await saveData();
+        renderMailList();
+        if (currentViewingMailId === id) closeLetterDetail();
+        showToast('已删除');
+    });
+}
+
+function composeMail() {
+    const recipientsContainer = document.getElementById('compose-recipients');
+    recipientsContainer.innerHTML = '';
+    appData.roles.forEach(role => {
+        const div = document.createElement('div');
+        div.className = 'flex-shrink-0 w-16 flex flex-col items-center gap-1 cursor-pointer';
+        div.onclick = () => selectRecipient(div, role.id);
+        div.innerHTML = `
+            <img src="${role.avatar}" class="w-12 h-12 rounded-full border-2 border-transparent">
+            <span class="text-[10px]">${escapeHtml(role.name)}</span>
+        `;
+        recipientsContainer.appendChild(div);
+    });
+    document.getElementById('compose-content').value = '';
+    document.getElementById('modal-compose').classList.remove('hidden');
+}
+
+function selectRecipient(el, id) {
+    selectedRecipientId = id;
+    const all = document.getElementById('compose-recipients').children;
+    for (let child of all) {
+        child.querySelector('img').className = 'w-12 h-12 rounded-full border-2 border-transparent';
+    }
+    el.querySelector('img').className = 'w-12 h-12 rounded-full border-2 border-amber-500 ring-2 ring-amber-200';
+}
+
+function closeCompose() {
+    document.getElementById('modal-compose').classList.add('hidden');
+    selectedRecipientId = null;
+}
+
+async function sendMail() {
+    if (!selectedRecipientId) {
+        showToast('请选择收信人');
+        return;
+    }
+    const content = document.getElementById('compose-content').value.trim();
+    if (!content) {
+        showToast('内容不能为空');
+        return;
+    }
+    const delay = 12 * 60 * 60 * 1000 + Math.random() * 12 * 60 * 60 * 1000;
+    const newMail = {
+        id: generateUID(),
+        roleId: selectedRecipientId,
+        type: 'sent',
+        content,
+        time: Date.now(),
+        replyTime: Date.now() + delay,
+        replied: false
+    };
+    appData.mails.push(newMail);
+    await saveData();
+    closeCompose();
+    renderMailList();
+    showToast('投递成功');
+}
+
+function openLetterDetail(id) {
+    const contentDiv = document.getElementById('letter-content');
+    contentDiv.innerHTML = '';
+    contentDiv.contentEditable = false;
+    document.getElementById('letter-author').textContent = '';
+    document.getElementById('letter-date').textContent = '';
+    document.getElementById('letter-footer-date').textContent = '';
+    const btnEdit = document.getElementById('btn-letter-edit');
+    const btnSave = document.getElementById('btn-letter-save');
+    if (btnEdit) btnEdit.classList.remove('hidden');
+    if (btnSave) btnSave.classList.add('hidden');
+    const mail = appData.mails.find(x => String(x.id) === String(id));
+    if (!mail) {
+        showToast('信件未找到');
+        return;
+    }
+    currentViewingMailId = mail.id;
+    const role = appData.roles.find(r => r.id === mail.roleId);
+    // 完整时间（年-月-日 时:分 星期几）
+    const fullTime = new Date(mail.time).toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        weekday: 'long'
+    });
+    document.getElementById('letter-date').textContent = fullTime;
+    document.getElementById('letter-footer-date').textContent = new Date(mail.time).toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    document.getElementById('letter-author').textContent = role?.name || '未知';
+    contentDiv.innerText = mail.content || '（信件内容为空）';
+    document.getElementById('modal-letter-detail').classList.remove('hidden');
+}
+
+function closeLetterDetail() {
+    document.getElementById('modal-letter-detail').classList.add('hidden');
+    currentViewingMailId = null;
+}
+
+function toggleLetterEdit() {
+    const div = document.getElementById('letter-content');
+    const btnEdit = document.getElementById('btn-letter-edit');
+    const btnSave = document.getElementById('btn-letter-save');
+    div.contentEditable = true;
+    div.classList.add('letter-content-div-editing');
+    btnEdit.classList.add('hidden');
+    btnSave.classList.remove('hidden');
+    div.focus();
+}
+
+async function saveLetterEdit() {
+    const div = document.getElementById('letter-content');
+    const btnEdit = document.getElementById('btn-letter-edit');
+    const btnSave = document.getElementById('btn-letter-save');
+    const mail = appData.mails.find(x => x.id === currentViewingMailId);
+    if (!mail) return;
+    mail.content = div.innerText;
+    await saveData();
+    div.contentEditable = false;
+    div.classList.remove('letter-content-div-editing');
+    btnEdit.classList.remove('hidden');
+    btnSave.classList.add('hidden');
+    renderMailList();
+    showToast('保存成功');
+}
+
+function deleteCurrentLetter() {
+    if (currentViewingMailId) deleteMail(currentViewingMailId);
+}
 
 function openDecision() { document.getElementById('decision-options').value = ''; document.getElementById('decision-result').innerHTML = ''; document.getElementById('modal-decision').classList.remove('hidden'); }
 function closeDecision() { document.getElementById('modal-decision').classList.add('hidden'); }
