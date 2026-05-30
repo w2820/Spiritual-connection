@@ -649,7 +649,7 @@
         /* 源码页 */
         #modal-source { z-index: 10000 !important; }
 
-        /* 戳一戳设置卡片样式 */
+        /* 戳一戳设置卡片样式（多条目列表样式） */
         .poke-card {
             background: white; border-radius: 24px; padding: 20px;
             max-width: 360px; width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
@@ -663,16 +663,52 @@
         .poke-card-header h3 {
             font-size: 18px; font-weight: 700; color: #1f2937;
         }
-        .poke-input-group {
-            margin-bottom: 20px;
+        .poke-group {
+            margin-bottom: 24px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 16px;
         }
-        .poke-input-group label {
-            display: block; font-size: 13px; font-weight: 600; color: #6b7280;
-            margin-bottom: 6px;
+        .poke-group-title {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #374151;
         }
-        .poke-input-group input {
-            width: 100%; padding: 12px 16px; background: #f3f4f6; border: 1px solid #e5e7eb;
-            border-radius: 16px; font-size: 14px; outline: none;
+        .poke-list {
+            margin-bottom: 12px;
+        }
+        .poke-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f9fafb;
+            padding: 8px 12px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
+        .poke-list-item .poke-text {
+            flex: 1;
+            font-size: 14px;
+            word-break: break-word;
+            padding-right: 8px;
+        }
+        .poke-list-item button {
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: #ef4444;
+            padding: 4px;
+        }
+        .poke-add-btn {
+            width: 100%;
+            padding: 8px;
+            background: #f3f4f6;
+            border: 1px dashed #d1d5db;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #4b5563;
+            cursor: pointer;
         }
         .poke-preview {
             background: #fef3c7; border-radius: 16px; padding: 12px 16px;
@@ -694,7 +730,9 @@
         }
         /* 戳一戳系统消息样式 */
         .poke-system-message {
-            display: flex; justify-content: center; margin: 12px 0;
+            display: flex;
+            justify-content: center;
+            margin: 12px 0;
         }
         .poke-system-message span {
             background: rgba(0,0,0,0.05); color: #6b7280;
@@ -2500,6 +2538,16 @@
             <button onclick="openMomentCommentBank()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: #8e24aa;"><i data-lucide="message-square" class="w-5 h-5"></i></div><span class="text-xs font-medium">朋友圈评论库</span></button>
             <button onclick="openAddressLibrary()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: #c2185b;"><i data-lucide="map-pin" class="w-5 h-5"></i></div><span class="text-xs font-medium">地址库</span></button>
             <button onclick="window.triggerMomentCheck && triggerMomentCheck()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="zap" class="w-5 h-5"></i></div><span class="text-xs font-medium">测试朋友圈</span></button>
+            <!-- 新增：帮我决策入口 -->
+            <button onclick="openDecisionHelper()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="help-circle" class="w-5 h-5"></i></div>
+                <span class="text-xs font-medium">帮我决策</span>
+            </button>
+            <!-- 新增：涂鸦本入口 -->
+            <button onclick="openDoodlePad()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="brush" class="w-5 h-5"></i></div>
+                <span class="text-xs font-medium">涂鸦本</span>
+            </button>
         </div>
         <div class="flex gap-4">
             <button onclick="closeAdvancedSettings()" class="flex-1 bg-gray-100 text-gray-600 p-3 rounded-xl font-bold">返回</button>
@@ -2781,9 +2829,29 @@
     <div class="online-status-card"><div class="online-status-header"><span class="online-status-title">角色在线状态</span><button class="online-status-close" onclick="closeOnlineStatus()">&times;</button></div><div class="online-status-body"><div class="online-status-role-selector"><select id="online-status-role-select" class="online-status-role-select" onchange="switchOnlineStatusRole()"></select></div><div class="online-status-switch-row"><span>启用自动切换</span><div class="ios-switch" id="online-status-switch" onclick="toggleSwitch(this)"></div></div><p style="font-size:12px;color:var(--text-secondary);margin-top:-8px;margin-bottom:16px;">基于时间自动更新在线状态</p><label style="font-size:14px;font-weight:500;margin-bottom:8px;display:block;">状态列表</label><div class="online-status-list" id="online-status-list"></div><div class="online-status-add"><input type="text" id="new-online-status" placeholder="输入新状态，如：在忙"><button class="btn-primary" onclick="addOnlineStatus()" style="padding:8px 16px;">添加</button></div></div><div class="online-status-footer"><button class="btn-primary" onclick="saveOnlineStatus()" style="width:100%;">保存设置</button></div></div>
 </div>
 
-<!-- 戳一戳设置 -->
+<!-- 戳一戳设置（新版：多条目列表，无内联onclick，添加id） -->
 <div id="modal-poke-settings" class="modal-overlay hidden">
-    <div class="poke-card"><div class="poke-card-header"><img id="poke-role-avatar" src="" alt="角色头像"><h3 id="poke-role-name">角色名</h3></div><div class="poke-input-group"><label>我戳他时显示</label><input type="text" id="poke-my-text" placeholder="例如：哥哥，我超爱你 😍😍" maxlength="30" oninput="updatePokePreview()"></div><div class="poke-input-group"><label>他戳我时显示</label><input type="text" id="poke-their-text" placeholder="例如：老婆，我们永远不分开 😂😂" maxlength="30" oninput="updatePokePreview()"></div><div class="poke-preview" id="poke-preview-text">预览区域</div><div class="poke-card-actions"><button class="poke-btn-cancel" onclick="closePokeSettings()">取消</button><button class="poke-btn-save" onclick="savePokeSettings()">保存</button></div></div>
+    <div class="poke-card">
+        <div class="poke-card-header">
+            <img id="poke-role-avatar" src="" alt="角色头像">
+            <h3 id="poke-role-name">角色名</h3>
+        </div>
+        <div class="poke-group">
+            <div class="poke-group-title">我戳他时显示</div>
+            <div id="poke-my-list" class="poke-list"></div>
+            <button id="poke-my-add-btn" class="poke-add-btn">+ 添加文案</button>
+        </div>
+        <div class="poke-group">
+            <div class="poke-group-title">他戳我时显示</div>
+            <div id="poke-their-list" class="poke-list"></div>
+            <button id="poke-their-add-btn" class="poke-add-btn">+ 添加文案</button>
+        </div>
+        <div class="poke-preview" id="poke-preview-text">预览区域</div>
+        <div class="poke-card-actions">
+            <button class="poke-btn-cancel" onclick="closePokeSettings()">取消</button>
+            <button class="poke-btn-save" onclick="savePokeSettings()">保存</button>
+        </div>
+    </div>
 </div>
 
 <!-- 通话浮层 -->
@@ -2832,6 +2900,16 @@
         <div class="flex flex-col items-center gap-2 cursor-pointer" onclick="showPokeActionSheet(); closePlusPanel();">
             <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl" style="background:#FFF9C4; color:#F9A825;">👋</div>
             <span class="text-xs text-gray-600">拍一拍</span>
+        </div>
+        <!-- 帮我决策入口（加号面板） -->
+        <div class="flex flex-col items-center gap-2 cursor-pointer" onclick="openDecisionHelper(); closePlusPanel();">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl" style="background:#E8F0FE; color:#1A73E8;">🤔</div>
+            <span class="text-xs text-gray-600">帮我决策</span>
+        </div>
+        <!-- 涂鸦本入口（加号面板） -->
+        <div class="flex flex-col items-center gap-2 cursor-pointer" onclick="openDoodlePad(); closePlusPanel();">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl" style="background:#FFF0F5; color:#DB2777;">🎨</div>
+            <span class="text-xs text-gray-600">涂鸦本</span>
         </div>
     </div>
     <button class="action-sheet-btn action-sheet-cancel" onclick="closePlusPanel()">取消</button>
@@ -3260,9 +3338,62 @@
     </div>
 </div>
 
+<!-- ========== 新增：帮我决策弹窗（增加选项计数器） ========== -->
+<div id="modal-decision-helper" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width:360px; width:90%;">
+        <h2 class="text-xl font-bold mb-4">🤔 帮我决策</h2>
+        <div class="mb-4">
+            <label class="text-sm font-medium block mb-1">你的问题</label>
+            <input type="text" id="decision-question-input" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm" placeholder="例如：晚上吃什么？">
+        </div>
+        <div class="mb-4">
+            <label class="text-sm font-medium block mb-1">选项 (每行一个，2~9个)</label>
+            <textarea id="decision-options-input" rows="4" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm" placeholder="火锅&#10;烧烤&#10;在家做饭"></textarea>
+            <div id="decision-options-counter" class="text-xs text-gray-400 mt-1">有效选项: 0 个 (需要2-9个)</div>
+        </div>
+        <div class="flex gap-3 mt-2">
+            <button onclick="closeDecisionHelper()" class="flex-1 py-2.5 rounded-xl border border-gray-200 font-medium">取消</button>
+            <button onclick="submitDecisionRequest()" class="flex-1 py-2.5 rounded-xl text-white font-medium shadow-lg" style="background-color: var(--button-primary-bg);">让角色帮我选</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========== 新增：涂鸦本弹窗（增强版） ========== -->
+<div id="modal-doodle-pad" class="modal-overlay hidden" style="z-index: 2000;">
+    <div class="modal-card" style="max-width:500px; width:95%; max-height:85vh; display:flex; flex-direction:column;">
+        <div class="flex justify-between items-center mb-3">
+            <h2 class="text-xl font-bold">🎨 涂鸦本</h2>
+            <button onclick="closeDoodlePad()" class="p-2 rounded-full hover:bg-gray-100">✕</button>
+        </div>
+        <div style="display:flex; justify-content:center; gap:12px; margin-bottom:10px; flex-wrap:wrap;">
+            <!-- 7种颜色 -->
+            <div class="color-picker" style="display:flex; gap:8px;">
+                <div class="color-btn" data-color="#FF4136" style="background:#FF4136; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
+                <div class="color-btn" data-color="#FF851B" style="background:#FF851B; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
+                <div class="color-btn" data-color="#FFDC00" style="background:#FFDC00; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
+                <div class="color-btn" data-color="#2ECC40" style="background:#2ECC40; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
+                <div class="color-btn" data-color="#0074D9" style="background:#0074D9; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
+                <div class="color-btn" data-color="#B10DC9" style="background:#B10DC9; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
+                <div class="color-btn" data-color="#F012BE" style="background:#F012BE; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
+            </div>
+            <button id="doodle-eraser" class="px-3 py-1 rounded-full bg-gray-200 text-sm">🧽 橡皮</button>
+            <button id="doodle-clear" class="px-3 py-1 rounded-full bg-gray-200 text-sm">🗑️ 清空</button>
+        </div>
+        <canvas id="doodle-canvas" width="400" height="400" style="width:100%; height:auto; background:#fff; border:1px solid #ccc; border-radius:12px; touch-action: none; cursor: crosshair;"></canvas>
+        <div style="margin-top:12px; display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
+            <!-- 26个字母按钮 -->
+            <div id="doodle-letters" style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-bottom:8px;"></div>
+        </div>
+        <div style="display:flex; gap:12px; margin-top:12px;">
+            <button id="doodle-random-draw" class="flex-1 py-2 rounded-xl bg-gray-100">🎲 随机图形</button>
+            <button id="doodle-random-spell" class="flex-1 py-2 rounded-xl bg-gray-100">🔤 随机拼写(画布)</button>
+        </div>
+    </div>
+</div>
+
 <script>
 
-// --- 初始化图标 ---
+// 初始化图标
 lucide.createIcons();
 
 // --- 预设背景 ---
@@ -3279,8 +3410,8 @@ const DEFAULT_GROUP_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org
 // --- 默认数据结构 ---
 const DEFAULT_DATA = {
     roles: [
-        { id: '1', name: '老公', avatar: 'https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/b706d6c461e44df0b82fda4381e66f56~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947761&x-signature=WPDM%2Fe%2Bq9Ltf6sL1Rc2vcm320jw%3D', groupProb: 50, lastActive: Date.now(), lastAutoSendTime: Date.now(), lastLoveRefresh: 0, pokeMyText: '哥哥，我超爱你 😍😍', pokeTheirText: '老婆，我们永远不分开 😂😂', onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 }, autoMailProbability: 20 },
-        { id: '2', name: '菜🥬', avatar: 'https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/cd47e4d6c7734a9f8c189d3d6c277eb6~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947762&x-signature=a5JLFkIXlkbkhZMc%2BJ%2FUogUFVKc%3D', groupProb: 30, lastActive: Date.now() - 3600000, lastAutoSendTime: Date.now() - 3600000, lastLoveRefresh: 0, pokeMyText: '贴贴 🥰', pokeTheirText: '想你啦 💕', onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭'], currentStatus: '在线', lastUpdate: 0 }, autoMailProbability: 15 }
+        { id: '1', name: '老公', avatar: 'https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/b706d6c461e44df0b82fda4381e66f56~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947761&x-signature=WPDM%2Fe%2Bq9Ltf6sL1Rc2vcm320jw%3D', groupProb: 50, lastActive: Date.now(), lastAutoSendTime: Date.now(), lastLoveRefresh: 0, pokeMyTexts: ['哥哥，我超爱你 😍😍'], pokeTheirTexts: ['老婆，我们永远不分开 😂😂'], onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 }, autoMailProbability: 20, lastDoodleDate: null },
+        { id: '2', name: '菜🥬', avatar: 'https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/cd47e4d6c7734a9f8c189d3d6c277eb6~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947762&x-signature=a5JLFkIXlkbkhZMc%2BJ%2FUogUFVKc%3D', groupProb: 30, lastActive: Date.now() - 3600000, lastAutoSendTime: Date.now() - 3600000, lastLoveRefresh: 0, pokeMyTexts: ['贴贴 🥰'], pokeTheirTexts: ['想你啦 💕'], onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭'], currentStatus: '在线', lastUpdate: 0 }, autoMailProbability: 15, lastDoodleDate: null }
     ],
     groups: [],
     chats: {},
@@ -3501,6 +3632,18 @@ let quoteMessageObject = null;
 let currentMusicId = null;
 let musicAudio = new Audio();
 let isMusicPlaying = false;
+
+// 涂鸦本相关全局变量
+let doodleCanvas = null, doodleCtx = null;
+let doodleDrawing = false;
+let doodleLastX = 0, doodleLastY = 0;
+let doodleCurrentColor = '#FF4136';
+let doodleIsErasing = false;
+
+// 戳一戳设置相关
+let currentPokeRoleId = null;
+let tempPokeMyTexts = [];
+let tempPokeTheirTexts = [];
 
 // 清理所有定时器的辅助函数
 function clearAllTimers() {
@@ -3839,7 +3982,7 @@ function syncAllReplies() {
 
 async function saveData() {
     try {
-        Object.keys(appData.chats).forEach(k => { if (appData.chats[k].length > 30) appData.chats[k] = appData.chats[k].slice(-30); });
+        Object.keys(appData.chats).forEach(k => { if (appData.chats[k].length > 100) appData.chats[k] = appData.chats[k].slice(-100); });
         Object.keys(appData.groupChats).forEach(k => { if (appData.groupChats[k].length > 100) appData.groupChats[k] = appData.groupChats[k].slice(-100); });
         syncAllReplies();
         const dataToSave = JSON.parse(JSON.stringify(appData));
@@ -3923,6 +4066,20 @@ async function loadData() {
         appData.wordbanks.wordGroups.forEach(g => {
             g.words = g.words.map(w => typeof w === 'string' ? { text: w, blocked: false } : w);
         });
+        // 兼容旧版戳一戳字段：将字符串转为数组
+        appData.roles.forEach(r => {
+            if (typeof r.pokeMyText === 'string') {
+                r.pokeMyTexts = [r.pokeMyText];
+                delete r.pokeMyText;
+            }
+            if (typeof r.pokeTheirText === 'string') {
+                r.pokeTheirTexts = [r.pokeTheirText];
+                delete r.pokeTheirText;
+            }
+            if (!r.pokeMyTexts) r.pokeMyTexts = ['哥哥，我超爱你 😍😍'];
+            if (!r.pokeTheirTexts) r.pokeTheirTexts = ['老婆，我们永远不分开 😂😂'];
+            if (!r.lastDoodleDate) r.lastDoodleDate = null;
+        });
         if (!appData.groups) appData.groups = []; appData.groups.forEach(g => { if (!g.avatar) g.avatar = DEFAULT_GROUP_AVATAR; if (!g.replyCountProb) g.replyCountProb = {}; });
         if (!appData.groupChats) appData.groupChats = {};
         if (!appData.importantDays) appData.importantDays = [{ id: '1', name: '4.21黎宝和领戒指', date: '2025-04-21', type: 'anniversary', cover: '' }];
@@ -3946,7 +4103,7 @@ async function loadData() {
         if (appData.settings.momentCover === undefined) appData.settings.momentCover = '';
         if (appData.settings.musicPlayerEnabled === undefined) appData.settings.musicPlayerEnabled = true;
         if (appData.settings.musicShuffle === undefined) appData.settings.musicShuffle = true;
-        appData.roles.forEach(r => { if (!r.lastAutoSendTime) r.lastAutoSendTime = Date.now(); if (!r.lastLoveRefresh) r.lastLoveRefresh = 0; if (!r.currentLoveState) r.currentLoveState = null; if (!r.pokeMyText) r.pokeMyText = '哥哥，我超爱你 😍😍'; if (!r.pokeTheirText) r.pokeTheirText = '老婆，我们永远不分开 😂😂'; if (!r.onlineStatus) r.onlineStatus = { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 }; if (r.autoMailProbability === undefined) r.autoMailProbability = 15; if (r.todayMomentCount === undefined) r.todayMomentCount = 0; if (r.lastMomentDate === undefined) r.lastMomentDate = null; });
+        appData.roles.forEach(r => { if (!r.lastAutoSendTime) r.lastAutoSendTime = Date.now(); if (!r.lastLoveRefresh) r.lastLoveRefresh = 0; if (!r.currentLoveState) r.currentLoveState = null; if (!r.onlineStatus) r.onlineStatus = { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 }; if (r.autoMailProbability === undefined) r.autoMailProbability = 15; if (r.todayMomentCount === undefined) r.todayMomentCount = 0; if (r.lastMomentDate === undefined) r.lastMomentDate = null; });
         if (!appData.transferSettings) appData.transferSettings = { enabled: true, minAmount: 5.20, maxAmount: 200, probability: 15, checkInterval: 30 };
         if (!appData.transferRecords) appData.transferRecords = [];
         if (!appData.redPackets) appData.redPackets = [];
@@ -3972,6 +4129,8 @@ async function loadData() {
     startAutoSendTimer(); startMailReplyChecker(); initNotificationSwitch(); updateCallButtonVisibility();
     startAutoCallTimer(); startAutoMailGenerator(); startAutoTransferTimer();
     startMomentTimer(); startMomentCommentTimer(); startMomentLikeTimer();
+    // 启动涂鸦自动触发定时器（每1小时检查一次）
+    setInterval(() => checkAndTriggerAutoDoodle(), 60 * 60 * 1000);
     disableAutoTransferUntil = Date.now() + 60 * 1000;
     applyMomentCover();
     updateMomentUnread();
@@ -3997,6 +4156,21 @@ async function loadData() {
         ringtoneAudio.src = appData.settings.call.ringtone;
         ringtoneAudio.load();
     }
+    // 初始化戳一戳设置临时数据
+    if (currentRoleId) {
+        const role = appData.roles.find(r => r.id === currentRoleId);
+        if (role) {
+            tempPokeMyTexts = [...(role.pokeMyTexts || [])];
+            tempPokeTheirTexts = [...(role.pokeTheirTexts || [])];
+        }
+    }
+    // 帮我决策计数器监听
+    const decisionOptionsInput = document.getElementById('decision-options-input');
+    if (decisionOptionsInput) {
+        decisionOptionsInput.addEventListener('input', updateDecisionOptionsCounter);
+    }
+    // 涂鸦本字母区绑定（稍后由 openDoodlePad 动态绑定，但先保证 canvas 初始化监听）
+    initDoodleCanvasEvents();
 }
 
 function updateChatPageHeight() {
@@ -4435,7 +4609,17 @@ function triggerRoleReply() {
             else { if (Math.random() * 100 < (appData.settings.emojiProb || 20) && appData.wordbanks.emojis.length > 0) content += ' ' + appData.wordbanks.emojis[Math.floor(Math.random() * appData.wordbanks.emojis.length)]; }
             const msg = { id: Date.now() + count, sender: currentRoleId, content, time: Date.now(), quote, type }; appData.chats[currentRoleId].push(msg); role.lastActive = Date.now(); debouncedSaveData();
             appendMessageToDOM(currentRoleId, content, Date.now(), quote, type); sendNotificationIfNeeded(`${role.name} 发来消息`, content);
-            if (Math.random() < 0.15) { setTimeout(() => { const pokeText = role.pokeTheirText || '拍了拍你'; const pokeMsg = { id: Date.now() + count + 100, sender: currentRoleId, content: pokeText, time: Date.now(), type: 'poke' }; appData.chats[currentRoleId].push(pokeMsg); debouncedSaveData(); appendMessageToDOM(currentRoleId, pokeText, Date.now(), null, 'poke'); }, 400); }
+            // 角色戳用户概率改为9%，并从 pokeTheirTexts 数组中随机选择一条
+            if (Math.random() < 0.09) { 
+                setTimeout(() => { 
+                    const pokeTexts = role.pokeTheirTexts || ['拍了拍你'];
+                    const randomPoke = pokeTexts[Math.floor(Math.random() * pokeTexts.length)];
+                    const pokeMsg = { id: Date.now() + count + 100, sender: currentRoleId, content: randomPoke, time: Date.now(), type: 'poke' }; 
+                    appData.chats[currentRoleId].push(pokeMsg); 
+                    debouncedSaveData(); 
+                    appendMessageToDOM(currentRoleId, randomPoke, Date.now(), null, 'poke'); 
+                }, 400); 
+            }
             if (count > 1) setTimeout(() => sendNext(count - 1), intervalMs);
         }; sendNext(msgCount);
     }, delay);
@@ -4627,7 +4811,7 @@ function deleteRole(id) { showConfirm('删除角色？', async () => { appData.r
 function openCreateRole() { document.getElementById('modal-create-role').classList.remove('hidden'); document.getElementById('role-name-input').value = ''; document.getElementById('role-avatar-preview').src = DEFAULT_AVATAR; document.getElementById('role-group-prob').value = 50; document.getElementById('role-group-prob-val').textContent = '50%'; document.getElementById('role-mail-prob').value = 15; document.getElementById('role-mail-prob-val').textContent = '15%'; }
 function closeCreateRole() { document.getElementById('modal-create-role').classList.add('hidden'); }
 async function handleAvatarUpload(input) { if (input.files?.[0]) { showToast('压缩中...'); const compressed = await compressImage(input.files[0], 400, 0.7); document.getElementById('role-avatar-preview').src = compressed; } }
-async function saveRole() { const name = document.getElementById('role-name-input').value.trim(); if (!name) { showToast('请输入名称'); return; } appData.roles.push({ id: Date.now().toString(), name, avatar: document.getElementById('role-avatar-preview').src, groupProb: parseInt(document.getElementById('role-group-prob').value), autoMailProbability: parseInt(document.getElementById('role-mail-prob').value) || 15, lastActive: Date.now(), lastAutoSendTime: Date.now(), lastLoveRefresh: 0, currentLoveState: null, pokeMyText: '哥哥，我超爱你 😍😍', pokeTheirText: '老婆，我们永远不分开 😂😂', onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 }, todayMomentCount: 0 }); await saveData(); renderRoleList(); closeCreateRole(); showToast('创建成功'); }
+async function saveRole() { const name = document.getElementById('role-name-input').value.trim(); if (!name) { showToast('请输入名称'); return; } appData.roles.push({ id: Date.now().toString(), name, avatar: document.getElementById('role-avatar-preview').src, groupProb: parseInt(document.getElementById('role-group-prob').value), autoMailProbability: parseInt(document.getElementById('role-mail-prob').value) || 15, lastActive: Date.now(), lastAutoSendTime: Date.now(), lastLoveRefresh: 0, currentLoveState: null, pokeMyTexts: ['哥哥，我超爱你 😍😍'], pokeTheirTexts: ['老婆，我们永远不分开 😂😂'], onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 }, todayMomentCount: 0, lastDoodleDate: null }); await saveData(); renderRoleList(); closeCreateRole(); showToast('创建成功'); }
 
 function openDataManagement() { pageHistory.push('settings'); document.getElementById('modal-settings-main').classList.add('hidden'); document.getElementById('modal-settings-data').classList.remove('hidden'); updateStorageDisplay(); updateNotificationUI(); }
 function closeDataManagement() { document.getElementById('modal-settings-data').classList.add('hidden'); if (pageHistory.pop() === 'settings') document.getElementById('modal-settings-main').classList.remove('hidden'); }
@@ -5263,19 +5447,127 @@ function closeSourceCode() { document.getElementById('modal-source').classList.r
 function copySourceCode() { const ta = document.getElementById('source-code-content'); ta.select(); document.execCommand('copy'); showToast('已复制'); }
 
 function showPokeActionSheet() { if (currentChatType !== 'role' || !currentRoleId) { showToast('仅支持在单人聊天中使用'); return; } document.getElementById('action-sheet-container').innerHTML = `<div class="action-sheet-backdrop" onclick="closeActionSheet()"></div><div class="action-sheet"><button class="action-sheet-btn" onclick="openPokeSettingsFromSheet(); closeActionSheet()">戳一戳设置</button><button class="action-sheet-btn" onclick="executePoke(); closeActionSheet()">戳一戳角色</button><button class="action-sheet-btn action-sheet-cancel" onclick="closeActionSheet()">取消</button></div>`; }
-function openPokeSettingsFromSheet() { const role = appData.roles.find(r => r.id === currentRoleId); if (!role) return; document.getElementById('poke-role-avatar').src = role.avatar; document.getElementById('poke-role-name').textContent = role.name; document.getElementById('poke-my-text').value = role.pokeMyText || '哥哥，我超爱你 😍😍'; document.getElementById('poke-their-text').value = role.pokeTheirText || '老婆，我们永远不分开 😂😂'; updatePokePreview(); document.getElementById('modal-poke-settings').classList.remove('hidden'); }
-
-// ========== 修正戳一戳预览函数，动态显示角色名，修复模板字符串语法 ==========
+function openPokeSettingsFromSheet() { 
+    const role = appData.roles.find(r => r.id === currentRoleId); 
+    if (!role) return; 
+    currentPokeRoleId = role.id;
+    tempPokeMyTexts = [...(role.pokeMyTexts || [])];
+    tempPokeTheirTexts = [...(role.pokeTheirTexts || [])];
+    document.getElementById('poke-role-avatar').src = role.avatar; 
+    document.getElementById('poke-role-name').textContent = role.name; 
+    renderPokeLists();
+    updatePokePreview(); 
+    // 直接绑定添加按钮事件（不再依赖 onclick 属性）
+    const myAddBtn = document.getElementById('poke-my-add-btn');
+    const theirAddBtn = document.getElementById('poke-their-add-btn');
+    if (myAddBtn) myAddBtn.onclick = () => addPokeItem('my');
+    if (theirAddBtn) theirAddBtn.onclick = () => addPokeItem('their');
+    document.getElementById('modal-poke-settings').classList.remove('hidden'); 
+}
+function renderPokeLists() {
+    const myContainer = document.getElementById('poke-my-list');
+    const theirContainer = document.getElementById('poke-their-list');
+    myContainer.innerHTML = '';
+    theirContainer.innerHTML = '';
+    tempPokeMyTexts.forEach((text, idx) => {
+        const div = document.createElement('div');
+        div.className = 'poke-list-item';
+        div.innerHTML = `
+            <span class="poke-text">${escapeHtml(text)}</span>
+            <div class="poke-item-actions">
+                <button class="poke-edit" data-type="my" data-index="${idx}">✏️</button>
+                <button class="poke-delete" data-type="my" data-index="${idx}">✖️</button>
+            </div>
+        `;
+        myContainer.appendChild(div);
+    });
+    tempPokeTheirTexts.forEach((text, idx) => {
+        const div = document.createElement('div');
+        div.className = 'poke-list-item';
+        div.innerHTML = `
+            <span class="poke-text">${escapeHtml(text)}</span>
+            <div class="poke-item-actions">
+                <button class="poke-edit" data-type="their" data-index="${idx}">✏️</button>
+                <button class="poke-delete" data-type="their" data-index="${idx}">✖️</button>
+            </div>
+        `;
+        theirContainer.appendChild(div);
+    });
+    // 绑定编辑/删除事件（事件委托）
+    myContainer.querySelectorAll('.poke-edit').forEach(btn => {
+        btn.onclick = () => editPokeItem('my', parseInt(btn.dataset.index));
+    });
+    myContainer.querySelectorAll('.poke-delete').forEach(btn => {
+        btn.onclick = () => removePokeItem('my', parseInt(btn.dataset.index));
+    });
+    theirContainer.querySelectorAll('.poke-edit').forEach(btn => {
+        btn.onclick = () => editPokeItem('their', parseInt(btn.dataset.index));
+    });
+    theirContainer.querySelectorAll('.poke-delete').forEach(btn => {
+        btn.onclick = () => removePokeItem('their', parseInt(btn.dataset.index));
+    });
+}
+function addPokeItem(type) {
+    const newText = prompt('请输入新的戳一戳文案：');
+    if (newText && newText.trim()) {
+        if (type === 'my') tempPokeMyTexts.push(newText.trim());
+        else tempPokeTheirTexts.push(newText.trim());
+        renderPokeLists();
+        updatePokePreview();
+    }
+}
+function editPokeItem(type, index) {
+    let newText;
+    if (type === 'my') {
+        newText = prompt('编辑“我戳他”文案：', tempPokeMyTexts[index]);
+        if (newText && newText.trim()) {
+            tempPokeMyTexts[index] = newText.trim();
+        } else {
+            return;
+        }
+    } else {
+        newText = prompt('编辑“他戳我”文案：', tempPokeTheirTexts[index]);
+        if (newText && newText.trim()) {
+            tempPokeTheirTexts[index] = newText.trim();
+        } else {
+            return;
+        }
+    }
+    renderPokeLists();
+    updatePokePreview();
+}
+function removePokeItem(type, index) {
+    if (type === 'my') tempPokeMyTexts.splice(index, 1);
+    else tempPokeTheirTexts.splice(index, 1);
+    renderPokeLists();
+    updatePokePreview();
+}
 function updatePokePreview() {
     const roleName = document.getElementById('poke-role-name').textContent || '角色';
-    const myText = document.getElementById('poke-my-text').value || '哥哥，我超爱你 😍😍';
-    const theirText = document.getElementById('poke-their-text').value || '老婆，我们永远不分开 😂😂';
-    document.getElementById('poke-preview-text').innerHTML = `我拍了拍"${escapeHtml(roleName)}"：${escapeHtml(myText)}<br>${escapeHtml(roleName)}拍了拍你：${escapeHtml(theirText)}`;
+    const myPreview = tempPokeMyTexts.length ? tempPokeMyTexts.map(t => `我拍了拍"${roleName}"：${t}`).join('<br>') : '';
+    const theirPreview = tempPokeTheirTexts.length ? tempPokeTheirTexts.map(t => `${roleName}拍了拍你：${t}`).join('<br>') : '';
+    document.getElementById('poke-preview-text').innerHTML = (myPreview ? myPreview + '<br>' : '') + theirPreview;
 }
-
-function closePokeSettings() { document.getElementById('modal-poke-settings').classList.add('hidden'); }
-async function savePokeSettings() { const role = appData.roles.find(r => r.id === currentRoleId); if (!role) return; role.pokeMyText = document.getElementById('poke-my-text').value.trim() || '哥哥，我超爱你 😍😍'; role.pokeTheirText = document.getElementById('poke-their-text').value.trim() || '老婆，我们永远不分开 😂😂'; await saveData(); closePokeSettings(); showToast('戳一戳设置已保存'); }
-function executePoke() { if (currentChatType !== 'role' || !currentRoleId) return; const role = appData.roles.find(r => r.id === currentRoleId); if (!role) return; const pokeText = role.pokeMyText || '哥哥，我超爱你 😍😍'; const msg = { id: Date.now(), sender: 'me', content: pokeText, time: Date.now(), type: 'poke' }; if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = []; appData.chats[currentRoleId].push(msg); debouncedSaveData(); appendMessageToDOM('me', pokeText, Date.now(), null, 'poke'); }
+function closePokeSettings() { document.getElementById('modal-poke-settings').classList.add('hidden'); currentPokeRoleId = null; }
+async function savePokeSettings() { 
+    const role = appData.roles.find(r => r.id === currentPokeRoleId); 
+    if (!role) return;
+    role.pokeMyTexts = [...tempPokeMyTexts];
+    role.pokeTheirTexts = [...tempPokeTheirTexts];
+    await saveData(); 
+    closePokeSettings(); 
+    showToast('戳一戳设置已保存'); 
+}
+function executePoke() { 
+    if (currentChatType !== 'role' || !currentRoleId) return; 
+    const role = appData.roles.find(r => r.id === currentRoleId); 
+    if (!role) return; 
+    const texts = role.pokeMyTexts || ['哥哥，我超爱你 😍😍'];
+    const randomPoke = texts[Math.floor(Math.random() * texts.length)];
+    const msg = { id: Date.now(), sender: 'me', content: randomPoke, time: Date.now(), type: 'poke' }; 
+    if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = []; 
+    appData.chats[currentRoleId].push(msg); debouncedSaveData(); appendMessageToDOM('me', randomPoke, Date.now(), null, 'poke'); 
+}
 
 function updateCallButtonVisibility() { const btn = document.getElementById('call-button'); if (!btn) return; btn.style.display = (appData.settings.call?.enabled !== false && currentChatType === 'role' && currentRoleId) ? 'block' : 'none'; }
 function startCall() { 
@@ -6808,16 +7100,324 @@ async function saveAddressLibrary() {
     showToast('地址库已保存');
 }
 
-window.openAddressAddModal = openAddressAddModal;
-window.closeAddressAddModal = closeAddressAddModal;
-window.confirmAddAddress = confirmAddAddress;
-window.openMomentLocationPicker = openMomentLocationPicker;
-window.closeMomentLocationPicker = closeMomentLocationPicker;
-window.clearMomentLocation = clearMomentLocation;
-window.openAddressLibraryFromPicker = openAddressLibraryFromPicker;
-window.addAddressItem = openAddressAddModal;
-window.triggerMomentCheck = window.triggerMomentCheck;
-window.loadAndTestRingtone = loadAndTestRingtone;
+// ========== 新增：帮我决策功能（增强版，支持2-9个选项，长句自动支持） ==========
+function updateDecisionOptionsCounter() {
+    const textarea = document.getElementById('decision-options-input');
+    if (!textarea) return;
+    const options = textarea.value.split(/\n/).filter(line => line.trim().length > 0);
+    const count = options.length;
+    const counter = document.getElementById('decision-options-counter');
+    if (counter) {
+        if (count < 2) counter.innerHTML = `有效选项: ${count} 个 (至少需要2个)`;
+        else if (count > 9) counter.innerHTML = `有效选项: ${count} 个 (最多9个，将只取前9个)`;
+        else counter.innerHTML = `有效选项: ${count} 个 ✓`;
+    }
+}
+function openDecisionHelper() {
+    if (currentChatType !== 'role' || !currentRoleId) {
+        showToast('请在单人聊天中使用此功能');
+        return;
+    }
+    document.getElementById('decision-question-input').value = '';
+    document.getElementById('decision-options-input').value = '';
+    updateDecisionOptionsCounter();
+    document.getElementById('modal-decision-helper').classList.remove('hidden');
+}
+function closeDecisionHelper() {
+    document.getElementById('modal-decision-helper').classList.add('hidden');
+}
+function submitDecisionRequest() {
+    const question = document.getElementById('decision-question-input').value.trim();
+    let optionsRaw = document.getElementById('decision-options-input').value;
+    let options = optionsRaw.split(/\n/).map(s => s.trim()).filter(s => s);
+    if (options.length < 2) {
+        showToast('至少需要2个选项');
+        return;
+    }
+    if (options.length > 9) {
+        options = options.slice(0, 9);
+        showToast('选项超过9个，已自动截取前9个');
+    }
+    const questionText = question || '帮我选一下';
+    const optionList = options.map((opt, idx) => `${idx+1}. ${opt}`).join('\n');
+    const userMsgContent = `【帮我决策】\n问题：${questionText}\n选项：\n${optionList}`;
+    const userMsg = { id: Date.now(), sender: 'me', content: userMsgContent, time: Date.now(), type: 'text' };
+    if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = [];
+    appData.chats[currentRoleId].push(userMsg);
+    debouncedSaveData();
+    appendMessageToDOM('me', userMsgContent, Date.now(), null, 'text');
+    closeDecisionHelper();
+    const role = appData.roles.find(r => r.id === currentRoleId);
+    if (!role) return;
+    const delay = 3000 + Math.random() * 2000; // 3-5秒
+    setTimeout(() => {
+        const chosen = options[Math.floor(Math.random() * options.length)];
+        const replyContent = `✨ 我帮你决定：${chosen}`;
+        const replyMsg = { id: Date.now(), sender: currentRoleId, content: replyContent, time: Date.now(), type: 'text' };
+        appData.chats[currentRoleId].push(replyMsg);
+        debouncedSaveData();
+        appendMessageToDOM(currentRoleId, replyContent, Date.now(), null, 'text');
+    }, delay);
+}
+
+// ========== 新增：涂鸦本功能（增强版：随机图形组合+字母绘制+画布图片发送） ==========
+let doodleRandomTimer = null;
+function initDoodleCanvasEvents() {
+    // 此函数已在 loadData 中调用，确保 canvas 可用
+}
+function openDoodlePad() {
+    const modal = document.getElementById('modal-doodle-pad');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    initDoodleCanvas();
+    renderDoodleLetters();
+    // 绑定事件
+    const clearBtn = document.getElementById('doodle-clear');
+    const eraserBtn = document.getElementById('doodle-eraser');
+    const randomDrawBtn = document.getElementById('doodle-random-draw');
+    const randomSpellBtn = document.getElementById('doodle-random-spell');
+    if (clearBtn) clearBtn.onclick = () => { if (doodleCtx) doodleCtx.clearRect(0, 0, doodleCanvas.width, doodleCanvas.height); };
+    if (eraserBtn) eraserBtn.onclick = () => { doodleIsErasing = !doodleIsErasing; eraserBtn.classList.toggle('bg-gray-400', doodleIsErasing); };
+    if (randomDrawBtn) randomDrawBtn.onclick = () => roleRandomDoodle();
+    if (randomSpellBtn) randomSpellBtn.onclick = () => roleRandomSpellAndSend(true); // true 表示画布上绘制字母并发送图片
+    // 颜色选择
+    document.querySelectorAll('.color-btn').forEach(btn => {
+        btn.onclick = () => {
+            doodleCurrentColor = btn.getAttribute('data-color');
+            doodleIsErasing = false;
+            if (eraserBtn) eraserBtn.classList.remove('bg-gray-400');
+        };
+    });
+}
+function closeDoodlePad() {
+    document.getElementById('modal-doodle-pad').classList.add('hidden');
+    if (doodleRandomTimer) clearTimeout(doodleRandomTimer);
+}
+function initDoodleCanvas() {
+    const canvas = document.getElementById('doodle-canvas');
+    if (!canvas) return;
+    if (doodleCanvas) {
+        // 已初始化过，避免重复绑定事件
+        return;
+    }
+    doodleCanvas = canvas;
+    doodleCtx = canvas.getContext('2d');
+    doodleCtx.lineCap = 'round';
+    doodleCtx.lineJoin = 'round';
+    doodleCtx.lineWidth = 5;
+    doodleCtx.strokeStyle = doodleCurrentColor;
+    doodleCanvas.width = 400;
+    doodleCanvas.height = 400;
+    doodleCtx.fillStyle = '#fff';
+    doodleCtx.fillRect(0, 0, doodleCanvas.width, doodleCanvas.height);
+    let drawing = false;
+    let lastX = 0, lastY = 0;
+    function startDrawing(e) {
+        e.preventDefault();
+        drawing = true;
+        const pos = getCanvasCoordinates(e);
+        lastX = pos.x;
+        lastY = pos.y;
+        doodleCtx.beginPath();
+        doodleCtx.moveTo(lastX, lastY);
+    }
+    function draw(e) {
+        if (!drawing) return;
+        e.preventDefault();
+        const pos = getCanvasCoordinates(e);
+        const currentX = pos.x;
+        const currentY = pos.y;
+        doodleCtx.beginPath();
+        doodleCtx.moveTo(lastX, lastY);
+        if (doodleIsErasing) {
+            doodleCtx.globalCompositeOperation = 'destination-out';
+            doodleCtx.lineWidth = 20;
+        } else {
+            doodleCtx.globalCompositeOperation = 'source-over';
+            doodleCtx.strokeStyle = doodleCurrentColor;
+            doodleCtx.lineWidth = 5;
+        }
+        doodleCtx.lineTo(currentX, currentY);
+        doodleCtx.stroke();
+        lastX = currentX;
+        lastY = currentY;
+    }
+    function stopDrawing() { drawing = false; doodleCtx.globalCompositeOperation = 'source-over'; }
+    function getCanvasCoordinates(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        let clientX, clientY;
+        if (e.touches) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+        let x = (clientX - rect.left) * scaleX;
+        let y = (clientY - rect.top) * scaleY;
+        x = Math.min(Math.max(0, x), canvas.width);
+        y = Math.min(Math.max(0, y), canvas.height);
+        return { x, y };
+    }
+    canvas.addEventListener('touchstart', startDrawing);
+    canvas.addEventListener('touchmove', draw);
+    canvas.addEventListener('touchend', stopDrawing);
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+}
+function renderDoodleLetters() {
+    const container = document.getElementById('doodle-letters');
+    if (!container) return;
+    container.innerHTML = '';
+    for (let i = 65; i <= 90; i++) {
+        const letter = String.fromCharCode(i);
+        const btn = document.createElement('button');
+        btn.textContent = letter;
+        btn.className = 'w-8 h-8 rounded-full bg-gray-200 text-sm font-bold hover:bg-gray-300';
+        btn.onclick = (function(l) {
+            return function() {
+                if (!doodleCtx || !doodleCanvas) return;
+                const x = Math.random() * (doodleCanvas.width - 40) + 20;
+                const y = Math.random() * (doodleCanvas.height - 40) + 20;
+                doodleCtx.font = `${20 + Math.random() * 20}px Arial`;
+                doodleCtx.fillStyle = doodleIsErasing ? '#fff' : doodleCurrentColor;
+                doodleCtx.fillText(l, x, y);
+            };
+        })(letter);
+        container.appendChild(btn);
+    }
+}
+function roleRandomDoodle() {
+    if (!doodleCtx || !doodleCanvas) return;
+    const shapeCount = 6 + Math.floor(Math.random() * 15);
+    for (let i = 0; i < shapeCount; i++) {
+        const shapeType = Math.floor(Math.random() * 5); // 0:线段,1:圆,2:矩形,3:弧线,4:椭圆
+        const x1 = Math.random() * doodleCanvas.width;
+        const y1 = Math.random() * doodleCanvas.height;
+        const x2 = Math.random() * doodleCanvas.width;
+        const y2 = Math.random() * doodleCanvas.height;
+        const color = `hsl(${Math.random() * 360}, 70%, 60%)`;
+        doodleCtx.beginPath();
+        doodleCtx.strokeStyle = color;
+        doodleCtx.fillStyle = color;
+        doodleCtx.lineWidth = 2 + Math.random() * 6;
+        switch(shapeType) {
+            case 0: // 线段
+                doodleCtx.moveTo(x1, y1);
+                doodleCtx.lineTo(x2, y2);
+                doodleCtx.stroke();
+                break;
+            case 1: // 圆
+                const radius = 10 + Math.random() * 40;
+                doodleCtx.arc(x1, y1, radius, 0, 2 * Math.PI);
+                if (Math.random() > 0.5) doodleCtx.fill(); else doodleCtx.stroke();
+                break;
+            case 2: // 矩形
+                const width = 20 + Math.random() * 60;
+                const height = 20 + Math.random() * 60;
+                doodleCtx.rect(x1, y1, width, height);
+                if (Math.random() > 0.5) doodleCtx.fill(); else doodleCtx.stroke();
+                break;
+            case 3: // 弧线
+                doodleCtx.arc(x1, y1, 30 + Math.random() * 40, 0, Math.PI * (Math.random() + 0.5));
+                doodleCtx.stroke();
+                break;
+            case 4: // 椭圆
+                doodleCtx.ellipse(x1, y1, 20 + Math.random() * 40, 20 + Math.random() * 40, 0, 0, 2 * Math.PI);
+                if (Math.random() > 0.5) doodleCtx.fill(); else doodleCtx.stroke();
+                break;
+        }
+    }
+    // 随机添加一些点
+    const dotCount = 30 + Math.floor(Math.random() * 70);
+    for (let i = 0; i < dotCount; i++) {
+        const x = Math.random() * doodleCanvas.width;
+        const y = Math.random() * doodleCanvas.height;
+        doodleCtx.fillStyle = `hsl(${Math.random() * 360}, 80%, 60%)`;
+        doodleCtx.fillRect(x, y, 2, 2);
+    }
+}
+async function sendCanvasAsImage(canvas, caption = '') {
+    if (!canvas) return;
+    const dataURL = canvas.toDataURL('image/png');
+    const role = appData.roles.find(r => r.id === currentRoleId);
+    if (!role) {
+        showToast('未找到当前角色');
+        return;
+    }
+    const msgContent = caption ? `${caption}\n${dataURL}` : dataURL;
+    const msg = { id: Date.now(), sender: currentRoleId, content: dataURL, time: Date.now(), type: 'image', caption: caption };
+    if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = [];
+    appData.chats[currentRoleId].push(msg);
+    debouncedSaveData();
+    if (currentChatType === 'role' && currentRoleId === currentRoleId) {
+        appendMessageToDOM(currentRoleId, dataURL, Date.now(), null, 'image');
+    } else {
+        incrementUnread(currentRoleId);
+    }
+    showToast('涂鸦已发送');
+}
+function roleRandomSpellAndSend(showOnCanvas = true) {
+    if (currentChatType !== 'role' || !currentRoleId) {
+        showToast('仅在单人聊天中可用');
+        return;
+    }
+    const length = 3 + Math.floor(Math.random() * 13); // 3-15
+    let word = '';
+    for (let i = 0; i < length; i++) {
+        const letter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+        word += letter;
+    }
+    if (showOnCanvas && doodleCtx && doodleCanvas) {
+        // 在画布上绘制随机字母（不影响原有画布，可先保存状态？简单起见，先清空特定区域或直接追加）
+        const x = Math.random() * (doodleCanvas.width - 100) + 50;
+        const y = Math.random() * (doodleCanvas.height - 100) + 50;
+        doodleCtx.font = `bold ${24 + Math.random() * 24}px Arial`;
+        doodleCtx.fillStyle = doodleIsErasing ? '#fff' : doodleCurrentColor;
+        doodleCtx.fillText(word, x, y);
+        sendCanvasAsImage(doodleCanvas, `🎨 涂鸦本拼写：${word}`);
+    } else {
+        const content = `🎨 涂鸦本拼写：${word}`;
+        const msg = { id: Date.now(), sender: currentRoleId, content: content, time: Date.now(), type: 'text' };
+        if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = [];
+        appData.chats[currentRoleId].push(msg);
+        debouncedSaveData();
+        if (currentChatType === 'role' && currentRoleId === currentRoleId) {
+            appendMessageToDOM(currentRoleId, content, Date.now(), null, 'text');
+        } else {
+            incrementUnread(currentRoleId);
+        }
+        showToast('涂鸦本消息已发送');
+    }
+}
+// 自动触发涂鸦（每日15%概率，随机3-15字母拼写，发送文字消息，不涉及画布）
+function checkAndTriggerAutoDoodle() {
+    if (!appData.settings.moment?.enabled) return; // 复用朋友圈开关控制
+    const today = new Date().toLocaleDateString('sv-SE');
+    appData.roles.forEach(role => {
+        if (role.lastDoodleDate !== today && Math.random() < 0.15) {
+            role.lastDoodleDate = today;
+            const length = 3 + Math.floor(Math.random() * 13);
+            let word = '';
+            for (let i = 0; i < length; i++) {
+                word += String.fromCharCode(65 + Math.floor(Math.random() * 26));
+            }
+            const content = `🎨 我的涂鸦：拼出了 ${word}`;
+            if (!appData.chats[role.id]) appData.chats[role.id] = [];
+            const msg = { id: Date.now(), sender: role.id, content, time: Date.now(), type: 'text' };
+            appData.chats[role.id].push(msg);
+            debouncedSaveData();
+            if (currentChatType === 'role' && currentRoleId === role.id) {
+                appendMessageToDOM(role.id, content, Date.now(), null, 'text');
+            } else {
+                incrementUnread(role.id);
+            }
+        }
+    });
+}
 
 // 挂载全局窗口函数
 window.showPlusPanel = showPlusPanel; window.closePlusPanel = closePlusPanel;
@@ -6928,6 +7528,14 @@ window.playRandomMusic = playRandomMusic;
 window.openAddressLibrary = openAddressLibrary; window.closeAddressLibrary = closeAddressLibrary;
 window.deleteAddressItem = deleteAddressItem;
 window.saveAddressLibrary = saveAddressLibrary;
+
+// 新增功能全局暴露
+window.openDecisionHelper = openDecisionHelper; window.closeDecisionHelper = closeDecisionHelper; window.submitDecisionRequest = submitDecisionRequest;
+window.openDoodlePad = openDoodlePad; window.closeDoodlePad = closeDoodlePad;
+window.updateDecisionOptionsCounter = updateDecisionOptionsCounter;
+window.addPokeItem = addPokeItem;
+window.editPokeItem = editPokeItem;
+window.removePokeItem = removePokeItem;
 
 function showChatHeaderMenu() { showToast('聊天信息'); }
 function showChatSettings() { openChatSettings(); }
@@ -7174,7 +7782,7 @@ async function openBatchEditor() {
             </div>
             <div style="overflow-y:auto; flex:1;">
                 <table style="width:100%; border-collapse:collapse;">
-                    <thead><tr><th style="text-align:left; padding:8px;">预览</th><th style="text-align:left; padding:8px;">牌名</th><th style="text-align:left; padding:8px;">牌意解读</th></td></thead>
+                    <thead><tr><th style="text-align:left; padding:8px;">预览</th><th style="text-align:left; padding:8px;">牌名</th><th style="text-align:left; padding:8px;">牌意解读</th></tr></thead>
                     <tbody id="batch-edit-tbody"></tbody>
                 </table>
             </div>
@@ -7315,7 +7923,7 @@ async function openBatchEditor() {
             html += '<table style="width:100%;font-size:12px;">';
             const matchCount = Math.min(blocks.length, lenormandLibrary.length);
             for (let i = 0; i < matchCount; i++) {
-                html += `<tr><td>${blocks[i].number}</td><td>${escapeHtml(blocks[i].name)}</td><td>→ 第${i+1}张图</td></tr>`;
+                html += `<tr><td style="padding:4px;">${blocks[i].number}</td><td style="padding:4px;">${escapeHtml(blocks[i].name)}</td><td style="padding:4px;">→ 第${i+1}张图</td></tr>`;
             }
             html += '</table>';
             previewDiv.innerHTML = html;
@@ -7335,7 +7943,6 @@ async function openBatchEditor() {
             modalDiv.remove();
             showToast(`已导入前 ${matchCount} 张牌`);
         };
-        modalDiv.querySelector('#full-import-cancel').onclick = () => modalDiv.remove();
         updatePreview();
     };
 
@@ -7566,6 +8173,5 @@ window.openFortune = openFortune;
 window.closeFortune = () => { if (currentFortuneModal) currentFortuneModal.classList.add('hidden'); };
 
 </script>
-
 </body>
 </html>
