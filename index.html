@@ -2902,9 +2902,9 @@
     <div class="online-status-card"><div class="online-status-header"><span class="online-status-title">角色在线状态</span><button class="online-status-close" onclick="closeOnlineStatus()">&times;</button></div><div class="online-status-body"><div class="online-status-role-selector"><select id="online-status-role-select" class="online-status-role-select" onchange="switchOnlineStatusRole()"></select></div><div class="online-status-switch-row"><span>启用自动切换</span><div class="ios-switch" id="online-status-switch" onclick="toggleSwitch(this)"></div></div><p style="font-size:12px;color:var(--text-secondary);margin-top:-8px;margin-bottom:16px;">基于时间自动更新在线状态</p><label style="font-size:14px;font-weight:500;margin-bottom:8px;display:block;">状态列表</label><div class="online-status-list" id="online-status-list"></div><div class="online-status-add"><input type="text" id="new-online-status" placeholder="输入新状态，如：在忙"><button class="btn-primary" onclick="addOnlineStatus()" style="padding:8px 16px;">添加</button></div></div><div class="online-status-footer"><button class="btn-primary" onclick="saveOnlineStatus()" style="width:100%;">保存设置</button></div></div>
 </div>
 
-<!-- 戳一戳设置（新版：多条目列表，无内联onclick，添加id） -->
-<div id="modal-poke-settings" class="modal-overlay hidden">
-    <div class="poke-card">
+<!-- 戳一戳设置（新版：多条目列表，点击背景可关闭） -->
+<div id="modal-poke-settings" class="modal-overlay hidden" onclick="closePokeSettings()">
+    <div class="poke-card" onclick="event.stopPropagation()">
         <div class="poke-card-header">
             <img id="poke-role-avatar" src="" alt="角色头像">
             <h3 id="poke-role-name">角色名</h3>
@@ -3723,6 +3723,11 @@ let currentContextMenu = null;
 let currentContextMenuMsg = null;
 let currentContextMenuElement = null;
 
+// 字卡库搜索相关
+let currentSearchResults = [];
+let currentSearchIndex = -1;
+let lastSearchKeyword = '';
+
 // 清理所有定时器的辅助函数
 function clearAllTimers() {
     if (autoSendTimer) clearInterval(autoSendTimer);
@@ -4255,6 +4260,8 @@ async function loadData() {
             closeContextMenu();
         }
     });
+    // 字卡库搜索功能初始化
+    initWordSearchUI();
 }
 
 function updateChatPageHeight() {
@@ -5539,6 +5546,144 @@ function importWords(input) { if (currentWordGroup === 'all') { showToast('请�
 function selectAllWords() { }
 function copyWords() { }
 window.selectAllWords = selectAllWords; window.copyWords = copyWords;
+
+// ========== 字卡库搜索功能 ==========
+function initWordSearchUI() {
+    const modal = document.getElementById('modal-library-words');
+    if (!modal) return;
+    // 防止重复添加搜索栏
+    if (document.getElementById('word-search-section')) return;
+    const actionRow = modal.querySelector('.flex.gap-2.mb-3');
+    if (!actionRow) return;
+    const searchSection = document.createElement('div');
+    searchSection.id = 'word-search-section';
+    searchSection.className = 'mb-4';
+    searchSection.innerHTML = `
+        <div class="flex gap-2 items-center">
+            <div class="relative flex-1">
+                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                <input type="text" id="word-search-input" class="w-full pl-9 pr-3 py-2 bg-gray-100 rounded-xl text-sm border-none outline-none" placeholder="搜索字卡...">
+            </div>
+            <button id="word-search-btn" class="px-4 py-2 rounded-xl text-sm font-medium shadow-md" style="background-color: var(--button-primary-bg); color: white;">搜索</button>
+            <button id="word-search-clear" class="px-3 py-2 rounded-xl text-sm text-gray-500 hidden">清除</button>
+        </div>
+        <div id="word-search-info" class="text-xs text-gray-500 mt-1 hidden"></div>
+    `;
+    actionRow.insertAdjacentElement('afterend', searchSection);
+    lucide.createIcons();
+    const searchInput = document.getElementById('word-search-input');
+    const searchBtn = document.getElementById('word-search-btn');
+    const clearBtn = document.getElementById('word-search-clear');
+    const infoDiv = document.getElementById('word-search-info');
+    searchBtn.onclick = () => performWordSearch(searchInput.value, infoDiv, clearBtn);
+    clearBtn.onclick = () => clearWordSearch(searchInput, infoDiv, clearBtn);
+    searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') performWordSearch(searchInput.value, infoDiv, clearBtn); });
+}
+
+function performWordSearch(keyword, infoDiv, clearBtn) {
+    keyword = keyword.trim();
+    if (!keyword) {
+        clearWordSearch(document.getElementById('word-search-input'), infoDiv, clearBtn);
+        return;
+    }
+    lastSearchKeyword = keyword;
+    currentSearchResults = [];
+    // 遍历所有分组的所有字卡
+    for (let gIdx = 0; gIdx < tempWordGroups.length; gIdx++) {
+        const group = tempWordGroups[gIdx];
+        for (let wIdx = 0; wIdx < group.words.length; wIdx++) {
+            const w = group.words[wIdx];
+            const text = typeof w === 'object' ? w.text : w;
+            if (text.toLowerCase().includes(keyword.toLowerCase())) {
+                currentSearchResults.push({ groupIndex: gIdx, wordIndex: wIdx, text: text });
+            }
+        }
+    }
+    if (currentSearchResults.length === 0) {
+        infoDiv.innerHTML = `未找到包含“${escapeHtml(keyword)}”的字卡`;
+        infoDiv.classList.remove('hidden');
+        clearBtn.classList.remove('hidden');
+        return;
+    }
+    currentSearchIndex = 0;
+    updateSearchInfoUI(infoDiv, clearBtn, keyword);
+    // 定位到第一个匹配项
+    const first = currentSearchResults[0];
+    switchWordGroup(first.groupIndex);
+    setTimeout(() => {
+        locateWordCard(first.groupIndex, first.wordIndex);
+    }, 100);
+}
+
+function updateSearchInfoUI(infoDiv, clearBtn, keyword) {
+    const total = currentSearchResults.length;
+    const current = currentSearchIndex + 1;
+    infoDiv.innerHTML = `找到 ${total} 条匹配“${escapeHtml(keyword)}”  (${current}/${total}) 
+        <button id="search-prev" class="ml-2 px-2 py-0.5 bg-gray-200 rounded text-xs">上一个</button>
+        <button id="search-next" class="ml-1 px-2 py-0.5 bg-gray-200 rounded text-xs">下一个</button>`;
+    infoDiv.classList.remove('hidden');
+    clearBtn.classList.remove('hidden');
+    const prevBtn = document.getElementById('search-prev');
+    const nextBtn = document.getElementById('search-next');
+    if (prevBtn) prevBtn.onclick = () => navigateSearch(-1, infoDiv, clearBtn, keyword);
+    if (nextBtn) nextBtn.onclick = () => navigateSearch(1, infoDiv, clearBtn, keyword);
+}
+
+function navigateSearch(delta, infoDiv, clearBtn, keyword) {
+    if (!currentSearchResults.length) return;
+    let newIndex = currentSearchIndex + delta;
+    if (newIndex < 0) newIndex = currentSearchResults.length - 1;
+    if (newIndex >= currentSearchResults.length) newIndex = 0;
+    currentSearchIndex = newIndex;
+    updateSearchInfoUI(infoDiv, clearBtn, keyword);
+    const target = currentSearchResults[currentSearchIndex];
+    switchWordGroup(target.groupIndex);
+    setTimeout(() => {
+        locateWordCard(target.groupIndex, target.wordIndex);
+    }, 100);
+}
+
+function locateWordCard(groupIndex, wordIndex) {
+    // 确保当前分组正确
+    if (currentWordGroup !== groupIndex) {
+        switchWordGroup(groupIndex);
+    }
+    // 等待 DOM 更新
+    setTimeout(() => {
+        const targetCard = document.querySelector(`.word-card-item[data-group-index="${groupIndex}"][data-word-index="${wordIndex}"]`);
+        if (targetCard) {
+            targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            targetCard.classList.add('search-highlight');
+            setTimeout(() => {
+                targetCard.classList.remove('search-highlight');
+            }, 2000);
+        } else {
+            // 可能因为渲染延迟，再试一次
+            setTimeout(() => {
+                const card = document.querySelector(`.word-card-item[data-group-index="${groupIndex}"][data-word-index="${wordIndex}"]`);
+                if (card) {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    card.classList.add('search-highlight');
+                    setTimeout(() => { card.classList.remove('search-highlight'); }, 2000);
+                }
+            }, 200);
+        }
+    }, 150);
+}
+
+function clearWordSearch(searchInput, infoDiv, clearBtn) {
+    if (searchInput) searchInput.value = '';
+    currentSearchResults = [];
+    currentSearchIndex = -1;
+    lastSearchKeyword = '';
+    if (infoDiv) infoDiv.classList.add('hidden');
+    if (clearBtn) clearBtn.classList.add('hidden');
+    // 移除所有高亮
+    document.querySelectorAll('.word-card-item').forEach(card => {
+        card.classList.remove('search-highlight');
+    });
+}
+
 function openEmojiLibrary() { pageHistory.push('library'); tempEmojis = [...appData.wordbanks.emojis]; renderEmojiGrid(); document.getElementById('modal-library-main').classList.add('hidden'); document.getElementById('modal-library-emoji').classList.add('active'); }
 function closeEmojiLibrary() { document.getElementById('modal-library-emoji').classList.remove('active'); if (pageHistory.pop() === 'library') document.getElementById('modal-library-main').classList.remove('hidden'); }
 function renderEmojiGrid() { const g = document.getElementById('emoji-grid'); g.innerHTML = ''; tempEmojis.forEach((e,i) => { const d = document.createElement('div'); d.className = 'emoji-item'; d.textContent = e; d.onclick = () => { tempEmojis.splice(i,1); renderEmojiGrid(); }; g.appendChild(d); }); document.getElementById('emoji-count').textContent = tempEmojis.length; }
