@@ -652,30 +652,75 @@
         /* 源码页 */
         #modal-source { z-index: 10000 !important; }
 
-        /* 戳一戳设置卡片样式（多条目列表样式） */
+        /* ========== 戳一戳设置卡片样式（重构版：可滚动 + 选项卡 + 批量添加） ========== */
         .poke-card {
             background: white; border-radius: 24px; padding: 20px;
-            max-width: 360px; width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            max-width: 360px; width: 90%; 
+            max-height: 85vh;
+            display: flex; flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             margin: auto; /* 确保居中 */
         }
         .poke-card-header {
-            display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+            position: relative;
         }
         .poke-card-header img {
             width: 48px; height: 48px; border-radius: 50%; object-fit: cover;
         }
         .poke-card-header h3 {
             font-size: 18px; font-weight: 700; color: #1f2937;
+            flex: 1;
+        }
+        .poke-close-x {
+            background: rgba(0,0,0,0.05);
+            border: none;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        /* 选项卡样式 */
+        .poke-tabs {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 12px;
+        }
+        .poke-tab-btn {
+            flex: 1;
+            padding: 8px 0;
+            background: none;
+            border: none;
+            font-size: 15px;
+            font-weight: 500;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .poke-tab-btn.active {
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--accent-color);
+        }
+        /* 内容区滚动 */
+        .poke-content {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 200px;
+            margin-bottom: 12px;
+        }
+        .poke-panel {
+            padding: 0 4px;
         }
         .poke-group {
-            margin-bottom: 24px;
-            border-bottom: 1px solid #e5e7eb;
-            padding-bottom: 16px;
+            margin-bottom: 16px;
         }
         .poke-group-title {
             font-weight: 600;
-            font-size: 16px;
-            margin-bottom: 12px;
+            font-size: 14px;
+            margin-bottom: 8px;
             color: #374151;
         }
         .poke-list {
@@ -716,14 +761,16 @@
         }
         .poke-preview {
             background: #fef3c7; border-radius: 16px; padding: 12px 16px;
-            margin: 16px 0; color: #92400e; font-size: 14px;
+            margin: 16px 0 0; color: #92400e; font-size: 14px;
             border-left: 4px solid var(--accent-color);
+            max-height: 100px;
+            overflow-y: auto;
         }
         .poke-card-actions {
-            display: flex; gap: 12px; margin-top: 20px;
+            display: flex; gap: 12px; margin-top: 12px;
         }
         .poke-card-actions button {
-            flex: 1; padding: 14px; border-radius: 40px; font-weight: 600;
+            flex: 1; padding: 12px; border-radius: 40px; font-weight: 600;
             border: none; cursor: pointer; font-size: 16px;
         }
         .poke-btn-cancel {
@@ -3151,25 +3198,31 @@
     <div class="online-status-card"><div class="online-status-header"><span class="online-status-title">角色在线状态</span><button class="online-status-close" onclick="closeOnlineStatus()">&times;</button></div><div class="online-status-body"><div class="online-status-role-selector"><select id="online-status-role-select" class="online-status-role-select" onchange="switchOnlineStatusRole()"></select></div><div class="online-status-switch-row"><span>启用自动切换</span><div class="ios-switch" id="online-status-switch" onclick="toggleSwitch(this)"></div></div><p style="font-size:12px;color:var(--text-secondary);margin-top:-8px;margin-bottom:16px;">基于时间自动更新在线状态</p><label style="font-size:14px;font-weight:500;margin-bottom:8px;display:block;">状态列表</label><div class="online-status-list" id="online-status-list"></div><div class="online-status-add"><input type="text" id="new-online-status" placeholder="输入新状态，如：在忙"><button class="btn-primary" onclick="addOnlineStatus()" style="padding:8px 16px;">添加</button></div></div><div class="online-status-footer"><button class="btn-primary" onclick="saveOnlineStatus()" style="width:100%;">保存设置</button></div></div>
 </div>
 
-<!-- ========== 戳一戳设置卡片 ========== -->
+<!-- ========== 戳一戳设置卡片（重构版：选项卡 + 可滚动 + 批量添加） ========== -->
 <div id="modal-poke-settings" class="modal-overlay hidden">
-    <div class="poke-card" style="position: relative;">
-        <button class="poke-close-x" style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.1); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center;" onclick="closePokeSettings()">✕</button>
+    <div class="poke-card">
         <div class="poke-card-header">
             <img id="poke-role-avatar" src="" alt="角色头像">
             <h3 id="poke-role-name">角色名</h3>
+            <button class="poke-close-x" onclick="closePokeSettings()">✕</button>
         </div>
-        <div class="poke-group">
-            <div class="poke-group-title">我戳他时显示</div>
-            <div id="poke-my-list" class="poke-list"></div>
-            <button id="poke-my-add-btn" class="poke-add-btn">+ 添加文案</button>
+        <!-- 选项卡 -->
+        <div class="poke-tabs">
+            <button class="poke-tab-btn active" data-tab="my" onclick="switchPokeTab('my')">我的戳他</button>
+            <button class="poke-tab-btn" data-tab="their" onclick="switchPokeTab('their')">他戳我</button>
         </div>
-        <div class="poke-group">
-            <div class="poke-group-title">他戳我时显示</div>
-            <div id="poke-their-list" class="poke-list"></div>
-            <button id="poke-their-add-btn" class="poke-add-btn">+ 添加文案</button>
+        <!-- 内容区（滚动） -->
+        <div class="poke-content">
+            <div id="poke-my-panel" class="poke-panel">
+                <div id="poke-my-list" class="poke-list"></div>
+                <button class="poke-add-btn" onclick="batchAddPokeItems('my')">➕ 批量添加文案</button>
+            </div>
+            <div id="poke-their-panel" class="poke-panel" style="display: none;">
+                <div id="poke-their-list" class="poke-list"></div>
+                <button class="poke-add-btn" onclick="batchAddPokeItems('their')">➕ 批量添加文案</button>
+            </div>
         </div>
-        <div class="poke-preview" id="poke-preview-text">预览区域</div>
+        <div class="poke-preview" id="poke-preview-text"></div>
         <div class="poke-card-actions">
             <button class="poke-btn-cancel" onclick="closePokeSettings()">取消</button>
             <button class="poke-btn-save" onclick="savePokeSettings()">保存</button>
@@ -3722,7 +3775,6 @@
         </div>
     </div>
 </div>
-
 
 <script>
 
@@ -5069,16 +5121,33 @@ async function initAppearance() {
 }
 
 function applyAppearance() {
-    const { theme, customColor, backgrounds, bubble, avatarShape, avatarSettings } = appData.appearance;
+    const { theme, customColor, backgrounds, bubble, avatarShape, avatarSettings, customThemeColors } = appData.appearance;
     const root = document.documentElement;
-    let mainColor = '#82cbb2'; if (theme === 'custom') mainColor = customColor || '#82cbb2';
-    root.style.setProperty('--accent-color', mainColor); root.style.setProperty('--accent-rgb', hexToRgb(mainColor).join(','));
-    root.style.setProperty('--bubble-sent', mainColor); root.style.setProperty('--button-primary-bg', mainColor);
-    root.style.setProperty('--tab-active-text', mainColor); root.style.setProperty('--tab-active-border', mainColor);
-    root.style.setProperty('--accent-light', hexToRgba(mainColor, 0.1));
+    let mainColor = '#82cbb2';
+    // 如果有自定义颜色集，直接应用
+    if (customThemeColors && Object.keys(customThemeColors).length > 0) {
+        for (const [varName, color] of Object.entries(customThemeColors)) {
+            root.style.setProperty(varName, color);
+            if (varName === '--accent-color') {
+                root.style.setProperty('--accent-rgb', hexToRgb(color).join(','));
+                root.style.setProperty('--button-primary-bg', color);
+                root.style.setProperty('--tab-active-text', color);
+                root.style.setProperty('--tab-active-border', color);
+                root.style.setProperty('--accent-light', hexToRgba(color, 0.1));
+            }
+        }
+    } else {
+        if (theme === 'custom') mainColor = customColor || '#82cbb2';
+        root.style.setProperty('--accent-color', mainColor);
+        root.style.setProperty('--accent-rgb', hexToRgb(mainColor).join(','));
+        root.style.setProperty('--button-primary-bg', mainColor);
+        root.style.setProperty('--tab-active-text', mainColor);
+        root.style.setProperty('--tab-active-border', mainColor);
+        root.style.setProperty('--accent-light', hexToRgba(mainColor, 0.1));
+    }
     document.body.className = `text-gray-800 transition-colors duration-300 ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-[#f3f4f6]'}`;
     const home = document.getElementById('page-home'); if (backgrounds.home) { home.style.backgroundImage = `url(${backgrounds.home})`; home.style.backgroundSize = 'cover'; home.style.backgroundColor = 'transparent'; } else { home.style.backgroundImage = ''; home.style.backgroundColor = theme === 'dark' ? '#111827' : '#f9fafb'; }
-    const chat = document.getElementById('page-chat'); if (backgrounds.chat) { chat.style.backgroundImage = `url(${backgrounds.chat})`; chat.style.backgroundSize = 'cover'; chat.style.backgroundColor = 'transparent'; } else { chat.style.backgroundImage = ''; chat.style.backgroundColor = theme === 'dark' ? '#1f2937' : '#f0f2f5'; }
+    const chat = document.getElementById('page-chat'); if (backgrounds.chat) { chat.style.backgroundImage = `url(${backgrounds.chat})`; chat.style.backgroundSize = 'cover'; chat.style.backgroundColor = 'transparent'; } else { chat.style.backgroundImage = ''; chat.style.backgroundColor = getComputedStyle(root).getPropertyValue('--bg-primary').trim() || '#f0f2f5'; }
     const style = document.createElement('style'); style.id = 'appearance-style';
     style.textContent = `.bubble-left { border-radius: ${bubble.radius}px ${bubble.radius}px ${bubble.radius}px 6px !important; box-shadow: 0 1px ${bubble.shadow}px rgba(0,0,0,0.08) !important; } .bubble-right { border-radius: ${bubble.radius}px ${bubble.radius}px 6px ${bubble.radius}px !important; box-shadow: 0 1px ${bubble.shadow}px rgba(0,0,0,0.1) !important; } .role-card img, .chat-header img, #typing-avatar { border-radius: ${avatarShape === 'circle' ? '50%' : '8px'} !important; }`;
     const old = document.getElementById('appearance-style'); if (old) old.remove(); document.head.appendChild(style);
@@ -6613,8 +6682,8 @@ function openPokeSettingsFromSheet() {
     updatePokePreview(); 
     const myAddBtn = document.getElementById('poke-my-add-btn');
     const theirAddBtn = document.getElementById('poke-their-add-btn');
-    if (myAddBtn) myAddBtn.onclick = () => addPokeItem('my');
-    if (theirAddBtn) theirAddBtn.onclick = () => addPokeItem('their');
+    if (myAddBtn) myAddBtn.onclick = () => batchAddPokeItems('my');
+    if (theirAddBtn) theirAddBtn.onclick = () => batchAddPokeItems('their');
     const cancelBtn = document.querySelector('#modal-poke-settings .poke-btn-cancel');
     if (cancelBtn) {
         cancelBtn.removeAttribute('onclick');
@@ -6629,47 +6698,119 @@ function openPokeSettingsFromSheet() {
     }
     document.getElementById('modal-poke-settings').classList.remove('hidden'); 
 }
+// 新的批量添加函数
+function batchAddPokeItems(type) {
+    const text = prompt('请输入文案，多行用逗号或换行分隔：', '');
+    if (!text) return;
+    const items = text.split(/[,\n]/).map(s => s.trim()).filter(s => s);
+    if (items.length === 0) return;
+    if (type === 'my') {
+        tempPokeMyTexts.push(...items);
+        renderPokeLists();
+    } else {
+        tempPokeTheirTexts.push(...items);
+        renderPokeLists();
+    }
+    updatePokePreview();
+}
+// 选项卡切换函数
+function switchPokeTab(tab) {
+    const myPanel = document.getElementById('poke-my-panel');
+    const theirPanel = document.getElementById('poke-their-panel');
+    const myTabBtn = document.querySelector('.poke-tab-btn[data-tab="my"]');
+    const theirTabBtn = document.querySelector('.poke-tab-btn[data-tab="their"]');
+    if (tab === 'my') {
+        myPanel.style.display = 'block';
+        theirPanel.style.display = 'none';
+        if (myTabBtn) myTabBtn.classList.add('active');
+        if (theirTabBtn) theirTabBtn.classList.remove('active');
+    } else {
+        myPanel.style.display = 'none';
+        theirPanel.style.display = 'block';
+        if (theirTabBtn) theirTabBtn.classList.add('active');
+        if (myTabBtn) myTabBtn.classList.remove('active');
+    }
+}
 function renderPokeLists() {
     const myContainer = document.getElementById('poke-my-list');
     const theirContainer = document.getElementById('poke-their-list');
     myContainer.innerHTML = '';
     theirContainer.innerHTML = '';
     tempPokeMyTexts.forEach((text, idx) => {
-        const div = document.createElement('div');
-        div.className = 'poke-list-item';
-        div.innerHTML = `
-            <span class="poke-text">${escapeHtml(text)}</span>
-            <div class="poke-item-actions">
-                <button class="poke-edit" data-type="my" data-index="${idx}">✏️</button>
-                <button class="poke-delete" data-type="my" data-index="${idx}">✖️</button>
-            </div>
-        `;
+        const div = createPokeItemDiv(text, idx, 'my');
         myContainer.appendChild(div);
     });
     tempPokeTheirTexts.forEach((text, idx) => {
-        const div = document.createElement('div');
-        div.className = 'poke-list-item';
-        div.innerHTML = `
-            <span class="poke-text">${escapeHtml(text)}</span>
-            <div class="poke-item-actions">
-                <button class="poke-edit" data-type="their" data-index="${idx}">✏️</button>
-                <button class="poke-delete" data-type="their" data-index="${idx}">✖️</button>
-            </div>
-        `;
+        const div = createPokeItemDiv(text, idx, 'their');
         theirContainer.appendChild(div);
     });
-    myContainer.querySelectorAll('.poke-edit').forEach(btn => { btn.onclick = () => editPokeItem('my', parseInt(btn.dataset.index)); });
-    myContainer.querySelectorAll('.poke-delete').forEach(btn => { btn.onclick = () => removePokeItem('my', parseInt(btn.dataset.index)); });
-    theirContainer.querySelectorAll('.poke-edit').forEach(btn => { btn.onclick = () => editPokeItem('their', parseInt(btn.dataset.index)); });
-    theirContainer.querySelectorAll('.poke-delete').forEach(btn => { btn.onclick = () => removePokeItem('their', parseInt(btn.dataset.index)); });
 }
-function addPokeItem(type) { const newText = prompt('请输入新的戳一戳文案：'); if (newText && newText.trim()) { if (type === 'my') tempPokeMyTexts.push(newText.trim()); else tempPokeTheirTexts.push(newText.trim()); renderPokeLists(); updatePokePreview(); } }
-function editPokeItem(type, index) { let newText; if (type === 'my') { newText = prompt('编辑“我戳他”文案：', tempPokeMyTexts[index]); if (newText && newText.trim()) { tempPokeMyTexts[index] = newText.trim(); } else { return; } } else { newText = prompt('编辑“他戳我”文案：', tempPokeTheirTexts[index]); if (newText && newText.trim()) { tempPokeTheirTexts[index] = newText.trim(); } else { return; } } renderPokeLists(); updatePokePreview(); }
-function removePokeItem(type, index) { if (type === 'my') tempPokeMyTexts.splice(index, 1); else tempPokeTheirTexts.splice(index, 1); renderPokeLists(); updatePokePreview(); }
-function updatePokePreview() { const roleName = document.getElementById('poke-role-name').textContent || '角色'; const myPreview = tempPokeMyTexts.length ? tempPokeMyTexts.map(t => `我拍了拍"${roleName}"：${t}`).join('<br>') : ''; const theirPreview = tempPokeTheirTexts.length ? tempPokeTheirTexts.map(t => `${roleName}拍了拍你：${t}`).join('<br>') : ''; document.getElementById('poke-preview-text').innerHTML = (myPreview ? myPreview + '<br>' : '') + theirPreview; }
-function closePokeSettings() { const modal = document.getElementById('modal-poke-settings'); if (modal) modal.classList.add('hidden'); currentPokeRoleId = null; }
-async function savePokeSettings() { const role = appData.roles.find(r => r.id === currentPokeRoleId); if (!role) return; role.pokeMyTexts = [...tempPokeMyTexts]; role.pokeTheirTexts = [...tempPokeTheirTexts]; await saveData(); closePokeSettings(); showToast('戳一戳设置已保存'); }
-function executePoke() { if (currentChatType !== 'role' || !currentRoleId) return; const role = appData.roles.find(r => r.id === currentRoleId); if (!role) return; const texts = role.pokeMyTexts || ['哥哥，我超爱你 😍😍']; const randomPoke = texts[Math.floor(Math.random() * texts.length)]; const msg = { id: Date.now(), sender: 'me', content: randomPoke, time: Date.now(), type: 'poke' }; if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = []; appData.chats[currentRoleId].push(msg); debouncedSaveData(); appendMessageToDOM('me', randomPoke, Date.now(), null, 'poke'); }
+function createPokeItemDiv(text, idx, type) {
+    const div = document.createElement('div');
+    div.className = 'poke-list-item';
+    div.innerHTML = `
+        <span class="poke-text">${escapeHtml(text)}</span>
+        <div class="poke-item-actions">
+            <button class="poke-edit" data-type="${type}" data-index="${idx}">✏️</button>
+            <button class="poke-delete" data-type="${type}" data-index="${idx}">✖️</button>
+        </div>
+    `;
+    div.querySelector('.poke-edit').onclick = () => editPokeItem(type, idx);
+    div.querySelector('.poke-delete').onclick = () => removePokeItem(type, idx);
+    return div;
+}
+function editPokeItem(type, index) {
+    let newText;
+    if (type === 'my') {
+        newText = prompt('编辑“我戳他”文案：', tempPokeMyTexts[index]);
+        if (newText && newText.trim()) { tempPokeMyTexts[index] = newText.trim(); }
+        else { return; }
+    } else {
+        newText = prompt('编辑“他戳我”文案：', tempPokeTheirTexts[index]);
+        if (newText && newText.trim()) { tempPokeTheirTexts[index] = newText.trim(); }
+        else { return; }
+    }
+    renderPokeLists();
+    updatePokePreview();
+}
+function removePokeItem(type, index) {
+    if (type === 'my') tempPokeMyTexts.splice(index, 1);
+    else tempPokeTheirTexts.splice(index, 1);
+    renderPokeLists();
+    updatePokePreview();
+}
+function updatePokePreview() {
+    const roleName = document.getElementById('poke-role-name').textContent || '角色';
+    const myPreview = tempPokeMyTexts.length ? tempPokeMyTexts.map(t => `我拍了拍"${roleName}"：${t}`).join('<br>') : '';
+    const theirPreview = tempPokeTheirTexts.length ? tempPokeTheirTexts.map(t => `${roleName}拍了拍你：${t}`).join('<br>') : '';
+    document.getElementById('poke-preview-text').innerHTML = (myPreview ? myPreview + '<br>' : '') + theirPreview;
+}
+function closePokeSettings() {
+    const modal = document.getElementById('modal-poke-settings');
+    if (modal) modal.classList.add('hidden');
+    currentPokeRoleId = null;
+}
+async function savePokeSettings() {
+    const role = appData.roles.find(r => r.id === currentPokeRoleId);
+    if (!role) return;
+    role.pokeMyTexts = [...tempPokeMyTexts];
+    role.pokeTheirTexts = [...tempPokeTheirTexts];
+    await saveData();
+    closePokeSettings();
+    showToast('戳一戳设置已保存');
+}
+function executePoke() {
+    if (currentChatType !== 'role' || !currentRoleId) return;
+    const role = appData.roles.find(r => r.id === currentRoleId);
+    if (!role) return;
+    const texts = role.pokeMyTexts || ['哥哥，我超爱你 😍😍'];
+    const randomPoke = texts[Math.floor(Math.random() * texts.length)];
+    const msg = { id: Date.now(), sender: 'me', content: randomPoke, time: Date.now(), type: 'poke' };
+    if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = [];
+    appData.chats[currentRoleId].push(msg);
+    debouncedSaveData();
+    appendMessageToDOM('me', randomPoke, Date.now(), null, 'poke');
+}
 
 // 通话功能（保持原样）
 function updateCallButtonVisibility() { const btn = document.getElementById('call-button'); if (!btn) return; btn.style.display = (appData.settings.call?.enabled !== false && currentChatType === 'role' && currentRoleId) ? 'block' : 'none'; }
@@ -8784,7 +8925,7 @@ async function openBatchEditor() {
             for (let i = 0; i < matchCount; i++) {
                 html += `<tr><td style="padding:4px;">${blocks[i].number}</td><td style="padding:4px;">${escapeHtml(blocks[i].name)}</td><td style="padding:4px;">→ 第${i+1}张图</td></tr>`;
             }
-            html += '<table>';
+            html += '</table>';
             previewDiv.innerHTML = html;
         };
         textarea.addEventListener('input', updatePreview);
@@ -9010,6 +9151,6 @@ window.openFortune = openFortune;
 window.closeFortune = () => { if (currentFortuneModal) currentFortuneModal.classList.add('hidden'); };
 
 </script>
-   
+
 </body>
 </html>
