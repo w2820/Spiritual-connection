@@ -659,7 +659,7 @@
             max-height: 85vh;
             display: flex; flex-direction: column;
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            margin: auto; /* 确保居中 */
+            margin: auto;
         }
         .poke-card-header {
             display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
@@ -4478,6 +4478,8 @@ function applyBuiltinTheme(themeId) {
     // 更新设置
     appData.appearance.theme = themeId;
     appData.appearance.customColor = theme.accentColor;
+    // 清空自定义颜色集，确保使用内置主题
+    appData.appearance.customThemeColors = {};
     debouncedSaveData();
     showToast(`已应用「${theme.name}」主题`);
 }
@@ -4497,6 +4499,11 @@ function applyCustomColors(colors) {
             }
         }
     }
+    // 保存到持久化数据
+    appData.appearance.customThemeColors = colors;
+    appData.appearance.theme = 'custom';
+    appData.appearance.customColor = colors['--accent-color'] || '#82cbb2';
+    debouncedSaveData();
 }
 
 // 获取当前所有主题颜色变量
@@ -4556,8 +4563,6 @@ async function applyThemeScheme(schemeId) {
     const scheme = themeSchemes.find(s => s.id === schemeId);
     if (!scheme) return;
     applyCustomColors(scheme.colors);
-    appData.appearance.theme = 'custom';
-    appData.appearance.customColor = scheme.colors['--accent-color'] || '#82cbb2';
     await saveData();
     showToast(`已应用方案「${scheme.name}」`);
 }
@@ -4716,8 +4721,6 @@ function resetThemeToDefault() {
         '--bubble-received-text': '#333333'
     };
     applyCustomColors(defaultColors);
-    appData.appearance.theme = 'custom';
-    appData.appearance.customColor = '#82cbb2';
     showToast('已重置为默认主题');
 }
 
@@ -4858,8 +4861,9 @@ async function loadData() {
         if (appData.settings.musicShuffle === undefined) appData.settings.musicShuffle = true;
         if (!appData.settings.musicCardPosition) appData.settings.musicCardPosition = { left: 'auto', top: '70px', right: '16px' };
         // 初始化头像设置
-        if (!appData.appearance) appData.appearance = { theme: 'custom', customColor: '#82cbb2', savedSchemes: [], backgrounds: { home: '', chat: '', group: '' }, bubble: { radius: 13, shadow: 1 }, avatarShape: 'circle', avatarSettings: { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' } };
+        if (!appData.appearance) appData.appearance = { theme: 'custom', customColor: '#82cbb2', savedSchemes: [], backgrounds: { home: '', chat: '', group: '' }, bubble: { radius: 13, shadow: 1 }, avatarShape: 'circle', avatarSettings: { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' }, customThemeColors: {} };
         else if (!appData.appearance.avatarSettings) appData.appearance.avatarSettings = { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' };
+        if (!appData.appearance.customThemeColors) appData.appearance.customThemeColors = {};
         
         appData.roles.forEach(r => { if (!r.lastAutoSendTime) r.lastAutoSendTime = Date.now(); if (!r.lastLoveRefresh) r.lastLoveRefresh = 0; if (!r.currentLoveState) r.currentLoveState = null; if (!r.onlineStatus) r.onlineStatus = { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 }; if (r.autoMailProbability === undefined) r.autoMailProbability = 15; if (r.todayMomentCount === undefined) r.todayMomentCount = 0; if (r.lastMomentDate === undefined) r.lastMomentDate = null; });
         if (!appData.transferSettings) appData.transferSettings = { enabled: true, minAmount: 5.20, maxAmount: 200, probability: 15, checkInterval: 30 };
@@ -4959,8 +4963,14 @@ async function loadData() {
     if (resetThemeBtn) resetThemeBtn.onclick = resetThemeToDefault;
     const applyThemeBtn = document.getElementById('apply-theme-btn');
     if (applyThemeBtn) applyThemeBtn.onclick = () => {
+        // 获取当前所有颜色变量并保存
+        const currentColors = getCurrentThemeColors();
+        appData.appearance.customThemeColors = currentColors;
+        appData.appearance.theme = 'custom';
+        appData.appearance.customColor = currentColors['--accent-color'] || '#82cbb2';
+        saveData();
         closeThemeEditor();
-        showToast('主题已应用');
+        showToast('主题已保存并应用');
     };
     // 挂载全局函数
     window.applyBuiltinTheme = applyBuiltinTheme;
@@ -5105,7 +5115,7 @@ async function handleMomentCoverUpload(input) {
 }
 
 async function initAppearance() {
-    if (!appData.appearance) appData.appearance = { theme: 'custom', customColor: '#82cbb2', savedSchemes: [], backgrounds: { home: '', chat: '', group: '' }, bubble: { radius: 13, shadow: 1 }, avatarShape: 'circle', avatarSettings: { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' } };
+    if (!appData.appearance) appData.appearance = { theme: 'custom', customColor: '#82cbb2', savedSchemes: [], backgrounds: { home: '', chat: '', group: '' }, bubble: { radius: 13, shadow: 1 }, avatarShape: 'circle', avatarSettings: { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' }, customThemeColors: {} };
     else { 
         if (!appData.appearance.theme) appData.appearance.theme = 'custom'; 
         if (!appData.appearance.customColor) appData.appearance.customColor = '#82cbb2'; 
@@ -5114,6 +5124,7 @@ async function initAppearance() {
         if (!appData.appearance.bubble) appData.appearance.bubble = { radius: 13, shadow: 1 }; 
         if (!appData.appearance.avatarShape) appData.appearance.avatarShape = 'circle';
         if (!appData.appearance.avatarSettings) appData.appearance.avatarSettings = { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' };
+        if (!appData.appearance.customThemeColors) appData.appearance.customThemeColors = {};
     }
     appData.appearance.backgrounds = await loadBackgrounds();
     tempAppearance = JSON.parse(JSON.stringify(appData.appearance));
@@ -5613,6 +5624,27 @@ function triggerRoleReply() {
                     debouncedSaveData(); 
                     appendMessageToDOM(currentRoleId, randomPoke, Date.now(), null, 'poke'); 
                 }, 400); 
+            }
+            // 戳一戳后15%概率主动发消息
+            if (Math.random() < 0.15) {
+                setTimeout(() => {
+                    const activeWords = getActiveWordList();
+                    if (activeWords.length > 0) {
+                        let extraContent = activeWords[Math.floor(Math.random() * activeWords.length)];
+                        let extraType = 'text';
+                        if (appData.wordbanks.stickers.length > 0 && Math.random() * 100 < (appData.settings.stickerProb || 10)) {
+                            extraType = 'image';
+                            extraContent = appData.wordbanks.stickers[Math.floor(Math.random() * appData.wordbanks.stickers.length)];
+                        } else if (Math.random() * 100 < (appData.settings.emojiProb || 20) && appData.wordbanks.emojis.length > 0) {
+                            extraContent += ' ' + appData.wordbanks.emojis[Math.floor(Math.random() * appData.wordbanks.emojis.length)];
+                        }
+                        const extraMsg = { id: Date.now() + count + 200, sender: currentRoleId, content: extraContent, time: Date.now(), type: extraType };
+                        appData.chats[currentRoleId].push(extraMsg);
+                        debouncedSaveData();
+                        appendMessageToDOM(currentRoleId, extraContent, Date.now(), null, extraType);
+                        sendNotificationIfNeeded(`${role.name} 发来消息`, extraContent);
+                    }
+                }, 1000);
             }
             if (count > 1) setTimeout(() => sendNext(count - 1), intervalMs);
         }; sendNext(msgCount);
