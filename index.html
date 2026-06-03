@@ -652,7 +652,7 @@
         /* 源码页 */
         #modal-source { z-index: 10000 !important; }
 
-        /* ========== 戳一戳设置卡片样式（重构版：可滚动 + 选项卡 + 批量添加） ========== */
+        /* ========== 戳一戳设置卡片样式（重构版：可滚动 + 选项卡 + 批量添加 + 装饰符号） ========== */
         .poke-card {
             background: white; border-radius: 24px; padding: 20px;
             max-width: 360px; width: 90%; 
@@ -683,7 +683,6 @@
             align-items: center;
             justify-content: center;
         }
-        /* 选项卡样式 */
         .poke-tabs {
             display: flex;
             border-bottom: 1px solid #e5e7eb;
@@ -759,6 +758,50 @@
             color: #4b5563;
             cursor: pointer;
         }
+        /* 戳一戳装饰符号区域 */
+        .poke-symbol-section {
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #e5e7eb;
+        }
+        .poke-symbol-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: #374151;
+        }
+        .poke-symbol-row {
+            margin-bottom: 16px;
+        }
+        .poke-symbol-row label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #4b5563;
+        }
+        .poke-symbol-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 20px;
+            font-size: 14px;
+            background: white;
+            margin-bottom: 8px;
+        }
+        .poke-symbol-custom-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 20px;
+            font-size: 14px;
+            background: #f9fafb;
+            margin-top: 6px;
+            display: none;
+        }
+        .poke-symbol-custom-input.visible {
+            display: block;
+        }
         .poke-preview {
             background: #fef3c7; border-radius: 16px; padding: 12px 16px;
             margin: 16px 0 0; color: #92400e; font-size: 14px;
@@ -789,6 +832,103 @@
             background: rgba(0,0,0,0.05); color: #6b7280;
             padding: 6px 16px; border-radius: 20px; font-size: 13px;
             max-width: 80%; text-align: center;
+        }
+
+        /* ========== 拍一拍快捷面板（新版） ========== */
+        #modal-poke-action {
+            z-index: 2000;
+        }
+        .poke-action-card {
+            background: var(--bg-secondary);
+            border-radius: 28px;
+            padding: 20px;
+            max-width: 320px;
+            width: 85%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        .poke-action-card .poke-role-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .poke-action-card .poke-role-info img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .poke-action-card .poke-role-info h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0;
+        }
+        .poke-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .poke-action-item {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 10px 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .poke-action-item:active {
+            transform: scale(0.96);
+            background: var(--accent-light);
+        }
+        .poke-custom-list {
+            margin-top: 16px;
+            text-align: left;
+        }
+        .poke-custom-list .title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+        .poke-custom-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        .poke-custom-tag {
+            background: var(--accent-light);
+            color: var(--accent-color);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .poke-custom-add {
+            width: 100%;
+            padding: 8px;
+            background: #f3f4f6;
+            border: 1px dashed #d1d5db;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #4b5563;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        .poke-action-card .poke-action-cancel {
+            margin-top: 16px;
+            background: #f3f4f6;
+            color: #4b5563;
         }
 
         /* ========== 通话功能样式 ========== */
@@ -2370,38 +2510,7 @@
         }
 
         /* ========== 新增：拍一拍居中菜单卡片 ========== */
-        #modal-poke-action {
-            z-index: 2000;
-        }
-        .poke-action-card {
-            background: var(--bg-secondary);
-            border-radius: 28px;
-            padding: 20px;
-            max-width: 320px;
-            width: 85%;
-            text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-        }
-        .poke-action-card button {
-            width: 100%;
-            padding: 14px;
-            border-radius: 40px;
-            font-size: 16px;
-            font-weight: 500;
-            background: var(--bg-primary);
-            border: none;
-            margin-bottom: 8px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .poke-action-card button:active {
-            background: var(--accent-light);
-        }
-        .poke-action-card .poke-action-cancel {
-            background: #f3f4f6;
-            color: #4b5563;
-            margin-bottom: 0;
-        }
+        /* 样式已在上方更新为新版拍一拍面板 */
 
         /* ========== 主题编辑器样式 ========== */
         .theme-editor-panel {
@@ -3091,6 +3200,19 @@
                     <div><span class="text-xs text-gray-500 block mb-1">用户评论后角色回复概率 (%)</span><input type="number" id="setting-moment-user-reply" min="0" max="100" value="65" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div>
                 </div>
             </div></div>
+            <!-- 新增：戳一戳后角色主动回复概率设置 -->
+            <div class="border-t border-gray-200 pt-4 mt-4"><h3 class="text-sm font-semibold mb-3">戳一戳交互</h3><div class="bg-gray-50 p-4 rounded-xl space-y-3">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium">启用戳一戳后角色主动回复</span>
+                    <div class="ios-switch" id="setting-poke-auto-reply-switch" onclick="toggleSwitch(this)"></div>
+                </div>
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="text-sm font-medium">主动回复概率</span>
+                    <input type="number" id="setting-poke-auto-reply-prob" min="0" max="100" value="45" class="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm">
+                    <span class="text-sm text-gray-400">%</span>
+                </div>
+                <p class="text-xs text-gray-400 mt-1">当你戳一戳角色后，角色有该概率主动发送一条消息</p>
+            </div></div>
         </div>
         <div class="flex gap-4"><button onclick="closeChatSettings()" class="flex-1 bg-gray-100 text-gray-600 p-3 rounded-xl font-bold">返回</button><button onclick="saveSettings()" class="flex-1 text-white p-3 rounded-xl font-bold shadow-lg" style="background-color: var(--button-primary-bg); color: var(--button-primary-text);">保存设置</button></div>
     </div>
@@ -3198,7 +3320,7 @@
     <div class="online-status-card"><div class="online-status-header"><span class="online-status-title">角色在线状态</span><button class="online-status-close" onclick="closeOnlineStatus()">&times;</button></div><div class="online-status-body"><div class="online-status-role-selector"><select id="online-status-role-select" class="online-status-role-select" onchange="switchOnlineStatusRole()"></select></div><div class="online-status-switch-row"><span>启用自动切换</span><div class="ios-switch" id="online-status-switch" onclick="toggleSwitch(this)"></div></div><p style="font-size:12px;color:var(--text-secondary);margin-top:-8px;margin-bottom:16px;">基于时间自动更新在线状态</p><label style="font-size:14px;font-weight:500;margin-bottom:8px;display:block;">状态列表</label><div class="online-status-list" id="online-status-list"></div><div class="online-status-add"><input type="text" id="new-online-status" placeholder="输入新状态，如：在忙"><button class="btn-primary" onclick="addOnlineStatus()" style="padding:8px 16px;">添加</button></div></div><div class="online-status-footer"><button class="btn-primary" onclick="saveOnlineStatus()" style="width:100%;">保存设置</button></div></div>
 </div>
 
-<!-- ========== 戳一戳设置卡片（重构版：选项卡 + 可滚动 + 批量添加） ========== -->
+<!-- ========== 戳一戳设置卡片（重构版：选项卡 + 可滚动 + 批量添加 + 装饰符号） ========== -->
 <div id="modal-poke-settings" class="modal-overlay hidden">
     <div class="poke-card">
         <div class="poke-card-header">
@@ -3222,6 +3344,40 @@
                 <button class="poke-add-btn" onclick="batchAddPokeItems('their')">➕ 批量添加文案</button>
             </div>
         </div>
+        <!-- 戳一戳装饰符号区域 -->
+        <div class="poke-symbol-section">
+            <div class="poke-symbol-title">🎀 戳一戳装饰符号</div>
+            <div class="poke-symbol-row">
+                <label>我发出的符号</label>
+                <select id="poke-symbol-my" class="poke-symbol-select">
+                    <option value="none">无</option>
+                    <option value="star4">✦</option>
+                    <option value="star5">✧</option>
+                    <option value="dot">·</option>
+                    <option value="wave">～</option>
+                    <option value="heart">♡</option>
+                    <option value="flower">✿</option>
+                    <option value="sparkle">✨</option>
+                    <option value="custom">自定义</option>
+                </select>
+                <input type="text" id="poke-symbol-my-custom" class="poke-symbol-custom-input" placeholder="输入1~2个字符" maxlength="2">
+            </div>
+            <div class="poke-symbol-row">
+                <label>对方发出的符号</label>
+                <select id="poke-symbol-partner" class="poke-symbol-select">
+                    <option value="none">无</option>
+                    <option value="star4">✦</option>
+                    <option value="star5">✧</option>
+                    <option value="dot">·</option>
+                    <option value="wave">～</option>
+                    <option value="heart">♡</option>
+                    <option value="flower">✿</option>
+                    <option value="sparkle">✨</option>
+                    <option value="custom">自定义</option>
+                </select>
+                <input type="text" id="poke-symbol-partner-custom" class="poke-symbol-custom-input" placeholder="输入1~2个字符" maxlength="2">
+            </div>
+        </div>
         <div class="poke-preview" id="poke-preview-text"></div>
         <div class="poke-card-actions">
             <button class="poke-btn-cancel" onclick="closePokeSettings()">取消</button>
@@ -3230,12 +3386,20 @@
     </div>
 </div>
 
-<!-- ========== 拍一拍居中菜单 ========== -->
+<!-- ========== 拍一拍快捷面板（新版：预设动作 + 自定义库） ========== -->
 <div id="modal-poke-action" class="modal-overlay hidden">
     <div class="poke-action-card">
-        <button id="poke-action-poke-btn" class="poke-action-poke">戳一戳角色</button>
-        <button id="poke-action-settings-btn" class="poke-action-settings">戳一戳设置</button>
-        <button class="poke-action-cancel" onclick="closePokeActionModal()">取消</button>
+        <div class="poke-role-info">
+            <img id="poke-quick-avatar" src="" alt="">
+            <h3 id="poke-quick-name">角色名</h3>
+        </div>
+        <div class="poke-actions-grid" id="poke-preset-actions"></div>
+        <div class="poke-custom-list">
+            <div class="title">📚 我的自定义拍一拍</div>
+            <div id="poke-custom-items" class="poke-custom-items"></div>
+            <button class="poke-custom-add" onclick="addCustomPoke()">+ 添加自定义拍一拍</button>
+        </div>
+        <button class="poke-action-cancel" onclick="closePokeActionModal()">关闭</button>
     </div>
 </div>
 
@@ -3795,8 +3959,8 @@ const DEFAULT_GROUP_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org
 // --- 默认数据结构 ---
 const DEFAULT_DATA = {
     roles: [
-        { id: '1', name: '老公', avatar: 'https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/b706d6c461e44df0b82fda4381e66f56~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947761&x-signature=WPDM%2Fe%2Bq9Ltf6sL1Rc2vcm320jw%3D', groupProb: 50, lastActive: Date.now(), lastAutoSendTime: Date.now(), lastLoveRefresh: 0, pokeMyTexts: ['哥哥，我超爱你 😍😍'], pokeTheirTexts: ['老婆，我们永远不分开 😂😂'], onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 }, autoMailProbability: 20, lastDoodleDate: null },
-        { id: '2', name: '菜🥬', avatar: 'https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/cd47e4d6c7734a9f8c189d3d6c277eb6~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947762&x-signature=a5JLFkIXlkbkhZMc%2BJ%2FUogUFVKc%3D', groupProb: 30, lastActive: Date.now() - 3600000, lastAutoSendTime: Date.now() - 3600000, lastLoveRefresh: 0, pokeMyTexts: ['贴贴 🥰'], pokeTheirTexts: ['想你啦 💕'], onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭'], currentStatus: '在线', lastUpdate: 0 }, autoMailProbability: 15, lastDoodleDate: null }
+        { id: '1', name: '老公', avatar: 'https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/b706d6c461e44df0b82fda4381e66f56~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947761&x-signature=WPDM%2Fe%2Bq9Ltf6sL1Rc2vcm320jw%3D', groupProb: 50, lastActive: Date.now(), lastAutoSendTime: Date.now(), lastLoveRefresh: 0, pokeMyTexts: ['哥哥，我超爱你 😍😍'], pokeTheirTexts: ['老婆，我们永远不分开 😂😂'], onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 }, autoMailProbability: 20, lastDoodleDate: null, customPokes: [] },
+        { id: '2', name: '菜🥬', avatar: 'https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/cd47e4d6c7734a9f8c189d3d6c277eb6~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947762&x-signature=a5JLFkIXlkbkhZMc%2BJ%2FUogUFVKc%3D', groupProb: 30, lastActive: Date.now() - 3600000, lastAutoSendTime: Date.now() - 3600000, lastLoveRefresh: 0, pokeMyTexts: ['贴贴 🥰'], pokeTheirTexts: ['想你啦 💕'], onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭'], currentStatus: '在线', lastUpdate: 0 }, autoMailProbability: 15, lastDoodleDate: null, customPokes: [] }
     ],
     groups: [],
     chats: {},
@@ -3816,7 +3980,9 @@ const DEFAULT_DATA = {
         momentCover: '',
         musicPlayerEnabled: true,
         musicShuffle: true,
-        musicCardPosition: { left: 'auto', top: '70px', right: '16px' }
+        musicCardPosition: { left: 'auto', top: '70px', right: '16px' },
+        pokeAutoReplyEnabled: true,
+        pokeAutoReplyProb: 45
     },
     wordbanks: {
         moods: ['开心', '难过', '生气', '平淡', '兴奋', '疲惫', '期待', '害羞'],
@@ -3945,7 +4111,12 @@ const DEFAULT_DATA = {
         '西安市雁塔区大唐不夜城',
         '长沙市岳麓区大学城',
         '厦门市思明区环岛路'
-    ]
+    ],
+    pokeSymbols: {
+        my: { preset: 'heart', custom: '♡' },
+        partner: { preset: 'flower', custom: '✿' }
+    },
+    customPokes: []
 };
 
 // --- 全局状态 ---
@@ -4050,6 +4221,18 @@ let wordcloudResizeObserver = null;
 // 聊天界面头像渲染辅助变量（记录上一条消息发送者）
 let lastMessageSender = null;
 
+// 符号映射
+const POKE_SYMBOL_MAP = {
+    none: '',
+    star4: '✦',
+    star5: '✧',
+    dot: '·',
+    wave: '～',
+    heart: '♡',
+    flower: '✿',
+    sparkle: '✨'
+};
+
 // --- 主题配色系统相关变量 ---
 const BUILTIN_THEMES = [
     { id: 'gold', name: '金', color: '#c5a47e', accentColor: '#c5a47e' },
@@ -4089,6 +4272,27 @@ const THEME_COLOR_MAPPINGS = {
 // 自定义主题方案存储
 let customThemes = [];
 let themeSchemes = [];
+
+// 预设拍一拍动作列表（6个）
+const PRESET_POKE_ACTIONS = [
+    '拍了拍头', '戳了戳肚子', '捏了捏脸', '摸了摸头', '弹了一下额头', '揉揉脸'
+];
+
+// ========== 辅助函数 ==========
+function formatPokeText(text, type) {
+    if (!appData.pokeSymbols) return text;
+    const config = appData.pokeSymbols[type];
+    if (!config) return text;
+    const preset = config.preset;
+    let symbol = '';
+    if (preset === 'custom') {
+        symbol = config.custom || '';
+    } else {
+        symbol = POKE_SYMBOL_MAP[preset] || '';
+    }
+    if (!symbol) return text;
+    return `${symbol} ${text} ${symbol}`;
+}
 
 // 清理所有定时器的辅助函数
 function clearAllTimers() {
@@ -4812,7 +5016,17 @@ function getActiveWordList() {
 
 async function loadData() {
     try {
-        const stored = await store.getItem('appData'); appData = stored || JSON.parse(JSON.stringify(DEFAULT_DATA));
+        const stored = await store.getItem('appData'); 
+        if (stored) {
+            appData = stored;
+            // 兼容旧数据：确保新增字段存在
+            if (!appData.pokeSymbols) appData.pokeSymbols = { my: { preset: 'heart', custom: '♡' }, partner: { preset: 'flower', custom: '✿' } };
+            if (!appData.settings.pokeAutoReplyEnabled) appData.settings.pokeAutoReplyEnabled = true;
+            if (appData.settings.pokeAutoReplyProb === undefined) appData.settings.pokeAutoReplyProb = 45;
+            appData.roles.forEach(r => { if (!r.customPokes) r.customPokes = []; });
+        } else {
+            appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+        }
         // 加载自定义主题和方案
         await loadCustomThemes();
         await loadThemeSchemes();
@@ -4835,6 +5049,7 @@ async function loadData() {
             if (!r.pokeMyTexts) r.pokeMyTexts = ['哥哥，我超爱你 😍😍'];
             if (!r.pokeTheirTexts) r.pokeTheirTexts = ['老婆，我们永远不分开 😂😂'];
             if (!r.lastDoodleDate) r.lastDoodleDate = null;
+            if (!r.customPokes) r.customPokes = [];
         });
         if (!appData.groups) appData.groups = []; appData.groups.forEach(g => { if (!g.avatar) g.avatar = DEFAULT_GROUP_AVATAR; if (!g.replyCountProb) g.replyCountProb = {}; });
         if (!appData.groupChats) appData.groupChats = {};
@@ -4860,6 +5075,8 @@ async function loadData() {
         if (appData.settings.musicPlayerEnabled === undefined) appData.settings.musicPlayerEnabled = true;
         if (appData.settings.musicShuffle === undefined) appData.settings.musicShuffle = true;
         if (!appData.settings.musicCardPosition) appData.settings.musicCardPosition = { left: 'auto', top: '70px', right: '16px' };
+        if (appData.settings.pokeAutoReplyEnabled === undefined) appData.settings.pokeAutoReplyEnabled = true;
+        if (appData.settings.pokeAutoReplyProb === undefined) appData.settings.pokeAutoReplyProb = 45;
         // 初始化头像设置
         if (!appData.appearance) appData.appearance = { theme: 'custom', customColor: '#82cbb2', savedSchemes: [], backgrounds: { home: '', chat: '', group: '' }, bubble: { radius: 13, shadow: 1 }, avatarShape: 'circle', avatarSettings: { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' }, customThemeColors: {} };
         else if (!appData.appearance.avatarSettings) appData.appearance.avatarSettings = { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' };
@@ -4884,6 +5101,7 @@ async function loadData() {
         if (!appData.momentCommentBank) appData.momentCommentBank = [...DEFAULT_DATA.momentCommentBank];
         if (!appData.musicLibrary || appData.musicLibrary.length === 0) appData.musicLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.musicLibrary));
         if (!appData.addressLibrary) appData.addressLibrary = [...DEFAULT_DATA.addressLibrary];
+        if (!appData.pokeSymbols) appData.pokeSymbols = { my: { preset: 'heart', custom: '♡' }, partner: { preset: 'flower', custom: '✿' } };
         appData.moments.forEach(m => { if (!m.commenters) m.commenters = []; });
         syncAllReplies();
     } catch (e) { appData = JSON.parse(JSON.stringify(DEFAULT_DATA)); }
@@ -4978,6 +5196,50 @@ async function loadData() {
     window.deleteThemeScheme = deleteThemeScheme;
     window.closeThemeEditor = closeThemeEditor;
     window.applyCustomColors = applyCustomColors;
+    
+    // 初始化戳一戳装饰符号UI
+    initPokeSymbolUI();
+}
+
+function initPokeSymbolUI() {
+    const mySelect = document.getElementById('poke-symbol-my');
+    const partnerSelect = document.getElementById('poke-symbol-partner');
+    const myCustom = document.getElementById('poke-symbol-my-custom');
+    const partnerCustom = document.getElementById('poke-symbol-partner-custom');
+    if (mySelect && appData.pokeSymbols) {
+        mySelect.value = appData.pokeSymbols.my.preset;
+        if (appData.pokeSymbols.my.preset === 'custom') {
+            myCustom.classList.add('visible');
+            myCustom.value = appData.pokeSymbols.my.custom;
+        } else {
+            myCustom.classList.remove('visible');
+        }
+        partnerSelect.value = appData.pokeSymbols.partner.preset;
+        if (appData.pokeSymbols.partner.preset === 'custom') {
+            partnerCustom.classList.add('visible');
+            partnerCustom.value = appData.pokeSymbols.partner.custom;
+        } else {
+            partnerCustom.classList.remove('visible');
+        }
+    }
+    if (mySelect) {
+        mySelect.onchange = () => {
+            if (mySelect.value === 'custom') {
+                myCustom.classList.add('visible');
+                myCustom.focus();
+            } else {
+                myCustom.classList.remove('visible');
+            }
+        };
+        partnerSelect.onchange = () => {
+            if (partnerSelect.value === 'custom') {
+                partnerCustom.classList.add('visible');
+                partnerCustom.focus();
+            } else {
+                partnerCustom.classList.remove('visible');
+            }
+        };
+    }
 }
 
 // 恢复音乐卡片位置
@@ -5340,7 +5602,7 @@ function createMessageElement(sender, content, time, quote = null, type = 'text'
     const avatarShapeClass = (appData.appearance.avatarShape === 'circle') ? 'rounded-full' : 'rounded-lg';
 
     if (type === 'poke') {
-        // 戳一戳消息：直接显示 content，不再添加任何前缀
+        // 戳一戳消息：显示格式化的文本（带装饰符号）
         div.className = 'poke-system-message';
         div.innerHTML = `<span>${escapeHtml(content)}</span>`;
     } else if (type === 'call' || type === 'call_missed') {
@@ -5619,32 +5881,12 @@ function triggerRoleReply() {
                 setTimeout(() => { 
                     const pokeTexts = role.pokeTheirTexts || ['拍了拍你'];
                     const randomPoke = pokeTexts[Math.floor(Math.random() * pokeTexts.length)];
-                    const pokeMsg = { id: Date.now() + count + 100, sender: currentRoleId, content: randomPoke, time: Date.now(), type: 'poke' }; 
+                    const formattedPoke = formatPokeText(randomPoke, 'partner');
+                    const pokeMsg = { id: Date.now() + count + 100, sender: currentRoleId, content: formattedPoke, time: Date.now(), type: 'poke' }; 
                     appData.chats[currentRoleId].push(pokeMsg); 
                     debouncedSaveData(); 
-                    appendMessageToDOM(currentRoleId, randomPoke, Date.now(), null, 'poke'); 
+                    appendMessageToDOM(currentRoleId, formattedPoke, Date.now(), null, 'poke'); 
                 }, 400); 
-            }
-            // 戳一戳后15%概率主动发消息
-            if (Math.random() < 0.15) {
-                setTimeout(() => {
-                    const activeWords = getActiveWordList();
-                    if (activeWords.length > 0) {
-                        let extraContent = activeWords[Math.floor(Math.random() * activeWords.length)];
-                        let extraType = 'text';
-                        if (appData.wordbanks.stickers.length > 0 && Math.random() * 100 < (appData.settings.stickerProb || 10)) {
-                            extraType = 'image';
-                            extraContent = appData.wordbanks.stickers[Math.floor(Math.random() * appData.wordbanks.stickers.length)];
-                        } else if (Math.random() * 100 < (appData.settings.emojiProb || 20) && appData.wordbanks.emojis.length > 0) {
-                            extraContent += ' ' + appData.wordbanks.emojis[Math.floor(Math.random() * appData.wordbanks.emojis.length)];
-                        }
-                        const extraMsg = { id: Date.now() + count + 200, sender: currentRoleId, content: extraContent, time: Date.now(), type: extraType };
-                        appData.chats[currentRoleId].push(extraMsg);
-                        debouncedSaveData();
-                        appendMessageToDOM(currentRoleId, extraContent, Date.now(), null, extraType);
-                        sendNotificationIfNeeded(`${role.name} 发来消息`, extraContent);
-                    }
-                }, 1000);
             }
             if (count > 1) setTimeout(() => sendNext(count - 1), intervalMs);
         }; sendNext(msgCount);
@@ -5734,6 +5976,9 @@ function openChatSettings() {
     document.getElementById('setting-moment-my-comment').value = appData.settings.moment?.myPostCommentProb ?? 45;
     document.getElementById('setting-moment-role-comment').value = appData.settings.moment?.rolePostCommentProb ?? 35;
     document.getElementById('setting-moment-user-reply').value = appData.settings.moment?.userCommentReplyProb ?? 65;
+    // 戳一戳主动回复概率设置
+    document.getElementById('setting-poke-auto-reply-switch').classList.toggle('active', appData.settings.pokeAutoReplyEnabled !== false);
+    document.getElementById('setting-poke-auto-reply-prob').value = appData.settings.pokeAutoReplyProb ?? 45;
 }
 function closeChatSettings() { document.getElementById('modal-settings-chat').classList.add('hidden'); if (pageHistory.pop() === 'settings') document.getElementById('modal-settings-main').classList.remove('hidden'); }
 function toggleSwitch(el) { el.classList.toggle('active'); }
@@ -5797,6 +6042,9 @@ async function saveSettings() {
     appData.settings.moment.myPostCommentProb = parseInt(document.getElementById('setting-moment-my-comment').value) || 45;
     appData.settings.moment.rolePostCommentProb = parseInt(document.getElementById('setting-moment-role-comment').value) || 35;
     appData.settings.moment.userCommentReplyProb = parseInt(document.getElementById('setting-moment-user-reply').value) || 65;
+    // 戳一戳主动回复概率
+    appData.settings.pokeAutoReplyEnabled = document.getElementById('setting-poke-auto-reply-switch').classList.contains('active');
+    appData.settings.pokeAutoReplyProb = parseInt(document.getElementById('setting-poke-auto-reply-prob').value) || 45;
 
     const ringtoneAudio = document.getElementById('call-ringtone');
     if (ringtoneAudio) {
@@ -5942,7 +6190,7 @@ function deleteRole(id) { showConfirm('删除角色？', async () => { appData.r
 function openCreateRole() { document.getElementById('modal-create-role').classList.remove('hidden'); document.getElementById('role-name-input').value = ''; document.getElementById('role-avatar-preview').src = DEFAULT_AVATAR; document.getElementById('role-group-prob').value = 50; document.getElementById('role-group-prob-val').textContent = '50%'; document.getElementById('role-mail-prob').value = 15; document.getElementById('role-mail-prob-val').textContent = '15%'; }
 function closeCreateRole() { document.getElementById('modal-create-role').classList.add('hidden'); }
 async function handleAvatarUpload(input) { if (input.files?.[0]) { showToast('压缩中...'); const compressed = await compressImage(input.files[0], 400, 0.7); document.getElementById('role-avatar-preview').src = compressed; } }
-async function saveRole() { const name = document.getElementById('role-name-input').value.trim(); if (!name) { showToast('请输入名称'); return; } appData.roles.push({ id: Date.now().toString(), name, avatar: document.getElementById('role-avatar-preview').src, groupProb: parseInt(document.getElementById('role-group-prob').value), autoMailProbability: parseInt(document.getElementById('role-mail-prob').value) || 15, lastActive: Date.now(), lastAutoSendTime: Date.now(), lastLoveRefresh: 0, currentLoveState: null, pokeMyTexts: ['哥哥，我超爱你 😍😍'], pokeTheirTexts: ['老婆，我们永远不分开 😂😂'], onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 }, todayMomentCount: 0, lastDoodleDate: null }); await saveData(); renderRoleList(); closeCreateRole(); showToast('创建成功'); }
+async function saveRole() { const name = document.getElementById('role-name-input').value.trim(); if (!name) { showToast('请输入名称'); return; } appData.roles.push({ id: Date.now().toString(), name, avatar: document.getElementById('role-avatar-preview').src, groupProb: parseInt(document.getElementById('role-group-prob').value), autoMailProbability: parseInt(document.getElementById('role-mail-prob').value) || 15, lastActive: Date.now(), lastAutoSendTime: Date.now(), lastLoveRefresh: 0, currentLoveState: null, pokeMyTexts: ['哥哥，我超爱你 😍😍'], pokeTheirTexts: ['老婆，我们永远不分开 😂😂'], onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 }, todayMomentCount: 0, lastDoodleDate: null, customPokes: [] }); await saveData(); renderRoleList(); closeCreateRole(); showToast('创建成功'); }
 
 function openDataManagement() { pageHistory.push('settings'); document.getElementById('modal-settings-main').classList.add('hidden'); document.getElementById('modal-settings-data').classList.remove('hidden'); updateStorageDisplay(); updateNotificationUI(); }
 function closeDataManagement() { document.getElementById('modal-settings-data').classList.add('hidden'); if (pageHistory.pop() === 'settings') document.getElementById('modal-settings-main').classList.remove('hidden'); }
@@ -5953,10 +6201,10 @@ function sendNotificationIfNeeded(title, body) { if (notificationPermissionGrant
 
 // --- 备份/恢复 ---
 function copyBackupToClipboard() { const jsonStr = JSON.stringify(appData, null, 2); navigator.clipboard.writeText(jsonStr).then(() => { showToast('备份数据已复制到剪贴板！可粘贴到备忘录保存'); }).catch(() => { showToast('复制失败，请手动选择文本复制'); }); }
-function openRestoreFromClipboardModal() { const overlay = document.createElement('div'); overlay.className = 'modal-overlay'; overlay.style.zIndex = '1200'; overlay.innerHTML = `<div class="modal-card" style="max-width:400px;width:90%;"><h3 class="text-lg font-bold mb-4">从备份恢复</h3><p class="text-xs text-gray-500 mb-2">请将之前复制的备份数据粘贴到下方文本框中，然后点击"恢复"。</p><textarea id="restore-backup-textarea" class="w-full h-40 bg-gray-100 rounded-xl p-3 text-sm outline-none resize-none" placeholder="在此粘贴备份数据..."></textarea><div class="flex gap-3 mt-4"><button id="restore-cancel-btn" class="flex-1 py-2.5 rounded-xl border border-gray-200 font-medium">取消</button><button id="restore-confirm-btn" class="flex-1 py-2.5 rounded-xl text-white font-medium shadow-lg" style="background-color: var(--button-primary-bg);">恢复</button></div></div>`; document.body.appendChild(overlay); const cancelBtn = overlay.querySelector('#restore-cancel-btn'); const confirmBtn = overlay.querySelector('#restore-confirm-btn'); const textarea = overlay.querySelector('#restore-backup-textarea'); cancelBtn.onclick = () => { document.body.removeChild(overlay); }; confirmBtn.onclick = () => { const content = textarea.value.trim(); if (!content) { showToast('请粘贴备份内容'); return; } try { const data = JSON.parse(content); if (data.roles && data.chats) { showConfirm('确定要恢复该备份吗？当前数据将被覆盖。', async () => { appData = data; if (!appData.wordbanks.wordGroups) appData.wordbanks.wordGroups = [{ name: '默认', words: [...(appData.wordbanks.replies || [])] }]; appData.wordbanks.wordGroups.forEach(g => { g.words = g.words.map(w => typeof w === 'string' ? { text: w, blocked: false } : w); }); if (!appData.favoriteMessages) appData.favoriteMessages = []; if (!appData.transferSettings) appData.transferSettings = { enabled: true, minAmount: 5.20, maxAmount: 200, probability: 15, checkInterval: 30 }; if (!appData.transferRecords) appData.transferRecords = []; if (!appData.redPackets) appData.redPackets = []; if (!appData.userProfile) appData.userProfile = { nickname: '我', avatar: DEFAULT_AVATAR }; if (!appData.balance) appData.balance = 1000000; if (!appData.moments || appData.moments.length === 0) appData.moments = JSON.parse(JSON.stringify(DEFAULT_DATA.moments)); if (!appData.momentPhotos) appData.momentPhotos = []; if (!appData.songLibrary || appData.songLibrary.length < 50) appData.songLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.songLibrary)); if (!appData.bookLibrary || appData.bookLibrary.length === 0) appData.bookLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.bookLibrary)); if (!appData.momentCommentBank) appData.momentCommentBank = [...DEFAULT_DATA.momentCommentBank]; if (!appData.musicLibrary) appData.musicLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.musicLibrary)); if (!appData.addressLibrary) appData.addressLibrary = [...DEFAULT_DATA.addressLibrary]; if (appData.settings.momentCover === undefined) appData.settings.momentCover = ''; await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('数据已恢复'); updateMusicPlayerCardVisibility(); }); } else { showToast('无效的备份数据'); } } catch (e) { showToast('数据格式错误，无法解析'); } document.body.removeChild(overlay); }; overlay.addEventListener('click', (e) => { if (e.target === overlay) { document.body.removeChild(overlay); } }); }
+function openRestoreFromClipboardModal() { const overlay = document.createElement('div'); overlay.className = 'modal-overlay'; overlay.style.zIndex = '1200'; overlay.innerHTML = `<div class="modal-card" style="max-width:400px;width:90%;"><h3 class="text-lg font-bold mb-4">从备份恢复</h3><p class="text-xs text-gray-500 mb-2">请将之前复制的备份数据粘贴到下方文本框中，然后点击"恢复"。</p><textarea id="restore-backup-textarea" class="w-full h-40 bg-gray-100 rounded-xl p-3 text-sm outline-none resize-none" placeholder="在此粘贴备份数据..."></textarea><div class="flex gap-3 mt-4"><button id="restore-cancel-btn" class="flex-1 py-2.5 rounded-xl border border-gray-200 font-medium">取消</button><button id="restore-confirm-btn" class="flex-1 py-2.5 rounded-xl text-white font-medium shadow-lg" style="background-color: var(--button-primary-bg);">恢复</button></div></div>`; document.body.appendChild(overlay); const cancelBtn = overlay.querySelector('#restore-cancel-btn'); const confirmBtn = overlay.querySelector('#restore-confirm-btn'); const textarea = overlay.querySelector('#restore-backup-textarea'); cancelBtn.onclick = () => { document.body.removeChild(overlay); }; confirmBtn.onclick = () => { const content = textarea.value.trim(); if (!content) { showToast('请粘贴备份内容'); return; } try { const data = JSON.parse(content); if (data.roles && data.chats) { showConfirm('确定要恢复该备份吗？当前数据将被覆盖。', async () => { appData = data; if (!appData.wordbanks.wordGroups) appData.wordbanks.wordGroups = [{ name: '默认', words: [...(appData.wordbanks.replies || [])] }]; appData.wordbanks.wordGroups.forEach(g => { g.words = g.words.map(w => typeof w === 'string' ? { text: w, blocked: false } : w); }); if (!appData.favoriteMessages) appData.favoriteMessages = []; if (!appData.transferSettings) appData.transferSettings = { enabled: true, minAmount: 5.20, maxAmount: 200, probability: 15, checkInterval: 30 }; if (!appData.transferRecords) appData.transferRecords = []; if (!appData.redPackets) appData.redPackets = []; if (!appData.userProfile) appData.userProfile = { nickname: '我', avatar: DEFAULT_AVATAR }; if (!appData.balance) appData.balance = 1000000; if (!appData.moments || appData.moments.length === 0) appData.moments = JSON.parse(JSON.stringify(DEFAULT_DATA.moments)); if (!appData.momentPhotos) appData.momentPhotos = []; if (!appData.songLibrary || appData.songLibrary.length < 50) appData.songLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.songLibrary)); if (!appData.bookLibrary || appData.bookLibrary.length === 0) appData.bookLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.bookLibrary)); if (!appData.momentCommentBank) appData.momentCommentBank = [...DEFAULT_DATA.momentCommentBank]; if (!appData.musicLibrary) appData.musicLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.musicLibrary)); if (!appData.addressLibrary) appData.addressLibrary = [...DEFAULT_DATA.addressLibrary]; if (appData.settings.momentCover === undefined) appData.settings.momentCover = ''; if (!appData.pokeSymbols) appData.pokeSymbols = { my: { preset: 'heart', custom: '♡' }, partner: { preset: 'flower', custom: '✿' } }; if (appData.settings.pokeAutoReplyEnabled === undefined) appData.settings.pokeAutoReplyEnabled = true; if (appData.settings.pokeAutoReplyProb === undefined) appData.settings.pokeAutoReplyProb = 45; await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('数据已恢复'); updateMusicPlayerCardVisibility(); }); } else { showToast('无效的备份数据'); } } catch (e) { showToast('数据格式错误，无法解析'); } document.body.removeChild(overlay); }; overlay.addEventListener('click', (e) => { if (e.target === overlay) { document.body.removeChild(overlay); } }); }
 
 function exportData() { const jsonStr = JSON.stringify(appData, null, 2); const blob = new Blob([jsonStr], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `spiritual_connection_${new Date().toISOString().slice(0,10)}.json`; a.click(); showToast('导出成功'); setTimeout(() => URL.revokeObjectURL(a.href), 60000); }
-function importData() { const i = document.createElement('input'); i.type = 'file'; i.accept = '.json'; i.onchange = e => { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = async ev => { try { const d = JSON.parse(ev.target.result); if (d.roles && d.chats) { showConfirm('导入将覆盖现有数据，确定？', async () => { appData = d; if (!appData.wordbanks.wordGroups) appData.wordbanks.wordGroups = [{ name: '默认', words: [...(appData.wordbanks.replies || [])] }]; appData.wordbanks.wordGroups.forEach(g => { g.words = g.words.map(w => typeof w === 'string' ? { text: w, blocked: false } : w); }); if (d.appearance?.backgrounds) await saveBackgrounds(d.appearance.backgrounds); if (!appData.favoriteMessages) appData.favoriteMessages = []; if (!appData.transferSettings) appData.transferSettings = { enabled: true, minAmount: 5.20, maxAmount: 200, probability: 15, checkInterval: 30 }; if (!appData.transferRecords) appData.transferRecords = []; if (!appData.redPackets) appData.redPackets = []; if (!appData.userProfile) appData.userProfile = { nickname: '我', avatar: DEFAULT_AVATAR }; if (!appData.balance) appData.balance = 1000000; if (!appData.moments || appData.moments.length === 0) appData.moments = JSON.parse(JSON.stringify(DEFAULT_DATA.moments)); if (!appData.momentPhotos) appData.momentPhotos = []; if (!appData.songLibrary || appData.songLibrary.length < 50) appData.songLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.songLibrary)); if (!appData.bookLibrary || appData.bookLibrary.length === 0) appData.bookLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.bookLibrary)); if (!appData.momentCommentBank) appData.momentCommentBank = [...DEFAULT_DATA.momentCommentBank]; if (!appData.musicLibrary) appData.musicLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.musicLibrary)); if (!appData.addressLibrary) appData.addressLibrary = [...DEFAULT_DATA.addressLibrary]; if (appData.settings.momentCover === undefined) appData.settings.momentCover = ''; await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('导入成功'); updateMusicPlayerCardVisibility(); }); } else showToast('无效文件'); } catch { showToast('解析失败'); } }; r.readAsText(f); }; i.click(); }
+function importData() { const i = document.createElement('input'); i.type = 'file'; i.accept = '.json'; i.onchange = e => { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = async ev => { try { const d = JSON.parse(ev.target.result); if (d.roles && d.chats) { showConfirm('导入将覆盖现有数据，确定？', async () => { appData = d; if (!appData.wordbanks.wordGroups) appData.wordbanks.wordGroups = [{ name: '默认', words: [...(appData.wordbanks.replies || [])] }]; appData.wordbanks.wordGroups.forEach(g => { g.words = g.words.map(w => typeof w === 'string' ? { text: w, blocked: false } : w); }); if (d.appearance?.backgrounds) await saveBackgrounds(d.appearance.backgrounds); if (!appData.favoriteMessages) appData.favoriteMessages = []; if (!appData.transferSettings) appData.transferSettings = { enabled: true, minAmount: 5.20, maxAmount: 200, probability: 15, checkInterval: 30 }; if (!appData.transferRecords) appData.transferRecords = []; if (!appData.redPackets) appData.redPackets = []; if (!appData.userProfile) appData.userProfile = { nickname: '我', avatar: DEFAULT_AVATAR }; if (!appData.balance) appData.balance = 1000000; if (!appData.moments || appData.moments.length === 0) appData.moments = JSON.parse(JSON.stringify(DEFAULT_DATA.moments)); if (!appData.momentPhotos) appData.momentPhotos = []; if (!appData.songLibrary || appData.songLibrary.length < 50) appData.songLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.songLibrary)); if (!appData.bookLibrary || appData.bookLibrary.length === 0) appData.bookLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.bookLibrary)); if (!appData.momentCommentBank) appData.momentCommentBank = [...DEFAULT_DATA.momentCommentBank]; if (!appData.musicLibrary) appData.musicLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.musicLibrary)); if (!appData.addressLibrary) appData.addressLibrary = [...DEFAULT_DATA.addressLibrary]; if (appData.settings.momentCover === undefined) appData.settings.momentCover = ''; if (!appData.pokeSymbols) appData.pokeSymbols = { my: { preset: 'heart', custom: '♡' }, partner: { preset: 'flower', custom: '✿' } }; if (appData.settings.pokeAutoReplyEnabled === undefined) appData.settings.pokeAutoReplyEnabled = true; if (appData.settings.pokeAutoReplyProb === undefined) appData.settings.pokeAutoReplyProb = 45; await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('导入成功'); updateMusicPlayerCardVisibility(); }); } else showToast('无效文件'); } catch { showToast('解析失败'); } }; r.readAsText(f); }; i.click(); }
 async function clearChatRecords() { showConfirm('清空所有聊天记录？', async () => { appData.chats = {}; appData.groupChats = {}; unreadCounts = {}; await saveUnreadCounts(); appData.roles.forEach(r => r.lastActive = Date.now()); await saveData(); renderRoleList(); if (currentChatType === 'role') renderChatMessages(); updateStorageDisplay(); showToast('已清空'); }); }
 async function resetAllData() { showConfirm('重置所有数据？不可恢复！', async () => { appData = JSON.parse(JSON.stringify(DEFAULT_DATA)); await saveBackgrounds({ home: '', chat: '', group: '' }); await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('已重置'); }); }
 
@@ -6685,12 +6933,93 @@ function showPokeActionModal() {
     }
     const modal = document.getElementById('modal-poke-action');
     if (!modal) return;
-    const pokeBtn = document.getElementById('poke-action-poke-btn');
-    const settingsBtn = document.getElementById('poke-action-settings-btn');
-    if (pokeBtn) pokeBtn.onclick = () => { executePoke(); closePokeActionModal(); };
-    if (settingsBtn) settingsBtn.onclick = () => { openPokeSettingsFromSheet(); closePokeActionModal(); };
+    const role = appData.roles.find(r => r.id === currentRoleId);
+    if (role) {
+        document.getElementById('poke-quick-avatar').src = role.avatar;
+        document.getElementById('poke-quick-name').textContent = role.name;
+    }
+    renderPresetPokeActions();
+    renderCustomPokeList();
     modal.classList.remove('hidden');
 }
+
+function renderPresetPokeActions() {
+    const container = document.getElementById('poke-preset-actions');
+    if (!container) return;
+    container.innerHTML = '';
+    PRESET_POKE_ACTIONS.forEach(action => {
+        const btn = document.createElement('button');
+        btn.className = 'poke-action-item';
+        btn.textContent = action;
+        btn.onclick = () => {
+            const formatted = formatPokeText(action, 'my');
+            executePokeWithText(formatted);
+            closePokeActionModal();
+        };
+        container.appendChild(btn);
+    });
+}
+
+function renderCustomPokeList() {
+    const role = appData.roles.find(r => r.id === currentRoleId);
+    if (!role) return;
+    const container = document.getElementById('poke-custom-items');
+    if (!container) return;
+    container.innerHTML = '';
+    (role.customPokes || []).forEach((text, idx) => {
+        const tag = document.createElement('span');
+        tag.className = 'poke-custom-tag';
+        tag.textContent = text;
+        tag.onclick = () => {
+            const formatted = formatPokeText(text, 'my');
+            executePokeWithText(formatted);
+            closePokeActionModal();
+        };
+        container.appendChild(tag);
+    });
+}
+
+function addCustomPoke() {
+    const role = appData.roles.find(r => r.id === currentRoleId);
+    if (!role) return;
+    const newText = prompt('请输入自定义拍一拍动作：');
+    if (newText && newText.trim()) {
+        if (!role.customPokes) role.customPokes = [];
+        role.customPokes.push(newText.trim());
+        debouncedSaveData();
+        renderCustomPokeList();
+        showToast('已添加自定义拍一拍');
+    }
+}
+
+function executePokeWithText(text) {
+    if (currentChatType !== 'role' || !currentRoleId) return;
+    const msg = { id: Date.now(), sender: 'me', content: text, time: Date.now(), type: 'poke' };
+    if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = [];
+    appData.chats[currentRoleId].push(msg);
+    debouncedSaveData();
+    appendMessageToDOM('me', text, Date.now(), null, 'poke');
+    // 戳一戳后角色主动回复（根据设置）
+    if (appData.settings.pokeAutoReplyEnabled) {
+        const prob = appData.settings.pokeAutoReplyProb || 45;
+        if (Math.random() * 100 < prob) {
+            setTimeout(() => {
+                const role = appData.roles.find(r => r.id === currentRoleId);
+                if (!role) return;
+                const allWords = getActiveWordList();
+                if (allWords.length > 0) {
+                    const replyContent = allWords[Math.floor(Math.random() * allWords.length)];
+                    const replyMsg = { id: Date.now(), sender: currentRoleId, content: replyContent, time: Date.now(), type: 'text' };
+                    appData.chats[currentRoleId].push(replyMsg);
+                    debouncedSaveData();
+                    appendMessageToDOM(currentRoleId, replyContent, Date.now(), null, 'text');
+                    sendNotificationIfNeeded(`${role.name} 发来消息`, replyContent);
+                }
+            }, 1500 + Math.random() * 2000);
+        }
+    }
+}
+
 function closePokeActionModal() {
     const modal = document.getElementById('modal-poke-action');
     if (modal) modal.classList.add('hidden');
@@ -6712,6 +7041,50 @@ function openPokeSettingsFromSheet() {
     document.getElementById('poke-role-name').textContent = role.name; 
     renderPokeLists();
     updatePokePreview(); 
+    // 初始化装饰符号UI
+    if (appData.pokeSymbols) {
+        const mySelect = document.getElementById('poke-symbol-my');
+        const partnerSelect = document.getElementById('poke-symbol-partner');
+        const myCustom = document.getElementById('poke-symbol-my-custom');
+        const partnerCustom = document.getElementById('poke-symbol-partner-custom');
+        if (mySelect) {
+            mySelect.value = appData.pokeSymbols.my.preset;
+            if (appData.pokeSymbols.my.preset === 'custom') {
+                myCustom.classList.add('visible');
+                myCustom.value = appData.pokeSymbols.my.custom;
+            } else {
+                myCustom.classList.remove('visible');
+            }
+            partnerSelect.value = appData.pokeSymbols.partner.preset;
+            if (appData.pokeSymbols.partner.preset === 'custom') {
+                partnerCustom.classList.add('visible');
+                partnerCustom.value = appData.pokeSymbols.partner.custom;
+            } else {
+                partnerCustom.classList.remove('visible');
+            }
+            // 绑定事件
+            mySelect.onchange = () => {
+                if (mySelect.value === 'custom') {
+                    myCustom.classList.add('visible');
+                    myCustom.focus();
+                } else {
+                    myCustom.classList.remove('visible');
+                }
+                updatePokePreview();
+            };
+            partnerSelect.onchange = () => {
+                if (partnerSelect.value === 'custom') {
+                    partnerCustom.classList.add('visible');
+                    partnerCustom.focus();
+                } else {
+                    partnerCustom.classList.remove('visible');
+                }
+                updatePokePreview();
+            };
+            myCustom.oninput = () => { updatePokePreview(); };
+            partnerCustom.oninput = () => { updatePokePreview(); };
+        }
+    }
     const myAddBtn = document.getElementById('poke-my-add-btn');
     const theirAddBtn = document.getElementById('poke-their-add-btn');
     if (myAddBtn) myAddBtn.onclick = () => batchAddPokeItems('my');
@@ -6813,8 +7186,37 @@ function removePokeItem(type, index) {
 }
 function updatePokePreview() {
     const roleName = document.getElementById('poke-role-name').textContent || '角色';
-    const myPreview = tempPokeMyTexts.length ? tempPokeMyTexts.map(t => `我拍了拍"${roleName}"：${t}`).join('<br>') : '';
-    const theirPreview = tempPokeTheirTexts.length ? tempPokeTheirTexts.map(t => `${roleName}拍了拍你：${t}`).join('<br>') : '';
+    // 获取当前装饰符号
+    const mySelect = document.getElementById('poke-symbol-my');
+    const partnerSelect = document.getElementById('poke-symbol-partner');
+    const myCustom = document.getElementById('poke-symbol-my-custom');
+    const partnerCustom = document.getElementById('poke-symbol-partner-custom');
+    let mySymbol = '';
+    let partnerSymbol = '';
+    if (mySelect) {
+        const myPreset = mySelect.value;
+        if (myPreset === 'custom') {
+            mySymbol = myCustom.value || '';
+        } else {
+            mySymbol = POKE_SYMBOL_MAP[myPreset] || '';
+        }
+    }
+    if (partnerSelect) {
+        const partnerPreset = partnerSelect.value;
+        if (partnerPreset === 'custom') {
+            partnerSymbol = partnerCustom.value || '';
+        } else {
+            partnerSymbol = POKE_SYMBOL_MAP[partnerPreset] || '';
+        }
+    }
+    const myPreview = tempPokeMyTexts.length ? tempPokeMyTexts.map(t => {
+        const formatted = mySymbol ? `${mySymbol} ${t} ${mySymbol}` : t;
+        return `我拍了拍"${roleName}"：${formatted}`;
+    }).join('<br>') : '';
+    const theirPreview = tempPokeTheirTexts.length ? tempPokeTheirTexts.map(t => {
+        const formatted = partnerSymbol ? `${partnerSymbol} ${t} ${partnerSymbol}` : t;
+        return `${roleName}拍了拍你：${formatted}`;
+    }).join('<br>') : '';
     document.getElementById('poke-preview-text').innerHTML = (myPreview ? myPreview + '<br>' : '') + theirPreview;
 }
 function closePokeSettings() {
@@ -6827,6 +7229,18 @@ async function savePokeSettings() {
     if (!role) return;
     role.pokeMyTexts = [...tempPokeMyTexts];
     role.pokeTheirTexts = [...tempPokeTheirTexts];
+    // 保存装饰符号配置
+    const mySelect = document.getElementById('poke-symbol-my');
+    const partnerSelect = document.getElementById('poke-symbol-partner');
+    const myCustom = document.getElementById('poke-symbol-my-custom');
+    const partnerCustom = document.getElementById('poke-symbol-partner-custom');
+    if (mySelect && partnerSelect) {
+        if (!appData.pokeSymbols) appData.pokeSymbols = { my: {}, partner: {} };
+        appData.pokeSymbols.my.preset = mySelect.value;
+        appData.pokeSymbols.partner.preset = partnerSelect.value;
+        if (mySelect.value === 'custom') appData.pokeSymbols.my.custom = myCustom.value || '';
+        if (partnerSelect.value === 'custom') appData.pokeSymbols.partner.custom = partnerCustom.value || '';
+    }
     await saveData();
     closePokeSettings();
     showToast('戳一戳设置已保存');
@@ -6837,11 +7251,29 @@ function executePoke() {
     if (!role) return;
     const texts = role.pokeMyTexts || ['哥哥，我超爱你 😍😍'];
     const randomPoke = texts[Math.floor(Math.random() * texts.length)];
-    const msg = { id: Date.now(), sender: 'me', content: randomPoke, time: Date.now(), type: 'poke' };
+    const formatted = formatPokeText(randomPoke, 'my');
+    const msg = { id: Date.now(), sender: 'me', content: formatted, time: Date.now(), type: 'poke' };
     if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = [];
     appData.chats[currentRoleId].push(msg);
     debouncedSaveData();
-    appendMessageToDOM('me', randomPoke, Date.now(), null, 'poke');
+    appendMessageToDOM('me', formatted, Date.now(), null, 'poke');
+    // 戳一戳后角色主动回复（根据设置）
+    if (appData.settings.pokeAutoReplyEnabled) {
+        const prob = appData.settings.pokeAutoReplyProb || 45;
+        if (Math.random() * 100 < prob) {
+            setTimeout(() => {
+                const allWords = getActiveWordList();
+                if (allWords.length > 0) {
+                    const replyContent = allWords[Math.floor(Math.random() * allWords.length)];
+                    const replyMsg = { id: Date.now(), sender: currentRoleId, content: replyContent, time: Date.now(), type: 'text' };
+                    appData.chats[currentRoleId].push(replyMsg);
+                    debouncedSaveData();
+                    appendMessageToDOM(currentRoleId, replyContent, Date.now(), null, 'text');
+                    sendNotificationIfNeeded(`${role.name} 发来消息`, replyContent);
+                }
+            }, 1500 + Math.random() * 2000);
+        }
+    }
 }
 
 // 通话功能（保持原样）
