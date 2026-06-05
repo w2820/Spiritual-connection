@@ -47,6 +47,7 @@
             --accent-secondary: #f8e6e9;
             --bg-primary: #f5f5f5;
             --bg-secondary: #ffffff;
+            --bg-secondary-rgb: 255, 255, 255;
             --text-primary: #333333;
             --text-secondary: #888888;
             --border-color: #e0e0e0;
@@ -423,52 +424,129 @@
         .progress-bar::after { content: ''; position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 9px; height: 9px; background: #fff; border-radius: 50%; box-shadow: 0 0 5px rgba(100, 180, 140, 0.7); }
         .status-text { font-size: 0.8rem; color: #64b48c; opacity: 0.85; }
 
-        /* ========== 主界面音乐卡片（悬浮可拖动） ========== */
+        /* ========== 音乐卡片（悬浮可拖动，新样式 - 带进度条，修复拉伸和主题跟随） ========== */
         #music-player-card {
-            display: none;
-            align-items: center;
-            gap: 10px;
-            position: fixed;
-            top: 70px;
-            right: 16px;
-            z-index: 50;
-            padding: 10px 14px;
-            border-radius: 16px;
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            border: 1px solid rgba(255,255,255,0.6);
-            font-size: 13px;
-            cursor: grab;
-            touch-action: none;
-        }
-        #music-player-card:active {
-            cursor: grabbing;
-        }
-        #music-player-card .music-card-cover {
-            width: 40px; height: 40px;
-            border-radius: 8px;
-            background: linear-gradient(135deg, var(--accent-color), #f59e0b);
-            display: flex; align-items: center; justify-content: center;
-            color: #fff; font-size: 18px;
-            flex-shrink: 0;
-        }
-        #music-player-card .music-card-info {
-            flex: 1; min-width: 0;
-        }
-        #music-player-card .music-card-title {
-            font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        #music-player-card .music-card-artist {
-            font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        #music-player-card .music-card-controls {
-            display: flex; gap: 6px; align-items: center;
-        }
-        #music-player-card .music-card-btn {
-            background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-primary); padding: 4px;
-        }
+    display: none;
+    flex-direction: column;
+    position: fixed;
+    top: 70px;
+    right: 16px;
+    z-index: 50;
+    width: 260px;
+    min-width: 260px;
+    max-width: 260px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border-radius: 20px;
+    background: var(--bg-secondary);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    background-color: rgba(var(--bg-secondary-rgb), 0.85);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: 1px solid var(--border-color);
+    cursor: grab;
+    touch-action: none;
+    transition: box-shadow 0.2s;
+    will-change: transform;
+    overflow: hidden;
+}
+#music-player-card.dragging {
+    transition: none !important;
+    cursor: grabbing;
+}
+#music-player-card:active {
+    cursor: grabbing;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.music-card-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+.music-card-cover {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-color), #f59e0b);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+.music-card-info {
+    flex: 1;
+    min-width: 0;
+}
+.music-card-title {
+    font-weight: 600;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-primary);
+}
+.music-card-artist {
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-secondary);
+}
+.music-card-progress-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0;
+}
+.music-card-progress-bar {
+    flex: 1;
+    height: 2px;
+    background: var(--border-color);
+    border-radius: 2px;
+    cursor: pointer;
+    position: relative;
+}
+.music-card-progress-fill {
+    width: 0%;
+    height: 100%;
+    background: var(--accent-color);
+    border-radius: 2px;
+}
+.music-card-time {
+    font-size: 10px;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+    min-width: 70px;
+    text-align: right;
+}
+.music-card-controls {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 6px;
+}
+.music-card-btn {
+    background: var(--accent-light);
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: var(--accent-color);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+}
+.music-card-btn:active {
+    background: var(--accent-color);
+    color: white;
+}
 
         /* 悬浮音乐播放器 (左下角) - 已废弃，永久隐藏 */
         .music-player {
@@ -834,7 +912,7 @@
             max-width: 80%; text-align: center;
         }
 
-        /* ========== 拍一拍快捷面板（新版） ========== */
+        /* ========== 拍一拍快捷面板（新版：上下单列滑动，整合装饰符号Tab，固定高度滚动） ========== */
         #modal-poke-action {
             z-index: 2000;
         }
@@ -842,18 +920,18 @@
             background: var(--bg-secondary);
             border-radius: 28px;
             padding: 20px;
-            max-width: 320px;
-            width: 85%;
-            text-align: center;
+            max-width: 400px;
+            width: 90%;
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            max-height: 85vh;
-            overflow-y: auto;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
         }
         .poke-action-card .poke-role-info {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             padding-bottom: 12px;
             border-bottom: 1px solid var(--border-color);
         }
@@ -868,67 +946,227 @@
             font-weight: 700;
             margin: 0;
         }
-        .poke-actions-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
+        /* 拍一拍内容的 Tab 栏 */
+        .poke-tab-bar {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 16px;
+        }
+        .poke-tab {
+            flex: 1;
+            padding: 8px 0;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .poke-tab.active {
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--accent-color);
+        }
+        /* 内容区域（滚动） */
+        .poke-tab-content {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 300px;
+            max-height: 50vh;
+        }
+        /* 拍一拍动作列表（可编辑删除） */
+        .poke-actions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .poke-actions-header .title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .edit-mode-btn {
+            background: var(--accent-light);
+            color: var(--accent-color);
+            border: none;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .edit-mode-btn.active {
+            background: var(--accent-color);
+            color: white;
+        }
+        .poke-actions-scroll {
+            max-height: 280px;
+            overflow-y: auto;
+            margin-bottom: 12px;
         }
         .poke-action-item {
             background: var(--bg-primary);
             border: 1px solid var(--border-color);
             border-radius: 20px;
-            padding: 10px 8px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .poke-action-item:active {
-            transform: scale(0.96);
+            transform: scale(0.98);
             background: var(--accent-light);
         }
-        .poke-custom-list {
-            margin-top: 16px;
-            text-align: left;
-        }
-        .poke-custom-list .title {
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text-secondary);
-        }
-        .poke-custom-items {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 12px;
-            max-height: 120px;
-            overflow-y: auto;
-        }
-        .poke-custom-tag {
-            background: var(--accent-light);
-            color: var(--accent-color);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
+        .poke-action-item .delete-poke {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            font-size: 16px;
             cursor: pointer;
+            padding: 0 4px;
+            display: none;
+        }
+        .poke-action-item.edit-mode .delete-poke {
+            display: inline-block;
         }
         .poke-custom-add {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
             background: #f3f4f6;
             border: 1px dashed #d1d5db;
-            border-radius: 20px;
+            border-radius: 24px;
             font-size: 13px;
             color: #4b5563;
             cursor: pointer;
-            margin-top: 8px;
+            margin-top: 4px;
         }
-        .poke-action-card .poke-action-cancel {
+        /* 装饰符号 Tab 样式（紧凑表格） */
+        .symbol-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .symbol-table th, .symbol-table td {
+            padding: 8px 4px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .symbol-table th {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        .symbol-emoji {
+            font-size: 22px;
+        }
+        .symbol-name {
+            font-size: 13px;
+        }
+        .symbol-radio {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            background: transparent;
+            cursor: pointer;
+            margin: 0 auto;
+        }
+        .symbol-radio.active {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+        .delete-custom-symbol {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .add-symbol-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+        .add-symbol-row input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            background: var(--bg-primary);
+            outline: none;
+            font-size: 14px;
+            text-align: center;
+        }
+        .add-symbol-row button {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 0 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .poke-action-cancel {
             margin-top: 16px;
             background: #f3f4f6;
             color: #4b5563;
+            border: none;
+            border-radius: 28px;
+            padding: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 自定义拍一拍添加弹窗（图二样式） */
+        .custom-poke-modal {
+            background: var(--bg-secondary);
+            border-radius: 24px;
+            padding: 24px 20px;
+            max-width: 320px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        .custom-poke-modal input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 15px;
+            margin-bottom: 20px;
+            background: var(--bg-primary);
+            outline: none;
+        }
+        .custom-poke-modal .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .custom-poke-modal button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 30px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+        .custom-poke-modal .btn-save {
+            background: var(--accent-color);
+            color: white;
+        }
+        .custom-poke-modal .btn-cancel {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+        .custom-poke-modal .btn-save-secondary {
+            background: #f0f0f0;
+            color: #333;
         }
 
         /* ========== 通话功能样式 ========== */
@@ -2509,9 +2747,6 @@
             color: white;
         }
 
-        /* ========== 新增：拍一拍居中菜单卡片 ========== */
-        /* 样式已在上方更新为新版拍一拍面板 */
-
         /* ========== 主题编辑器样式 ========== */
         .theme-editor-panel {
             max-height: 70vh;
@@ -2635,10 +2870,18 @@
     </header>
     <!-- 主界面音乐卡片（悬浮层，由 JS 控制显隐和拖动） -->
     <div id="music-player-card">
-        <div class="music-card-cover" id="music-card-cover">🎵</div>
-        <div class="music-card-info">
-            <div class="music-card-title" id="music-card-title">未选择</div>
-            <div class="music-card-artist" id="music-card-artist">点击下方音乐库</div>
+        <div class="music-card-row">
+            <div class="music-card-cover" id="music-card-cover">🎵</div>
+            <div class="music-card-info">
+                <div class="music-card-title" id="music-card-title">未选择</div>
+                <div class="music-card-artist" id="music-card-artist">点击下方音乐库</div>
+            </div>
+        </div>
+        <div class="music-card-progress-container">
+            <div class="music-card-progress-bar" id="music-progress-bar">
+                <div class="music-card-progress-fill" id="music-progress-fill"></div>
+            </div>
+            <div class="music-card-time" id="music-time-display">0:00 / 0:00</div>
         </div>
         <div class="music-card-controls">
             <button class="music-card-btn" id="music-card-prev" onclick="prevMusic(); event.stopPropagation();">⏮️</button>
@@ -3068,7 +3311,7 @@
         <div class="grid grid-cols-1 gap-4 mb-8">
             <button onclick="openWordCardLibrary()" class="bg-gray-50 p-4 rounded-2xl flex items-center gap-4 text-left"><div class="w-12 h-12 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="align-left" class="w-6 h-6"></i></div><div><h3 class="font-bold">字卡词库</h3><p class="text-xs text-gray-500">管理文本回复词条，支持查重、分组</p></div><i data-lucide="chevron-right" class="w-5 h-5 text-gray-400 ml-auto"></i></button>
             <button onclick="openEmojiLibrary()" class="bg-gray-50 p-4 rounded-2xl flex items-center gap-4 text-left"><div class="w-12 h-12 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="smile" class="w-6 h-6"></i></div><div><h3 class="font-bold">Emoji 表情包库</h3><p class="text-xs text-gray-500">添加和管理常用 Emoji 表情</p></div><i data-lucide="chevron-right" class="w-5 h-5 text-gray-400 ml-auto"></i></button>
-            <button onclick="openStickerLibrary()" class="bg-gray-50 p-4 rounded-2xl flex items-center gap-4 text-left"><div class="w-12 h-12 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="image" class="w-6 h-6"></i></div><div><h3 class="font-bold">图片表情包库</h3><p class="text-xs text-gray-500">上传本地图片作为表情包</p></div><i data-lucide="chevron-right" class="w-5 h-5 text-gray-400 ml-auto"></i></button>
+            <button onclick="openStickerLibrary()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-4 text-left"><div class="w-12 h-12 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="image" class="w-6 h-6"></i></div><div><h3 class="font-bold">图片表情包库</h3><p class="text-xs text-gray-500">上传本地图片作为表情包</p></div><i data-lucide="chevron-right" class="w-5 h-5 text-gray-400 ml-auto"></i></button>
         </div>
         <button onclick="closeContentLibrary()" class="w-full bg-gray-100 text-gray-600 p-3 rounded-xl font-bold">返回</button>
     </div>
@@ -3268,7 +3511,7 @@
 
 <!-- 🥰面板 -->
 <div id="modal-love-panel" class="modal-overlay hidden">
-    <div class="love-card"><div class="love-header"><div class="shimmer-overlay"></div><div class="season-box"><span class="season-emoji" id="season-emoji">🌸</span></div><div class="festival-eng" id="love-header-eng">GOOD EVENING</div><div class="festival-cn" id="love-header-cn">今天也要开心哦</div><div class="date-big" id="love-header-date">2026年4月21日</div></div><div class="love-body"><div class="love-mood-row"><span class="love-mood-icon" id="love-mood-emoji">😊</span><span class="love-mood-text" id="love-mood-name">害羞</span></div><div class="love-quote-list" id="love-quote-list"></div><div class="love-info-grid"><div class="love-info-card"><div class="love-info-label">老公的天气</div><div class="love-info-value" id="love-weather">阴雨绵绵</div></div><div class="love-info-card"><div class="love-info-label">老公的状态</div><div class="love-info-value" id="love-status">难过</div></div></div><div class="love-footer-quote" id="love-footer-quote">谷雨生百谷，你是我生命里最饱满的那颗。</div><button class="love-btn" onclick="toggleLovePanel()"><span>知道了，开始今天</span><div class="shimmer-overlay"></div></button></div></div>
+    <div class="love-card"><div class="love-header"><div class="shimmer-overlay"></div><div class="season-box"><span class="season-emoji" id="season-emoji">🌸</span></div><div class="festival-eng" id="love-header-eng">GOOD EVENING</div><div class="festival-cn" id="love-header-cn">今天也要开心哦</div><div class="date-big" id="love-header-date">2026年4月21日</div></div><div class="love-body"><div class="love-mood-row"><span class="love-mood-emoji" id="love-mood-emoji">😊</span><span class="love-mood-text" id="love-mood-name">害羞</span></div><div class="love-quote-list" id="love-quote-list"></div><div class="love-info-grid"><div class="love-info-card"><div class="love-info-label">老公的天气</div><div class="love-info-value" id="love-weather">阴雨绵绵</div></div><div class="love-info-card"><div class="love-info-label">老公的状态</div><div class="love-info-value" id="love-status">难过</div></div></div><div class="love-footer-quote" id="love-footer-quote">谷雨生百谷，你是我生命里最饱满的那颗。</div><button class="love-btn" onclick="toggleLovePanel()"><span>知道了，开始今天</span><div class="shimmer-overlay"></div></button></div></div>
 </div>
 
 <!-- 源码查看 -->
@@ -3386,20 +3629,65 @@
     </div>
 </div>
 
-<!-- ========== 拍一拍快捷面板（新版：预设动作 + 自定义库） ========== -->
+<!-- ========== 拍一拍快捷面板（新版：上下单列滑动，整合装饰符号Tab，固定高度滚动） ========== -->
 <div id="modal-poke-action" class="modal-overlay hidden">
     <div class="poke-action-card">
         <div class="poke-role-info">
             <img id="poke-quick-avatar" src="" alt="">
             <h3 id="poke-quick-name">角色名</h3>
         </div>
-        <div class="poke-actions-grid" id="poke-preset-actions"></div>
-        <div class="poke-custom-list">
-            <div class="title">📚 我的自定义拍一拍</div>
-            <div id="poke-custom-items" class="poke-custom-items"></div>
-            <button class="poke-custom-add" onclick="addCustomPoke()">+ 添加自定义拍一拍</button>
+        <!-- Tab 栏 -->
+        <div class="poke-tab-bar">
+            <div class="poke-tab active" data-tab="poke">拍一拍</div>
+            <div class="poke-tab" data-tab="symbol">戳一戳装饰符号</div>
+        </div>
+        <!-- 拍一拍 Tab 内容 -->
+        <div id="poke-tab-content" class="poke-tab-content">
+            <div id="poke-actions-content">
+                <div class="poke-actions-header">
+                    <span class="title">📌 快捷动作</span>
+                    <button id="poke-edit-mode-btn" class="edit-mode-btn">编辑模式</button>
+                </div>
+                <div class="poke-actions-scroll" id="poke-actions-list-container"></div>
+                <button class="poke-custom-add" id="show-custom-poke-btn">+ 添加自定义拍一拍</button>
+            </div>
+        </div>
+        <!-- 装饰符号 Tab 内容（初始隐藏） -->
+        <div id="symbol-tab-content" class="poke-tab-content" style="display: none;">
+            <table class="symbol-table">
+                <thead>
+                <tr>
+                    <th>符号</th>
+                    <th>类型</th>
+                    <th>我</th>
+                    <th>对方</th>
+                    <th></th>
+                 </tr>
+                </thead>
+                <tbody id="symbol-list-body">
+                    <!-- 动态生成 -->
+                </tbody>
+            </table>
+            <div class="add-symbol-row">
+                <input type="text" id="new-symbol-input" placeholder="自定义符号 (1~2字符)" maxlength="2">
+                <button id="add-custom-symbol-btn">添加</button>
+            </div>
         </div>
         <button class="poke-action-cancel" onclick="closePokeActionModal()">关闭</button>
+    </div>
+</div>
+
+<!-- 自定义拍一拍添加弹窗（图二样式） -->
+<div id="modal-custom-poke" class="modal-overlay hidden" style="z-index: 2100;">
+    <div class="custom-poke-modal">
+        <input type="text" id="custom-poke-input" placeholder="例如：拍了拍“老公”的肩膀" maxlength="30" autofocus>
+        <div class="button-group">
+            <button class="btn-cancel" onclick="closeCustomPokeModal()">取消</button>
+            <button class="btn-save" onclick="addCustomPokeAndSend()">发送</button>
+        </div>
+        <div class="button-group" style="margin-top: 8px;">
+            <button class="btn-save-secondary" onclick="saveToLibraryAndClose()">保存到拍一拍库</button>
+        </div>
     </div>
 </div>
 
@@ -3940,6 +4228,7 @@
     </div>
 </div>
 
+
 <script>
 
 // 初始化图标
@@ -4114,7 +4403,8 @@ const DEFAULT_DATA = {
     ],
     pokeSymbols: {
         my: { preset: 'heart', custom: '♡' },
-        partner: { preset: 'flower', custom: '✿' }
+        partner: { preset: 'flower', custom: '✿' },
+        customSymbols: []
     },
     customPokes: []
 };
@@ -4220,6 +4510,9 @@ let wordcloudResizeObserver = null;
 
 // 聊天界面头像渲染辅助变量（记录上一条消息发送者）
 let lastMessageSender = null;
+
+// 拍一拍编辑模式标志
+let pokeEditMode = false;
 
 // 符号映射
 const POKE_SYMBOL_MAP = {
@@ -4641,13 +4934,25 @@ async function saveData() {
         // 保存自定义主题和方案
         await store.setItem('customThemes', customThemes);
         await store.setItem('themeSchemes', themeSchemes);
+        // 额外备份主题到 localStorage（防止 IndexedDB 丢失）
+        try {
+            localStorage.setItem('spiritual_theme_backup', JSON.stringify({
+                customThemeColors: appData.appearance.customThemeColors,
+                theme: appData.appearance.theme,
+                customColor: appData.appearance.customColor,
+                backgrounds: appData.appearance.backgrounds,
+                bubble: appData.appearance.bubble,
+                avatarShape: appData.appearance.avatarShape,
+                avatarSettings: appData.appearance.avatarSettings
+            }));
+        } catch(e) {}
         if (document.getElementById('modal-settings-data') && !document.getElementById('modal-settings-data').classList.contains('hidden')) updateStorageDisplay();
     } catch (e) { showToast('保存失败，请清理数据'); }
 }
 const debouncedSaveData = debounce(saveData, 800);
 function debounce(fn, delay) { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); }; }
 
-// --- 主题配色系统函数 ---
+// --- 主题配色系统函数（增强持久化）---
 async function loadCustomThemes() {
     try {
         const stored = await store.getItem('customThemes');
@@ -4661,7 +4966,58 @@ async function loadThemeSchemes() {
     } catch(e) { themeSchemes = []; }
 }
 
-// 应用内置主题
+// 强制恢复主题（在 loadData 结束时调用，并在每次主题切换后重新设置 bg-secondary-rgb）
+function forceApplyTheme() {
+    const colors = appData.appearance?.customThemeColors;
+    if (colors && Object.keys(colors).length > 0) {
+        applyCustomColors(colors);
+    } else {
+        const themeId = appData.appearance?.theme;
+        if (themeId && themeId !== 'custom') {
+            applyBuiltinTheme(themeId);
+        } else {
+            // 尝试从 localStorage 恢复
+            const backup = localStorage.getItem('spiritual_theme_backup');
+            if (backup) {
+                try {
+                    const { customThemeColors, theme, customColor } = JSON.parse(backup);
+                    if (customThemeColors && Object.keys(customThemeColors).length > 0) {
+                        applyCustomColors(customThemeColors);
+                        return;
+                    }
+                    if (theme && theme !== 'custom') {
+                        applyBuiltinTheme(theme);
+                        return;
+                    }
+                } catch(e) {}
+            }
+            // 默认主题
+            applyBuiltinTheme('green');
+        }
+    }
+    // 确保背景色 RGB 变量被正确设置（用于音乐卡片）
+    updateBgSecondaryRgb();
+}
+
+// 根据当前 bg-secondary 更新 rgb 变量
+function updateBgSecondaryRgb() {
+    const root = document.documentElement;
+    const bgSecondary = getComputedStyle(root).getPropertyValue('--bg-secondary').trim();
+    if (bgSecondary) {
+        let rgb;
+        if (bgSecondary.startsWith('#')) {
+            rgb = hexToRgb(bgSecondary);
+        } else if (bgSecondary.startsWith('rgb')) {
+            const match = bgSecondary.match(/\d+/g);
+            if (match && match.length >= 3) rgb = [parseInt(match[0]), parseInt(match[1]), parseInt(match[2])];
+        }
+        if (rgb) {
+            root.style.setProperty('--bg-secondary-rgb', rgb.join(','));
+        }
+    }
+}
+
+// 应用内置主题（修复持久化）
 function applyBuiltinTheme(themeId) {
     const theme = BUILTIN_THEMES.find(t => t.id === themeId);
     if (!theme) return;
@@ -4678,13 +5034,17 @@ function applyBuiltinTheme(themeId) {
         if (variable === '--accent-color') continue;
         root.style.removeProperty(variable);
     }
+    // 恢复 bg-secondary 默认值
+    root.style.setProperty('--bg-secondary', '#ffffff');
+    root.style.setProperty('--bg-secondary-rgb', '255,255,255');
     
-    // 更新设置
+    // 更新设置并保存
     appData.appearance.theme = themeId;
     appData.appearance.customColor = theme.accentColor;
     // 清空自定义颜色集，确保使用内置主题
     appData.appearance.customThemeColors = {};
     debouncedSaveData();
+    updateBgSecondaryRgb();
     showToast(`已应用「${theme.name}」主题`);
 }
 
@@ -4708,6 +5068,7 @@ function applyCustomColors(colors) {
     appData.appearance.theme = 'custom';
     appData.appearance.customColor = colors['--accent-color'] || '#82cbb2';
     debouncedSaveData();
+    updateBgSecondaryRgb();
 }
 
 // 获取当前所有主题颜色变量
@@ -4880,6 +5241,9 @@ window.updateThemeColorFromEditor = function(variable, value) {
         document.documentElement.style.setProperty('--tab-active-border', value);
         document.documentElement.style.setProperty('--accent-light', hexToRgba(value, 0.1));
     }
+    if (variable === '--bg-secondary') {
+        updateBgSecondaryRgb();
+    }
     // 更新显示值
     const displaySpan = document.getElementById(`value-${variable.replace(/--/g, '')}`);
     if (displaySpan) displaySpan.textContent = value;
@@ -5020,12 +5384,29 @@ async function loadData() {
         if (stored) {
             appData = stored;
             // 兼容旧数据：确保新增字段存在
-            if (!appData.pokeSymbols) appData.pokeSymbols = { my: { preset: 'heart', custom: '♡' }, partner: { preset: 'flower', custom: '✿' } };
+            if (!appData.pokeSymbols) appData.pokeSymbols = { my: { preset: 'heart', custom: '♡' }, partner: { preset: 'flower', custom: '✿' }, customSymbols: [] };
+            if (!appData.pokeSymbols.customSymbols) appData.pokeSymbols.customSymbols = [];
             if (!appData.settings.pokeAutoReplyEnabled) appData.settings.pokeAutoReplyEnabled = true;
             if (appData.settings.pokeAutoReplyProb === undefined) appData.settings.pokeAutoReplyProb = 45;
             appData.roles.forEach(r => { if (!r.customPokes) r.customPokes = []; });
         } else {
             appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+        }
+        // 尝试从 localStorage 恢复主题备份（如果 IndexedDB 中的主题数据不完整）
+        if ((!appData.appearance || !appData.appearance.customThemeColors || Object.keys(appData.appearance.customThemeColors).length === 0) && localStorage.getItem('spiritual_theme_backup')) {
+            try {
+                const backup = JSON.parse(localStorage.getItem('spiritual_theme_backup'));
+                if (backup && backup.customThemeColors) {
+                    appData.appearance = appData.appearance || {};
+                    appData.appearance.customThemeColors = backup.customThemeColors;
+                    appData.appearance.theme = backup.theme || 'custom';
+                    appData.appearance.customColor = backup.customColor || '#82cbb2';
+                    appData.appearance.backgrounds = backup.backgrounds || { home: '', chat: '', group: '' };
+                    appData.appearance.bubble = backup.bubble || { radius: 13, shadow: 1 };
+                    appData.appearance.avatarShape = backup.avatarShape || 'circle';
+                    appData.appearance.avatarSettings = backup.avatarSettings || { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' };
+                }
+            } catch(e) {}
         }
         // 加载自定义主题和方案
         await loadCustomThemes();
@@ -5050,6 +5431,10 @@ async function loadData() {
             if (!r.pokeTheirTexts) r.pokeTheirTexts = ['老婆，我们永远不分开 😂😂'];
             if (!r.lastDoodleDate) r.lastDoodleDate = null;
             if (!r.customPokes) r.customPokes = [];
+            // 初始化为默认动作数组
+            if (!r.pokeActions || r.pokeActions.length === 0) {
+                r.pokeActions = [...PRESET_POKE_ACTIONS];
+            }
         });
         if (!appData.groups) appData.groups = []; appData.groups.forEach(g => { if (!g.avatar) g.avatar = DEFAULT_GROUP_AVATAR; if (!g.replyCountProb) g.replyCountProb = {}; });
         if (!appData.groupChats) appData.groupChats = {};
@@ -5101,7 +5486,7 @@ async function loadData() {
         if (!appData.momentCommentBank) appData.momentCommentBank = [...DEFAULT_DATA.momentCommentBank];
         if (!appData.musicLibrary || appData.musicLibrary.length === 0) appData.musicLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.musicLibrary));
         if (!appData.addressLibrary) appData.addressLibrary = [...DEFAULT_DATA.addressLibrary];
-        if (!appData.pokeSymbols) appData.pokeSymbols = { my: { preset: 'heart', custom: '♡' }, partner: { preset: 'flower', custom: '✿' } };
+        if (!appData.pokeSymbols) appData.pokeSymbols = { my: { preset: 'heart', custom: '♡' }, partner: { preset: 'flower', custom: '✿' }, customSymbols: [] };
         appData.moments.forEach(m => { if (!m.commenters) m.commenters = []; });
         syncAllReplies();
     } catch (e) { appData = JSON.parse(JSON.stringify(DEFAULT_DATA)); }
@@ -5119,6 +5504,7 @@ async function loadData() {
     if (coverAvatar) coverAvatar.src = (appData.userProfile && appData.userProfile.avatar) ? appData.userProfile.avatar : DEFAULT_AVATAR;
     updateMusicPlayerCardVisibility();
     restoreMusicCardPosition(); // 恢复音乐卡片位置
+    // 音乐进度条事件
     musicAudio.addEventListener('ended', () => {
         if (appData.settings.musicShuffle) {
             playRandomMusic();
@@ -5126,6 +5512,11 @@ async function loadData() {
             nextMusic();
         }
     });
+    musicAudio.addEventListener('timeupdate', updateMusicProgress);
+    const progressBar = document.getElementById('music-progress-bar');
+    if (progressBar) {
+        progressBar.addEventListener('click', seekMusic);
+    }
     updateChatPageHeight();
     window.addEventListener('resize', updateChatPageHeight);
     window.addEventListener('orientationchange', updateChatPageHeight);
@@ -5199,6 +5590,39 @@ async function loadData() {
     
     // 初始化戳一戳装饰符号UI
     initPokeSymbolUI();
+    
+    // 拍一拍面板 Tab 切换逻辑
+    const pokeTabs = document.querySelectorAll('#modal-poke-action .poke-tab');
+    if (pokeTabs.length) {
+        pokeTabs.forEach(tab => {
+            tab.onclick = () => {
+                const targetTab = tab.getAttribute('data-tab');
+                pokeTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                if (targetTab === 'poke') {
+                    document.getElementById('poke-tab-content').style.display = 'block';
+                    document.getElementById('symbol-tab-content').style.display = 'none';
+                    renderPokeActionsList(); // 刷新拍一拍列表
+                } else {
+                    document.getElementById('poke-tab-content').style.display = 'none';
+                    document.getElementById('symbol-tab-content').style.display = 'block';
+                    renderSymbolTable(); // 刷新符号表格
+                }
+            };
+        });
+    }
+    // 拍一拍列表渲染
+    renderPokeActionsList();
+    // 符号表格渲染
+    renderSymbolTable();
+    // 添加自定义符号按钮
+    const addCustomSymbolBtn = document.getElementById('add-custom-symbol-btn');
+    if (addCustomSymbolBtn) addCustomSymbolBtn.onclick = addCustomSymbol;
+    
+    // 最后强制应用一次主题，确保颜色正确
+    forceApplyTheme();
+    // 额外确保背景色 RGB 变量正确（音乐卡片背景问题）
+    updateBgSecondaryRgb();
 }
 
 function initPokeSymbolUI() {
@@ -5274,7 +5698,7 @@ function saveMusicCardPosition() {
 }
 // 重写音乐卡片拖拽结束部分，添加保存
 function startDragMusicCard(e) {
-    if (e.target.closest('.music-card-btn')) return;
+    if (e.target.closest('.music-card-btn') || e.target.closest('.music-card-progress-bar')) return;
     e.preventDefault();
     const card = document.getElementById('music-player-card');
     const rect = card.getBoundingClientRect();
@@ -5285,6 +5709,7 @@ function startDragMusicCard(e) {
     musicCardInitLeft = rect.left;
     musicCardInitTop = rect.top;
     isDraggingMusicCard = true;
+    card.classList.add('dragging');
     let hasMoved = false;
     function onMove(ev) {
         if (!isDraggingMusicCard) return;
@@ -5302,7 +5727,11 @@ function startDragMusicCard(e) {
         if (isDraggingMusicCard && hasMoved) {
             saveMusicCardPosition();
         }
+        // 恢复 right 和 left 样式，让卡片回到 CSS 定义的定位
+        card.style.right = '';
+        card.style.left = '';
         isDraggingMusicCard = false;
+        card.classList.remove('dragging');
         window.removeEventListener('mousemove', onMove);
         window.removeEventListener('touchmove', onMove);
         window.removeEventListener('mouseup', onEnd);
@@ -5388,7 +5817,8 @@ async function initAppearance() {
         if (!appData.appearance.avatarSettings) appData.appearance.avatarSettings = { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' };
         if (!appData.appearance.customThemeColors) appData.appearance.customThemeColors = {};
     }
-    appData.appearance.backgrounds = await loadBackgrounds();
+    const loadedBackgrounds = await loadBackgrounds();
+    appData.appearance.backgrounds = { ...appData.appearance.backgrounds, ...loadedBackgrounds };
     tempAppearance = JSON.parse(JSON.stringify(appData.appearance));
     applyAppearance();
 }
@@ -5426,6 +5856,8 @@ function applyAppearance() {
     const old = document.getElementById('appearance-style'); if (old) old.remove(); document.head.appendChild(style);
     // 应用头像设置到UI（如果当前打开聊天，重新渲染）
     if (currentChatType === 'role' && currentRoleId) renderChatMessages();
+    // 更新背景色 RGB 变量（音乐卡片背景）
+    updateBgSecondaryRgb();
 }
 
 function hexToRgb(hex) { const c = hex.substring(1); return [parseInt(c.substring(0,2), 16), parseInt(c.substring(2,4), 16), parseInt(c.substring(4,6), 16)]; }
@@ -5848,6 +6280,8 @@ async function sendMessage() {
     else { if (!appData.groupChats[currentGroupId]) appData.groupChats[currentGroupId] = []; appData.groupChats[currentGroupId].push(msg); }
     debouncedSaveData(); appendMessageToDOM('me', content, Date.now(), quote, 'text');
     input.value = ''; input.style.height = 'auto'; triggerReply();
+    // 用户发送消息后，角色有概率主动拍一拍用户
+    maybeTriggerRolePoke();
 }
 function appendMessageToDOM(sender, content, time, quote = null, type = 'text') { 
     const c = document.getElementById('chat-messages'); 
@@ -5873,8 +6307,14 @@ function triggerRoleReply() {
             if (lastMe && Math.random() * 100 < appData.settings.quoteMyProb) {
                 quote = { content: lastMe.content, type: lastMe.type || 'text' };
             }
-            if (appData.wordbanks.stickers.length > 0 && Math.random() * 100 < (appData.settings.stickerProb || 10)) { type = 'image'; content = appData.wordbanks.stickers[Math.floor(Math.random() * appData.wordbanks.stickers.length)]; }
-            else { if (Math.random() * 100 < (appData.settings.emojiProb || 20) && appData.wordbanks.emojis.length > 0) content += ' ' + appData.wordbanks.emojis[Math.floor(Math.random() * appData.wordbanks.emojis.length)]; }
+            // 概率单独发送一个纯 Emoji
+            if (appData.wordbanks.emojis.length > 0 && Math.random() * 100 < (appData.settings.emojiProb / 2)) {
+                content = appData.wordbanks.emojis[Math.floor(Math.random() * appData.wordbanks.emojis.length)];
+                type = 'text';
+            } else {
+                if (appData.wordbanks.stickers.length > 0 && Math.random() * 100 < (appData.settings.stickerProb || 10)) { type = 'image'; content = appData.wordbanks.stickers[Math.floor(Math.random() * appData.wordbanks.stickers.length)]; }
+                else { if (Math.random() * 100 < (appData.settings.emojiProb || 20) && appData.wordbanks.emojis.length > 0) content += ' ' + appData.wordbanks.emojis[Math.floor(Math.random() * appData.wordbanks.emojis.length)]; }
+            }
             const msg = { id: Date.now() + count, sender: currentRoleId, content, time: Date.now(), quote, type }; appData.chats[currentRoleId].push(msg); role.lastActive = Date.now(); debouncedSaveData();
             appendMessageToDOM(currentRoleId, content, Date.now(), quote, type); sendNotificationIfNeeded(`${role.name} 发来消息`, content);
             if (Math.random() < 0.09) { 
@@ -5914,6 +6354,30 @@ function triggerGroupReply() {
             const role = appData.roles.find(r => r.id === speakerId); if (role) sendNotificationIfNeeded(`${role.name} (群聊)`, content);
         }, index * 800); });
     }, delay);
+}
+
+// 用户发送消息后概率触发角色拍一拍用户
+function maybeTriggerRolePoke() {
+    if (currentChatType !== 'role' || !currentRoleId) return;
+    const prob = appData.settings.pokeAutoReplyProb || 45;
+    if (Math.random() * 100 >= prob) return;
+    const role = appData.roles.find(r => r.id === currentRoleId);
+    if (!role) return;
+    const pokeTexts = role.pokeTheirTexts || ['拍了拍你'];
+    const randomPoke = pokeTexts[Math.floor(Math.random() * pokeTexts.length)];
+    const formatted = formatPokeText(randomPoke, 'partner');
+    const pokeMsg = { id: Date.now(), sender: currentRoleId, content: formatted, time: Date.now(), type: 'poke' };
+    if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = [];
+    appData.chats[currentRoleId].push(pokeMsg);
+    debouncedSaveData();
+    appendMessageToDOM(currentRoleId, formatted, Date.now(), null, 'poke');
+    // 显示正在输入动画
+    const tip = document.getElementById('typing-indicator');
+    document.getElementById('typing-avatar').src = role.avatar;
+    document.getElementById('typing-name').textContent = role.name;
+    tip.classList.add('active');
+    setTimeout(() => tip.classList.remove('active'), 2000);
+    // 角色拍一拍后也可以回复文字（根据概率和原有回复逻辑，但这里为了简化，不重复触发）
 }
 
 // --- 群聊创建等原有函数（保持完整）---
@@ -6190,7 +6654,7 @@ function deleteRole(id) { showConfirm('删除角色？', async () => { appData.r
 function openCreateRole() { document.getElementById('modal-create-role').classList.remove('hidden'); document.getElementById('role-name-input').value = ''; document.getElementById('role-avatar-preview').src = DEFAULT_AVATAR; document.getElementById('role-group-prob').value = 50; document.getElementById('role-group-prob-val').textContent = '50%'; document.getElementById('role-mail-prob').value = 15; document.getElementById('role-mail-prob-val').textContent = '15%'; }
 function closeCreateRole() { document.getElementById('modal-create-role').classList.add('hidden'); }
 async function handleAvatarUpload(input) { if (input.files?.[0]) { showToast('压缩中...'); const compressed = await compressImage(input.files[0], 400, 0.7); document.getElementById('role-avatar-preview').src = compressed; } }
-async function saveRole() { const name = document.getElementById('role-name-input').value.trim(); if (!name) { showToast('请输入名称'); return; } appData.roles.push({ id: Date.now().toString(), name, avatar: document.getElementById('role-avatar-preview').src, groupProb: parseInt(document.getElementById('role-group-prob').value), autoMailProbability: parseInt(document.getElementById('role-mail-prob').value) || 15, lastActive: Date.now(), lastAutoSendTime: Date.now(), lastLoveRefresh: 0, currentLoveState: null, pokeMyTexts: ['哥哥，我超爱你 😍😍'], pokeTheirTexts: ['老婆，我们永远不分开 😂😂'], onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 }, todayMomentCount: 0, lastDoodleDate: null, customPokes: [] }); await saveData(); renderRoleList(); closeCreateRole(); showToast('创建成功'); }
+async function saveRole() { const name = document.getElementById('role-name-input').value.trim(); if (!name) { showToast('请输入名称'); return; } appData.roles.push({ id: Date.now().toString(), name, avatar: document.getElementById('role-avatar-preview').src, groupProb: parseInt(document.getElementById('role-group-prob').value), autoMailProbability: parseInt(document.getElementById('role-mail-prob').value) || 15, lastActive: Date.now(), lastAutoSendTime: Date.now(), lastLoveRefresh: 0, currentLoveState: null, pokeMyTexts: ['哥哥，我超爱你 😍😍'], pokeTheirTexts: ['老婆，我们永远不分开 😂😂'], onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 }, todayMomentCount: 0, lastDoodleDate: null, customPokes: [], pokeActions: [...PRESET_POKE_ACTIONS] }); await saveData(); renderRoleList(); closeCreateRole(); showToast('创建成功'); }
 
 function openDataManagement() { pageHistory.push('settings'); document.getElementById('modal-settings-main').classList.add('hidden'); document.getElementById('modal-settings-data').classList.remove('hidden'); updateStorageDisplay(); updateNotificationUI(); }
 function closeDataManagement() { document.getElementById('modal-settings-data').classList.add('hidden'); if (pageHistory.pop() === 'settings') document.getElementById('modal-settings-main').classList.remove('hidden'); }
@@ -6201,10 +6665,10 @@ function sendNotificationIfNeeded(title, body) { if (notificationPermissionGrant
 
 // --- 备份/恢复 ---
 function copyBackupToClipboard() { const jsonStr = JSON.stringify(appData, null, 2); navigator.clipboard.writeText(jsonStr).then(() => { showToast('备份数据已复制到剪贴板！可粘贴到备忘录保存'); }).catch(() => { showToast('复制失败，请手动选择文本复制'); }); }
-function openRestoreFromClipboardModal() { const overlay = document.createElement('div'); overlay.className = 'modal-overlay'; overlay.style.zIndex = '1200'; overlay.innerHTML = `<div class="modal-card" style="max-width:400px;width:90%;"><h3 class="text-lg font-bold mb-4">从备份恢复</h3><p class="text-xs text-gray-500 mb-2">请将之前复制的备份数据粘贴到下方文本框中，然后点击"恢复"。</p><textarea id="restore-backup-textarea" class="w-full h-40 bg-gray-100 rounded-xl p-3 text-sm outline-none resize-none" placeholder="在此粘贴备份数据..."></textarea><div class="flex gap-3 mt-4"><button id="restore-cancel-btn" class="flex-1 py-2.5 rounded-xl border border-gray-200 font-medium">取消</button><button id="restore-confirm-btn" class="flex-1 py-2.5 rounded-xl text-white font-medium shadow-lg" style="background-color: var(--button-primary-bg);">恢复</button></div></div>`; document.body.appendChild(overlay); const cancelBtn = overlay.querySelector('#restore-cancel-btn'); const confirmBtn = overlay.querySelector('#restore-confirm-btn'); const textarea = overlay.querySelector('#restore-backup-textarea'); cancelBtn.onclick = () => { document.body.removeChild(overlay); }; confirmBtn.onclick = () => { const content = textarea.value.trim(); if (!content) { showToast('请粘贴备份内容'); return; } try { const data = JSON.parse(content); if (data.roles && data.chats) { showConfirm('确定要恢复该备份吗？当前数据将被覆盖。', async () => { appData = data; if (!appData.wordbanks.wordGroups) appData.wordbanks.wordGroups = [{ name: '默认', words: [...(appData.wordbanks.replies || [])] }]; appData.wordbanks.wordGroups.forEach(g => { g.words = g.words.map(w => typeof w === 'string' ? { text: w, blocked: false } : w); }); if (!appData.favoriteMessages) appData.favoriteMessages = []; if (!appData.transferSettings) appData.transferSettings = { enabled: true, minAmount: 5.20, maxAmount: 200, probability: 15, checkInterval: 30 }; if (!appData.transferRecords) appData.transferRecords = []; if (!appData.redPackets) appData.redPackets = []; if (!appData.userProfile) appData.userProfile = { nickname: '我', avatar: DEFAULT_AVATAR }; if (!appData.balance) appData.balance = 1000000; if (!appData.moments || appData.moments.length === 0) appData.moments = JSON.parse(JSON.stringify(DEFAULT_DATA.moments)); if (!appData.momentPhotos) appData.momentPhotos = []; if (!appData.songLibrary || appData.songLibrary.length < 50) appData.songLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.songLibrary)); if (!appData.bookLibrary || appData.bookLibrary.length === 0) appData.bookLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.bookLibrary)); if (!appData.momentCommentBank) appData.momentCommentBank = [...DEFAULT_DATA.momentCommentBank]; if (!appData.musicLibrary) appData.musicLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.musicLibrary)); if (!appData.addressLibrary) appData.addressLibrary = [...DEFAULT_DATA.addressLibrary]; if (appData.settings.momentCover === undefined) appData.settings.momentCover = ''; if (!appData.pokeSymbols) appData.pokeSymbols = { my: { preset: 'heart', custom: '♡' }, partner: { preset: 'flower', custom: '✿' } }; if (appData.settings.pokeAutoReplyEnabled === undefined) appData.settings.pokeAutoReplyEnabled = true; if (appData.settings.pokeAutoReplyProb === undefined) appData.settings.pokeAutoReplyProb = 45; await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('数据已恢复'); updateMusicPlayerCardVisibility(); }); } else { showToast('无效的备份数据'); } } catch (e) { showToast('数据格式错误，无法解析'); } document.body.removeChild(overlay); }; overlay.addEventListener('click', (e) => { if (e.target === overlay) { document.body.removeChild(overlay); } }); }
+function openRestoreFromClipboardModal() { const overlay = document.createElement('div'); overlay.className = 'modal-overlay'; overlay.style.zIndex = '1200'; overlay.innerHTML = `<div class="modal-card" style="max-width:400px;width:90%;"><h3 class="text-lg font-bold mb-4">从备份恢复</h3><p class="text-xs text-gray-500 mb-2">请将之前复制的备份数据粘贴到下方文本框中，然后点击"恢复"。</p><textarea id="restore-backup-textarea" class="w-full h-40 bg-gray-100 rounded-xl p-3 text-sm outline-none resize-none" placeholder="在此粘贴备份数据..."></textarea><div class="flex gap-3 mt-4"><button id="restore-cancel-btn" class="flex-1 py-2.5 rounded-xl border border-gray-200 font-medium">取消</button><button id="restore-confirm-btn" class="flex-1 py-2.5 rounded-xl text-white font-medium shadow-lg" style="background-color: var(--button-primary-bg);">恢复</button></div></div>`; document.body.appendChild(overlay); const cancelBtn = overlay.querySelector('#restore-cancel-btn'); const confirmBtn = overlay.querySelector('#restore-confirm-btn'); const textarea = overlay.querySelector('#restore-backup-textarea'); cancelBtn.onclick = () => { document.body.removeChild(overlay); }; confirmBtn.onclick = () => { const content = textarea.value.trim(); if (!content) { showToast('请粘贴备份内容'); return; } try { const data = JSON.parse(content); if (data.roles && data.chats) { showConfirm('确定要恢复该备份吗？当前数据将被覆盖。', async () => { appData = data; if (!appData.wordbanks.wordGroups) appData.wordbanks.wordGroups = [{ name: '默认', words: [...(appData.wordbanks.replies || [])] }]; appData.wordbanks.wordGroups.forEach(g => { g.words = g.words.map(w => typeof w === 'string' ? { text: w, blocked: false } : w); }); if (!appData.favoriteMessages) appData.favoriteMessages = []; if (!appData.transferSettings) appData.transferSettings = { enabled: true, minAmount: 5.20, maxAmount: 200, probability: 15, checkInterval: 30 }; if (!appData.transferRecords) appData.transferRecords = []; if (!appData.redPackets) appData.redPackets = []; if (!appData.userProfile) appData.userProfile = { nickname: '我', avatar: DEFAULT_AVATAR }; if (!appData.balance) appData.balance = 1000000; if (!appData.moments || appData.moments.length === 0) appData.moments = JSON.parse(JSON.stringify(DEFAULT_DATA.moments)); if (!appData.momentPhotos) appData.momentPhotos = []; if (!appData.songLibrary || appData.songLibrary.length < 50) appData.songLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.songLibrary)); if (!appData.bookLibrary || appData.bookLibrary.length === 0) appData.bookLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.bookLibrary)); if (!appData.momentCommentBank) appData.momentCommentBank = [...DEFAULT_DATA.momentCommentBank]; if (!appData.musicLibrary) appData.musicLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.musicLibrary)); if (!appData.addressLibrary) appData.addressLibrary = [...DEFAULT_DATA.addressLibrary]; if (appData.settings.momentCover === undefined) appData.settings.momentCover = ''; if (!appData.pokeSymbols) appData.pokeSymbols = { my: { preset: 'heart', custom: '♡' }, partner: { preset: 'flower', custom: '✿' }, customSymbols: [] }; if (appData.settings.pokeAutoReplyEnabled === undefined) appData.settings.pokeAutoReplyEnabled = true; if (appData.settings.pokeAutoReplyProb === undefined) appData.settings.pokeAutoReplyProb = 45; await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('数据已恢复'); updateMusicPlayerCardVisibility(); }); } else { showToast('无效的备份数据'); } } catch (e) { showToast('数据格式错误，无法解析'); } document.body.removeChild(overlay); }; overlay.addEventListener('click', (e) => { if (e.target === overlay) { document.body.removeChild(overlay); } }); }
 
 function exportData() { const jsonStr = JSON.stringify(appData, null, 2); const blob = new Blob([jsonStr], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `spiritual_connection_${new Date().toISOString().slice(0,10)}.json`; a.click(); showToast('导出成功'); setTimeout(() => URL.revokeObjectURL(a.href), 60000); }
-function importData() { const i = document.createElement('input'); i.type = 'file'; i.accept = '.json'; i.onchange = e => { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = async ev => { try { const d = JSON.parse(ev.target.result); if (d.roles && d.chats) { showConfirm('导入将覆盖现有数据，确定？', async () => { appData = d; if (!appData.wordbanks.wordGroups) appData.wordbanks.wordGroups = [{ name: '默认', words: [...(appData.wordbanks.replies || [])] }]; appData.wordbanks.wordGroups.forEach(g => { g.words = g.words.map(w => typeof w === 'string' ? { text: w, blocked: false } : w); }); if (d.appearance?.backgrounds) await saveBackgrounds(d.appearance.backgrounds); if (!appData.favoriteMessages) appData.favoriteMessages = []; if (!appData.transferSettings) appData.transferSettings = { enabled: true, minAmount: 5.20, maxAmount: 200, probability: 15, checkInterval: 30 }; if (!appData.transferRecords) appData.transferRecords = []; if (!appData.redPackets) appData.redPackets = []; if (!appData.userProfile) appData.userProfile = { nickname: '我', avatar: DEFAULT_AVATAR }; if (!appData.balance) appData.balance = 1000000; if (!appData.moments || appData.moments.length === 0) appData.moments = JSON.parse(JSON.stringify(DEFAULT_DATA.moments)); if (!appData.momentPhotos) appData.momentPhotos = []; if (!appData.songLibrary || appData.songLibrary.length < 50) appData.songLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.songLibrary)); if (!appData.bookLibrary || appData.bookLibrary.length === 0) appData.bookLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.bookLibrary)); if (!appData.momentCommentBank) appData.momentCommentBank = [...DEFAULT_DATA.momentCommentBank]; if (!appData.musicLibrary) appData.musicLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.musicLibrary)); if (!appData.addressLibrary) appData.addressLibrary = [...DEFAULT_DATA.addressLibrary]; if (appData.settings.momentCover === undefined) appData.settings.momentCover = ''; if (!appData.pokeSymbols) appData.pokeSymbols = { my: { preset: 'heart', custom: '♡' }, partner: { preset: 'flower', custom: '✿' } }; if (appData.settings.pokeAutoReplyEnabled === undefined) appData.settings.pokeAutoReplyEnabled = true; if (appData.settings.pokeAutoReplyProb === undefined) appData.settings.pokeAutoReplyProb = 45; await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('导入成功'); updateMusicPlayerCardVisibility(); }); } else showToast('无效文件'); } catch { showToast('解析失败'); } }; r.readAsText(f); }; i.click(); }
+function importData() { const i = document.createElement('input'); i.type = 'file'; i.accept = '.json'; i.onchange = e => { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = async ev => { try { const d = JSON.parse(ev.target.result); if (d.roles && d.chats) { showConfirm('导入将覆盖现有数据，确定？', async () => { appData = d; if (!appData.wordbanks.wordGroups) appData.wordbanks.wordGroups = [{ name: '默认', words: [...(appData.wordbanks.replies || [])] }]; appData.wordbanks.wordGroups.forEach(g => { g.words = g.words.map(w => typeof w === 'string' ? { text: w, blocked: false } : w); }); if (d.appearance?.backgrounds) await saveBackgrounds(d.appearance.backgrounds); if (!appData.favoriteMessages) appData.favoriteMessages = []; if (!appData.transferSettings) appData.transferSettings = { enabled: true, minAmount: 5.20, maxAmount: 200, probability: 15, checkInterval: 30 }; if (!appData.transferRecords) appData.transferRecords = []; if (!appData.redPackets) appData.redPackets = []; if (!appData.userProfile) appData.userProfile = { nickname: '我', avatar: DEFAULT_AVATAR }; if (!appData.balance) appData.balance = 1000000; if (!appData.moments || appData.moments.length === 0) appData.moments = JSON.parse(JSON.stringify(DEFAULT_DATA.moments)); if (!appData.momentPhotos) appData.momentPhotos = []; if (!appData.songLibrary || appData.songLibrary.length < 50) appData.songLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.songLibrary)); if (!appData.bookLibrary || appData.bookLibrary.length === 0) appData.bookLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.bookLibrary)); if (!appData.momentCommentBank) appData.momentCommentBank = [...DEFAULT_DATA.momentCommentBank]; if (!appData.musicLibrary) appData.musicLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.musicLibrary)); if (!appData.addressLibrary) appData.addressLibrary = [...DEFAULT_DATA.addressLibrary]; if (appData.settings.momentCover === undefined) appData.settings.momentCover = ''; if (!appData.pokeSymbols) appData.pokeSymbols = { my: { preset: 'heart', custom: '♡' }, partner: { preset: 'flower', custom: '✿' }, customSymbols: [] }; if (appData.settings.pokeAutoReplyEnabled === undefined) appData.settings.pokeAutoReplyEnabled = true; if (appData.settings.pokeAutoReplyProb === undefined) appData.settings.pokeAutoReplyProb = 45; await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('导入成功'); updateMusicPlayerCardVisibility(); }); } else showToast('无效文件'); } catch { showToast('解析失败'); } }; r.readAsText(f); }; i.click(); }
 async function clearChatRecords() { showConfirm('清空所有聊天记录？', async () => { appData.chats = {}; appData.groupChats = {}; unreadCounts = {}; await saveUnreadCounts(); appData.roles.forEach(r => r.lastActive = Date.now()); await saveData(); renderRoleList(); if (currentChatType === 'role') renderChatMessages(); updateStorageDisplay(); showToast('已清空'); }); }
 async function resetAllData() { showConfirm('重置所有数据？不可恢复！', async () => { appData = JSON.parse(JSON.stringify(DEFAULT_DATA)); await saveBackgrounds({ home: '', chat: '', group: '' }); await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('已重置'); }); }
 
@@ -6925,7 +7389,7 @@ function showSourceCode() { document.getElementById('source-code-content').value
 function closeSourceCode() { document.getElementById('modal-source').classList.remove('active'); }
 function copySourceCode() { const ta = document.getElementById('source-code-content'); ta.select(); document.execCommand('copy'); showToast('已复制'); }
 
-// ========== 拍一拍居中菜单 ==========
+// ========== 拍一拍快捷面板（新版：上下单列滑动，整合装饰符号Tab，固定高度滚动） ==========
 function showPokeActionModal() {
     if (currentChatType !== 'role' || !currentRoleId) {
         showToast('仅支持在单人聊天中使用');
@@ -6938,57 +7402,146 @@ function showPokeActionModal() {
         document.getElementById('poke-quick-avatar').src = role.avatar;
         document.getElementById('poke-quick-name').textContent = role.name;
     }
-    renderPresetPokeActions();
-    renderCustomPokeList();
+    // 重置到拍一拍 Tab
+    const pokeTab = document.querySelector('#modal-poke-action .poke-tab[data-tab="poke"]');
+    const symbolTab = document.querySelector('#modal-poke-action .poke-tab[data-tab="symbol"]');
+    if (pokeTab && symbolTab) {
+        pokeTab.classList.add('active');
+        symbolTab.classList.remove('active');
+        document.getElementById('poke-tab-content').style.display = 'block';
+        document.getElementById('symbol-tab-content').style.display = 'none';
+    }
+    renderPokeActionsList();
     modal.classList.remove('hidden');
 }
 
-function renderPresetPokeActions() {
-    const container = document.getElementById('poke-preset-actions');
+function renderPokeActionsList() {
+    const container = document.getElementById('poke-actions-list-container');
     if (!container) return;
-    container.innerHTML = '';
-    PRESET_POKE_ACTIONS.forEach(action => {
-        const btn = document.createElement('button');
-        btn.className = 'poke-action-item';
-        btn.textContent = action;
-        btn.onclick = () => {
-            const formatted = formatPokeText(action, 'my');
-            executePokeWithText(formatted);
-            closePokeActionModal();
-        };
-        container.appendChild(btn);
-    });
-}
-
-function renderCustomPokeList() {
     const role = appData.roles.find(r => r.id === currentRoleId);
     if (!role) return;
-    const container = document.getElementById('poke-custom-items');
-    if (!container) return;
+    // 使用 pokeActions 数组，用户可随意增删
+    let actions = role.pokeActions || [...PRESET_POKE_ACTIONS];
     container.innerHTML = '';
-    (role.customPokes || []).forEach((text, idx) => {
-        const tag = document.createElement('span');
-        tag.className = 'poke-custom-tag';
-        tag.textContent = text;
-        tag.onclick = () => {
-            const formatted = formatPokeText(text, 'my');
-            executePokeWithText(formatted);
-            closePokeActionModal();
-        };
-        container.appendChild(tag);
+    actions.forEach((action, idx) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'poke-action-item';
+        if (pokeEditMode) {
+            itemDiv.classList.add('edit-mode');
+            const textSpan = document.createElement('span');
+            textSpan.textContent = action;
+            textSpan.style.flex = '1';
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-poke';
+            deleteBtn.innerHTML = '✖️';
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation();
+                role.pokeActions.splice(idx, 1);
+                debouncedSaveData();
+                renderPokeActionsList();
+                showToast('已删除');
+            };
+            itemDiv.appendChild(textSpan);
+            itemDiv.appendChild(deleteBtn);
+            itemDiv.onclick = null;
+        } else {
+            itemDiv.textContent = action;
+            itemDiv.onclick = () => {
+                const formatted = formatPokeText(action, 'my');
+                executePokeWithText(formatted);
+                closePokeActionModal();
+            };
+        }
+        container.appendChild(itemDiv);
     });
+    // 重置默认按钮（仅当编辑模式开启时显示）
+    if (pokeEditMode) {
+        const resetBtn = document.createElement('button');
+        resetBtn.textContent = '重置默认';
+        resetBtn.className = 'poke-custom-add';
+        resetBtn.onclick = () => {
+            role.pokeActions = [...PRESET_POKE_ACTIONS];
+            debouncedSaveData();
+            renderPokeActionsList();
+            showToast('已重置为默认拍一拍动作');
+        };
+        container.appendChild(resetBtn);
+    }
 }
 
-function addCustomPoke() {
+// 编辑模式切换
+function togglePokeEditMode() {
+    pokeEditMode = !pokeEditMode;
+    const btn = document.getElementById('poke-edit-mode-btn');
+    if (btn) {
+        btn.classList.toggle('active', pokeEditMode);
+        btn.textContent = pokeEditMode ? '退出编辑' : '编辑模式';
+    }
+    renderPokeActionsList();
+}
+
+function showCustomPokeModal() {
+    const modal = document.getElementById('modal-custom-poke');
+    if (!modal) return;
+    document.getElementById('custom-poke-input').value = '';
+    modal.classList.remove('hidden');
+    setTimeout(() => document.getElementById('custom-poke-input').focus(), 100);
+}
+
+function closeCustomPokeModal() {
+    document.getElementById('modal-custom-poke').classList.add('hidden');
+}
+
+function addCustomPokeAndSend() {
+    const input = document.getElementById('custom-poke-input');
+    const text = input.value.trim();
+    if (!text) {
+        showToast('请输入拍一拍内容');
+        return;
+    }
     const role = appData.roles.find(r => r.id === currentRoleId);
     if (!role) return;
-    const newText = prompt('请输入自定义拍一拍动作：');
-    if (newText && newText.trim()) {
-        if (!role.customPokes) role.customPokes = [];
-        role.customPokes.push(newText.trim());
+    // 先发送
+    const formatted = formatPokeText(text, 'my');
+    executePokeWithText(formatted);
+    // 添加到自定义库（如果不在库中）
+    if (!role.pokeActions) role.pokeActions = [...PRESET_POKE_ACTIONS];
+    if (!role.pokeActions.includes(text)) {
+        role.pokeActions.unshift(text);
         debouncedSaveData();
-        renderCustomPokeList();
-        showToast('已添加自定义拍一拍');
+        renderPokeActionsList();
+    }
+    closeCustomPokeModal();
+}
+
+function saveToLibraryAndClose() {
+    const input = document.getElementById('custom-poke-input');
+    const text = input.value.trim();
+    if (!text) {
+        showToast('请输入拍一拍内容');
+        return;
+    }
+    const role = appData.roles.find(r => r.id === currentRoleId);
+    if (!role) return;
+    if (!role.pokeActions) role.pokeActions = [...PRESET_POKE_ACTIONS];
+    if (!role.pokeActions.includes(text)) {
+        role.pokeActions.unshift(text);
+        debouncedSaveData();
+        renderPokeActionsList();
+        showToast('已保存到自定义库');
+    } else {
+        showToast('已存在于自定义库中');
+    }
+    closeCustomPokeModal();
+}
+
+function deleteCustomPoke(index) {
+    const role = appData.roles.find(r => r.id === currentRoleId);
+    if (role && role.pokeActions) {
+        role.pokeActions.splice(index, 1);
+        debouncedSaveData();
+        renderPokeActionsList();
+        showToast('已删除');
     }
 }
 
@@ -6999,6 +7552,15 @@ function executePokeWithText(text) {
     appData.chats[currentRoleId].push(msg);
     debouncedSaveData();
     appendMessageToDOM('me', text, Date.now(), null, 'poke');
+    // 显示正在输入动画
+    const role = appData.roles.find(r => r.id === currentRoleId);
+    if (role) {
+        const tip = document.getElementById('typing-indicator');
+        document.getElementById('typing-avatar').src = role.avatar;
+        document.getElementById('typing-name').textContent = role.name;
+        tip.classList.add('active');
+        setTimeout(() => tip.classList.remove('active'), 2000);
+    }
     // 戳一戳后角色主动回复（根据设置）
     if (appData.settings.pokeAutoReplyEnabled) {
         const prob = appData.settings.pokeAutoReplyProb || 45;
@@ -7023,6 +7585,12 @@ function executePokeWithText(text) {
 function closePokeActionModal() {
     const modal = document.getElementById('modal-poke-action');
     if (modal) modal.classList.add('hidden');
+    pokeEditMode = false;
+    const btn = document.getElementById('poke-edit-mode-btn');
+    if (btn) {
+        btn.classList.remove('active');
+        btn.textContent = '编辑模式';
+    }
 }
 function bindPokeActionModalEvents() {
     const modal = document.getElementById('modal-poke-action');
@@ -7030,7 +7598,131 @@ function bindPokeActionModalEvents() {
     modal.addEventListener('click', function(e) {
         if (e.target === modal) closePokeActionModal();
     });
+    const editBtn = document.getElementById('poke-edit-mode-btn');
+    if (editBtn) editBtn.onclick = togglePokeEditMode;
+    const showCustomBtn = document.getElementById('show-custom-poke-btn');
+    if (showCustomBtn) showCustomBtn.onclick = showCustomPokeModal;
 }
+
+// 符号表格渲染
+function renderSymbolTable() {
+    const tbody = document.getElementById('symbol-list-body');
+    if (!tbody) return;
+    const symbols = [
+        { name: '爱心', emoji: '❤️', key: 'heart' },
+        { name: '花朵', emoji: '🌸', key: 'flower' },
+        { name: '星星', emoji: '✨', key: 'sparkle' },
+        { name: '波浪', emoji: '～', key: 'wave' },
+        { name: '圆点', emoji: '·', key: 'dot' },
+        { name: '星号', emoji: '✦', key: 'star4' },
+        { name: '无', emoji: '🚫', key: 'none' }
+    ];
+    const myPreset = appData.pokeSymbols?.my?.preset || 'heart';
+    const partnerPreset = appData.pokeSymbols?.partner?.preset || 'flower';
+    let html = '';
+    symbols.forEach(sym => {
+        html += `
+            <tr>
+                <td class="symbol-emoji">${sym.emoji}</td>
+                <td class="symbol-name">${sym.name}</td>
+                <td><div class="symbol-radio ${myPreset === sym.key ? 'active' : ''}" onclick="selectSymbol('my', '${sym.key}')"></div></td>
+                <td><div class="symbol-radio ${partnerPreset === sym.key ? 'active' : ''}" onclick="selectSymbol('partner', '${sym.key}')"></div></td>
+                <td>
+            </tr>
+        `;
+    });
+    // 自定义符号列表
+    const customSymbols = appData.pokeSymbols?.customSymbols || [];
+    customSymbols.forEach((sym, idx) => {
+        html += `
+            <tr>
+                <td class="symbol-emoji">${escapeHtml(sym.char)}</td>
+                <td class="symbol-name">自定义${idx+1}</td>
+                <td><div class="symbol-radio ${myPreset === 'custom' && appData.pokeSymbols?.my?.custom === sym.char ? 'active' : ''}" onclick="selectSymbolCustom('my', '${escapeHtml(sym.char)}')"></div></td>
+                <td><div class="symbol-radio ${partnerPreset === 'custom' && appData.pokeSymbols?.partner?.custom === sym.char ? 'active' : ''}" onclick="selectSymbolCustom('partner', '${escapeHtml(sym.char)}')"></div></td>
+                <td><button class="delete-custom-symbol" onclick="removeCustomSymbol(${idx})">✖️</button></td>
+            </table>
+        `;
+    });
+    tbody.innerHTML = html;
+}
+
+function selectSymbol(type, key) {
+    if (!appData.pokeSymbols) appData.pokeSymbols = { my: {}, partner: {}, customSymbols: [] };
+    appData.pokeSymbols[type].preset = key;
+    if (key !== 'custom') {
+        appData.pokeSymbols[type].custom = '';
+    }
+    renderSymbolTable();
+    // 同步到戳一戳设置面板
+    if (document.getElementById('modal-poke-settings').classList.contains('hidden') === false) {
+        const mySelect = document.getElementById('poke-symbol-my');
+        const partnerSelect = document.getElementById('poke-symbol-partner');
+        if (mySelect && type === 'my') mySelect.value = key;
+        if (partnerSelect && type === 'partner') partnerSelect.value = key;
+        updatePokePreview();
+    }
+}
+
+function selectSymbolCustom(type, char) {
+    if (!appData.pokeSymbols) appData.pokeSymbols = { my: {}, partner: {}, customSymbols: [] };
+    appData.pokeSymbols[type].preset = 'custom';
+    appData.pokeSymbols[type].custom = char;
+    renderSymbolTable();
+    if (document.getElementById('modal-poke-settings').classList.contains('hidden') === false) {
+        const mySelect = document.getElementById('poke-symbol-my');
+        const partnerSelect = document.getElementById('poke-symbol-partner');
+        const myCustom = document.getElementById('poke-symbol-my-custom');
+        const partnerCustom = document.getElementById('poke-symbol-partner-custom');
+        if (mySelect && type === 'my') {
+            mySelect.value = 'custom';
+            if (myCustom) myCustom.value = char;
+        }
+        if (partnerSelect && type === 'partner') {
+            partnerSelect.value = 'custom';
+            if (partnerCustom) partnerCustom.value = char;
+        }
+        updatePokePreview();
+    }
+}
+
+function addCustomSymbol() {
+    const input = document.getElementById('new-symbol-input');
+    let char = input.value.trim();
+    if (!char || char.length > 2) {
+        showToast('请输入1~2个字符的符号');
+        return;
+    }
+    if (!appData.pokeSymbols) appData.pokeSymbols = { my: {}, partner: {}, customSymbols: [] };
+    if (!appData.pokeSymbols.customSymbols) appData.pokeSymbols.customSymbols = [];
+    if (appData.pokeSymbols.customSymbols.some(s => s.char === char)) {
+        showToast('符号已存在');
+        return;
+    }
+    appData.pokeSymbols.customSymbols.push({ char: char });
+    input.value = '';
+    renderSymbolTable();
+    showToast('自定义符号已添加');
+}
+
+function removeCustomSymbol(index) {
+    if (appData.pokeSymbols && appData.pokeSymbols.customSymbols) {
+        appData.pokeSymbols.customSymbols.splice(index, 1);
+        renderSymbolTable();
+        showToast('已删除');
+    }
+}
+
+function savePokeSymbolSettings() {
+    debouncedSaveData();
+    closePokeSymbolSettings();
+    showToast('符号设置已保存');
+    // 刷新戳一戳设置面板预览
+    if (document.getElementById('modal-poke-settings').classList.contains('hidden') === false) {
+        updatePokePreview();
+    }
+}
+
 function openPokeSettingsFromSheet() { 
     const role = appData.roles.find(r => r.id === currentRoleId); 
     if (!role) return; 
@@ -7235,7 +7927,7 @@ async function savePokeSettings() {
     const myCustom = document.getElementById('poke-symbol-my-custom');
     const partnerCustom = document.getElementById('poke-symbol-partner-custom');
     if (mySelect && partnerSelect) {
-        if (!appData.pokeSymbols) appData.pokeSymbols = { my: {}, partner: {} };
+        if (!appData.pokeSymbols) appData.pokeSymbols = { my: {}, partner: {}, customSymbols: [] };
         appData.pokeSymbols.my.preset = mySelect.value;
         appData.pokeSymbols.partner.preset = partnerSelect.value;
         if (mySelect.value === 'custom') appData.pokeSymbols.my.custom = myCustom.value || '';
@@ -7257,6 +7949,12 @@ function executePoke() {
     appData.chats[currentRoleId].push(msg);
     debouncedSaveData();
     appendMessageToDOM('me', formatted, Date.now(), null, 'poke');
+    // 显示正在输入动画
+    const tip = document.getElementById('typing-indicator');
+    document.getElementById('typing-avatar').src = role.avatar;
+    document.getElementById('typing-name').textContent = role.name;
+    tip.classList.add('active');
+    setTimeout(() => tip.classList.remove('active'), 2000);
     // 戳一戳后角色主动回复（根据设置）
     if (appData.settings.pokeAutoReplyEnabled) {
         const prob = appData.settings.pokeAutoReplyProb || 45;
@@ -7273,6 +7971,32 @@ function executePoke() {
                 }
             }, 1500 + Math.random() * 2000);
         }
+    }
+}
+
+// 音乐进度条和时间显示
+function updateMusicProgress() {
+    if (!musicAudio.duration || isNaN(musicAudio.duration)) return;
+    const percent = (musicAudio.currentTime / musicAudio.duration) * 100;
+    const fill = document.getElementById('music-progress-fill');
+    if (fill) fill.style.width = percent + '%';
+    const timeDisplay = document.getElementById('music-time-display');
+    if (timeDisplay) {
+        const currentMin = Math.floor(musicAudio.currentTime / 60);
+        const currentSec = Math.floor(musicAudio.currentTime % 60);
+        const totalMin = Math.floor(musicAudio.duration / 60);
+        const totalSec = Math.floor(musicAudio.duration % 60);
+        timeDisplay.textContent = `${currentMin}:${currentSec.toString().padStart(2,'0')} / ${totalMin}:${totalSec.toString().padStart(2,'0')}`;
+    }
+}
+function seekMusic(e) {
+    const bar = document.getElementById('music-progress-bar');
+    const rect = bar.getBoundingClientRect();
+    const clientX = e.clientX;
+    let ratio = (clientX - rect.left) / rect.width;
+    ratio = Math.min(1, Math.max(0, ratio));
+    if (musicAudio.duration && isFinite(musicAudio.duration)) {
+        musicAudio.currentTime = ratio * musicAudio.duration;
     }
 }
 
@@ -7621,6 +8345,10 @@ function updateMusicPlayerCardVisibility() {
     if (appData.settings.musicPlayerEnabled && document.getElementById('page-home').classList.contains('active')) {
         card.style.display = 'flex';
         restoreMusicCardPosition();
+        // 如果音乐正在播放，保持进度条更新
+        if (isMusicPlaying) {
+            updateMusicProgress();
+        }
     } else {
         card.style.display = 'none';
         stopMusic();
@@ -7633,46 +8361,6 @@ function bindMusicCardDrag() {
     card.dataset.dragBound = 'true';
     card.addEventListener('touchstart', startDragMusicCard, { passive: false });
     card.addEventListener('mousedown', startDragMusicCard);
-}
-function startDragMusicCard(e) {
-    if (e.target.closest('.music-card-btn')) return;
-    e.preventDefault();
-    const card = document.getElementById('music-player-card');
-    const rect = card.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    musicCardStartX = clientX;
-    musicCardStartY = clientY;
-    musicCardInitLeft = rect.left;
-    musicCardInitTop = rect.top;
-    isDraggingMusicCard = true;
-    let hasMoved = false;
-    function onMove(ev) {
-        if (!isDraggingMusicCard) return;
-        ev.preventDefault();
-        const x = (ev.touches ? ev.touches[0].clientX : ev.clientX);
-        const y = (ev.touches ? ev.touches[0].clientY : ev.clientY);
-        const dx = x - musicCardStartX;
-        const dy = y - musicCardStartY;
-        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) hasMoved = true;
-        card.style.left = (musicCardInitLeft + dx) + 'px';
-        card.style.top = (musicCardInitTop + dy) + 'px';
-        card.style.right = 'auto';
-    }
-    function onEnd() {
-        if (isDraggingMusicCard && hasMoved) {
-            saveMusicCardPosition();
-        }
-        isDraggingMusicCard = false;
-        window.removeEventListener('mousemove', onMove);
-        window.removeEventListener('touchmove', onMove);
-        window.removeEventListener('mouseup', onEnd);
-        window.removeEventListener('touchend', onEnd);
-    }
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('touchmove', onMove, { passive: false });
-    window.addEventListener('mouseup', onEnd);
-    window.addEventListener('touchend', onEnd);
 }
 function updateMusicCardUI() {
     const cover = document.getElementById('music-card-cover');
@@ -7697,6 +8385,11 @@ function updateMusicCardUI() {
         cover.innerHTML = '🎵';
         playBtn.textContent = '▶️';
     }
+    // 重置进度条显示
+    const fill = document.getElementById('music-progress-fill');
+    if (fill) fill.style.width = '0%';
+    const timeDisplay = document.getElementById('music-time-display');
+    if (timeDisplay) timeDisplay.textContent = '0:00 / 0:00';
 }
 function playMusic(musicId) {
     const music = appData.musicLibrary.find(m => m.id === musicId);
@@ -7710,6 +8403,7 @@ function playMusic(musicId) {
     musicAudio.play().then(() => {
         isMusicPlaying = true;
         updateMusicCardUI();
+        updateMusicProgress();
     }).catch(e => {
         showToast('音乐无法播放，链接可能已失效');
         isMusicPlaying = false;
@@ -7743,6 +8437,7 @@ function togglePlayMusic() {
     } else {
         musicAudio.play().then(() => {
             isMusicPlaying = true;
+            updateMusicProgress();
         }).catch(() => {
             showToast('播放失败');
         });
@@ -9387,7 +10082,7 @@ async function openBatchEditor() {
             html += '<table style="width:100%;font-size:12px;">';
             const matchCount = Math.min(blocks.length, lenormandLibrary.length);
             for (let i = 0; i < matchCount; i++) {
-                html += `<tr><td style="padding:4px;">${blocks[i].number}</td><td style="padding:4px;">${escapeHtml(blocks[i].name)}</td><td style="padding:4px;">→ 第${i+1}张图</td></tr>`;
+                html += `<tr><td style="padding:4px;">${blocks[i].number}</td><td style="padding:4px;">${escapeHtml(blocks[i].name)}</td><td style="padding:4px;">→ 第${i+1}张图</td>`;
             }
             html += '</table>';
             previewDiv.innerHTML = html;
