@@ -4228,7 +4228,6 @@
     </div>
 </div>
 
-
 <script>
 
 // 初始化图标
@@ -6280,7 +6279,7 @@ async function sendMessage() {
     else { if (!appData.groupChats[currentGroupId]) appData.groupChats[currentGroupId] = []; appData.groupChats[currentGroupId].push(msg); }
     debouncedSaveData(); appendMessageToDOM('me', content, Date.now(), quote, 'text');
     input.value = ''; input.style.height = 'auto'; triggerReply();
-    // 用户发送消息后，角色有概率主动拍一拍用户
+    // 用户发送消息后，角色有概率主动拍一拍用户（概率9%）
     maybeTriggerRolePoke();
 }
 function appendMessageToDOM(sender, content, time, quote = null, type = 'text') { 
@@ -6317,11 +6316,21 @@ function triggerRoleReply() {
             }
             const msg = { id: Date.now() + count, sender: currentRoleId, content, time: Date.now(), quote, type }; appData.chats[currentRoleId].push(msg); role.lastActive = Date.now(); debouncedSaveData();
             appendMessageToDOM(currentRoleId, content, Date.now(), quote, type); sendNotificationIfNeeded(`${role.name} 发来消息`, content);
-            if (Math.random() < 0.09) { 
+            // 回复时附带戳一戳，概率3%
+            if (Math.random() < 0.03) { 
                 setTimeout(() => { 
-                    const pokeTexts = role.pokeTheirTexts || ['拍了拍你'];
-                    const randomPoke = pokeTexts[Math.floor(Math.random() * pokeTexts.length)];
-                    const formattedPoke = formatPokeText(randomPoke, 'partner');
+                    let actions = role.pokeActions;
+                    if (!actions || actions.length === 0) {
+                        actions = [...PRESET_POKE_ACTIONS];
+                    }
+                    const randomAction = actions[Math.floor(Math.random() * actions.length)];
+                    const partnerSymbol = (() => {
+                        const cfg = appData.pokeSymbols?.partner;
+                        if (!cfg) return '';
+                        if (cfg.preset === 'custom') return cfg.custom || '';
+                        return POKE_SYMBOL_MAP[cfg.preset] || '';
+                    })();
+                    const formattedPoke = `${partnerSymbol} ${role.name} ${randomAction} ${partnerSymbol}`.trim();
                     const pokeMsg = { id: Date.now() + count + 100, sender: currentRoleId, content: formattedPoke, time: Date.now(), type: 'poke' }; 
                     appData.chats[currentRoleId].push(pokeMsg); 
                     debouncedSaveData(); 
@@ -6356,28 +6365,129 @@ function triggerGroupReply() {
     }, delay);
 }
 
-// 用户发送消息后概率触发角色拍一拍用户
+// ========== 拍一拍核心功能 ==========
+// 辅助函数：角色回复多条消息（在指定初始延迟后逐条发送）
+async function sendRolePokeReply(role, count, initialDelayMs = 0) {
+    if (!role) return;
+    const allWords = getActiveWordList();
+    if (allWords.length === 0) return;
+    const intervalMs = (appData.settings.multiMsgInterval || 2) * 1000;
+    // 先等待初始延迟
+    setTimeout(async () => {
+        for (let i = 1; i <= count; i++) {
+            setTimeout(async () => {
+                let content = allWords[Math.floor(Math.random() * allWords.length)];
+                let type = 'text';
+                if (appData.wordbanks.stickers.length > 0 && Math.random() * 100 < (appData.settings.stickerProb || 10)) {
+                    type = 'image';
+                    content = appData.wordbanks.stickers[Math.floor(Math.random() * appData.wordbanks.stickers.length)];
+                } else {
+                    if (Math.random() * 100 < (appData.settings.emojiProb || 20) && appData.wordbanks.emojis.length > 0) {
+                        content += ' ' + appData.wordbanks.emojis[Math.floor(Math.random() * appData.wordbanks.emojis.length)];
+                    }
+                }
+                const msg = { id: Date.now() + i, sender: role.id, content: content, time: Date.now(), type: type };
+                if (!appData.chats[role.id]) appData.chats[role.id] = [];
+                appData.chats[role.id].push(msg);
+                debouncedSaveData();
+                if (currentChatType === 'role' && currentRoleId === role.id) {
+                    appendMessageToDOM(role.id, content, Date.now(), null, type);
+                } else {
+                    incrementUnread(role.id);
+                }
+                sendNotificationIfNeeded(`${role.name} 发来消息`, content);
+            }, (i - 1) * intervalMs);
+        }
+    }, initialDelayMs);
+}
+
+// 用户戳一戳角色（支持装饰符号，动作文本使用传入的 text，随机回复1~3条消息，延迟遵循聊天设置中的最短/最长时长）
+function executePokeWithText(text) {
+    if (currentChatType !== 'role' || !currentRoleId) return;
+    
+    // 获取“我”发出的符号（my 符号）
+    const mySymbol = (() => {
+        const cfg = appData.pokeSymbols?.my;
+        if (!cfg) return '';
+        if (cfg.preset === 'custom') return cfg.custom || '';
+        return POKE_SYMBOL_MAP[cfg.preset] || '';
+    })();
+    
+    // 用户发送拍一拍消息，显示为 (符号) 动作内容 (符号)
+    const content = `${mySymbol} ${text} ${mySymbol}`.trim();
+    const msg = { id: Date.now(), sender: 'me', content: content, time: Date.now(), type: 'poke' };
+    if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = [];
+    appData.chats[currentRoleId].push(msg);
+    debouncedSaveData();
+    appendMessageToDOM('me', content, Date.now(), null, 'poke');
+    
+    // 显示正在输入动画
+    const role = appData.roles.find(r => r.id === currentRoleId);
+    if (role) {
+        const tip = document.getElementById('typing-indicator');
+        document.getElementById('typing-avatar').src = role.avatar;
+        document.getElementById('typing-name').textContent = role.name;
+        tip.classList.add('active');
+        setTimeout(() => tip.classList.remove('active'), 2000);
+    }
+    
+    // 根据设置决定是否回复，回复数量随机1~3条
+    if (appData.settings.pokeAutoReplyEnabled && role) {
+        let prob = appData.settings.pokeAutoReplyProb ?? 45;
+        let shouldReply = false;
+        if (prob >= 100) {
+            shouldReply = true;
+        } else {
+            shouldReply = (Math.random() * 100 < prob);
+        }
+        if (shouldReply) {
+            const replyCount = Math.floor(Math.random() * 3) + 1;
+            // 初始延迟：在 minDelay~maxDelay 范围内随机
+            const minDelay = appData.settings.minDelay || 1;
+            const maxDelay = appData.settings.maxDelay || 3;
+            const initialDelay = (Math.random() * (maxDelay - minDelay) + minDelay) * 1000;
+            sendRolePokeReply(role, replyCount, initialDelay);
+        }
+    }
+}
+
+// 角色主动拍一拍用户（概率9%，消息格式：(符号) 角色名 动作内容 (符号)）
 function maybeTriggerRolePoke() {
     if (currentChatType !== 'role' || !currentRoleId) return;
-    const prob = appData.settings.pokeAutoReplyProb || 45;
-    if (Math.random() * 100 >= prob) return;
+    // 固定概率 9%
+    if (Math.random() >= 0.09) return;
+    
     const role = appData.roles.find(r => r.id === currentRoleId);
     if (!role) return;
-    const pokeTexts = role.pokeTheirTexts || ['拍了拍你'];
-    const randomPoke = pokeTexts[Math.floor(Math.random() * pokeTexts.length)];
-    const formatted = formatPokeText(randomPoke, 'partner');
+    
+    // 使用角色的拍一拍动作库（pokeActions）
+    let actions = role.pokeActions;
+    if (!actions || actions.length === 0) {
+        actions = [...PRESET_POKE_ACTIONS];
+    }
+    const randomAction = actions[Math.floor(Math.random() * actions.length)];
+    
+    // 获取对方发出的符号（partner 符号）
+    const partnerSymbol = (() => {
+        const cfg = appData.pokeSymbols?.partner;
+        if (!cfg) return '';
+        if (cfg.preset === 'custom') return cfg.custom || '';
+        return POKE_SYMBOL_MAP[cfg.preset] || '';
+    })();
+    
+    const formatted = `${partnerSymbol} ${role.name} ${randomAction} ${partnerSymbol}`.trim();
     const pokeMsg = { id: Date.now(), sender: currentRoleId, content: formatted, time: Date.now(), type: 'poke' };
     if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = [];
     appData.chats[currentRoleId].push(pokeMsg);
     debouncedSaveData();
     appendMessageToDOM(currentRoleId, formatted, Date.now(), null, 'poke');
+    
     // 显示正在输入动画
     const tip = document.getElementById('typing-indicator');
     document.getElementById('typing-avatar').src = role.avatar;
     document.getElementById('typing-name').textContent = role.name;
     tip.classList.add('active');
     setTimeout(() => tip.classList.remove('active'), 2000);
-    // 角色拍一拍后也可以回复文字（根据概率和原有回复逻辑，但这里为了简化，不重复触发）
 }
 
 // --- 群聊创建等原有函数（保持完整）---
@@ -7447,8 +7557,8 @@ function renderPokeActionsList() {
         } else {
             itemDiv.textContent = action;
             itemDiv.onclick = () => {
-                const formatted = formatPokeText(action, 'my');
-                executePokeWithText(formatted);
+                // 用户点击拍一拍动作，调用 executePokeWithText 并传入动作内容
+                executePokeWithText(action);
                 closePokeActionModal();
             };
         }
@@ -7502,8 +7612,7 @@ function addCustomPokeAndSend() {
     const role = appData.roles.find(r => r.id === currentRoleId);
     if (!role) return;
     // 先发送
-    const formatted = formatPokeText(text, 'my');
-    executePokeWithText(formatted);
+    executePokeWithText(text);
     // 添加到自定义库（如果不在库中）
     if (!role.pokeActions) role.pokeActions = [...PRESET_POKE_ACTIONS];
     if (!role.pokeActions.includes(text)) {
@@ -7545,42 +7654,8 @@ function deleteCustomPoke(index) {
     }
 }
 
-function executePokeWithText(text) {
-    if (currentChatType !== 'role' || !currentRoleId) return;
-    const msg = { id: Date.now(), sender: 'me', content: text, time: Date.now(), type: 'poke' };
-    if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = [];
-    appData.chats[currentRoleId].push(msg);
-    debouncedSaveData();
-    appendMessageToDOM('me', text, Date.now(), null, 'poke');
-    // 显示正在输入动画
-    const role = appData.roles.find(r => r.id === currentRoleId);
-    if (role) {
-        const tip = document.getElementById('typing-indicator');
-        document.getElementById('typing-avatar').src = role.avatar;
-        document.getElementById('typing-name').textContent = role.name;
-        tip.classList.add('active');
-        setTimeout(() => tip.classList.remove('active'), 2000);
-    }
-    // 戳一戳后角色主动回复（根据设置）
-    if (appData.settings.pokeAutoReplyEnabled) {
-        const prob = appData.settings.pokeAutoReplyProb || 45;
-        if (Math.random() * 100 < prob) {
-            setTimeout(() => {
-                const role = appData.roles.find(r => r.id === currentRoleId);
-                if (!role) return;
-                const allWords = getActiveWordList();
-                if (allWords.length > 0) {
-                    const replyContent = allWords[Math.floor(Math.random() * allWords.length)];
-                    const replyMsg = { id: Date.now(), sender: currentRoleId, content: replyContent, time: Date.now(), type: 'text' };
-                    appData.chats[currentRoleId].push(replyMsg);
-                    debouncedSaveData();
-                    appendMessageToDOM(currentRoleId, replyContent, Date.now(), null, 'text');
-                    sendNotificationIfNeeded(`${role.name} 发来消息`, replyContent);
-                }
-            }, 1500 + Math.random() * 2000);
-        }
-    }
-}
+// 注意：executePokeWithText 已经在上方定义并修改，此处不再重复
+// 注意：maybeTriggerRolePoke 已经在上方定义并修改，此处不再重复
 
 function closePokeActionModal() {
     const modal = document.getElementById('modal-poke-action');
@@ -7641,7 +7716,7 @@ function renderSymbolTable() {
                 <td><div class="symbol-radio ${myPreset === 'custom' && appData.pokeSymbols?.my?.custom === sym.char ? 'active' : ''}" onclick="selectSymbolCustom('my', '${escapeHtml(sym.char)}')"></div></td>
                 <td><div class="symbol-radio ${partnerPreset === 'custom' && appData.pokeSymbols?.partner?.custom === sym.char ? 'active' : ''}" onclick="selectSymbolCustom('partner', '${escapeHtml(sym.char)}')"></div></td>
                 <td><button class="delete-custom-symbol" onclick="removeCustomSymbol(${idx})">✖️</button></td>
-            </table>
+            </tr>
         `;
     });
     tbody.innerHTML = html;
