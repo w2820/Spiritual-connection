@@ -8670,20 +8670,113 @@ function closeTransferSettings() { document.getElementById('modal-transfer-setti
 async function saveTransferSettings() { appData.transferSettings.enabled = document.getElementById('setting-auto-transfer-switch').classList.contains('active'); appData.transferSettings.minAmount = parseFloat(document.getElementById('setting-transfer-min').value) || 5.20; appData.transferSettings.maxAmount = parseFloat(document.getElementById('setting-transfer-max').value) || 200; appData.transferSettings.probability = parseInt(document.getElementById('setting-transfer-prob').value) || 15; appData.transferSettings.checkInterval = parseInt(document.getElementById('setting-transfer-interval').value) || 30; const testSwitch = document.getElementById('setting-transfer-test-switch'); appData.settings.transferTestMode = testSwitch ? testSwitch.classList.contains('active') : false; await saveData(); closeTransferSettings(); if (appData.settings.transferTestMode && currentRoleId) { const role = appData.roles.find(r => r.id === currentRoleId); if (role) sendRoleTransfer(role, true); } autoTransferTimer = null; startAutoTransferTimer(); showToast('转账设置已保存'); }
 function openTransferRecords() { const page = document.getElementById('page-transfer-records'); page.style.zIndex = '1200'; page.classList.add('active'); renderCombinedBillList(); }
 function closeTransferRecords() { document.getElementById('page-transfer-records').classList.remove('active'); }
+
 function renderCombinedBillList() {
     const listEl = document.getElementById('transfer-records-list');
     let items = [];
-    appData.transferRecords.forEach(r => { const isIncoming = r.direction === 'received' || r.to === 'me'; items.push({ time: r.time, type: 'transfer', direction: isIncoming ? 'received' : 'sent', amount: r.amount, note: r.note || '', status: r.status, from: r.fromName || (r.from === 'me' ? '我' : r.from), to: r.toName || (r.to === 'me' ? '我' : r.to) }); });
-    appData.redPackets.filter(p => p.sender !== 'me').forEach(p => { const myRecord = p.records.find(r => r.userId === 'me'); if (myRecord) { items.push({ time: myRecord.time, type: 'redpacket', direction: 'received', amount: myRecord.amount, note: p.blessing || '', status: 'received', from: appData.roles.find(r => r.id === p.sender)?.name || '对方', to: '我' }); } });
-    appData.redPackets.filter(p => p.sender === 'me').forEach(p => { const total = p.totalAmount; if (total > 0) { items.push({ time: p.createTime, type: 'redpacket', direction: 'sent', amount: total, note: p.blessing || '', status: 'finished', from: '我', to: p.chatType === 'group' ? `群聊${p.chatId}` : appData.roles.find(r => r.id === p.chatId)?.name || '对方' }); } });
+    // 转账记录
+    appData.transferRecords.forEach(r => {
+        const isIncoming = r.direction === 'received' || r.to === 'me';
+        items.push({
+            time: r.time,
+            type: 'transfer',
+            direction: isIncoming ? 'received' : 'sent',
+            amount: r.amount,
+            note: r.note || '',
+            status: r.status,
+            from: r.fromName || (r.from === 'me' ? '我' : r.from),
+            to: r.toName || (r.to === 'me' ? '我' : r.to)
+        });
+    });
+    // 红包记录（收到的）
+    appData.redPackets.filter(p => p.sender !== 'me').forEach(p => {
+        const myRecord = p.records.find(r => r.userId === 'me');
+        if (myRecord) {
+            items.push({
+                time: myRecord.time,
+                type: 'redpacket',
+                direction: 'received',
+                amount: myRecord.amount,
+                note: p.blessing || '',
+                status: 'received',
+                from: appData.roles.find(r => r.id === p.sender)?.name || '对方',
+                to: '我'
+            });
+        }
+    });
+    // 红包记录（发出的）
+    appData.redPackets.filter(p => p.sender === 'me').forEach(p => {
+        const total = p.totalAmount;
+        if (total > 0) {
+            items.push({
+                time: p.createTime,
+                type: 'redpacket',
+                direction: 'sent',
+                amount: total,
+                note: p.blessing || '',
+                status: 'finished',
+                from: '我',
+                to: p.chatType === 'group' ? `群聊${p.chatId}` : (appData.roles.find(r => r.id === p.chatId)?.name || '对方')
+            });
+        }
+    });
+    // 按时间倒序
     items.sort((a, b) => b.time - a.time);
-    let receivedSum = 0, sentSum = 0; items.forEach(i => { if (i.direction === 'received') receivedSum += i.amount; else sentSum += i.amount; });
+    let receivedSum = 0, sentSum = 0;
+    items.forEach(i => {
+        if (i.direction === 'received') receivedSum += i.amount;
+        else sentSum += i.amount;
+    });
     let html = `<div class="bg-white rounded-2xl p-4 mb-4 shadow-sm"><div class="flex justify-between text-sm"><span>收入：<span class="text-green-600 font-bold">¥${receivedSum.toFixed(2)}</span></span><span>支出：<span class="text-red-500 font-bold">¥${sentSum.toFixed(2)}</span></span><span>净额：<span class="${receivedSum - sentSum >= 0 ? 'text-green-600' : 'text-red-500'} font-bold">¥${(receivedSum - sentSum).toFixed(2)}</span></span></div></div>`;
-    if (items.length === 0) { html += '<div class="text-center text-gray-400 py-10">暂无账单记录</div>'; }
-    else { const grouped = {}; items.forEach(item => { const dateKey = new Date(item.time).toLocaleDateString('zh-CN'); if (!grouped[dateKey]) grouped[dateKey] = []; grouped[dateKey].push(item); }); for (let dateKey in grouped) { html += `<div class="text-xs text-gray-400 px-1 mb-2 mt-4">${dateKey}</div>`; grouped[dateKey].forEach(item => { const timeStr = new Date(item.time).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }); const typeLabel = item.type === 'transfer' ? '转账' : '红包'; const statusText = item.status === 'received' || item.status === 'finished' ? '已收款' : '待收款'; const sign = item.direction === 'received' ? '+' : '-'; html += `<div class="bg-white rounded-xl p-3 mb-2 shadow-sm flex justify-between items-center"><div><div class="text-xs text-gray-400">${timeStr}</div><div class="text-sm font-medium mt-1">${sign} ¥${item.amount.toFixed(2)} <span class="text-xs text-gray-400">${typeLabel}</span></div>${item.note ? `<div class="text-xs text-gray-400">${escapeHtml(item.note)}</div>` : ''}</div><div class="text-xs text-gray-500">${statusText}</div></div>`; }); } }
+    if (items.length === 0) {
+        html += '<div class="text-center text-gray-400 py-10">暂无账单记录</div>';
+    } else {
+        const grouped = {};
+        items.forEach(item => {
+            const dateKey = new Date(item.time).toLocaleDateString('zh-CN');
+            if (!grouped[dateKey]) grouped[dateKey] = [];
+            grouped[dateKey].push(item);
+        });
+        for (let dateKey in grouped) {
+            html += `<div class="text-xs text-gray-400 px-1 mb-2 mt-4">${dateKey}</div>`;
+            grouped[dateKey].forEach(item => {
+                const timeStr = new Date(item.time).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+                const typeLabel = item.type === 'transfer' ? '转账' : '红包';
+                const statusText = item.status === 'received' || item.status === 'finished' ? '已收款' : '待收款';
+                const sign = item.direction === 'received' ? '+' : '-';
+                // 构建转账双方信息
+                let whoText = '';
+                if (item.type === 'transfer') {
+                    if (item.direction === 'received') {
+                        whoText = `<div class="text-xs text-gray-400">来自 ${item.from}</div>`;
+                    } else {
+                        whoText = `<div class="text-xs text-gray-400">转给 ${item.to}</div>`;
+                    }
+                } else if (item.type === 'redpacket') {
+                    if (item.direction === 'received') {
+                        whoText = `<div class="text-xs text-gray-400">来自 ${item.from} 的红包</div>`;
+                    } else {
+                        whoText = `<div class="text-xs text-gray-400">发给 ${item.to} 的红包</div>`;
+                    }
+                }
+                html += `
+                    <div class="bg-white rounded-xl p-3 mb-2 shadow-sm flex justify-between items-center">
+                        <div>
+                            <div class="text-xs text-gray-400">${timeStr}</div>
+                            <div class="text-sm font-medium mt-1">${sign} ¥${item.amount.toFixed(2)} <span class="text-xs text-gray-400">${typeLabel}</span></div>
+                            ${whoText}
+                            ${item.note ? `<div class="text-xs text-gray-400">备注：${escapeHtml(item.note)}</div>` : ''}
+                        </div>
+                        <div class="text-xs text-gray-500">${statusText}</div>
+                    </div>
+                `;
+            });
+        }
+    }
     html += `<div class="mt-6"><button onclick="clearAllBills()" class="w-full bg-red-50 text-red-600 p-3 rounded-xl font-medium active:bg-red-100 transition">清空所有账单记录</button></div>`;
     listEl.innerHTML = html;
 }
+
 async function clearAllBills() { showConfirm('确定清空所有转账和红包记录吗？', async () => { appData.transferRecords = []; appData.redPackets = []; await saveData(); renderCombinedBillList(); showToast('账单已清空'); }); }
 window.clearAllBills = clearAllBills;
 function showPlusPanel() { const panel = document.getElementById('plus-panel'); if (!panel) return; if (panel.style.display === 'none' || !panel.style.display) { panel.style.display = 'block'; panel.style.zIndex = '360'; } else { panel.style.display = 'none'; } const transferBtn = panel.querySelector('[onclick*="showTransferModal"]'); if (transferBtn) { transferBtn.parentElement.style.display = (currentChatType === 'role') ? '' : 'none'; } const redpacketBtn = panel.querySelector('[onclick*="showRedPacketModal"]'); if (redpacketBtn) { redpacketBtn.parentElement.style.display = ''; } }
