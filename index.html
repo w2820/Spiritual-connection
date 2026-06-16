@@ -3623,7 +3623,13 @@
         </div>
         <div class="notification-section">
             <h3 class="text-sm font-semibold mb-3">通知与关于</h3>
-            <div class="notification-item"><div class="info"><h4>后台消息推送</h4><p id="notification-status-text">检查权限中...</p></div><div class="ios-switch" id="notification-switch" onclick="toggleNotificationPermission()"></div></div>
+            <div class="notification-item"><div class="info"><h4>后台消息推送</h4><p id="notification-status-text">检查权限中...</p></div>
+            <!-- 修复：通知开关使用 label + input 结构 -->
+            <label class="dm-toggle-pill">
+                <input type="checkbox" id="notif-permission-toggle" onchange="handleNotifToggle(this)">
+                <span class="dm-toggle-slider"></span>
+            </label>
+            </div>
             <div class="notification-item"><div class="info"><h4>关于</h4><p>Spiritual connection v2.0</p></div><span class="notification-badge" onclick="showSourceCode()">查看源码</span></div>
         </div>
         <button onclick="closeDataManagement()" class="w-full bg-gray-100 p-3 rounded-xl font-medium mt-4">返回</button>
@@ -5857,7 +5863,7 @@ async function loadData() {
     forceApplyTheme();
     // 额外确保背景色 RGB 变量正确（音乐卡片背景问题）
     updateBgSecondaryRgb();
-    
+
     // ============================================================
     // 修复：气泡 CSS 编辑器功能（完全参考 index.html 逻辑）
     // ============================================================
@@ -5923,6 +5929,76 @@ async function loadData() {
 
     // 执行初始化
     initBubbleCssEditor();
+
+    // ============================================================
+    // 修复：通知权限开关（兼容现有 HTML 结构）
+    // ============================================================
+    function fixNotificationToggle() {
+        const toggle = document.getElementById('notification-switch');
+        const statusText = document.getElementById('notification-status-text');
+        if (!toggle) return;
+
+        // 移除原有的 onclick 属性（由 HTML 内联绑定）
+        toggle.removeAttribute('onclick');
+
+        // 绑定新的事件
+        toggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            // 模拟开关切换视觉效果
+            this.classList.toggle('active');
+            const isActive = this.classList.contains('active');
+
+            if (!('Notification' in window)) {
+                this.classList.remove('active');
+                if (statusText) statusText.textContent = '⚠️ 您的浏览器不支持通知';
+                return;
+            }
+
+            if (isActive) {
+                // 请求权限
+                Notification.requestPermission().then(function(perm) {
+                    if (perm === 'granted') {
+                        if (statusText) statusText.textContent = '✅ 已开启 — 对方回复时提醒';
+                        localStorage.setItem('notifEnabled', '1');
+                        try {
+                            new Notification('Spiritual connection', {
+                                body: '通知已开启！当对方回复时我们会提醒您。',
+                                icon: appData.userProfile?.avatar || DEFAULT_AVATAR
+                            });
+                        } catch(e) {}
+                    } else {
+                        toggle.classList.remove('active');
+                        if (statusText) statusText.textContent = perm === 'denied' ? '❌ 权限被拒绝，请在浏览器设置中开启' : '⚠️ 未授权';
+                        localStorage.setItem('notifEnabled', '0');
+                    }
+                }).catch(function() {
+                    toggle.classList.remove('active');
+                    if (statusText) statusText.textContent = '❌ 请求权限失败';
+                    localStorage.setItem('notifEnabled', '0');
+                });
+            } else {
+                if (statusText) statusText.textContent = '已关闭 — 后台将不提醒';
+                localStorage.setItem('notifEnabled', '0');
+            }
+        });
+
+        // 初始化状态
+        const enabled = localStorage.getItem('notifEnabled') === '1';
+        const granted = ('Notification' in window) && Notification.permission === 'granted';
+        toggle.classList.toggle('active', enabled && granted);
+        if (statusText) {
+            if (enabled && granted) {
+                statusText.textContent = '✅ 已开启 — 对方回复时提醒';
+            } else if ('Notification' in window && Notification.permission === 'denied') {
+                statusText.textContent = '❌ 权限被拒绝，请在浏览器设置中开启';
+            } else {
+                statusText.textContent = '点击开关请求权限';
+            }
+        }
+    }
+
+    // 在页面加载完成后执行修复
+    setTimeout(fixNotificationToggle, 500);
 }
 
 function initPokeSymbolUI() {
@@ -11657,122 +11733,75 @@ function applyCustomBubbleCss(cssCode) {
 }
 
 // ============================================================
-// 强制修复：气泡 CSS 自定义功能（确保按钮可用）
+// 修复：通知权限开关（兼容现有 HTML 结构）—— 确保点击后弹出权限请求
 // ============================================================
-(function fixBubbleCss() {
-    // 确保 DOM 元素存在
-    const applyBtn = document.getElementById('apply-bubble-css');
-    const resetBtn = document.getElementById('reset-bubble-css');
-    const textarea = document.getElementById('custom-bubble-css');
+// 在页面加载完成后执行修复，防止 DOM 未渲染
+function fixNotificationToggle() {
+    const toggle = document.getElementById('notification-switch');
+    const statusText = document.getElementById('notification-status-text');
+    if (!toggle) return;
 
-    if (!applyBtn || !resetBtn || !textarea) {
-        console.warn('气泡 CSS 编辑器元素未找到，稍后重试...');
-        // 如果元素还没加载，等待 DOM 就绪
-        document.addEventListener('DOMContentLoaded', fixBubbleCss);
-        return;
-    }
+    // 移除原有的 onclick 属性（由 HTML 内联绑定），避免冲突
+    toggle.removeAttribute('onclick');
 
-    // 定义核心应用函数（如果已经存在则复用，否则定义）
-    if (typeof window.applyCustomBubbleCss !== 'function') {
-        window.applyCustomBubbleCss = function(cssCode) {
-            const styleId = 'user-custom-bubble-style';
-            let styleTag = document.getElementById(styleId);
-            if (styleTag) styleTag.remove();
+    // 绑定新的事件
+    toggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        // 模拟开关切换视觉效果
+        this.classList.toggle('active');
+        const isActive = this.classList.contains('active');
 
-            if (!cssCode || !cssCode.trim()) {
-                // 清除样式并刷新聊天
-                if (typeof renderChatMessages === 'function') renderChatMessages();
-                showToast('🔄 气泡 CSS 已清除');
-                return;
-            }
+        if (!('Notification' in window)) {
+            this.classList.remove('active');
+            if (statusText) statusText.textContent = '⚠️ 您的浏览器不支持通知';
+            return;
+        }
 
-            styleTag = document.createElement('style');
-            styleTag.id = styleId;
-
-            // 增强选择器权重
-            function boostSpecificity(css) {
-                return css.replace(/([^{}@][^{}]*)\{([^{}]*)\}/g, (match, rawSel, body) => {
-                    const selectors = rawSel.split(',').map(s => s.trim()).filter(Boolean);
-                    const boosted = selectors.map(sel => {
-                        if (sel.startsWith('html') || sel.startsWith('@') || sel.startsWith('from') || sel.startsWith('to') || /^\d/.test(sel)) {
-                            return sel;
-                        }
-                        return `html body ${sel}`;
-                    });
-                    return `${boosted.join(', ')} {${body}}`;
-                });
-            }
-
-            styleTag.textContent = boostSpecificity(cssCode) + `
-                /* 强制图片气泡透明 */
-                html body .message.message-image-bubble-none,
-                html body .bubble-left:has(> img:only-child),
-                html body .bubble-right:has(> img:only-child) {
-                    background: transparent !important;
-                    border: none !important;
-                    box-shadow: none !important;
-                    padding: 0 !important;
-                    border-radius: 0 !important;
+        if (isActive) {
+            // 请求权限
+            Notification.requestPermission().then(function(perm) {
+                if (perm === 'granted') {
+                    if (statusText) statusText.textContent = '✅ 已开启 — 对方回复时提醒';
+                    localStorage.setItem('notifEnabled', '1');
+                    try {
+                        new Notification('Spiritual connection', {
+                            body: '通知已开启！当对方回复时我们会提醒您。',
+                            icon: appData.userProfile?.avatar || DEFAULT_AVATAR
+                        });
+                    } catch(e) {}
+                } else {
+                    toggle.classList.remove('active');
+                    if (statusText) statusText.textContent = perm === 'denied' ? '❌ 权限被拒绝，请在浏览器设置中开启' : '⚠️ 未授权';
+                    localStorage.setItem('notifEnabled', '0');
                 }
-            `;
-            document.head.appendChild(styleTag);
-
-            // 刷新聊天消息
-            if (typeof renderChatMessages === 'function') renderChatMessages();
-            showToast('✅ 气泡 CSS 已应用');
-        };
-    }
-
-    // 移除旧的事件监听（避免重复绑定）
-    const newApply = applyBtn.cloneNode(true);
-    const newReset = resetBtn.cloneNode(true);
-    applyBtn.parentNode.replaceChild(newApply, applyBtn);
-    resetBtn.parentNode.replaceChild(newReset, resetBtn);
-
-    // 绑定新事件
-    newApply.addEventListener('click', function() {
-        const css = textarea.value.trim();
-        if (typeof window.applyCustomBubbleCss === 'function') {
-            window.applyCustomBubbleCss(css);
-            // 保存到 appData
-            if (typeof appData !== 'undefined' && appData.appearance) {
-                appData.appearance.customBubbleCss = css;
-                if (typeof debouncedSaveData === 'function') {
-                    debouncedSaveData();
-                } else if (typeof saveData === 'function') {
-                    saveData();
-                }
-            }
+            }).catch(function() {
+                toggle.classList.remove('active');
+                if (statusText) statusText.textContent = '❌ 请求权限失败';
+                localStorage.setItem('notifEnabled', '0');
+            });
         } else {
-            showToast('❌ applyCustomBubbleCss 函数未定义');
+            if (statusText) statusText.textContent = '已关闭 — 后台将不提醒';
+            localStorage.setItem('notifEnabled', '0');
         }
     });
 
-    newReset.addEventListener('click', function() {
-        textarea.value = '';
-        if (typeof window.applyCustomBubbleCss === 'function') {
-            window.applyCustomBubbleCss('');
+    // 初始化状态
+    const enabled = localStorage.getItem('notifEnabled') === '1';
+    const granted = ('Notification' in window) && Notification.permission === 'granted';
+    toggle.classList.toggle('active', enabled && granted);
+    if (statusText) {
+        if (enabled && granted) {
+            statusText.textContent = '✅ 已开启 — 对方回复时提醒';
+        } else if ('Notification' in window && Notification.permission === 'denied') {
+            statusText.textContent = '❌ 权限被拒绝，请在浏览器设置中开启';
+        } else {
+            statusText.textContent = '点击开关请求权限';
         }
-        if (typeof appData !== 'undefined' && appData.appearance) {
-            appData.appearance.customBubbleCss = '';
-            if (typeof debouncedSaveData === 'function') {
-                debouncedSaveData();
-            } else if (typeof saveData === 'function') {
-                saveData();
-            }
-        }
-        showToast('🔄 气泡 CSS 已重置');
-    });
-
-    // 如果之前有保存的 CSS，自动加载
-    if (appData && appData.appearance && appData.appearance.customBubbleCss) {
-        textarea.value = appData.appearance.customBubbleCss;
-        // 自动应用（可选，如果希望打开面板时立即应用，取消注释下一行）
-        // window.applyCustomBubbleCss(appData.appearance.customBubbleCss);
     }
+}
 
-    console.log('✅ 气泡 CSS 编辑器修复完成');
-})();
+// 在 loadData 最后调用 fixNotificationToggle
+setTimeout(fixNotificationToggle, 500);
 
 </script>
 </body>
