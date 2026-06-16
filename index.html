@@ -30,6 +30,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Spiritual connection</title>
+    <!-- 新增 manifest.json 支持全屏（底部网址隐藏） -->
+    <link rel="manifest" href="manifest.json">
+    <!-- 确保全屏模式 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#82cbb2">
+
     <script src="https://marscode-static.doubaocdn.com/_lib/app-main.js"></script>
     <script src="https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/resource/npm/@tailwindcss/browser@3.4.17/dist/index.global.js"></script>
     <script src="https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/resource/npm/lucide@0.560.0/dist/umd/lucide.min.js"></script>
@@ -2871,6 +2879,50 @@
         .cosmic-modal button.cosmic-gen:active {
             transform: scale(0.98);
         }
+        /* ========== 新增：气泡 CSS 编辑器面板（在 modal-appearance-bubble 中增加） ========== */
+        .bubble-css-editor {
+            margin-top: 16px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 16px;
+        }
+        .bubble-css-editor label {
+            font-size: 12px;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+        .bubble-css-editor textarea {
+            width: 100%;
+            height: 120px;
+            font-family: monospace;
+            font-size: 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 8px;
+            color: var(--text-primary);
+            resize: vertical;
+            outline: none;
+        }
+        .bubble-css-editor .editor-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .bubble-css-editor .editor-actions button {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .bubble-css-editor .editor-actions .reset-bubble-css {
+            background: #e5e7eb;
+            color: #4b5563;
+        }
     </style>
 </head>
 <body class="text-gray-800">
@@ -3183,7 +3235,7 @@
     </div>
 </div>
 
-<!-- 外观子页面：气泡 & CSS -->
+<!-- 外观子页面：气泡 & CSS（增加自定义 CSS 编辑器） -->
 <div id="modal-appearance-bubble" class="modal-overlay hidden">
     <div class="modal-card">
         <div class="flex items-center gap-2 mb-6">
@@ -3196,6 +3248,24 @@
             <div class="bg-gray-50 p-4 rounded-2xl flex flex-col gap-3">
                 <div class="flex items-end gap-2"><div class="w-8 h-8 rounded-full bg-gray-200"></div><div class="bubble-left px-4 py-2 text-sm">你好呀！这是一条预览消息。</div></div>
                 <div class="flex items-end justify-end gap-2"><div class="bubble-right px-4 py-2 text-sm" style="color: #686A67;">收到，这是我的回复。</div></div>
+            </div>
+        </div>
+        <!-- 新增：气泡 CSS 自定义编辑器 -->
+        <div class="bubble-css-editor">
+            <label>📝 自定义气泡 CSS（复制粘贴代码即可改变样式）</label>
+            <textarea id="custom-bubble-css" placeholder="/* 输入 CSS 代码，例如：  
+.bubble-left {  
+  background: #ffefdb !important;  
+  border-radius: 20px 20px 20px 4px !important;  
+}  
+.bubble-right {  
+  background: #d9f0ec !important;  
+  border-radius: 20px 20px 4px 20px !important;  
+}  
+*/"></textarea>
+            <div class="editor-actions">
+                <button id="apply-bubble-css" class="apply-bubble-css">应用 CSS</button>
+                <button id="reset-bubble-css" class="reset-bubble-css">重置</button>
             </div>
         </div>
     </div>
@@ -3486,7 +3556,7 @@
             <div><label class="text-sm font-medium block mb-3">多条回复概率设置 (%)</label><div class="flex gap-4"><div class="flex-1"><span class="text-xs text-gray-400 block mb-1 text-center">回复2条概率</span><input type="number" id="setting-prob-2" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-center font-bold" value="20"></div><div class="flex-1"><span class="text-xs text-gray-400 block mb-1 text-center">回复3条概率</span><input type="number" id="setting-prob-3" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-center font-bold" value="5"></div></div></div>
             <div><label class="text-sm font-medium block mb-3">引用功能概率设置 (%)</label><div class="flex gap-4"><div class="flex-1"><span class="text-xs text-gray-400 block mb-1 text-center">引用我的消息</span><input type="number" id="setting-quote-my" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-center font-bold" value="10"></div><div class="flex-1"><span class="text-xs text-gray-400 block mb-1 text-center">引用他人消息</span><input type="number" id="setting-quote-other" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-center font-bold" value="5"></div></div></div>
             <div class="border-t border-gray-200 pt-4 mt-4"><h3 class="text-sm font-semibold mb-3">消息氛围</h3><div class="bg-gray-50 p-4 rounded-xl space-y-3"><p class="text-xs text-gray-400">角色回复时随机混入 Emoji 或图片表情</p><div class="grid grid-cols-2 gap-3 mt-3"><div><span class="text-xs text-gray-500 block mb-1">Emoji 混入概率 (%)</span><input type="number" id="setting-emoji-prob" min="0" max="100" value="20" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div><div><span class="text-xs text-gray-500 block mb-1">图片表情概率 (%)</span><input type="number" id="setting-sticker-prob" min="0" max="100" value="10" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div></div></div></div>
-            <div class="border-t border-gray-200 pt-4 mt-4"><div class="flex items-center justify-between mb-3"><h3 class="text-sm font-semibold">群聊发言人数概率</h3><select id="group-prob-select" class="text-xs bg-gray-50 border border-gray-200 rounded-lg px-2 py-1" onchange="loadGroupProbConfig()"><option value="">选择群聊</option></select></div><div id="group-prob-config-panel" class="bg-gray-50 p-4 rounded-xl space-y-3 hidden"><p class="text-xs text-gray-500 mb-2">当前群成员数：<span id="group-member-count">0</span> 人</p><div id="group-prob-inputs" class="space-y-2"></div><p class="text-[10px] text-gray-400">各概率总和需为 100%</p><button onclick="saveCurrentGroupProb()" class="mt-2 w-full py-1.5 rounded-lg text-xs font-medium" style="background-color: var(--accent-light); color: var(--accent-color);">保存此群概率</button><p id="prob-error-msg" class="text-xs text-red-500 hidden mt-1"></p></div></div>
+            <div class="border-t border-gray-200 pt-4 mt-4"><h3 class="text-sm font-semibold mb-3">群聊发言人数概率</h3><select id="group-prob-select" class="text-xs bg-gray-50 border border-gray-200 rounded-lg px-2 py-1" onchange="loadGroupProbConfig()"><option value="">选择群聊</option></select></div><div id="group-prob-config-panel" class="bg-gray-50 p-4 rounded-xl space-y-3 hidden"><p class="text-xs text-gray-500 mb-2">当前群成员数：<span id="group-member-count">0</span> 人</p><div id="group-prob-inputs" class="space-y-2"></div><p class="text-[10px] text-gray-400">各概率总和需为 100%</p><button onclick="saveCurrentGroupProb()" class="mt-2 w-full py-1.5 rounded-lg text-xs font-medium" style="background-color: var(--accent-light); color: var(--accent-color);">保存此群概率</button><p id="prob-error-msg" class="text-xs text-red-500 hidden mt-1"></p></div>
             <div class="border-t border-gray-200 pt-4 mt-4"><h3 class="text-sm font-semibold mb-3">模拟视频通话</h3><div class="bg-gray-50 p-4 rounded-xl space-y-3"><div class="flex items-center justify-between"><span class="text-sm">显示通话按钮</span><div class="ios-switch" id="setting-call-enabled-switch" onclick="toggleSwitch(this)"></div></div><p class="text-xs text-gray-400">关闭后聊天头部将隐藏通话按钮</p><div class="grid grid-cols-2 gap-3 mt-3"><div><span class="text-xs text-gray-500 block mb-1">拒绝通话概率 (%)</span><input type="number" id="setting-call-reject-prob" min="0" max="100" value="20" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div><div><span class="text-xs text-gray-500 block mb-1">未接听概率 (%)</span><input type="number" id="setting-call-miss-prob" min="0" max="100" value="10" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div></div><div class="grid grid-cols-2 gap-3 mt-3"><div><span class="text-xs text-gray-500 block mb-1">最短通话 (分钟)</span><input type="number" id="setting-call-min-duration" min="0.1" max="30" step="0.1" value="0.5" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div><div><span class="text-xs text-gray-500 block mb-1">最长通话 (分钟)</span><input type="number" id="setting-call-max-duration" min="0.1" max="30" step="0.1" value="2" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div></div><div class="mt-3"><span class="text-xs text-gray-500 block mb-1">来电铃声 URL</span><div class="flex items-center gap-2"><input type="text" id="setting-call-ringtone" class="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm" placeholder="默认铃声"><button onclick="loadAndTestRingtone()" class="text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full border border-gray-200 active:bg-gray-200 transition">加载并测试</button></div></div></div></div>
             <div class="border-t border-gray-200 pt-4 mt-4"><h3 class="text-sm font-semibold mb-3">多条回复间隔</h3><div class="bg-gray-50 p-4 rounded-xl space-y-3"><div class="flex items-center justify-between"><span class="text-sm">间隔时间 (秒)</span><input type="number" id="setting-multi-interval" min="1" max="10" value="2" class="w-20 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div><p class="text-xs text-gray-400">角色连续回复多条消息时，每条之间的等待秒数</p></div></div>
             <div class="border-t border-gray-200 pt-4 mt-4"><h3 class="text-sm font-semibold mb-3">自动来电</h3><div class="bg-gray-50 p-4 rounded-xl space-y-3"><div class="flex items-center justify-between"><span class="text-sm">启用角色主动来电</span><div class="ios-switch" id="setting-auto-call-enabled-switch" onclick="toggleSwitch(this)"></div></div><p class="text-xs text-gray-400">开启后角色会随机主动给你打电话</p><div class="grid grid-cols-2 gap-3 mt-3"><div><span class="text-xs text-gray-500 block mb-1">来电概率 (%)</span><input type="number" id="setting-auto-call-prob" min="0" max="100" value="30" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div><div><span class="text-xs text-gray-500 block mb-1">最小间隔 (分钟)</span><input type="number" id="setting-auto-call-min-interval" min="1" max="120" value="10" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div><div><span class="text-xs text-gray-500 block mb-1">最大间隔 (分钟)</span><input type="number" id="setting-auto-call-max-interval" min="1" max="120" value="30" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div><div><span class="text-xs text-gray-500 block mb-1">超时未接 (秒)</span><input type="number" id="setting-auto-call-user-timeout" min="5" max="60" value="30" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div></div><div class="grid grid-cols-2 gap-3 mt-3"><div><span class="text-xs text-gray-500 block mb-1">最短通话 (分钟)</span><input type="number" id="setting-auto-call-min-duration" min="0.1" max="30" step="0.1" value="0.5" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div><div><span class="text-xs text-gray-500 block mb-1">最长通话 (分钟)</span><input type="number" id="setting-auto-call-max-duration" min="0.1" max="30" step="0.1" value="3" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"></div></div></div></div>
@@ -3777,7 +3847,7 @@
 </div>
 
 <!-- 悬浮音乐播放器 (已废弃，隐藏) -->
-<div id="music-player" class="music-player" onclick="toggleMusicPlayer(event)" style="display:none !important;">
+<div id="music-player" class="music-player" style="display:none !important;">
     <div class="music-icon">🎵</div>
     <div class="music-controls"><audio id="music-audio" controls style="width:100%"></audio><input type="text" id="music-url" class="music-url-input" placeholder="输入音乐URL (mp3)" value="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"><button onclick="loadMusic()" class="text-xs px-2 py-1 rounded-full" style="background-color: var(--accent-light); color: var(--accent-color);">加载</button></div>
     <div class="close-music" onclick="closeMusicPlayer(event)">✕</div>
@@ -4351,7 +4421,6 @@
 </div>
 
 <script>
-
 // 初始化图标
 lucide.createIcons();
 
@@ -5788,6 +5857,72 @@ async function loadData() {
     forceApplyTheme();
     // 额外确保背景色 RGB 变量正确（音乐卡片背景问题）
     updateBgSecondaryRgb();
+    
+    // ============================================================
+    // 修复：气泡 CSS 编辑器功能（完全参考 index.html 逻辑）
+    // ============================================================
+    function initBubbleCssEditor() {
+        const applyBtn = document.getElementById('apply-bubble-css');
+        const resetBtn = document.getElementById('reset-bubble-css');
+        const textarea = document.getElementById('custom-bubble-css');
+
+        if (!applyBtn || !resetBtn || !textarea) {
+            console.warn('气泡 CSS 编辑器元素未找到');
+            return;
+        }
+
+        // 1. 加载已保存的 CSS
+        if (appData && appData.appearance && appData.appearance.customBubbleCss) {
+            textarea.value = appData.appearance.customBubbleCss;
+            if (typeof applyCustomBubbleCss === 'function') {
+                applyCustomBubbleCss(textarea.value);
+            }
+        }
+
+        // 2. 应用按钮
+        applyBtn.addEventListener('click', function() {
+            const css = textarea.value.trim();
+            
+            if (typeof applyCustomBubbleCss === 'function') {
+                applyCustomBubbleCss(css);
+            } else {
+                showToast('❌ applyCustomBubbleCss 函数未定义');
+                return;
+            }
+
+            if (typeof appData !== 'undefined' && appData.appearance) {
+                appData.appearance.customBubbleCss = css;
+                if (typeof debouncedSaveData === 'function') {
+                    debouncedSaveData();
+                } else {
+                    saveData();
+                }
+            }
+            showToast('✅ 气泡 CSS 已应用');
+        });
+
+        // 3. 重置按钮
+        resetBtn.addEventListener('click', function() {
+            textarea.value = '';
+            
+            if (typeof applyCustomBubbleCss === 'function') {
+                applyCustomBubbleCss('');
+            }
+            
+            if (typeof appData !== 'undefined' && appData.appearance) {
+                appData.appearance.customBubbleCss = '';
+                if (typeof debouncedSaveData === 'function') {
+                    debouncedSaveData();
+                } else {
+                    saveData();
+                }
+            }
+            showToast('🔄 气泡 CSS 已重置');
+        });
+    }
+
+    // 执行初始化
+    initBubbleCssEditor();
 }
 
 function initPokeSymbolUI() {
@@ -6949,7 +7084,37 @@ async function saveSettings() {
 
 function openAppearanceSettings() { pageHistory.push('settings'); tempAppearance = JSON.parse(JSON.stringify(appData.appearance)); document.getElementById('modal-settings-main').classList.add('hidden'); document.getElementById('modal-appearance').classList.remove('hidden'); }
 function closeAppearanceSettings() { document.getElementById('modal-appearance').classList.add('hidden'); if (pageHistory.pop() === 'settings') document.getElementById('modal-settings-main').classList.remove('hidden'); }
-function switchAppearanceTab(tab) { closeAppearanceSubTab(); if (tab === 'theme') { document.getElementById('modal-appearance-theme').classList.remove('hidden'); renderSchemeList(); renderThemeColorPalette(); } if (tab === 'background') { currentBgTab = 'home'; switchBgTab('home'); document.getElementById('modal-appearance-background').classList.remove('hidden'); } if (tab === 'bubble') { document.getElementById('bubble-radius').value = tempAppearance.bubble.radius; document.getElementById('bubble-shadow').value = tempAppearance.bubble.shadow; updateBubblePreview(); document.getElementById('modal-appearance-bubble').classList.remove('hidden'); } if (tab === 'avatar') { setAvatarShape(tempAppearance.avatarShape); loadAvatarSettingsToUI(); bindAvatarSettingsEvents(); document.getElementById('modal-appearance-avatar').classList.remove('hidden'); } }
+function switchAppearanceTab(tab) { 
+    closeAppearanceSubTab(); 
+    if (tab === 'theme') { 
+        document.getElementById('modal-appearance-theme').classList.remove('hidden'); 
+        renderSchemeList(); 
+        renderThemeColorPalette(); 
+    } 
+    if (tab === 'background') { 
+        currentBgTab = 'home'; 
+        switchBgTab('home'); 
+        document.getElementById('modal-appearance-background').classList.remove('hidden'); 
+    } 
+    if (tab === 'bubble') {
+        // 加载当前值
+        document.getElementById('bubble-radius').value = tempAppearance.bubble.radius || 13;
+        document.getElementById('bubble-shadow').value = tempAppearance.bubble.shadow || 1;
+        updateBubblePreview();
+        // 加载已保存的 CSS
+        const textarea = document.getElementById('custom-bubble-css');
+        if (textarea && appData && appData.appearance && appData.appearance.customBubbleCss) {
+            textarea.value = appData.appearance.customBubbleCss;
+        }
+        document.getElementById('modal-appearance-bubble').classList.remove('hidden');
+    }
+    if (tab === 'avatar') { 
+        setAvatarShape(tempAppearance.avatarShape); 
+        loadAvatarSettingsToUI(); 
+        bindAvatarSettingsEvents(); 
+        document.getElementById('modal-appearance-avatar').classList.remove('hidden'); 
+    } 
+}
 function closeAppearanceSubTab() { document.querySelectorAll('#modal-appearance-theme, #modal-appearance-background, #modal-appearance-bubble, #modal-appearance-avatar, #modal-appearance-theme-editor').forEach(m => m.classList.add('hidden')); }
 function setTheme(theme) {}
 function setAvatarShape(shape) { 
@@ -10866,7 +11031,7 @@ function drawTarot(count) {
 function drawRandomImages(count) {
     if (!lenormandLibrary.length) return [];
     const shuffled = [...lenormandLibrary];
-    for (let i = shuffled.length - 1; i > 0; i--) {
+    for (let i = lenormandLibrary.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
@@ -11425,7 +11590,190 @@ function closeCosmicGraphicModal() {
 window.openCosmicGraphicModal = openCosmicGraphicModal;
 window.closeCosmicGraphicModal = closeCosmicGraphicModal;
 
-</script>
+// ========== 增强版 applyCustomBubbleCss ==========
+function applyCustomBubbleCss(cssCode) {
+    const styleId = 'user-custom-bubble-style';
+    let styleTag = document.getElementById(styleId);
 
+    // 清除旧样式
+    if (styleTag) {
+        styleTag.remove();
+        styleTag = null;
+    }
+
+    // 如果没有 CSS 内容，直接返回
+    if (!cssCode || !cssCode.trim()) {
+        // 移除可能残留的样式
+        const old = document.getElementById(styleId);
+        if (old) old.remove();
+        return;
+    }
+
+    // 创建新样式标签
+    styleTag = document.createElement('style');
+    styleTag.id = styleId;
+
+    // 增强选择器权重（避免被内联样式覆盖）
+    function boostSpecificity(css) {
+        return css.replace(/([^{}@][^{}]*)\{([^{}]*)\}/g, (match, rawSel, body) => {
+            const selectors = rawSel.split(',').map(s => s.trim()).filter(Boolean);
+            const boosted = selectors.map(sel => {
+                // 跳过特殊选择器
+                if (sel.startsWith('html') || sel.startsWith('@') || sel.startsWith('from') || sel.startsWith('to') || /^\d/.test(sel)) {
+                    return sel;
+                }
+                // 增加 html body 前缀提高优先级
+                return `html body ${sel}`;
+            });
+            return `${boosted.join(', ')} {${body}}`;
+        });
+    }
+
+    // 注入增强后的 CSS
+    styleTag.textContent = boostSpecificity(cssCode) + `
+        /* 强制图片气泡透明 */
+        html body .message.message-image-bubble-none,
+        html body .bubble-left:has(> img:only-child),
+        html body .bubble-right:has(> img:only-child) {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            border-radius: 0 !important;
+        }
+    `;
+
+    document.head.appendChild(styleTag);
+
+    // 尝试同步更新已渲染的消息
+    if (typeof renderChatMessages === 'function') {
+        renderChatMessages();
+    } else if (typeof renderMessages === 'function') {
+        renderMessages();
+    }
+
+    // 提示成功
+    showToast('✅ 气泡样式已更新');
+}
+
+// ============================================================
+// 强制修复：气泡 CSS 自定义功能（确保按钮可用）
+// ============================================================
+(function fixBubbleCss() {
+    // 确保 DOM 元素存在
+    const applyBtn = document.getElementById('apply-bubble-css');
+    const resetBtn = document.getElementById('reset-bubble-css');
+    const textarea = document.getElementById('custom-bubble-css');
+
+    if (!applyBtn || !resetBtn || !textarea) {
+        console.warn('气泡 CSS 编辑器元素未找到，稍后重试...');
+        // 如果元素还没加载，等待 DOM 就绪
+        document.addEventListener('DOMContentLoaded', fixBubbleCss);
+        return;
+    }
+
+    // 定义核心应用函数（如果已经存在则复用，否则定义）
+    if (typeof window.applyCustomBubbleCss !== 'function') {
+        window.applyCustomBubbleCss = function(cssCode) {
+            const styleId = 'user-custom-bubble-style';
+            let styleTag = document.getElementById(styleId);
+            if (styleTag) styleTag.remove();
+
+            if (!cssCode || !cssCode.trim()) {
+                // 清除样式并刷新聊天
+                if (typeof renderChatMessages === 'function') renderChatMessages();
+                showToast('🔄 气泡 CSS 已清除');
+                return;
+            }
+
+            styleTag = document.createElement('style');
+            styleTag.id = styleId;
+
+            // 增强选择器权重
+            function boostSpecificity(css) {
+                return css.replace(/([^{}@][^{}]*)\{([^{}]*)\}/g, (match, rawSel, body) => {
+                    const selectors = rawSel.split(',').map(s => s.trim()).filter(Boolean);
+                    const boosted = selectors.map(sel => {
+                        if (sel.startsWith('html') || sel.startsWith('@') || sel.startsWith('from') || sel.startsWith('to') || /^\d/.test(sel)) {
+                            return sel;
+                        }
+                        return `html body ${sel}`;
+                    });
+                    return `${boosted.join(', ')} {${body}}`;
+                });
+            }
+
+            styleTag.textContent = boostSpecificity(cssCode) + `
+                /* 强制图片气泡透明 */
+                html body .message.message-image-bubble-none,
+                html body .bubble-left:has(> img:only-child),
+                html body .bubble-right:has(> img:only-child) {
+                    background: transparent !important;
+                    border: none !important;
+                    box-shadow: none !important;
+                    padding: 0 !important;
+                    border-radius: 0 !important;
+                }
+            `;
+            document.head.appendChild(styleTag);
+
+            // 刷新聊天消息
+            if (typeof renderChatMessages === 'function') renderChatMessages();
+            showToast('✅ 气泡 CSS 已应用');
+        };
+    }
+
+    // 移除旧的事件监听（避免重复绑定）
+    const newApply = applyBtn.cloneNode(true);
+    const newReset = resetBtn.cloneNode(true);
+    applyBtn.parentNode.replaceChild(newApply, applyBtn);
+    resetBtn.parentNode.replaceChild(newReset, resetBtn);
+
+    // 绑定新事件
+    newApply.addEventListener('click', function() {
+        const css = textarea.value.trim();
+        if (typeof window.applyCustomBubbleCss === 'function') {
+            window.applyCustomBubbleCss(css);
+            // 保存到 appData
+            if (typeof appData !== 'undefined' && appData.appearance) {
+                appData.appearance.customBubbleCss = css;
+                if (typeof debouncedSaveData === 'function') {
+                    debouncedSaveData();
+                } else if (typeof saveData === 'function') {
+                    saveData();
+                }
+            }
+        } else {
+            showToast('❌ applyCustomBubbleCss 函数未定义');
+        }
+    });
+
+    newReset.addEventListener('click', function() {
+        textarea.value = '';
+        if (typeof window.applyCustomBubbleCss === 'function') {
+            window.applyCustomBubbleCss('');
+        }
+        if (typeof appData !== 'undefined' && appData.appearance) {
+            appData.appearance.customBubbleCss = '';
+            if (typeof debouncedSaveData === 'function') {
+                debouncedSaveData();
+            } else if (typeof saveData === 'function') {
+                saveData();
+            }
+        }
+        showToast('🔄 气泡 CSS 已重置');
+    });
+
+    // 如果之前有保存的 CSS，自动加载
+    if (appData && appData.appearance && appData.appearance.customBubbleCss) {
+        textarea.value = appData.appearance.customBubbleCss;
+        // 自动应用（可选，如果希望打开面板时立即应用，取消注释下一行）
+        // window.applyCustomBubbleCss(appData.appearance.customBubbleCss);
+    }
+
+    console.log('✅ 气泡 CSS 编辑器修复完成');
+})();
+
+</script>
 </body>
 </html>
