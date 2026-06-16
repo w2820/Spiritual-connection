@@ -1,0 +1,17 @@
+{
+    "name": "Spiritual connection",
+    "short_name": "传讯",
+    "description": "Spiritual connection - 你与梦角的私密空间",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#82cbb2",
+    "theme_color": "#82cbb2",
+    "icons": [
+        {
+            "src": "https://p6-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/775a3744ebc74fa48a9dfae72c8d20cb~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947763&x-signature=uo4cB3G%2BvhnvAf1b2YEDaY3jqGE%3D",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
