@@ -2924,6 +2924,8 @@
             color: #4b5563;
         }
     </style>
+    <!-- ========== 新增：气泡 CSS 实时预览样式标签 ========== -->
+    <style id="css-live-preview-style"></style>
 </head>
 <body class="text-gray-800">
 
@@ -3266,6 +3268,24 @@
             <div class="editor-actions">
                 <button id="apply-bubble-css" class="apply-bubble-css">应用 CSS</button>
                 <button id="reset-bubble-css" class="reset-bubble-css">重置</button>
+            </div>
+        </div>
+        <!-- ========== 新增：CSS 实时预览区域（完全参考第二个文件） ========== -->
+        <div style="margin-top:14px; border-top:1px solid var(--border-color); padding-top:14px;">
+            <div style="font-size:11px; color:var(--text-secondary); margin-bottom:8px; font-weight:500; letter-spacing:0.3px;">实时预览</div>
+            <div id="css-live-preview" style="background:var(--chat-bg,var(--bg-primary)); border-radius:14px; padding:14px 12px; border:1px solid var(--border-color);">
+                <div style="display:flex; align-items:flex-end; gap:8px; margin-bottom:10px;">
+                    <div style="width:32px; height:32px; border-radius:50%; background:var(--accent-color); flex-shrink:0; display:flex; align-items:center; justify-content:center;">
+                        <i class="fas fa-user" style="font-size:12px; color:#fff;"></i>
+                    </div>
+                    <div class="message message-received" style="max-width:180px; padding:8px 12px; border-radius:12px; background:var(--bubble-received); color:var(--bubble-received-text);">你是我朝夕相伴触手可及的虚拟</div>
+                </div>
+                <div style="display:flex; align-items:flex-end; gap:8px; justify-content:flex-end;">
+                    <div class="message message-sent" style="max-width:180px; padding:8px 12px; border-radius:12px; background:var(--bubble-sent); color:var(--bubble-sent-text);">你是我未曾拥有无法捕捉的亲昵</div>
+                    <div style="width:32px; height:32px; border-radius:50%; background:var(--border-color); flex-shrink:0; display:flex; align-items:center; justify-content:center;">
+                        <i class="fas fa-user" style="font-size:12px; color:var(--text-secondary);"></i>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -3623,13 +3643,7 @@
         </div>
         <div class="notification-section">
             <h3 class="text-sm font-semibold mb-3">通知与关于</h3>
-            <div class="notification-item"><div class="info"><h4>后台消息推送</h4><p id="notification-status-text">检查权限中...</p></div>
-            <!-- 修复：通知开关使用 label + input 结构 -->
-            <label class="dm-toggle-pill">
-                <input type="checkbox" id="notif-permission-toggle" onchange="handleNotifToggle(this)">
-                <span class="dm-toggle-slider"></span>
-            </label>
-            </div>
+            <div class="notification-item"><div class="info"><h4>后台消息推送</h4><p id="notification-status-text">检查权限中...</p></div><div class="ios-switch" id="notification-switch" onclick="toggleNotificationPermission()"></div></div>
             <div class="notification-item"><div class="info"><h4>关于</h4><p>Spiritual connection v2.0</p></div><span class="notification-badge" onclick="showSourceCode()">查看源码</span></div>
         </div>
         <button onclick="closeDataManagement()" class="w-full bg-gray-100 p-3 rounded-xl font-medium mt-4">返回</button>
@@ -4611,7 +4625,7 @@ const DEFAULT_DATA = {
 
 // --- 全局状态 ---
 let appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
-let tempAppearance = { theme: 'custom', customColor: '#82cbb2', savedSchemes: [], backgrounds: { home: '', chat: '', group: '' }, bubble: { radius: 13, shadow: 1 }, avatarShape: 'circle', avatarSettings: { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' } };
+let tempAppearance = { theme: 'custom', customColor: '#82cbb2', savedSchemes: [], backgrounds: { home: '', chat: '', group: '' }, bubble: { radius: 13, shadow: 1 }, avatarShape: 'circle', avatarSettings: { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' }, customBubbleCss: '' };
 let currentChatType = 'role';
 let currentRoleId = null;
 let currentGroupId = null;
@@ -4725,6 +4739,9 @@ const POKE_SYMBOL_MAP = {
     flower: '✿',
     sparkle: '✨'
 };
+
+// --- 每个角色独立的"正在输入"状态管理 ---
+let roleTypingStates = {}; // { roleId: { active: boolean, timer: timeoutId, avatar: string, name: string } }
 
 // --- 主题配色系统相关变量 ---
 const BUILTIN_THEMES = [
@@ -5163,7 +5180,8 @@ async function saveData() {
                 backgrounds: appData.appearance.backgrounds,
                 bubble: appData.appearance.bubble,
                 avatarShape: appData.appearance.avatarShape,
-                avatarSettings: appData.appearance.avatarSettings
+                avatarSettings: appData.appearance.avatarSettings,
+                customBubbleCss: appData.appearance.customBubbleCss
             }));
         } catch(e) {}
         if (document.getElementById('modal-settings-data') && !document.getElementById('modal-settings-data').classList.contains('hidden')) updateStorageDisplay();
@@ -5191,22 +5209,37 @@ function forceApplyTheme() {
     const colors = appData.appearance?.customThemeColors;
     if (colors && Object.keys(colors).length > 0) {
         applyCustomColors(colors);
+        // 恢复气泡 CSS
+        if (appData.appearance.customBubbleCss) {
+            applyCustomBubbleCss(appData.appearance.customBubbleCss);
+        }
     } else {
         const themeId = appData.appearance?.theme;
         if (themeId && themeId !== 'custom') {
             applyBuiltinTheme(themeId);
+            if (appData.appearance.customBubbleCss) {
+                applyCustomBubbleCss(appData.appearance.customBubbleCss);
+            }
         } else {
             // 尝试从 localStorage 恢复
             const backup = localStorage.getItem('spiritual_theme_backup');
             if (backup) {
                 try {
-                    const { customThemeColors, theme, customColor } = JSON.parse(backup);
+                    const { customThemeColors, theme, customColor, customBubbleCss } = JSON.parse(backup);
                     if (customThemeColors && Object.keys(customThemeColors).length > 0) {
                         applyCustomColors(customThemeColors);
+                        if (customBubbleCss !== undefined) {
+                            appData.appearance.customBubbleCss = customBubbleCss;
+                            applyCustomBubbleCss(customBubbleCss);
+                        }
                         return;
                     }
                     if (theme && theme !== 'custom') {
                         applyBuiltinTheme(theme);
+                        if (customBubbleCss !== undefined) {
+                            appData.appearance.customBubbleCss = customBubbleCss;
+                            applyCustomBubbleCss(customBubbleCss);
+                        }
                         return;
                     }
                 } catch(e) {}
@@ -5645,6 +5678,13 @@ async function loadData() {
                     appData.appearance.bubble = backup.bubble || { radius: 13, shadow: 1 };
                     appData.appearance.avatarShape = backup.avatarShape || 'circle';
                     appData.appearance.avatarSettings = backup.avatarSettings || { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' };
+                    // ★ 恢复自定义气泡 CSS
+                    if (backup.customBubbleCss !== undefined) {
+                        appData.appearance.customBubbleCss = backup.customBubbleCss;
+                        applyCustomBubbleCss(backup.customBubbleCss);
+                    } else {
+                        appData.appearance.customBubbleCss = '';
+                    }
                 }
             } catch(e) {}
         }
@@ -5703,9 +5743,10 @@ async function loadData() {
         if (appData.settings.pokeAutoReplyEnabled === undefined) appData.settings.pokeAutoReplyEnabled = true;
         if (appData.settings.pokeAutoReplyProb === undefined) appData.settings.pokeAutoReplyProb = 45;
         // 初始化头像设置
-        if (!appData.appearance) appData.appearance = { theme: 'custom', customColor: '#82cbb2', savedSchemes: [], backgrounds: { home: '', chat: '', group: '' }, bubble: { radius: 13, shadow: 1 }, avatarShape: 'circle', avatarSettings: { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' }, customThemeColors: {} };
+        if (!appData.appearance) appData.appearance = { theme: 'custom', customColor: '#82cbb2', savedSchemes: [], backgrounds: { home: '', chat: '', group: '' }, bubble: { radius: 13, shadow: 1 }, avatarShape: 'circle', avatarSettings: { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' }, customThemeColors: {}, customBubbleCss: '' };
         else if (!appData.appearance.avatarSettings) appData.appearance.avatarSettings = { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' };
         if (!appData.appearance.customThemeColors) appData.appearance.customThemeColors = {};
+        if (appData.appearance.customBubbleCss === undefined) appData.appearance.customBubbleCss = '';
         
         appData.roles.forEach(r => { if (!r.lastAutoSendTime) r.lastAutoSendTime = Date.now(); if (!r.lastLoveRefresh) r.lastLoveRefresh = 0; if (!r.currentLoveState) r.currentLoveState = null; if (!r.onlineStatus) r.onlineStatus = { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 }; if (r.autoMailProbability === undefined) r.autoMailProbability = 15; if (r.todayMomentCount === undefined) r.todayMomentCount = 0; if (r.lastMomentDate === undefined) r.lastMomentDate = null; });
         if (!appData.transferSettings) appData.transferSettings = { enabled: true, minAmount: 5.20, maxAmount: 200, probability: 15, checkInterval: 30 };
@@ -5863,9 +5904,9 @@ async function loadData() {
     forceApplyTheme();
     // 额外确保背景色 RGB 变量正确（音乐卡片背景问题）
     updateBgSecondaryRgb();
-
+    
     // ============================================================
-    // 修复：气泡 CSS 编辑器功能（完全参考 index.html 逻辑）
+    // 修复：气泡 CSS 编辑器功能（完全参考 index.html 逻辑 + 持久化）
     // ============================================================
     function initBubbleCssEditor() {
         const applyBtn = document.getElementById('apply-bubble-css');
@@ -5874,10 +5915,24 @@ async function loadData() {
 
         if (!applyBtn || !resetBtn || !textarea) {
             console.warn('气泡 CSS 编辑器元素未找到');
+            // 延迟重试一次
+            setTimeout(function() {
+                const applyBtn2 = document.getElementById('apply-bubble-css');
+                const resetBtn2 = document.getElementById('reset-bubble-css');
+                const textarea2 = document.getElementById('custom-bubble-css');
+                if (applyBtn2 && resetBtn2 && textarea2) {
+                    console.log('气泡 CSS 编辑器元素已就绪，重新绑定');
+                    bindBubbleCssEvents(applyBtn2, resetBtn2, textarea2);
+                }
+            }, 500);
             return;
         }
 
-        // 1. 加载已保存的 CSS
+        bindBubbleCssEvents(applyBtn, resetBtn, textarea);
+    }
+
+    function bindBubbleCssEvents(applyBtn, resetBtn, textarea) {
+        // 1. 加载已保存的 CSS（从 appData.appearance 中读取，实现持久化）
         if (appData && appData.appearance && appData.appearance.customBubbleCss) {
             textarea.value = appData.appearance.customBubbleCss;
             if (typeof applyCustomBubbleCss === 'function') {
@@ -5885,9 +5940,14 @@ async function loadData() {
             }
         }
 
-        // 2. 应用按钮
-        applyBtn.addEventListener('click', function() {
+        // 2. 移除旧的事件监听（防止重复绑定）
+        applyBtn.removeEventListener('click', applyBtn._handler);
+        resetBtn.removeEventListener('click', resetBtn._handler);
+
+        // 3. 应用按钮
+        applyBtn._handler = function() {
             const css = textarea.value.trim();
+            console.log('[气泡CSS] 应用按钮点击，CSS长度:', css.length);
             
             if (typeof applyCustomBubbleCss === 'function') {
                 applyCustomBubbleCss(css);
@@ -5896,6 +5956,7 @@ async function loadData() {
                 return;
             }
 
+            // 持久化保存到 appData.appearance
             if (typeof appData !== 'undefined' && appData.appearance) {
                 appData.appearance.customBubbleCss = css;
                 if (typeof debouncedSaveData === 'function') {
@@ -5905,16 +5966,19 @@ async function loadData() {
                 }
             }
             showToast('✅ 气泡 CSS 已应用');
-        });
+        };
+        applyBtn.addEventListener('click', applyBtn._handler);
 
-        // 3. 重置按钮
-        resetBtn.addEventListener('click', function() {
+        // 4. 重置按钮
+        resetBtn._handler = function() {
+            console.log('[气泡CSS] 重置按钮点击');
             textarea.value = '';
             
             if (typeof applyCustomBubbleCss === 'function') {
                 applyCustomBubbleCss('');
             }
             
+            // 清除持久化保存
             if (typeof appData !== 'undefined' && appData.appearance) {
                 appData.appearance.customBubbleCss = '';
                 if (typeof debouncedSaveData === 'function') {
@@ -5924,81 +5988,14 @@ async function loadData() {
                 }
             }
             showToast('🔄 气泡 CSS 已重置');
-        });
+        };
+        resetBtn.addEventListener('click', resetBtn._handler);
+
+        console.log('[气泡CSS] 事件绑定完成');
     }
 
     // 执行初始化
     initBubbleCssEditor();
-
-    // ============================================================
-    // 修复：通知权限开关（兼容现有 HTML 结构）
-    // ============================================================
-    function fixNotificationToggle() {
-        const toggle = document.getElementById('notification-switch');
-        const statusText = document.getElementById('notification-status-text');
-        if (!toggle) return;
-
-        // 移除原有的 onclick 属性（由 HTML 内联绑定）
-        toggle.removeAttribute('onclick');
-
-        // 绑定新的事件
-        toggle.addEventListener('click', function(e) {
-            e.stopPropagation();
-            // 模拟开关切换视觉效果
-            this.classList.toggle('active');
-            const isActive = this.classList.contains('active');
-
-            if (!('Notification' in window)) {
-                this.classList.remove('active');
-                if (statusText) statusText.textContent = '⚠️ 您的浏览器不支持通知';
-                return;
-            }
-
-            if (isActive) {
-                // 请求权限
-                Notification.requestPermission().then(function(perm) {
-                    if (perm === 'granted') {
-                        if (statusText) statusText.textContent = '✅ 已开启 — 对方回复时提醒';
-                        localStorage.setItem('notifEnabled', '1');
-                        try {
-                            new Notification('Spiritual connection', {
-                                body: '通知已开启！当对方回复时我们会提醒您。',
-                                icon: appData.userProfile?.avatar || DEFAULT_AVATAR
-                            });
-                        } catch(e) {}
-                    } else {
-                        toggle.classList.remove('active');
-                        if (statusText) statusText.textContent = perm === 'denied' ? '❌ 权限被拒绝，请在浏览器设置中开启' : '⚠️ 未授权';
-                        localStorage.setItem('notifEnabled', '0');
-                    }
-                }).catch(function() {
-                    toggle.classList.remove('active');
-                    if (statusText) statusText.textContent = '❌ 请求权限失败';
-                    localStorage.setItem('notifEnabled', '0');
-                });
-            } else {
-                if (statusText) statusText.textContent = '已关闭 — 后台将不提醒';
-                localStorage.setItem('notifEnabled', '0');
-            }
-        });
-
-        // 初始化状态
-        const enabled = localStorage.getItem('notifEnabled') === '1';
-        const granted = ('Notification' in window) && Notification.permission === 'granted';
-        toggle.classList.toggle('active', enabled && granted);
-        if (statusText) {
-            if (enabled && granted) {
-                statusText.textContent = '✅ 已开启 — 对方回复时提醒';
-            } else if ('Notification' in window && Notification.permission === 'denied') {
-                statusText.textContent = '❌ 权限被拒绝，请在浏览器设置中开启';
-            } else {
-                statusText.textContent = '点击开关请求权限';
-            }
-        }
-    }
-
-    // 在页面加载完成后执行修复
-    setTimeout(fixNotificationToggle, 500);
 }
 
 function initPokeSymbolUI() {
@@ -6182,7 +6179,7 @@ async function handleMomentCoverUpload(input) {
 }
 
 async function initAppearance() {
-    if (!appData.appearance) appData.appearance = { theme: 'custom', customColor: '#82cbb2', savedSchemes: [], backgrounds: { home: '', chat: '', group: '' }, bubble: { radius: 13, shadow: 1 }, avatarShape: 'circle', avatarSettings: { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' }, customThemeColors: {} };
+    if (!appData.appearance) appData.appearance = { theme: 'custom', customColor: '#82cbb2', savedSchemes: [], backgrounds: { home: '', chat: '', group: '' }, bubble: { radius: 13, shadow: 1 }, avatarShape: 'circle', avatarSettings: { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' }, customThemeColors: {}, customBubbleCss: '' };
     else { 
         if (!appData.appearance.theme) appData.appearance.theme = 'custom'; 
         if (!appData.appearance.customColor) appData.appearance.customColor = '#82cbb2'; 
@@ -6192,6 +6189,7 @@ async function initAppearance() {
         if (!appData.appearance.avatarShape) appData.appearance.avatarShape = 'circle';
         if (!appData.appearance.avatarSettings) appData.appearance.avatarSettings = { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' };
         if (!appData.appearance.customThemeColors) appData.appearance.customThemeColors = {};
+        if (appData.appearance.customBubbleCss === undefined) appData.appearance.customBubbleCss = '';
     }
     const loadedBackgrounds = await loadBackgrounds();
     appData.appearance.backgrounds = { ...appData.appearance.backgrounds, ...loadedBackgrounds };
@@ -6200,7 +6198,7 @@ async function initAppearance() {
 }
 
 function applyAppearance() {
-    const { theme, customColor, backgrounds, bubble, avatarShape, avatarSettings, customThemeColors } = appData.appearance;
+    const { theme, customColor, backgrounds, bubble, avatarShape, avatarSettings, customThemeColors, customBubbleCss } = appData.appearance;
     const root = document.documentElement;
     let mainColor = '#82cbb2';
     // 如果有自定义颜色集，直接应用
@@ -6234,6 +6232,12 @@ function applyAppearance() {
     if (currentChatType === 'role' && currentRoleId) renderChatMessages();
     // 更新背景色 RGB 变量（音乐卡片背景）
     updateBgSecondaryRgb();
+    // ★ 新增：应用自定义气泡 CSS
+    if (customBubbleCss) {
+        applyCustomBubbleCss(customBubbleCss);
+    } else {
+        applyCustomBubbleCss(''); // 清除已有样式
+    }
 }
 
 function hexToRgb(hex) { const c = hex.substring(1); return [parseInt(c.substring(0,2), 16), parseInt(c.substring(2,4), 16), parseInt(c.substring(4,6), 16)]; }
@@ -6342,6 +6346,18 @@ function openChat(roleId) {
     updateChatPageHeight();
     renderChatMessages(); updateCallButtonVisibility();
     
+    // 进入聊天时，清除该角色的"正在输入"状态（因为我们要重新开始）
+    if (roleTypingStates[roleId]) {
+        if (roleTypingStates[roleId].timer) {
+            clearTimeout(roleTypingStates[roleId].timer);
+            roleTypingStates[roleId].timer = null;
+        }
+        roleTypingStates[roleId].active = false;
+        // 隐藏正在输入提示
+        const tip = document.getElementById('typing-indicator');
+        if (tip) tip.classList.remove('active');
+    }
+    
     // 进入聊天时，将所有对方发送的未读消息标记为已读
     const msgs = appData.chats[roleId];
     if (msgs) {
@@ -6385,6 +6401,18 @@ function openGroupChat(groupId) {
 }
 
 function goBack() {
+    // 退出聊天时，隐藏正在输入提示
+    const tip = document.getElementById('typing-indicator');
+    if (tip) tip.classList.remove('active');
+    // 清除当前角色的正在输入定时器（但保留消息发送功能，消息发送由独立的定时器管理）
+    if (currentRoleId && roleTypingStates[currentRoleId]) {
+        if (roleTypingStates[currentRoleId].timer) {
+            clearTimeout(roleTypingStates[currentRoleId].timer);
+            roleTypingStates[currentRoleId].timer = null;
+        }
+        roleTypingStates[currentRoleId].active = false;
+    }
+    
     document.getElementById('page-chat').classList.remove('active');
     document.getElementById('page-home').classList.add('active');
     currentChatType = 'role';
@@ -6529,14 +6557,16 @@ function createMessageElement(sender, content, time, quote = null, type = 'text'
             <div class="flex flex-col max-w-[70%]">
                 ${showName ? `<div class="text-sm font-bold text-gray-700 mb-1">${escapeHtml(name)}</div>` : ''}
                 <div class="flex items-end gap-2">
-                    <div class="bubble-left" style="background:transparent; box-shadow:none; padding:0;">${imgTag}</div>
+                    <!-- 修改：为图片气泡添加 message-received 类 -->
+                    <div class="bubble-left message-received" style="background:transparent; box-shadow:none; padding:0;">${imgTag}</div>
                 </div>
                 <span class="text-xs text-gray-400 mt-1">${tsWithRead}</span>
             </div>`;
         } else {
             div.innerHTML = `<div class="flex flex-col items-end max-w-[70%]">
                 <div class="flex items-end gap-2">
-                    <div class="bubble-right" style="background:transparent; box-shadow:none; padding:0;">${imgTag}</div>
+                    <!-- 修改：为图片气泡添加 message-sent 类 -->
+                    <div class="bubble-right message-sent" style="background:transparent; box-shadow:none; padding:0;">${imgTag}</div>
                 </div>
                 <span class="text-xs text-gray-400 mt-1">${tsWithRead}</span>
             </div>
@@ -6560,14 +6590,16 @@ function createMessageElement(sender, content, time, quote = null, type = 'text'
             <div class="flex flex-col max-w-[70%]">
                 ${showName ? `<div class="text-sm font-bold text-gray-700 mb-1">${escapeHtml(name)}</div>` : ''}
                 <div class="flex items-end gap-2">
-                    <div class="bubble-left text-gray-900" style="max-width:100%; word-break:break-all; overflow-wrap:break-word; white-space:pre-wrap;">${qt}${escapeHtml(content)}</div>
+                    <!-- 修改：为对方文本气泡添加 message-received 类 -->
+                    <div class="bubble-left message-received text-gray-900" style="max-width:100%; word-break:break-all; overflow-wrap:break-word; white-space:pre-wrap;">${qt}${escapeHtml(content)}</div>
                 </div>
                 <span class="text-xs text-gray-400 mt-1 text-left">${tsWithRead}</span>
             </div>`;
         } else {
             div.innerHTML = `<div class="flex flex-col items-end max-w-[70%]">
                 <div class="flex items-end gap-2">
-                    <div class="bubble-right text-white" style="max-width:100%; word-break:break-all; overflow-wrap:break-word; white-space:pre-wrap;">${qt}${escapeHtml(content)}</div>
+                    <!-- 修改：为我方文本气泡添加 message-sent 类 -->
+                    <div class="bubble-right message-sent text-white" style="max-width:100%; word-break:break-all; overflow-wrap:break-word; white-space:pre-wrap;">${qt}${escapeHtml(content)}</div>
                 </div>
                 <span class="text-xs text-gray-400 mt-1 text-right">${tsWithRead}</span>
             </div>
@@ -6708,21 +6740,26 @@ async function sendMessage() {
     if (currentChatType === 'role') { if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = []; appData.chats[currentRoleId].push(msg); }
     else { if (!appData.groupChats[currentGroupId]) appData.groupChats[currentGroupId] = []; appData.groupChats[currentGroupId].push(msg); }
     debouncedSaveData(); appendMessageToDOM('me', content, Date.now(), quote, 'text');
-    input.value = ''; input.style.height = 'auto'; triggerReply();
+    input.value = ''; input.style.height = 'auto';
+    // ★ 修改：无论当前聊天状态，只要是在角色聊天中发送，就触发该角色的回复
+    if (currentChatType === 'role' && currentRoleId) {
+        // 直接调用角色回复（内部会处理延迟、显示打字等）
+        triggerRoleReplyForRole(currentRoleId);
+    } else if (currentChatType === 'group' && currentGroupId) {
+        triggerGroupReplyForGroup(currentGroupId);
+    }
     // 用户发送消息后，角色有概率主动拍一拍用户（概率9%）
     maybeTriggerRolePoke();
-    
     // 模拟对方已读（仅单聊）
     if (currentChatType === 'role') {
         const sentMsg = appData.chats[currentRoleId][appData.chats[currentRoleId].length - 1];
         if (sentMsg) {
-            const delay = 1000 + Math.random() * 2000; // 1~3秒
+            const delay = 1000 + Math.random() * 2000;
             setTimeout(() => {
                 sentMsg.read = true;
                 debouncedSaveData();
-                // 重新渲染当前聊天界面（只更新这条消息）
                 const messages = document.getElementById('chat-messages');
-                const lastBubble = messages.querySelector('.message-bubble-container:last-child');
+                const lastBubble = messages?.querySelector('.message-bubble-container:last-child');
                 if (lastBubble) {
                     const timeSpan = lastBubble.querySelector('.text-right, .text-left');
                     if (timeSpan && timeSpan.textContent.includes('✓')) {
@@ -6733,6 +6770,191 @@ async function sendMessage() {
         }
     }
 }
+
+// 新增：根据角色ID触发回复（不依赖当前聊天）
+function triggerRoleReplyForRole(roleId) {
+    const role = appData.roles.find(r => r.id === roleId);
+    if (!role) return;
+    // 直接调用原有的触发逻辑（但内部不再判断 currentChatType）
+    executeRoleReply(role);
+}
+
+// 新增：根据群组ID触发群聊回复
+function triggerGroupReplyForGroup(groupId) {
+    const group = appData.groups.find(g => g.id === groupId);
+    if (!group) return;
+    executeGroupReply(group);
+}
+
+// 原来的 triggerRoleReply 改为调用 executeRoleReply
+function triggerRoleReply() {
+    const role = appData.roles.find(r => r.id === currentRoleId);
+    if (!role) return;
+    executeRoleReply(role);
+}
+
+// 核心执行函数（独立于当前聊天状态）
+function executeRoleReply(role) {
+    if (!role) return;
+    const delay = Math.random() * (appData.settings.maxDelay - appData.settings.minDelay) * 1000 + appData.settings.minDelay * 1000;
+    // 显示正在输入（使用独立管理）
+    showRoleTyping(role.id, role.name, role.avatar, delay + 500);
+    setTimeout(async () => {
+        hideRoleTyping(role.id);
+        const all = getActiveWordList();
+        if (all.length === 0) return;
+        const prob2 = appData.settings.prob2 || 0, prob3 = appData.settings.prob3 || 0;
+        const rand = Math.random() * 100;
+        let msgCount = 1;
+        if (rand < prob2) msgCount = 2;
+        else if (rand < prob2 + prob3) msgCount = 3;
+        const intervalSec = appData.settings.multiMsgInterval || 2;
+        const intervalMs = intervalSec * 1000;
+        const sendNext = (count) => {
+            if (count <= 0) return;
+            let finalContent = '', type = 'text', quote = null;
+            if (appData.settings.mergeReplyEnabled) {
+                const mergeRand = Math.random() * 100;
+                let mergeCount = 1;
+                const p1 = appData.settings.mergeProb1 || 50;
+                const p2 = appData.settings.mergeProb2 || 30;
+                if (mergeRand < p1) mergeCount = 1;
+                else if (mergeRand < p1 + p2) mergeCount = 2;
+                else mergeCount = 3;
+                const selectedTexts = [];
+                for (let i = 0; i < mergeCount; i++) {
+                    const word = all[Math.floor(Math.random() * all.length)];
+                    selectedTexts.push(word);
+                }
+                finalContent = selectedTexts.join(' · ');
+            } else {
+                finalContent = all[Math.floor(Math.random() * all.length)];
+            }
+            const msgs = appData.chats[role.id] || [], lastMe = msgs.slice().reverse().find(m => m.sender === 'me');
+            if (lastMe && Math.random() * 100 < appData.settings.quoteMyProb) {
+                quote = { content: lastMe.content, type: lastMe.type || 'text' };
+            }
+            let emojiSuffix = '';
+            if (appData.wordbanks.emojis.length > 0 && Math.random() * 100 < (appData.settings.emojiProb / 2)) {
+                emojiSuffix = ' ' + appData.wordbanks.emojis[Math.floor(Math.random() * appData.wordbanks.emojis.length)];
+                finalContent += emojiSuffix;
+            } else {
+                if (appData.wordbanks.stickers.length > 0 && Math.random() * 100 < (appData.settings.stickerProb || 10)) {
+                    type = 'image';
+                    finalContent = appData.wordbanks.stickers[Math.floor(Math.random() * appData.wordbanks.stickers.length)];
+                } else {
+                    if (Math.random() * 100 < (appData.settings.emojiProb || 20) && appData.wordbanks.emojis.length > 0 && !emojiSuffix) {
+                        finalContent += ' ' + appData.wordbanks.emojis[Math.floor(Math.random() * appData.wordbanks.emojis.length)];
+                    }
+                }
+            }
+            const msg = { id: Date.now() + count, sender: role.id, content: finalContent, time: Date.now(), quote, type, read: false };
+            if (!appData.chats[role.id]) appData.chats[role.id] = [];
+            appData.chats[role.id].push(msg);
+            role.lastActive = Date.now();
+            debouncedSaveData();
+
+            // ★ 关键：判断当前是否正在查看该角色，若是则立即渲染，否则增加未读
+            if (currentChatType === 'role' && currentRoleId === role.id) {
+                appendMessageToDOM(role.id, finalContent, Date.now(), quote, type);
+            } else {
+                incrementUnread(role.id);
+            }
+            sendNotificationIfNeeded(`${role.name} 发来消息`, finalContent);
+
+            // 随机拍一拍（保留）
+            if (Math.random() < 0.03) {
+                setTimeout(() => {
+                    let actions = role.pokeActions;
+                    if (!actions || actions.length === 0) {
+                        actions = [...PRESET_POKE_ACTIONS];
+                    }
+                    const randomAction = actions[Math.floor(Math.random() * actions.length)];
+                    const partnerSymbol = (() => {
+                        const cfg = appData.pokeSymbols?.partner;
+                        if (!cfg) return '';
+                        if (cfg.preset === 'custom') return cfg.custom || '';
+                        return POKE_SYMBOL_MAP[cfg.preset] || '';
+                    })();
+                    const formattedPoke = `${partnerSymbol} ${role.name} ${randomAction} ${partnerSymbol}`.trim();
+                    const pokeMsg = { id: Date.now() + count + 100, sender: role.id, content: formattedPoke, time: Date.now(), type: 'poke' };
+                    if (!appData.chats[role.id]) appData.chats[role.id] = [];
+                    appData.chats[role.id].push(pokeMsg);
+                    debouncedSaveData();
+                    if (currentChatType === 'role' && currentRoleId === role.id) {
+                        appendMessageToDOM(role.id, formattedPoke, Date.now(), null, 'poke');
+                    } else {
+                        incrementUnread(role.id);
+                    }
+                }, 400);
+            }
+            if (count > 1) setTimeout(() => sendNext(count - 1), intervalMs);
+        };
+        sendNext(msgCount);
+    }, delay);
+}
+
+// 群聊回复独立执行函数（类似）
+function executeGroupReply(group) {
+    const memberCount = group.members.length;
+    if (![2,3,4,5,7].includes(memberCount)) return;
+    const probConfig = group.replyCountProb?.[memberCount.toString()] || getDefaultProbConfig(memberCount);
+    const rand = Math.random() * 100;
+    let cumulative = 0, selectedCount = 1;
+    for (let i = 1; i <= memberCount; i++) {
+        cumulative += probConfig[i.toString()] || 0;
+        if (rand < cumulative) { selectedCount = i; break; }
+    }
+    const speakers = [...group.members].sort(() => Math.random() - 0.5).slice(0, Math.min(selectedCount, memberCount));
+    if (speakers.length === 0) return;
+    // 显示打字提示（群聊用全局）
+    const firstRole = appData.roles.find(r => r.id === speakers[0]);
+    if (firstRole) {
+        const tip = document.getElementById('typing-indicator');
+        document.getElementById('typing-avatar').src = firstRole.avatar || DEFAULT_AVATAR;
+        document.getElementById('typing-name').textContent = firstRole.name || '成员';
+        tip.classList.add('active');
+    }
+    const delay = Math.random() * (appData.settings.maxDelay - appData.settings.minDelay) * 1000 + appData.settings.minDelay * 1000;
+    setTimeout(() => {
+        const tip = document.getElementById('typing-indicator');
+        if (tip) tip.classList.remove('active');
+        if (!appData.groupChats[group.id]) appData.groupChats[group.id] = [];
+        speakers.forEach((speakerId, index) => {
+            setTimeout(() => {
+                let content = (() => { const aw = getActiveWordList(); return aw.length ? aw[Math.floor(Math.random() * aw.length)] : ''; })();
+                let type = 'text';
+                if (!content) return;
+                if (appData.wordbanks.stickers.length > 0 && Math.random() * 100 < (appData.settings.stickerProb || 10)) {
+                    type = 'image';
+                    content = appData.wordbanks.stickers[Math.floor(Math.random() * appData.wordbanks.stickers.length)];
+                } else {
+                    if (Math.random() * 100 < (appData.settings.emojiProb || 20) && appData.wordbanks.emojis.length > 0) {
+                        content += ' ' + appData.wordbanks.emojis[Math.floor(Math.random() * appData.wordbanks.emojis.length)];
+                    }
+                }
+                const msg = { id: Date.now() + index, sender: speakerId, content, time: Date.now(), type, read: false };
+                appData.groupChats[group.id].push(msg);
+                debouncedSaveData();
+                if (currentChatType === 'group' && currentGroupId === group.id) {
+                    appendMessageToDOM(speakerId, content, Date.now(), null, type);
+                } else {
+                    incrementUnread('group_' + group.id);
+                }
+                const role = appData.roles.find(r => r.id === speakerId);
+                if (role) sendNotificationIfNeeded(`${role.name} (群聊)`, content);
+            }, index * 800);
+        });
+    }, delay);
+}
+
+// 修改原有的 triggerGroupReply 调用执行函数
+function triggerGroupReply() {
+    const group = appData.groups.find(g => g.id === currentGroupId);
+    if (!group) return;
+    executeGroupReply(group);
+}
+
 function appendMessageToDOM(sender, content, time, quote = null, type = 'text') {
     const c = document.getElementById('chat-messages');
     // 获取最后一条消息的日期（如果存在）
@@ -6781,102 +7003,101 @@ function appendMessageToDOM(sender, content, time, quote = null, type = 'text') 
 }
 function scrollToBottom() { const c = document.getElementById('chat-messages'); c.scrollTop = c.scrollHeight; }
 
-function triggerReply() { if (currentChatType === 'role') triggerRoleReply(); else triggerGroupReply(); }
+function triggerReply() { 
+    if (currentChatType === 'role') {
+        triggerRoleReply();
+    } else if (currentChatType === 'group') {
+        triggerGroupReply();
+    }
+}
+
+// ========== 每个角色独立的"正在输入"管理 ==========
+function showRoleTyping(roleId, roleName, roleAvatar, duration) {
+    // 如果当前没有打开聊天或者当前聊天不是该角色，不显示正在输入
+    if (currentChatType !== 'role' || currentRoleId !== roleId) {
+        // 但仍然记录状态，以便进入聊天时显示
+        if (!roleTypingStates[roleId]) {
+            roleTypingStates[roleId] = { active: false, timer: null, avatar: roleAvatar, name: roleName };
+        }
+        roleTypingStates[roleId].active = true;
+        // 设置定时器自动清除状态（但不显示UI）
+        if (roleTypingStates[roleId].timer) {
+            clearTimeout(roleTypingStates[roleId].timer);
+        }
+        roleTypingStates[roleId].timer = setTimeout(() => {
+            if (roleTypingStates[roleId]) {
+                roleTypingStates[roleId].active = false;
+                roleTypingStates[roleId].timer = null;
+            }
+        }, duration);
+        return;
+    }
+    
+    // 当前正在查看该角色聊天，显示正在输入
+    const tip = document.getElementById('typing-indicator');
+    if (!tip) return;
+    
+    // 更新角色信息
+    document.getElementById('typing-avatar').src = roleAvatar || DEFAULT_AVATAR;
+    document.getElementById('typing-name').textContent = roleName || '角色';
+    
+    // 显示提示
+    tip.classList.add('active');
+    
+    // 存储状态
+    if (!roleTypingStates[roleId]) {
+        roleTypingStates[roleId] = { active: false, timer: null, avatar: roleAvatar, name: roleName };
+    }
+    roleTypingStates[roleId].active = true;
+    roleTypingStates[roleId].avatar = roleAvatar;
+    roleTypingStates[roleId].name = roleName;
+    
+    // 清除旧的定时器
+    if (roleTypingStates[roleId].timer) {
+        clearTimeout(roleTypingStates[roleId].timer);
+        roleTypingStates[roleId].timer = null;
+    }
+    
+    // 设置定时器自动隐藏
+    roleTypingStates[roleId].timer = setTimeout(() => {
+        if (roleTypingStates[roleId]) {
+            roleTypingStates[roleId].active = false;
+            roleTypingStates[roleId].timer = null;
+        }
+        // 如果当前仍然在查看该角色，隐藏提示
+        if (currentChatType === 'role' && currentRoleId === roleId) {
+            const tipEl = document.getElementById('typing-indicator');
+            if (tipEl) tipEl.classList.remove('active');
+        }
+    }, duration);
+}
+
+function hideRoleTyping(roleId) {
+    if (!roleId) return;
+    if (roleTypingStates[roleId]) {
+        if (roleTypingStates[roleId].timer) {
+            clearTimeout(roleTypingStates[roleId].timer);
+            roleTypingStates[roleId].timer = null;
+        }
+        roleTypingStates[roleId].active = false;
+    }
+    // 如果当前正在查看该角色，隐藏提示
+    if (currentChatType === 'role' && currentRoleId === roleId) {
+        const tip = document.getElementById('typing-indicator');
+        if (tip) tip.classList.remove('active');
+    }
+}
 
 function triggerRoleReply() {
-    const role = appData.roles.find(r => r.id === currentRoleId); if (!role) return;
-    const delay = Math.random() * (appData.settings.maxDelay - appData.settings.minDelay) * 1000 + appData.settings.minDelay * 1000;
-    const tip = document.getElementById('typing-indicator'); document.getElementById('typing-avatar').src = role.avatar; document.getElementById('typing-name').textContent = role.name; tip.classList.add('active');
-    setTimeout(async () => {
-        tip.classList.remove('active'); const all = getActiveWordList(); if (all.length === 0) return;
-        const prob2 = appData.settings.prob2 || 0, prob3 = appData.settings.prob3 || 0; const rand = Math.random() * 100; let msgCount = 1;
-        if (rand < prob2) msgCount = 2; else if (rand < prob2 + prob3) msgCount = 3;
-        const intervalSec = appData.settings.multiMsgInterval || 2; const intervalMs = intervalSec * 1000;
-        const sendNext = (count) => { if (count <= 0) return;
-            // 生成回复内容，支持随机合并（1-3条字卡合并为一条消息）
-            let finalContent = '';
-            let type = 'text';
-            let quote = null;
-            if (appData.settings.mergeReplyEnabled) {
-                const mergeRand = Math.random() * 100;
-                let mergeCount = 1;
-                const p1 = appData.settings.mergeProb1 || 50;
-                const p2 = appData.settings.mergeProb2 || 30;
-                if (mergeRand < p1) mergeCount = 1;
-                else if (mergeRand < p1 + p2) mergeCount = 2;
-                else mergeCount = 3;
-                const selectedTexts = [];
-                for (let i = 0; i < mergeCount; i++) {
-                    const word = all[Math.floor(Math.random() * all.length)];
-                    selectedTexts.push(word);
-                }
-                finalContent = selectedTexts.join(' · ');
-            } else {
-                finalContent = all[Math.floor(Math.random() * all.length)];
-            }
-            // 引用功能
-            const msgs = appData.chats[currentRoleId] || [], lastMe = msgs.slice().reverse().find(m => m.sender === 'me');
-            if (lastMe && Math.random() * 100 < appData.settings.quoteMyProb) {
-                quote = { content: lastMe.content, type: lastMe.type || 'text' };
-            }
-            // 概率单独发送一个纯 Emoji（作为附加）
-            let emojiSuffix = '';
-            if (appData.wordbanks.emojis.length > 0 && Math.random() * 100 < (appData.settings.emojiProb / 2)) {
-                emojiSuffix = ' ' + appData.wordbanks.emojis[Math.floor(Math.random() * appData.wordbanks.emojis.length)];
-                finalContent += emojiSuffix;
-            } else {
-                if (appData.wordbanks.stickers.length > 0 && Math.random() * 100 < (appData.settings.stickerProb || 10)) { type = 'image'; finalContent = appData.wordbanks.stickers[Math.floor(Math.random() * appData.wordbanks.stickers.length)]; }
-                else { if (Math.random() * 100 < (appData.settings.emojiProb || 20) && appData.wordbanks.emojis.length > 0 && !emojiSuffix) finalContent += ' ' + appData.wordbanks.emojis[Math.floor(Math.random() * appData.wordbanks.emojis.length)]; }
-            }
-            const msg = { id: Date.now() + count, sender: currentRoleId, content: finalContent, time: Date.now(), quote, type, read: false }; appData.chats[currentRoleId].push(msg); role.lastActive = Date.now(); debouncedSaveData();
-            appendMessageToDOM(currentRoleId, finalContent, Date.now(), quote, type); sendNotificationIfNeeded(`${role.name} 发来消息`, finalContent);
-            // 回复时附带戳一戳，概率3%
-            if (Math.random() < 0.03) { 
-                setTimeout(() => { 
-                    let actions = role.pokeActions;
-                    if (!actions || actions.length === 0) {
-                        actions = [...PRESET_POKE_ACTIONS];
-                    }
-                    const randomAction = actions[Math.floor(Math.random() * actions.length)];
-                    const partnerSymbol = (() => {
-                        const cfg = appData.pokeSymbols?.partner;
-                        if (!cfg) return '';
-                        if (cfg.preset === 'custom') return cfg.custom || '';
-                        return POKE_SYMBOL_MAP[cfg.preset] || '';
-                    })();
-                    const formattedPoke = `${partnerSymbol} ${role.name} ${randomAction} ${partnerSymbol}`.trim();
-                    const pokeMsg = { id: Date.now() + count + 100, sender: currentRoleId, content: formattedPoke, time: Date.now(), type: 'poke' }; 
-                    appData.chats[currentRoleId].push(pokeMsg); 
-                    debouncedSaveData(); 
-                    appendMessageToDOM(currentRoleId, formattedPoke, Date.now(), null, 'poke'); 
-                }, 400); 
-            }
-            if (count > 1) setTimeout(() => sendNext(count - 1), intervalMs);
-        }; sendNext(msgCount);
-    }, delay);
+    const role = appData.roles.find(r => r.id === currentRoleId); 
+    if (!role) return;
+    executeRoleReply(role);
 }
 
 function triggerGroupReply() {
-    const group = appData.groups.find(g => g.id === currentGroupId); if (!group || group.members.length === 0) return;
-    const memberCount = group.members.length; if (![2,3,4,5,7].includes(memberCount)) return;
-    const probConfig = group.replyCountProb?.[memberCount.toString()] || getDefaultProbConfig(memberCount);
-    const rand = Math.random() * 100; let cumulative = 0, selectedCount = 1;
-    for (let i = 1; i <= memberCount; i++) { cumulative += probConfig[i.toString()] || 0; if (rand < cumulative) { selectedCount = i; break; } }
-    const speakers = [...group.members].sort(() => Math.random() - 0.5).slice(0, Math.min(selectedCount, memberCount)); if (speakers.length === 0) return;
-    const firstRole = appData.roles.find(r => r.id === speakers[0]); const tip = document.getElementById('typing-indicator');
-    document.getElementById('typing-avatar').src = firstRole?.avatar || DEFAULT_AVATAR; document.getElementById('typing-name').textContent = firstRole?.name || '成员'; tip.classList.add('active');
-    const delay = Math.random() * (appData.settings.maxDelay - appData.settings.minDelay) * 1000 + appData.settings.minDelay * 1000;
-    setTimeout(() => { tip.classList.remove('active'); if (!appData.groupChats[currentGroupId]) appData.groupChats[currentGroupId] = [];
-        speakers.forEach((speakerId, index) => { setTimeout(() => {
-            let content = (() => { const aw = getActiveWordList(); return aw.length ? aw[Math.floor(Math.random() * aw.length)] : ''; })(), type = 'text';
-            if (!content) return;
-            if (appData.wordbanks.stickers.length > 0 && Math.random() * 100 < (appData.settings.stickerProb || 10)) { type = 'image'; content = appData.wordbanks.stickers[Math.floor(Math.random() * appData.wordbanks.stickers.length)]; }
-            else { if (Math.random() * 100 < (appData.settings.emojiProb || 20) && appData.wordbanks.emojis.length > 0) content += ' ' + appData.wordbanks.emojis[Math.floor(Math.random() * appData.wordbanks.emojis.length)]; }
-            const msg = { id: Date.now() + index, sender: speakerId, content, time: Date.now(), type, read: false }; appData.groupChats[currentGroupId].push(msg); debouncedSaveData();
-            appendMessageToDOM(speakerId, content, Date.now(), null, type);
-            const role = appData.roles.find(r => r.id === speakerId); if (role) sendNotificationIfNeeded(`${role.name} (群聊)`, content);
-        }, index * 800); });
-    }, delay);
+    const group = appData.groups.find(g => g.id === currentGroupId);
+    if (!group) return;
+    executeGroupReply(group);
 }
 
 // ========== 拍一拍核心功能 ==========
@@ -6919,7 +7140,7 @@ async function sendRolePokeReply(role, count, initialDelayMs = 0) {
 function executePokeWithText(text) {
     if (currentChatType !== 'role' || !currentRoleId) return;
     
-    // 获取“我”发出的符号（my 符号）
+    // 获取"我"发出的符号（my 符号）
     const mySymbol = (() => {
         const cfg = appData.pokeSymbols?.my;
         if (!cfg) return '';
@@ -6935,14 +7156,14 @@ function executePokeWithText(text) {
     debouncedSaveData();
     appendMessageToDOM('me', content, Date.now(), null, 'poke');
     
-    // 显示正在输入动画
+    // 显示正在输入动画（独立管理）
     const role = appData.roles.find(r => r.id === currentRoleId);
     if (role) {
-        const tip = document.getElementById('typing-indicator');
-        document.getElementById('typing-avatar').src = role.avatar;
-        document.getElementById('typing-name').textContent = role.name;
-        tip.classList.add('active');
-        setTimeout(() => tip.classList.remove('active'), 2000);
+        const delay = 1500 + Math.random() * 2000;
+        showRoleTyping(role.id, role.name, role.avatar, delay);
+        setTimeout(() => {
+            hideRoleTyping(role.id);
+        }, delay + 500);
     }
     
     // 根据设置决定是否回复，回复数量随机1~3条
@@ -6996,12 +7217,12 @@ function maybeTriggerRolePoke() {
     debouncedSaveData();
     appendMessageToDOM(currentRoleId, formatted, Date.now(), null, 'poke');
     
-    // 显示正在输入动画
-    const tip = document.getElementById('typing-indicator');
-    document.getElementById('typing-avatar').src = role.avatar;
-    document.getElementById('typing-name').textContent = role.name;
-    tip.classList.add('active');
-    setTimeout(() => tip.classList.remove('active'), 2000);
+    // 显示正在输入动画（独立管理）
+    const delay = 1500 + Math.random() * 2000;
+    showRoleTyping(role.id, role.name, role.avatar, delay);
+    setTimeout(() => {
+        hideRoleTyping(role.id);
+    }, delay + 500);
 }
 
 // --- 群聊创建等原有函数（保持完整）---
@@ -7177,11 +7398,76 @@ function switchAppearanceTab(tab) {
         document.getElementById('bubble-radius').value = tempAppearance.bubble.radius || 13;
         document.getElementById('bubble-shadow').value = tempAppearance.bubble.shadow || 1;
         updateBubblePreview();
-        // 加载已保存的 CSS
+        
+        // 加载已保存的 CSS（从持久化存储中读取）
         const textarea = document.getElementById('custom-bubble-css');
-        if (textarea && appData && appData.appearance && appData.appearance.customBubbleCss) {
-            textarea.value = appData.appearance.customBubbleCss;
+        const applyBtn = document.getElementById('apply-bubble-css');
+        const resetBtn = document.getElementById('reset-bubble-css');
+        
+        if (textarea) {
+            if (appData && appData.appearance && appData.appearance.customBubbleCss) {
+                textarea.value = appData.appearance.customBubbleCss;
+            } else {
+                textarea.value = '';
+            }
+            // 实时预览 - 输入时更新
+            textarea.removeEventListener('input', updateCssLivePreview);
+            textarea.addEventListener('input', updateCssLivePreview);
+            updateCssLivePreview();
         }
+        
+        // 应用按钮
+        if (applyBtn) {
+            applyBtn.removeEventListener('click', applyBtn._handler);
+            applyBtn._handler = function() {
+                const css = textarea ? textarea.value : '';
+                if (typeof applyCustomBubbleCss === 'function') {
+                    applyCustomBubbleCss(css);
+                }
+                // 持久化保存到 appData.appearance
+                if (appData && appData.appearance) {
+                    appData.appearance.customBubbleCss = css;
+                    if (typeof debouncedSaveData === 'function') {
+                        debouncedSaveData();
+                    } else {
+                        saveData();
+                    }
+                }
+                showToast('✅ 气泡 CSS 已应用');
+            };
+            applyBtn.addEventListener('click', applyBtn._handler);
+        }
+        
+        // 重置按钮
+        if (resetBtn) {
+            resetBtn.removeEventListener('click', resetBtn._handler);
+            resetBtn._handler = function() {
+                if (textarea) textarea.value = '';
+                if (typeof applyCustomBubbleCss === 'function') {
+                    applyCustomBubbleCss('');
+                }
+                // 清除持久化保存
+                if (appData && appData.appearance) {
+                    appData.appearance.customBubbleCss = '';
+                    if (typeof debouncedSaveData === 'function') {
+                        debouncedSaveData();
+                    } else {
+                        saveData();
+                    }
+                }
+                updateCssLivePreview();
+                showToast('🔄 气泡 CSS 已重置');
+            };
+            resetBtn.addEventListener('click', resetBtn._handler);
+        }
+        
+        // 初始应用已保存的 CSS
+        if (textarea && textarea.value) {
+            if (typeof applyCustomBubbleCss === 'function') {
+                applyCustomBubbleCss(textarea.value);
+            }
+        }
+        
         document.getElementById('modal-appearance-bubble').classList.remove('hidden');
     }
     if (tab === 'avatar') { 
@@ -7212,7 +7498,19 @@ function switchBgTab(tab) { currentBgTab = tab; ['home','chat','group'].forEach(
 function renderPresetBackgrounds() { const container = document.getElementById('bg-presets'); container.innerHTML = ''; PRESET_BACKGROUNDS.forEach(item => { const wrapper = document.createElement('div'); wrapper.className = 'bg-preset-wrapper'; const img = document.createElement('img'); img.src = item.url; img.alt = item.name; img.className = 'bg-preset-item'; if (tempAppearance.backgrounds[currentBgTab] === item.url) img.classList.add('active'); img.onclick = () => { document.querySelectorAll('.bg-preset-item').forEach(i => i.classList.remove('active')); img.classList.add('active'); tempAppearance.backgrounds[currentBgTab] = item.url; document.getElementById('bg-upload-preview').classList.add('hidden'); }; wrapper.appendChild(img); const span = document.createElement('span'); span.className = 'bg-preset-name'; span.textContent = item.name; wrapper.appendChild(span); container.appendChild(wrapper); }); }
 async function handleBgUpload(input) { if (input.files?.[0]) { showToast('压缩中...'); const url = await compressImage(input.files[0]); document.getElementById('bg-upload-preview').src = url; document.getElementById('bg-upload-preview').classList.remove('hidden'); tempAppearance.backgrounds[currentBgTab] = url; document.querySelectorAll('.bg-preset-item').forEach(i => i.classList.remove('active')); } }
 function updateBubblePreview() { const r = document.getElementById('bubble-radius').value, s = document.getElementById('bubble-shadow').value; document.querySelectorAll('.bubble-left, .bubble-right').forEach(el => { if (el.classList.contains('bubble-left')) { el.style.borderRadius = `${r}px ${r}px ${r}px 6px`; } else { el.style.borderRadius = `${r}px ${r}px 6px ${r}px`; } el.style.boxShadow = `0 1px ${s}px rgba(0,0,0,0.1)`; }); tempAppearance.bubble.radius = parseInt(r); tempAppearance.bubble.shadow = parseInt(s); }
-async function saveAppearanceSettings() { appData.appearance = JSON.parse(JSON.stringify(tempAppearance)); await saveBackgrounds(tempAppearance.backgrounds); await saveData(); applyAppearance(); closeAppearanceSettings(); showToast('外观已保存'); }
+async function saveAppearanceSettings() { 
+    // 读取文本域内容
+    const cssTextarea = document.getElementById('custom-bubble-css');
+    if (cssTextarea) {
+        tempAppearance.customBubbleCss = cssTextarea.value;
+    }
+    appData.appearance = JSON.parse(JSON.stringify(tempAppearance));
+    await saveBackgrounds(tempAppearance.backgrounds);
+    await saveData();
+    applyAppearance();
+    closeAppearanceSettings();
+    showToast('外观已保存');
+}
 
 // ========== 头像设置相关函数（修复开关响应） ==========
 function loadAvatarSettingsToUI() {
@@ -7322,10 +7620,74 @@ async function saveRole() { const name = document.getElementById('role-name-inpu
 
 function openDataManagement() { pageHistory.push('settings'); document.getElementById('modal-settings-main').classList.add('hidden'); document.getElementById('modal-settings-data').classList.remove('hidden'); updateStorageDisplay(); updateNotificationUI(); }
 function closeDataManagement() { document.getElementById('modal-settings-data').classList.add('hidden'); if (pageHistory.pop() === 'settings') document.getElementById('modal-settings-main').classList.remove('hidden'); }
-function initNotificationSwitch() { if (!('Notification' in window)) { document.getElementById('notification-status-text').textContent = '您的浏览器不支持通知'; const sw = document.getElementById('notification-switch'); sw.classList.add('disabled'); sw.onclick = null; return; } notificationPermissionGranted = Notification.permission === 'granted'; updateNotificationUI(); }
+function initNotificationSwitch() {
+    if (!('Notification' in window)) {
+        document.getElementById('notification-status-text').textContent = '您的浏览器不支持通知';
+        const sw = document.getElementById('notification-switch');
+        sw.classList.add('disabled');
+        sw.onclick = null;
+        return;
+    }
+    notificationPermissionGranted = Notification.permission === 'granted';
+    updateNotificationUI();
+    
+    // 使用 addEventListener 绑定开关
+    const sw = document.getElementById('notification-switch');
+    if (sw) {
+        sw.removeEventListener('click', sw._clickHandler);
+        sw._clickHandler = function() {
+            toggleNotificationPermission();
+        };
+        sw.addEventListener('click', sw._clickHandler);
+    }
+}
 function updateNotificationUI() { const sw = document.getElementById('notification-switch'), statusText = document.getElementById('notification-status-text'); if (!('Notification' in window)) return; if (Notification.permission === 'granted') { sw.classList.add('active'); statusText.textContent = '已开启 (对方回复时提醒)'; notificationPermissionGranted = true; } else if (Notification.permission === 'denied') { sw.classList.remove('active'); statusText.textContent = '已拒绝 (请在浏览器设置中开启)'; notificationPermissionGranted = false; } else { sw.classList.remove('active'); statusText.textContent = '点击开关请求权限'; notificationPermissionGranted = false; } }
-async function toggleNotificationPermission() { if (!('Notification' in window)) { showToast('浏览器不支持通知'); return; } if (Notification.permission === 'granted') { showToast('通知已开启，如需关闭请在浏览器设置中操作'); return; } if (Notification.permission === 'denied') { showToast('通知权限已被拒绝，请在浏览器设置中开启'); return; } try { const permission = await Notification.requestPermission(); if (permission === 'granted') { notificationPermissionGranted = true; new Notification('Spiritual connection', { body: '通知已开启！当对方回复时我们会提醒您。', icon: appData.userProfile?.avatar || DEFAULT_AVATAR }); showToast('通知已开启'); } else { notificationPermissionGranted = false; showToast('通知权限被拒绝'); } updateNotificationUI(); } catch (e) { showToast('无法请求通知权限'); } }
-function sendNotificationIfNeeded(title, body) { if (notificationPermissionGranted && document.visibilityState === 'hidden') new Notification(title, { body, icon: appData.userProfile?.avatar || DEFAULT_AVATAR }); }
+async function toggleNotificationPermission() {
+    if (!('Notification' in window)) {
+        showToast('浏览器不支持通知');
+        return;
+    }
+    
+    // 如果已经授权，直接提示
+    if (Notification.permission === 'granted') {
+        showToast('通知已开启，如需关闭请在浏览器设置中操作');
+        updateNotificationUI();
+        return;
+    }
+    
+    if (Notification.permission === 'denied') {
+        showToast('通知权限已被拒绝，请在浏览器设置中开启');
+        updateNotificationUI();
+        return;
+    }
+    
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            notificationPermissionGranted = true;
+            // 发送测试通知
+            new Notification('Spiritual connection', {
+                body: '通知已开启！当对方回复时我们会提醒您。',
+                icon: appData.userProfile?.avatar || DEFAULT_AVATAR
+            });
+            showToast('✅ 通知已开启');
+        } else {
+            notificationPermissionGranted = false;
+            showToast('❌ 通知权限被拒绝');
+        }
+        updateNotificationUI();
+    } catch (e) {
+        console.error('通知权限请求失败:', e);
+        showToast('无法请求通知权限');
+    }
+}
+function sendNotificationIfNeeded(title, body) {
+    if (notificationPermissionGranted && document.visibilityState === 'hidden') {
+        try {
+            new Notification(title, { body, icon: appData.userProfile?.avatar || DEFAULT_AVATAR });
+        } catch(e) {}
+    }
+}
 
 // --- 备份/恢复 ---
 function copyBackupToClipboard() { const jsonStr = JSON.stringify(appData, null, 2); navigator.clipboard.writeText(jsonStr).then(() => { showToast('备份数据已复制到剪贴板！可粘贴到备忘录保存'); }).catch(() => { showToast('复制失败，请手动选择文本复制'); }); }
@@ -7664,7 +8026,7 @@ function renderWordGroups() {
             } else {
                 selectedGroups = selectedGroups.filter(i => i !== idx);
             }
-            // 同步“全部分组”复选框状态
+            // 同步"全部分组"复选框状态
             const allCb = document.getElementById('group-all-check');
             if (allCb) allCb.checked = selectedGroups.length === tempWordGroups.length;
         };
@@ -8759,12 +9121,12 @@ function executePoke() {
     appData.chats[currentRoleId].push(msg);
     debouncedSaveData();
     appendMessageToDOM('me', formatted, Date.now(), null, 'poke');
-    // 显示正在输入动画
-    const tip = document.getElementById('typing-indicator');
-    document.getElementById('typing-avatar').src = role.avatar;
-    document.getElementById('typing-name').textContent = role.name;
-    tip.classList.add('active');
-    setTimeout(() => tip.classList.remove('active'), 2000);
+    // 显示正在输入动画（独立管理）
+    const delay = 1500 + Math.random() * 2000;
+    showRoleTyping(role.id, role.name, role.avatar, delay);
+    setTimeout(() => {
+        hideRoleTyping(role.id);
+    }, delay + 500);
     // 戳一戳后角色主动回复（根据设置）
     if (appData.settings.pokeAutoReplyEnabled) {
         const prob = appData.settings.pokeAutoReplyProb || 45;
@@ -9838,7 +10200,7 @@ function openPostMoment() {
     document.getElementById('moment-music-select').classList.add('hidden');
     document.getElementById('moment-book-select').classList.add('hidden');
     updateMomentLocationUI();
-    document.querySelectorAll('.post-type-btn').forEach(btn => { if (btn.dataset.type === 'text') { btn.className = 'post-type-btn px-4 py-1.5 rounded-full text-xs font-medium bg-gray-200 text-gray-600'; } else { btn.className = 'post-type-btn px-4 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500'; } });
+    document.querySelectorAll('.post-type-btn').forEach(btn => { if (btn.datatype === 'text') { btn.className = 'post-type-btn px-4 py-1.5 rounded-full text-xs font-medium bg-gray-200 text-gray-600'; } else { btn.className = 'post-type-btn px-4 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500'; } });
     populateSongSelector(); populateBookSelector(); renderMomentImageGrid();
 }
 function closePostMoment() { document.getElementById('modal-post-moment').classList.add('hidden'); }
@@ -11157,7 +11519,7 @@ async function openFortune() {
 window.openFortune = openFortune;
 window.closeFortune = () => { if (currentFortuneModal) currentFortuneModal.classList.add('hidden'); };
 
-// ========== 宇宙图形通信系统（新增融合） ==========
+// ========== 宇宙图形通信系统（新增融合 - 修复方形绘制） ==========
 function openCosmicGraphicModal() {
     const modal = document.getElementById('modal-cosmic-graphic');
     if (!modal) return;
@@ -11258,15 +11620,7 @@ function openCosmicGraphicModal() {
         sealed: { label: "封闭 / 保护空间", frame: 3 }
     };
     
-    // 绘图辅助函数
-    function circle(x, y, r, color, lineWidth) {
-        ctx.beginPath();
-        ctx.arc(x, y, r, 0, Math.PI * 2);
-        ctx.strokeStyle = color;
-        ctx.lineWidth = lineWidth;
-        ctx.stroke();
-    }
-    
+    // ========== 修复：square 绘图函数（确保方形不歪扭） ==========
     function square(x, y, size, color, lineWidth, filled, frame = 1) {
         const drawOne = (sizeNow, alpha = 1) => {
             const c = color.startsWith("#") ? withAlpha(color, alpha) : color;
@@ -11292,6 +11646,14 @@ function openCosmicGraphicModal() {
         drawOne(size, 1);
         if (!filled && frame >= 2) drawOne(size + 18, 0.38);
         if (!filled && frame >= 3) drawOne(size + 36, 0.20);
+    }
+    
+    function circle(x, y, r, color, lineWidth) {
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = lineWidth;
+        ctx.stroke();
     }
     
     function cross(x, y, size, color, lineWidth) {
@@ -11666,28 +12028,31 @@ function closeCosmicGraphicModal() {
 window.openCosmicGraphicModal = openCosmicGraphicModal;
 window.closeCosmicGraphicModal = closeCosmicGraphicModal;
 
-// ========== 增强版 applyCustomBubbleCss ==========
+// ========== 增强版 applyCustomBubbleCss（完全参考 index.html - 修复持久化） ==========
 function applyCustomBubbleCss(cssCode) {
     const styleId = 'user-custom-bubble-style';
     let styleTag = document.getElementById(styleId);
-
-    // 清除旧样式
-    if (styleTag) {
-        styleTag.remove();
-        styleTag = null;
-    }
-
-    // 如果没有 CSS 内容，直接返回
+    
+    // 如果没有 CSS 内容，移除样式
     if (!cssCode || !cssCode.trim()) {
-        // 移除可能残留的样式
-        const old = document.getElementById(styleId);
-        if (old) old.remove();
+        if (styleTag) {
+            styleTag.remove();
+        }
+        // 同步更新已渲染的消息
+        if (typeof renderChatMessages === 'function') {
+            renderChatMessages();
+        } else if (typeof renderMessages === 'function') {
+            renderMessages(true);
+        }
         return;
     }
-
-    // 创建新样式标签
-    styleTag = document.createElement('style');
-    styleTag.id = styleId;
+    
+    // 创建或获取样式标签
+    if (!styleTag) {
+        styleTag = document.createElement('style');
+        styleTag.id = styleId;
+    }
+    document.head.appendChild(styleTag);
 
     // 增强选择器权重（避免被内联样式覆盖）
     function boostSpecificity(css) {
@@ -11698,15 +12063,13 @@ function applyCustomBubbleCss(cssCode) {
                 if (sel.startsWith('html') || sel.startsWith('@') || sel.startsWith('from') || sel.startsWith('to') || /^\d/.test(sel)) {
                     return sel;
                 }
-                // 增加 html body 前缀提高优先级
                 return `html body ${sel}`;
             });
             return `${boosted.join(', ')} {${body}}`;
         });
     }
 
-    // 注入增强后的 CSS
-    styleTag.textContent = boostSpecificity(cssCode) + `
+    const boostedCss = boostSpecificity(cssCode) + `
         /* 强制图片气泡透明 */
         html body .message.message-image-bubble-none,
         html body .bubble-left:has(> img:only-child),
@@ -11718,90 +12081,89 @@ function applyCustomBubbleCss(cssCode) {
             border-radius: 0 !important;
         }
     `;
+    
+    styleTag.textContent = boostedCss;
 
-    document.head.appendChild(styleTag);
-
-    // 尝试同步更新已渲染的消息
+    // 同步更新已渲染的消息
     if (typeof renderChatMessages === 'function') {
         renderChatMessages();
     } else if (typeof renderMessages === 'function') {
-        renderMessages();
+        renderMessages(true);
     }
-
-    // 提示成功
-    showToast('✅ 气泡样式已更新');
 }
 
-// ============================================================
-// 修复：通知权限开关（兼容现有 HTML 结构）—— 确保点击后弹出权限请求
-// ============================================================
-// 在页面加载完成后执行修复，防止 DOM 未渲染
-function fixNotificationToggle() {
-    const toggle = document.getElementById('notification-switch');
-    const statusText = document.getElementById('notification-status-text');
-    if (!toggle) return;
-
-    // 移除原有的 onclick 属性（由 HTML 内联绑定），避免冲突
-    toggle.removeAttribute('onclick');
-
-    // 绑定新的事件
-    toggle.addEventListener('click', function(e) {
-        e.stopPropagation();
-        // 模拟开关切换视觉效果
-        this.classList.toggle('active');
-        const isActive = this.classList.contains('active');
-
-        if (!('Notification' in window)) {
-            this.classList.remove('active');
-            if (statusText) statusText.textContent = '⚠️ 您的浏览器不支持通知';
-            return;
-        }
-
-        if (isActive) {
-            // 请求权限
-            Notification.requestPermission().then(function(perm) {
-                if (perm === 'granted') {
-                    if (statusText) statusText.textContent = '✅ 已开启 — 对方回复时提醒';
-                    localStorage.setItem('notifEnabled', '1');
-                    try {
-                        new Notification('Spiritual connection', {
-                            body: '通知已开启！当对方回复时我们会提醒您。',
-                            icon: appData.userProfile?.avatar || DEFAULT_AVATAR
-                        });
-                    } catch(e) {}
-                } else {
-                    toggle.classList.remove('active');
-                    if (statusText) statusText.textContent = perm === 'denied' ? '❌ 权限被拒绝，请在浏览器设置中开启' : '⚠️ 未授权';
-                    localStorage.setItem('notifEnabled', '0');
-                }
-            }).catch(function() {
-                toggle.classList.remove('active');
-                if (statusText) statusText.textContent = '❌ 请求权限失败';
-                localStorage.setItem('notifEnabled', '0');
-            });
-        } else {
-            if (statusText) statusText.textContent = '已关闭 — 后台将不提醒';
-            localStorage.setItem('notifEnabled', '0');
-        }
+// ========== 实时预览更新函数 ==========
+function updateCssLivePreview() {
+    const textarea = document.getElementById('custom-bubble-css');
+    const previewStyle = document.getElementById('css-live-preview-style');
+    if (!previewStyle || !textarea) return;
+    
+    const raw = textarea.value || '';
+    // 将选择器限定在预览区域内
+    const scoped = raw.replace(/([^{}]+)\{/g, (match, selector) => {
+        const parts = selector.split(',').map(s => `#css-live-preview ${s.trim()}`);
+        return parts.join(', ') + ' {';
     });
-
-    // 初始化状态
-    const enabled = localStorage.getItem('notifEnabled') === '1';
-    const granted = ('Notification' in window) && Notification.permission === 'granted';
-    toggle.classList.toggle('active', enabled && granted);
-    if (statusText) {
-        if (enabled && granted) {
-            statusText.textContent = '✅ 已开启 — 对方回复时提醒';
-        } else if ('Notification' in window && Notification.permission === 'denied') {
-            statusText.textContent = '❌ 权限被拒绝，请在浏览器设置中开启';
-        } else {
-            statusText.textContent = '点击开关请求权限';
-        }
-    }
+    previewStyle.textContent = scoped;
 }
 
-// 在 loadData 最后调用 fixNotificationToggle
-setTimeout(fixNotificationToggle, 500);
+// ========== 后台通知发送函数（完全参考 index.html） ==========
+window._sendPartnerNotification = function(title, body) {
+    try {
+        if (localStorage.getItem('notifEnabled') !== '1') return;
+        if (!('Notification' in window)) return;
+        if (Notification.permission !== 'granted') return;
+        
+        var notif = new Notification(title || '传讯', {
+            body: body || '对方发来了消息',
+            icon: (document.querySelector('#partner-avatar img') || {}).src || '',
+            tag: 'partner-msg',
+            renotify: true
+        });
+
+        notif.onclick = function(event) {
+            event.preventDefault();
+            window.focus();
+            if (document.hidden) {
+                window.blur();
+                window.focus();
+            }
+            notif.close();
+        };
+    } catch(e) {
+        console.warn('通知发送失败:', e);
+    }
+};
+
+// ========== 修复模拟回复中的通知调用 ==========
+// 在 simulateReply 函数中，在 addMessage 之后添加通知调用
+// 由于 simulateReply 函数已在上方定义，我们需要在它内部添加通知调用
+// 但由于代码已定义，我们通过 Monkey Patch 方式增强它
+
+// 保存原始的 simulateReply 函数引用
+const _originalSimulateReply = window.simulateReply || function() {};
+
+// 重写 simulateReply 以包含通知功能
+window.simulateReply = function() {
+    // 调用原始逻辑
+    if (typeof _originalSimulateReply === 'function') {
+        _originalSimulateReply();
+    }
+    
+    // 添加通知发送（在消息发送后）
+    // 检查最近是否有新消息
+    const messages = window.messages || [];
+    if (messages.length > 0) {
+        const lastMsg = messages[messages.length - 1];
+        if (lastMsg && lastMsg.sender !== 'user') {
+            const partnerName = (typeof settings !== 'undefined' && settings.partnerName) ? settings.partnerName : '对方';
+            const content = lastMsg.content || '发来了一条消息';
+            if (typeof window._sendPartnerNotification === 'function') {
+                window._sendPartnerNotification(partnerName, content);
+            }
+        }
+    }
+};
 
 </script>
 </body>
