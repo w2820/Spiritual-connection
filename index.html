@@ -2387,6 +2387,7 @@
             align-items: center;
             justify-content: space-between;
             height: 44px;
+            padding-top: calc(env(safe-area-inset-top) + 8px);
         }
         .moment-detail-nav h2 {
             font-size: 17px;
@@ -2408,6 +2409,7 @@
             flex: 1;
             overflow-y: auto;
             padding: 16px;
+            padding-bottom: calc(16px + env(safe-area-inset-bottom));
         }
         .moment-detail-post {
             border-bottom: 1px solid #f0f0f0;
@@ -2499,6 +2501,7 @@
             gap: 8px;
             align-items: center;
             background: #f7f7f7;
+            padding-bottom: calc(8px + env(safe-area-inset-bottom));
         }
         .moment-detail-footer input {
             flex: 1;
@@ -3452,9 +3455,9 @@
     <div class="modal-card">
         <div class="flex items-center gap-2 mb-8"><i data-lucide="library" class="w-6 h-6" style="color: var(--accent-color);"></i><h2 class="text-xl font-bold">内容库管理</h2></div>
         <div class="grid grid-cols-1 gap-4 mb-8">
-            <button onclick="openWordCardLibrary()" class="bg-gray-50 p-4 rounded-2xl flex items-center gap-4 text-left"><div class="w-12 h-12 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="align-left" class="w-6 h-6"></i></div><div><h3 class="font-bold">字卡词库</h3><p class="text-xs text-gray-500">管理文本回复词条，支持查重、分组</p></div><i data-lucide="chevron-right" class="w-5 h-5 text-gray-400 ml-auto"></i></button>
-            <button onclick="openEmojiLibrary()" class="bg-gray-50 p-4 rounded-2xl flex items-center gap-4 text-left"><div class="w-12 h-12 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="smile" class="w-6 h-6"></i></div><div><h3 class="font-bold">Emoji 表情包库</h3><p class="text-xs text-gray-500">添加和管理常用 Emoji 表情</p></div><i data-lucide="chevron-right" class="w-5 h-5 text-gray-400 ml-auto"></i></button>
-            <button onclick="openStickerLibrary()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-4 text-left"><div class="w-12 h-12 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="image" class="w-6 h-6"></i></div><div><h3 class="font-bold">图片表情包库</h3><p class="text-xs text-gray-500">上传本地图片作为表情包</p></div><i data-lucide="chevron-right" class="w-5 h-5 text-gray-400 ml-auto"></i></button>
+            <button onclick="openWordCardLibrary()" class="bg-gray-50 p-4 rounded-2xl flex items-center gap-4 text-left"><div class="w-12 h-12 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="align-left" class="w-6 h-6"></i></div><div><h3 class="font-bold">字卡词库</h3><p class="text-xs text-gray-500">管理文本回复词条，支持查重、分组</p></div><i data-lucide="chevron-right" class="w-5 h-5 text-gray-400 ml-auto"></i></div>
+            <button onclick="openEmojiLibrary()" class="bg-gray-50 p-4 rounded-2xl flex items-center gap-4 text-left"><div class="w-12 h-12 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="smile" class="w-6 h-6"></i></div><div><h3 class="font-bold">Emoji 表情包库</h3><p class="text-xs text-gray-500">添加和管理常用 Emoji 表情</p></div><i data-lucide="chevron-right" class="w-5 h-5 text-gray-400 ml-auto"></i></div>
+            <button onclick="openStickerLibrary()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-4 text-left"><div class="w-12 h-12 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="image" class="w-6 h-6"></i></div><div><h3 class="font-bold">图片表情包库</h3><p class="text-xs text-gray-500">上传本地图片作为表情包</p></div><i data-lucide="chevron-right" class="w-5 h-5 text-gray-400 ml-auto"></i></div>
         </div>
         <button onclick="closeContentLibrary()" class="w-full bg-gray-100 text-gray-600 p-3 rounded-xl font-bold">返回</button>
     </div>
@@ -4043,7 +4046,7 @@
 <!-- ========== 朋友圈页面 ========== -->
 <div id="page-moments" class="page bg-[#f0f2f5] z-40">
     <header class="absolute top-0 left-0 w-full bg-transparent shadow-none z-20 safe-top" style="background-color: transparent !important;">
-        <div class="px-2 py-2 flex items-center h-12">
+        <div class="px-2 py-2 flex items-center h-12" style="padding-top: calc(env(safe-area-inset-top) + 8px);">
             <button onclick="closeMomentPage()" class="p-2 -ml-2 rounded-full" style="background: rgba(0,0,0,0.3); color: white;">
                 <i data-lucide="chevron-left" class="w-7 h-7"></i>
             </button>
@@ -4082,7 +4085,7 @@
 
 <!-- 朋友圈详情页 (全屏) -->
 <div id="page-moment-detail" class="page" style="z-index: 45;">
-    <div class="safe-top moment-detail-nav">
+    <div class="safe-top moment-detail-nav" style="padding-top: calc(env(safe-area-inset-top) + 8px);">
         <button onclick="closeMomentDetail()">
             <i data-lucide="chevron-left" class="w-6 h-6"></i>
         </button>
@@ -4095,7 +4098,7 @@
         <div class="moment-detail-post" id="moment-detail-post-block"></div>
         <div class="moment-detail-comments" id="moment-detail-comments-block"></div>
     </div>
-    <div class="moment-detail-footer safe-bottom">
+    <div class="moment-detail-footer safe-bottom" style="padding-bottom: calc(8px + env(safe-area-inset-bottom));">
         <input type="text" id="detail-comment-input" placeholder="评论" />
         <button onclick="submitDetailComment()">发送</button>
     </div>
@@ -6860,6 +6863,7 @@ function executeRoleReply(role) {
             } else {
                 incrementUnread(role.id);
             }
+            // 每次发送消息后都调用通知（修复弹窗通知问题）
             sendNotificationIfNeeded(`${role.name} 发来消息`, finalContent);
 
             // 随机拍一拍（保留）
@@ -7130,6 +7134,7 @@ async function sendRolePokeReply(role, count, initialDelayMs = 0) {
                 } else {
                     incrementUnread(role.id);
                 }
+                // 每条消息都发送通知
                 sendNotificationIfNeeded(`${role.name} 发来消息`, content);
             }, (i - 1) * intervalMs);
         }
@@ -11631,7 +11636,7 @@ function openCosmicGraphicModal() {
             ctx.moveTo(x0 + r, y0);
             ctx.arcTo(x0 + sizeNow, y0, x0 + sizeNow, y0 + sizeNow, r);
             ctx.arcTo(x0 + sizeNow, y0 + sizeNow, x0, y0 + sizeNow, r);
-            ctx.arcTo(x0, y0 + sizeNow, x0, y0, r);
+            ctx.arcTo(x0, y0 + sizeNow, x0, y0 + sizeNow, r);
             ctx.arcTo(x0, y0, x0 + sizeNow, y0, r);
             ctx.closePath();
             if (filled) {
@@ -12137,8 +12142,7 @@ window._sendPartnerNotification = function(title, body) {
 
 // ========== 修复模拟回复中的通知调用 ==========
 // 在 simulateReply 函数中，在 addMessage 之后添加通知调用
-// 由于 simulateReply 函数已在上方定义，我们需要在它内部添加通知调用
-// 但由于代码已定义，我们通过 Monkey Patch 方式增强它
+// 由于 simulateReply 函数已在上方定义，我们通过 Monkey Patch 方式增强它
 
 // 保存原始的 simulateReply 函数引用
 const _originalSimulateReply = window.simulateReply || function() {};
