@@ -11604,7 +11604,7 @@ async function openBatchEditor() {
             html += '<table style="width:100%;font-size:12px;">';
             const matchCount = Math.min(blocks.length, lenormandLibrary.length);
             for (let i = 0; i < matchCount; i++) {
-                html += `<tr><td style="padding:4px;">${blocks[i].number}</td><td style="padding:4px;">${escapeHtml(blocks[i].name)}</td><td style="padding:4px;">→ 第${i+1}张图</td></tr>`;
+                html += `<tr><td style="padding:4px;">${blocks[i].number}</td><td style="padding:4px;">${blocks[i].name}</td><td style="padding:4px;">→ 第${i+1}张图</td></tr>`;
             }
             html += '</table>';
             previewDiv.innerHTML = html;
@@ -12014,7 +12014,7 @@ function openCosmicGraphicModal() {
             ctx.beginPath();
             ctx.moveTo(x2, y2);
             ctx.lineTo(x2 - head * Math.cos(angle - Math.PI / 6), y2 - head * Math.sin(angle - Math.PI / 6));
-            ctx.lineTo(x2 - head * Math.cos(angle + Math.PI / 6), y2 - head * Math.sin(angle + Math.PI / 6));
+            ctx.lineTo(x2 - head * Math.cos(angle + Math.PI / 6), y2 + head * Math.sin(angle + Math.PI / 6));
             ctx.closePath();
             ctx.fill();
         }
