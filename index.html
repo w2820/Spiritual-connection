@@ -3578,6 +3578,11 @@
                 <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="brush" class="w-5 h-5"></i></div>
                 <span class="text-xs font-medium">涂鸦本</span>
             </button>
+            <!-- 新增：角色背景管理入口 -->
+            <button onclick="openRoleBackgroundManager()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: #8e44ad;"><i data-lucide="image" class="w-5 h-5"></i></div>
+                <span class="text-xs font-medium">角色背景管理</span>
+            </button>
         </div>
         <div class="flex gap-4">
             <button onclick="closeAdvancedSettings()" class="flex-1 bg-gray-100 text-gray-600 p-3 rounded-xl font-bold">返回</button>
@@ -4647,7 +4652,47 @@
     </div>
 </div>
 
+<!-- ========== 新增：角色背景管理页面 ========== -->
+<div id="page-role-background" class="page bg-[#f0f2f5] z-50">
+    <header class="safe-top bg-white shadow-sm" style="background-color: var(--header-bg);">
+        <div class="px-2 py-2 flex items-center h-12">
+            <button onclick="closeRoleBackgroundManager()" class="p-2 -ml-2 rounded-full hover:bg-gray-100">
+                <i data-lucide="chevron-left" class="w-7 h-7" style="color: var(--header-text);"></i>
+            </button>
+            <h1 class="text-lg font-bold ml-2" style="color: var(--header-text);">角色背景管理</h1>
+        </div>
+    </header>
+    <main class="flex-1 overflow-auto p-4" id="role-bg-main">
+        <div class="bg-white rounded-2xl shadow-sm p-4 mb-4">
+            <label class="text-sm font-medium block mb-2">选择角色</label>
+            <select id="role-bg-select" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none" onchange="loadRoleBackgroundPreview()">
+                <!-- options dynamically -->
+            </select>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm p-4">
+            <label class="text-sm font-medium block mb-3">当前背景预览</label>
+            <div class="relative w-full aspect-video bg-gray-100 rounded-xl overflow-hidden flex items-center justify-center" id="role-bg-preview-container">
+                <img id="role-bg-preview-img" src="" class="w-full h-full object-cover hidden" alt="背景预览">
+                <span id="role-bg-placeholder" class="text-gray-400 text-sm">暂无背景</span>
+            </div>
+            <div class="flex gap-3 mt-4">
+                <label class="flex-1 text-center py-3 rounded-xl font-medium cursor-pointer" style="background-color: var(--button-primary-bg); color: var(--button-primary-text);">
+                    <i data-lucide="upload" class="w-4 h-4 inline mr-1"></i> 选择图片
+                    <input type="file" id="role-bg-upload-input" accept="image/*" class="hidden" onchange="handleRoleBackgroundUpload(this)">
+                </label>
+                <button id="role-bg-remove-btn" class="flex-1 py-3 rounded-xl font-medium border border-gray-300 text-red-500" onclick="removeRoleBackground()">移除背景</button>
+            </div>
+            <p class="text-xs text-gray-400 mt-3">📌 上传的图片将保留原始画质，不压缩。建议宽度 750px 以上。</p>
+        </div>
+    </main>
+    <div class="p-4 safe-bottom bg-white border-t border-gray-100" style="background-color: var(--footer-bg); border-color: var(--footer-border);">
+        <button onclick="closeRoleBackgroundManager()" class="w-full bg-gray-100 text-gray-600 p-3 rounded-xl font-bold">关闭</button>
+    </div>
+</div>
+
 <script>
+// ========== 第一部分结束，第二部分从下一行开始 ==========
+
 // 初始化图标
 lucide.createIcons();
 
@@ -6843,57 +6888,6 @@ async function deleteRoleChatBackground(roleId) {
     });
 }
 
-// ========== 新增：在角色管理中添加更换背景按钮 ==========
-function addRoleBackgroundActions() {
-    const roleManagementList = document.getElementById('role-management-list');
-    if (!roleManagementList) return;
-    // 在角色管理列表中为每个角色添加背景操作按钮
-    appData.roles.forEach(role => {
-        const items = roleManagementList.querySelectorAll('.bg-gray-50');
-        items.forEach(item => {
-            const nameDiv = item.querySelector('.font-bold');
-            if (nameDiv && nameDiv.textContent.trim() === role.name) {
-                // 检查是否已经添加了背景按钮
-                if (item.querySelector('.role-bg-action')) return;
-                const actionsDiv = item.querySelector('.flex.gap-2');
-                if (actionsDiv) {
-                    const bgBtn = document.createElement('button');
-                    bgBtn.className = 'role-bg-action p-2 bg-white text-green-600 rounded-full';
-                    bgBtn.title = '更换聊天背景';
-                    bgBtn.innerHTML = '<i data-lucide="image" class="w-4 h-4"></i>';
-                    bgBtn.onclick = (e) => {
-                        e.stopPropagation();
-                        uploadRoleChatBackground(role.id);
-                    };
-                    actionsDiv.appendChild(bgBtn);
-                    
-                    // 如果有背景，添加删除按钮
-                    if (role.chatBackground) {
-                        const delBgBtn = document.createElement('button');
-                        delBgBtn.className = 'role-bg-action p-2 bg-white text-red-500 rounded-full';
-                        delBgBtn.title = '删除聊天背景';
-                        delBgBtn.innerHTML = '<i data-lucide="trash-2" class="w-4 h-4"></i>';
-                        delBgBtn.onclick = (e) => {
-                            e.stopPropagation();
-                            deleteRoleChatBackground(role.id);
-                        };
-                        actionsDiv.appendChild(delBgBtn);
-                    }
-                    lucide.createIcons();
-                }
-            }
-        });
-    });
-}
-
-// 重写 renderRoleManagementList 以包含背景操作
-const originalRenderRoleManagementList = renderRoleManagementList;
-renderRoleManagementList = function() {
-    originalRenderRoleManagementList();
-    // 延迟添加背景按钮，确保 DOM 已渲染
-    setTimeout(addRoleBackgroundActions, 100);
-};
-
 function openGroupChat(groupId) {
     currentChatType = 'group'; currentGroupId = groupId; currentRoleId = null; const group = appData.groups.find(g => g.id === groupId); if (!group) return;
     clearUnread('group_' + groupId);
@@ -8172,11 +8166,7 @@ function renderRoleManagementList() {
         d.className = 'bg-gray-50 p-4 rounded-2xl flex items-center justify-between'; 
         let actionsHtml = `<button onclick="editRole('${r.id}')" class="p-2 bg-white text-amber-600 rounded-full"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
                           <button onclick="deleteRole('${r.id}')" class="p-2 bg-white text-red-500 rounded-full"><i data-lucide="trash-2" class="w-4 h-4"></i></button>`;
-        // 添加背景操作按钮
-        actionsHtml += `<button onclick="uploadRoleChatBackground('${r.id}')" class="p-2 bg-white text-green-600 rounded-full" title="更换聊天背景"><i data-lucide="image" class="w-4 h-4"></i></button>`;
-        if (r.chatBackground) {
-            actionsHtml += `<button onclick="deleteRoleChatBackground('${r.id}')" class="p-2 bg-white text-red-500 rounded-full" title="删除聊天背景"><i data-lucide="trash-2" class="w-4 h-4"></i></button>`;
-        }
+        // 移除原来的小按钮样式，改为在高级功能中统一管理
         d.innerHTML = `<div class="flex items-center gap-3"><img src="${r.avatar}" class="w-10 h-10 rounded-full"><div><h3 class="font-bold text-sm">${escapeHtml(r.name)}</h3></div></div><div class="flex gap-2">${actionsHtml}</div>`; 
         list.appendChild(d); 
     }); 
@@ -12779,6 +12769,152 @@ sendBatchMessages = function() {
     DOMElements.messageInput.placeholder = placeholder.length > 20 ? placeholder.substring(0, 20) + "..." : placeholder;
 };
 
+// ========== 角色背景管理（新增独立页面 - 方案B） ==========
+function openRoleBackgroundManager() {
+    const page = document.getElementById('page-role-background');
+    if (!page) return;
+    
+    // 关闭高级设置页面（如果是从高级功能进入的）
+    const advancedModal = document.getElementById('modal-settings-advanced');
+    if (advancedModal && !advancedModal.classList.contains('hidden')) {
+        advancedModal.classList.add('hidden');
+    }
+    
+    // 填充角色下拉框
+    const select = document.getElementById('role-bg-select');
+    if (select) {
+        select.innerHTML = '';
+        appData.roles.forEach(role => {
+            const option = document.createElement('option');
+            option.value = role.id;
+            option.textContent = role.name;
+            select.appendChild(option);
+        });
+        if (appData.roles.length > 0) {
+            select.value = appData.roles[0].id;
+        }
+    }
+    
+    // 加载第一个角色的背景预览
+    loadRoleBackgroundPreview();
+    
+    page.classList.add('active');
+}
+
+function closeRoleBackgroundManager() {
+    const page = document.getElementById('page-role-background');
+    if (page) page.classList.remove('active');
+}
+
+function loadRoleBackgroundPreview() {
+    const select = document.getElementById('role-bg-select');
+    const img = document.getElementById('role-bg-preview-img');
+    const placeholder = document.getElementById('role-bg-placeholder');
+    const removeBtn = document.getElementById('role-bg-remove-btn');
+    
+    if (!select || !img || !placeholder) return;
+    
+    const roleId = select.value;
+    if (!roleId) {
+        img.classList.add('hidden');
+        placeholder.classList.remove('hidden');
+        return;
+    }
+    
+    const role = appData.roles.find(r => r.id === roleId);
+    if (!role) {
+        img.classList.add('hidden');
+        placeholder.classList.remove('hidden');
+        return;
+    }
+    
+    if (role.chatBackground) {
+        img.src = role.chatBackground;
+        img.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        if (removeBtn) removeBtn.style.display = 'block';
+    } else {
+        img.classList.add('hidden');
+        placeholder.classList.remove('hidden');
+        if (removeBtn) removeBtn.style.display = 'block';
+    }
+}
+
+async function handleRoleBackgroundUpload(input) {
+    if (!input || !input.files || !input.files[0]) return;
+    
+    const file = input.files[0];
+    if (file.size > 50 * 1024 * 1024) {
+        showToast('图片大小不能超过50MB');
+        input.value = '';
+        return;
+    }
+    
+    const roleId = document.getElementById('role-bg-select').value;
+    if (!roleId) {
+        showToast('请先选择角色');
+        input.value = '';
+        return;
+    }
+    
+    showToast('正在保存背景图片...');
+    try {
+        // 不压缩，直接存储原始图片
+        const imageData = await storeImageAsBlob(file);
+        await saveRoleChatBackground(roleId, imageData);
+        showToast('角色背景已更新 ✨');
+        loadRoleBackgroundPreview();
+        
+        // 如果当前正在查看该角色的聊天，更新聊天背景
+        if (currentChatType === 'role' && currentRoleId === roleId) {
+            applyRoleChatBackground(roleId);
+        }
+    } catch(err) {
+        showToast('保存失败，请重试');
+        console.error(err);
+    }
+    input.value = '';
+}
+
+async function removeRoleBackground() {
+    const roleId = document.getElementById('role-bg-select').value;
+    if (!roleId) {
+        showToast('请先选择角色');
+        return;
+    }
+    
+    const role = appData.roles.find(r => r.id === roleId);
+    if (!role) return;
+    
+    if (!role.chatBackground) {
+        showToast('该角色暂无背景');
+        return;
+    }
+    
+    showConfirm('确定要删除该角色的聊天背景吗？', async (ok) => {
+        if (ok) {
+            await deleteRoleChatBackground(roleId);
+            showToast('角色背景已删除');
+            loadRoleBackgroundPreview();
+            if (currentChatType === 'role' && currentRoleId === roleId) {
+                applyRoleChatBackground(roleId);
+            }
+        }
+    });
+}
+
+// ========== 挂载全局函数 ==========
+window.openRoleBackgroundManager = openRoleBackgroundManager;
+window.closeRoleBackgroundManager = closeRoleBackgroundManager;
+window.loadRoleBackgroundPreview = loadRoleBackgroundPreview;
+window.handleRoleBackgroundUpload = handleRoleBackgroundUpload;
+window.removeRoleBackground = removeRoleBackground;
+window.uploadRoleChatBackground = uploadRoleChatBackground;
+window.deleteRoleChatBackground = deleteRoleChatBackground;
+window.applyRoleChatBackground = applyRoleChatBackground;
+
+// ========== 加载完成 ==========
+console.log('Spiritual connection v2.0 - 所有功能已加载');
 </script>
 </body>
 </html>
