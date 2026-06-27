@@ -111,6 +111,16 @@
             50% { transform: translateY(-4px); }
         }
 
+        /* ========== 消息淡入上滑动画（借鉴传讯文件） ========== */
+        @keyframes messageAppear {
+            0% { opacity: 0; transform: translateY(12px) scale(0.96); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .message-wrapper {
+            animation: messageAppear 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            opacity: 0;
+        }
+
         /* ========== 气泡样式（优化宽度控制，防止竖排） ========== */
         /* 角色接收的消息气泡（完全保留原始设计，不做调整） */
         .bubble-left {
@@ -434,127 +444,127 @@
 
         /* ========== 音乐卡片（悬浮可拖动，新样式 - 带进度条，修复拉伸和主题跟随） ========== */
         #music-player-card {
-    display: none;
-    flex-direction: column;
-    position: fixed;
-    top: 70px;
-    right: 16px;
-    z-index: 50;
-    width: 260px;
-    min-width: 260px;
-    max-width: 260px;
-    flex-shrink: 0;
-    box-sizing: border-box;
-    padding: 10px 12px;
-    border-radius: 20px;
-    background: var(--bg-secondary);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    background-color: rgba(var(--bg-secondary-rgb), 0.85);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    border: 1px solid var(--border-color);
-    cursor: grab;
-    touch-action: none;
-    transition: box-shadow 0.2s;
-    will-change: transform;
-    overflow: hidden;
-}
-#music-player-card.dragging {
-    transition: none !important;
-    cursor: grabbing;
-}
-#music-player-card:active {
-    cursor: grabbing;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-}
-.music-card-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-}
-.music-card-cover {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent-color), #f59e0b);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 18px;
-    flex-shrink: 0;
-}
-.music-card-info {
-    flex: 1;
-    min-width: 0;
-}
-.music-card-title {
-    font-weight: 600;
-    font-size: 13px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: var(--text-primary);
-}
-.music-card-artist {
-    font-size: 11px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: var(--text-secondary);
-}
-.music-card-progress-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 4px 0;
-}
-.music-card-progress-bar {
-    flex: 1;
-    height: 2px;
-    background: var(--border-color);
-    border-radius: 2px;
-    cursor: pointer;
-    position: relative;
-}
-.music-card-progress-fill {
-    width: 0%;
-    height: 100%;
-    background: var(--accent-color);
-    border-radius: 2px;
-}
-.music-card-time {
-    font-size: 10px;
-    color: var(--text-secondary);
-    font-variant-numeric: tabular-nums;
-    min-width: 70px;
-    text-align: right;
-}
-.music-card-controls {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin-top: 6px;
-}
-.music-card-btn {
-    background: var(--accent-light);
-    border: none;
-    font-size: 16px;
-    cursor: pointer;
-    color: var(--accent-color);
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s, color 0.2s;
-}
-.music-card-btn:active {
-    background: var(--accent-color);
-    color: white;
-}
+            display: none;
+            flex-direction: column;
+            position: fixed;
+            top: 70px;
+            right: 16px;
+            z-index: 50;
+            width: 260px;
+            min-width: 260px;
+            max-width: 260px;
+            flex-shrink: 0;
+            box-sizing: border-box;
+            padding: 10px 12px;
+            border-radius: 20px;
+            background: var(--bg-secondary);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            background-color: rgba(var(--bg-secondary-rgb), 0.85);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            cursor: grab;
+            touch-action: none;
+            transition: box-shadow 0.2s;
+            will-change: transform;
+            overflow: hidden;
+        }
+        #music-player-card.dragging {
+            transition: none !important;
+            cursor: grabbing;
+        }
+        #music-player-card:active {
+            cursor: grabbing;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .music-card-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .music-card-cover {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-color), #f59e0b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .music-card-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .music-card-title {
+            font-weight: 600;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-primary);
+        }
+        .music-card-artist {
+            font-size: 11px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-secondary);
+        }
+        .music-card-progress-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 4px 0;
+        }
+        .music-card-progress-bar {
+            flex: 1;
+            height: 2px;
+            background: var(--border-color);
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+        }
+        .music-card-progress-fill {
+            width: 0%;
+            height: 100%;
+            background: var(--accent-color);
+            border-radius: 2px;
+        }
+        .music-card-time {
+            font-size: 10px;
+            color: var(--text-secondary);
+            font-variant-numeric: tabular-nums;
+            min-width: 70px;
+            text-align: right;
+        }
+        .music-card-controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 6px;
+        }
+        .music-card-btn {
+            background: var(--accent-light);
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: var(--accent-color);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, color 0.2s;
+        }
+        .music-card-btn:active {
+            background: var(--accent-color);
+            color: white;
+        }
 
         /* 悬浮音乐播放器 (左下角) - 已废弃，永久隐藏 */
         .music-player {
@@ -4655,8 +4665,8 @@ const DEFAULT_GROUP_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org
 // --- 默认数据结构 ---
 const DEFAULT_DATA = {
     roles: [
-        { id: '1', name: '老公', avatar: 'https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/b706d6c461e44df0b82fda4381e66f56~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947761&x-signature=WPDM%2Fe%2Bq9Ltf6sL1Rc2vcm320jw%3D', groupProb: 50, lastActive: Date.now(), lastAutoSendTime: Date.now(), lastLoveRefresh: 0, pokeMyTexts: ['哥哥，我超爱你 😍😍'], pokeTheirTexts: ['老婆，我们永远不分开 😂😂'], onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 }, autoMailProbability: 20, lastDoodleDate: null, customPokes: [] },
-        { id: '2', name: '菜🥬', avatar: 'https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/cd47e4d6c7734a9f8c189d3d6c277eb6~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947762&x-signature=a5JLFkIXlkbkhZMc%2BJ%2FUogUFVKc%3D', groupProb: 30, lastActive: Date.now() - 3600000, lastAutoSendTime: Date.now() - 3600000, lastLoveRefresh: 0, pokeMyTexts: ['贴贴 🥰'], pokeTheirTexts: ['想你啦 💕'], onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭'], currentStatus: '在线', lastUpdate: 0 }, autoMailProbability: 15, lastDoodleDate: null, customPokes: [] }
+        { id: '1', name: '老公', avatar: 'https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/b706d6c461e44df0b82fda4381e66f56~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947761&x-signature=WPDM%2Fe%2Bq9Ltf6sL1Rc2vcm320jw%3D', groupProb: 50, lastActive: Date.now(), lastAutoSendTime: Date.now(), lastLoveRefresh: 0, pokeMyTexts: ['哥哥，我超爱你 😍😍'], pokeTheirTexts: ['老婆，我们永远不分开 😂😂'], onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 }, autoMailProbability: 20, lastDoodleDate: null, customPokes: [], chatBackground: null },
+        { id: '2', name: '菜🥬', avatar: 'https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/cd47e4d6c7734a9f8c189d3d6c277eb6~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947762&x-signature=a5JLFkIXlkbkhZMc%2BJ%2FUogUFVKc%3D', groupProb: 30, lastActive: Date.now() - 3600000, lastAutoSendTime: Date.now() - 3600000, lastLoveRefresh: 0, pokeMyTexts: ['贴贴 🥰'], pokeTheirTexts: ['想你啦 💕'], onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭'], currentStatus: '在线', lastUpdate: 0 }, autoMailProbability: 15, lastDoodleDate: null, customPokes: [], chatBackground: null }
     ],
     groups: [],
     chats: {},
@@ -5284,6 +5294,17 @@ async function compressImage(file, maxWidth = 150, quality = 0.5) {
     });
 }
 
+// ========== 新增：不压缩图片存储（用于角色聊天背景） ==========
+async function storeImageAsBlob(file) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            resolve(e.target.result);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
 function generateUID() {
     const timestamp = Date.now().toString(36);
     const randomPart1 = Math.random().toString(36).substr(2, 9);
@@ -5296,6 +5317,45 @@ async function saveBackgrounds(bg) { await store.setItem('appBackgrounds', bg); 
 async function loadBackgrounds() { return await store.getItem('appBackgrounds') || { home: '', chat: '', group: '' }; }
 async function saveUnreadCounts() { await store.setItem('appUnread', unreadCounts); }
 async function loadUnreadCounts() { unreadCounts = await store.getItem('appUnread') || {}; renderRoleList(); renderGroupList(); }
+
+// ========== 新增：角色聊天背景存储 ==========
+async function saveRoleChatBackground(roleId, imageData) {
+    if (!roleId) return;
+    const key = 'roleBg_' + roleId;
+    if (imageData) {
+        await store.setItem(key, imageData);
+    } else {
+        await store.removeItem(key);
+    }
+    // 更新 appData 中的引用
+    const role = appData.roles.find(r => r.id === roleId);
+    if (role) {
+        role.chatBackground = imageData || null;
+        await saveData();
+    }
+}
+
+async function loadRoleChatBackground(roleId) {
+    if (!roleId) return null;
+    const key = 'roleBg_' + roleId;
+    try {
+        const data = await store.getItem(key);
+        return data || null;
+    } catch(e) {
+        return null;
+    }
+}
+
+async function deleteRoleChatBackground(roleId) {
+    if (!roleId) return;
+    const key = 'roleBg_' + roleId;
+    await store.removeItem(key);
+    const role = appData.roles.find(r => r.id === roleId);
+    if (role) {
+        role.chatBackground = null;
+        await saveData();
+    }
+}
 
 async function calculateStorageUsage() {
     const dataStr = await store.getItem('appData') ? JSON.stringify(await store.getItem('appData')) : '{}';
@@ -5317,6 +5377,8 @@ async function calculateStorageUsage() {
     if (appData.songLibrary) mediaBytes += appData.songLibrary.reduce((acc, s) => acc + (s.cover ? s.cover.length * 2 : 0), 0);
     if (appData.bookLibrary) mediaBytes += appData.bookLibrary.reduce((acc, s) => acc + (s.cover ? s.cover.length * 2 : 0), 0);
     if (appData.settings?.momentCover?.startsWith('data:')) mediaBytes += appData.settings.momentCover.length * 2;
+    // 角色聊天背景
+    appData.roles?.forEach(r => { if (r.chatBackground && r.chatBackground.startsWith('data:')) mediaBytes += r.chatBackground.length * 2; });
     const totalBytes = new Blob([dataStr]).size + bgStr.length + unreadStr.length + mediaBytes;
     return { total: totalBytes, chat: chatBytes, settings: settingsBytes, media: mediaBytes };
 }
@@ -5325,9 +5387,9 @@ function formatBytes(bytes) { if (bytes < 1024) return bytes + 'B'; if (bytes < 
 
 async function updateStorageDisplay() {
     const usage = await calculateStorageUsage();
-    const maxBytes = 500 * 1024 * 1024;
+    const maxBytes = 8 * 1024 * 1024 * 1024; // 8GB
     const percent = Math.min(100, (usage.total / maxBytes) * 100).toFixed(1);
-    document.getElementById('storage-total-text').textContent = `${formatBytes(usage.total)} / ~500MB (${percent}%)`;
+    document.getElementById('storage-total-text').textContent = `${formatBytes(usage.total)} / ~8GB (${percent}%)`;
     document.getElementById('chat-storage-size').textContent = formatBytes(usage.chat);
     document.getElementById('settings-storage-size').textContent = formatBytes(usage.settings);
     document.getElementById('media-storage-size').textContent = formatBytes(usage.media);
@@ -5844,6 +5906,11 @@ async function loadData() {
             if (appData.settings.mergeProb3 === undefined) appData.settings.mergeProb3 = 20;
             appData.roles.forEach(r => { if (!r.customPokes) r.customPokes = []; });
             
+            // 确保每个角色都有 chatBackground 字段
+            appData.roles.forEach(r => {
+                if (r.chatBackground === undefined) r.chatBackground = null;
+            });
+            
             // 为已有消息添加 read 属性兼容（已读功能）
             for (let roleId in appData.chats) {
                 if (appData.chats[roleId]) {
@@ -5912,6 +5979,8 @@ async function loadData() {
             if (!r.pokeActions || r.pokeActions.length === 0) {
                 r.pokeActions = [...PRESET_POKE_ACTIONS];
             }
+            // 确保 chatBackground 字段存在
+            if (r.chatBackground === undefined) r.chatBackground = null;
         });
         if (!appData.groups) appData.groups = []; appData.groups.forEach(g => { if (!g.avatar) g.avatar = DEFAULT_GROUP_AVATAR; if (!g.replyCountProb) g.replyCountProb = {}; });
         if (!appData.groupChats) appData.groupChats = {};
@@ -6536,7 +6605,27 @@ function applyAppearance() {
     }
     document.body.className = `text-gray-800 transition-colors duration-300 ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-[#f3f4f6]'}`;
     const home = document.getElementById('page-home'); if (backgrounds.home) { home.style.backgroundImage = `url(${backgrounds.home})`; home.style.backgroundSize = 'cover'; home.style.backgroundColor = 'transparent'; } else { home.style.backgroundImage = ''; home.style.backgroundColor = theme === 'dark' ? '#111827' : '#f9fafb'; }
-    const chat = document.getElementById('page-chat'); if (backgrounds.chat) { chat.style.backgroundImage = `url(${backgrounds.chat})`; chat.style.backgroundSize = 'cover'; chat.style.backgroundColor = 'transparent'; } else { chat.style.backgroundImage = ''; chat.style.backgroundColor = getComputedStyle(root).getPropertyValue('--bg-primary').trim() || '#f0f2f5'; }
+    const chat = document.getElementById('page-chat'); 
+    // 检查当前是否有角色聊天背景
+    let chatBg = null;
+    if (currentChatType === 'role' && currentRoleId) {
+        const role = appData.roles.find(r => r.id === currentRoleId);
+        if (role && role.chatBackground) {
+            chatBg = role.chatBackground;
+        }
+    }
+    if (chatBg) {
+        chat.style.backgroundImage = `url(${chatBg})`;
+        chat.style.backgroundSize = 'cover';
+        chat.style.backgroundColor = 'transparent';
+    } else if (backgrounds.chat) {
+        chat.style.backgroundImage = `url(${backgrounds.chat})`;
+        chat.style.backgroundSize = 'cover';
+        chat.style.backgroundColor = 'transparent';
+    } else {
+        chat.style.backgroundImage = '';
+        chat.style.backgroundColor = getComputedStyle(root).getPropertyValue('--bg-primary').trim() || '#f0f2f5';
+    }
     const style = document.createElement('style'); style.id = 'appearance-style';
     style.textContent = `.bubble-left { border-radius: ${bubble.radius}px ${bubble.radius}px ${bubble.radius}px 6px !important; box-shadow: 0 1px ${bubble.shadow}px rgba(0,0,0,0.08) !important; } .bubble-right { border-radius: ${bubble.radius}px ${bubble.radius}px 6px ${bubble.radius}px !important; box-shadow: 0 1px ${bubble.shadow}px rgba(0,0,0,0.1) !important; } .role-card img, .chat-header img, #typing-avatar { border-radius: ${avatarShape === 'circle' ? '50%' : '8px'} !important; }`;
     const old = document.getElementById('appearance-style'); if (old) old.remove(); document.head.appendChild(style);
@@ -6658,6 +6747,9 @@ function openChat(roleId) {
     updateChatPageHeight();
     renderChatMessages(); updateCallButtonVisibility();
     
+    // ========== 应用角色独立聊天背景 ==========
+    applyRoleChatBackground(roleId);
+    
     // 进入聊天时，清除该角色的"正在输入"状态（因为我们要重新开始）
     if (roleTypingStates[roleId]) {
         if (roleTypingStates[roleId].timer) {
@@ -6686,6 +6778,121 @@ function openChat(roleId) {
         }
     }
 }
+
+// ========== 新增：应用角色聊天背景 ==========
+function applyRoleChatBackground(roleId) {
+    const role = appData.roles.find(r => r.id === roleId);
+    if (!role) return;
+    const chatPage = document.getElementById('page-chat');
+    if (!chatPage) return;
+    
+    if (role.chatBackground) {
+        chatPage.style.backgroundImage = `url(${role.chatBackground})`;
+        chatPage.style.backgroundSize = 'cover';
+        chatPage.style.backgroundColor = 'transparent';
+    } else {
+        // 恢复全局聊天背景
+        const backgrounds = appData.appearance?.backgrounds;
+        if (backgrounds && backgrounds.chat) {
+            chatPage.style.backgroundImage = `url(${backgrounds.chat})`;
+            chatPage.style.backgroundSize = 'cover';
+            chatPage.style.backgroundColor = 'transparent';
+        } else {
+            chatPage.style.backgroundImage = '';
+            chatPage.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim() || '#f0f2f5';
+        }
+    }
+}
+
+// ========== 新增：角色聊天背景上传 ==========
+async function uploadRoleChatBackground(roleId) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 50 * 1024 * 1024) {
+            showToast('图片大小不能超过50MB', 'error');
+            return;
+        }
+        showToast('正在保存背景图片...');
+        try {
+            // 不压缩，直接存储原始图片
+            const imageData = await storeImageAsBlob(file);
+            await saveRoleChatBackground(roleId, imageData);
+            showToast('角色聊天背景已更新 ✨');
+            // 重新应用背景
+            applyRoleChatBackground(roleId);
+        } catch(err) {
+            showToast('保存失败，请重试');
+            console.error(err);
+        }
+    };
+    input.click();
+}
+
+// ========== 新增：删除角色聊天背景 ==========
+async function deleteRoleChatBackground(roleId) {
+    showConfirm('确定要删除该角色的聊天背景吗？', async (ok) => {
+        if (ok) {
+            await deleteRoleChatBackground(roleId);
+            showToast('角色聊天背景已删除');
+            applyRoleChatBackground(roleId);
+        }
+    });
+}
+
+// ========== 新增：在角色管理中添加更换背景按钮 ==========
+function addRoleBackgroundActions() {
+    const roleManagementList = document.getElementById('role-management-list');
+    if (!roleManagementList) return;
+    // 在角色管理列表中为每个角色添加背景操作按钮
+    appData.roles.forEach(role => {
+        const items = roleManagementList.querySelectorAll('.bg-gray-50');
+        items.forEach(item => {
+            const nameDiv = item.querySelector('.font-bold');
+            if (nameDiv && nameDiv.textContent.trim() === role.name) {
+                // 检查是否已经添加了背景按钮
+                if (item.querySelector('.role-bg-action')) return;
+                const actionsDiv = item.querySelector('.flex.gap-2');
+                if (actionsDiv) {
+                    const bgBtn = document.createElement('button');
+                    bgBtn.className = 'role-bg-action p-2 bg-white text-green-600 rounded-full';
+                    bgBtn.title = '更换聊天背景';
+                    bgBtn.innerHTML = '<i data-lucide="image" class="w-4 h-4"></i>';
+                    bgBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        uploadRoleChatBackground(role.id);
+                    };
+                    actionsDiv.appendChild(bgBtn);
+                    
+                    // 如果有背景，添加删除按钮
+                    if (role.chatBackground) {
+                        const delBgBtn = document.createElement('button');
+                        delBgBtn.className = 'role-bg-action p-2 bg-white text-red-500 rounded-full';
+                        delBgBtn.title = '删除聊天背景';
+                        delBgBtn.innerHTML = '<i data-lucide="trash-2" class="w-4 h-4"></i>';
+                        delBgBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            deleteRoleChatBackground(role.id);
+                        };
+                        actionsDiv.appendChild(delBgBtn);
+                    }
+                    lucide.createIcons();
+                }
+            }
+        });
+    });
+}
+
+// 重写 renderRoleManagementList 以包含背景操作
+const originalRenderRoleManagementList = renderRoleManagementList;
+renderRoleManagementList = function() {
+    originalRenderRoleManagementList();
+    // 延迟添加背景按钮，确保 DOM 已渲染
+    setTimeout(addRoleBackgroundActions, 100);
+};
 
 function openGroupChat(groupId) {
     currentChatType = 'group'; currentGroupId = groupId; currentRoleId = null; const group = appData.groups.find(g => g.id === groupId); if (!group) return;
@@ -6796,7 +7003,8 @@ function createMessageElement(sender, content, time, quote = null, type = 'text'
     if (showAvatarThisMsg) lastMessageSender = sender;
     const showName = !isMe && avatarSettings.showNameInSingle && currentChatType === 'role';
     
-    div.className = `flex w-full ${isMe ? 'justify-end items-start' : 'justify-start items-start'} animate-fade-in mb-4 message-bubble-container`;
+    // 添加 message-wrapper 类实现淡入上滑动画
+    div.className = `flex w-full ${isMe ? 'justify-end items-start' : 'justify-start items-start'} animate-fade-in mb-4 message-bubble-container message-wrapper`;
     const ts = new Date(time).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
     const tsWithRead = isMe ? (read ? `${ts} ✓✓` : `${ts} ✓`) : ts;
     const avatarSize = avatarSettings.size;
@@ -7105,26 +7313,43 @@ function triggerRoleReply() {
     executeRoleReply(role);
 }
 
-// 核心执行函数（独立于当前聊天状态）
+// ========== 核心执行函数（修改：多条回复间隔 + 正在输入提示） ==========
 function executeRoleReply(role) {
     if (!role) return;
-    const delay = Math.random() * (appData.settings.maxDelay - appData.settings.minDelay) * 1000 + appData.settings.minDelay * 1000;
-    // 显示正在输入（使用独立管理）
-    showRoleTyping(role.id, role.name, role.avatar, delay + 500);
+    
+    // 计算延迟
+    const minDelay = appData.settings.minDelay || 1;
+    const maxDelay = appData.settings.maxDelay || 3;
+    const baseDelay = (Math.random() * (maxDelay - minDelay) + minDelay) * 1000;
+    
+    // ========== 显示正在输入 ==========
+    showRoleTyping(role.id, role.name, role.avatar, baseDelay + 500);
+    
     setTimeout(async () => {
         hideRoleTyping(role.id);
+        
         const all = getActiveWordList();
         if (all.length === 0) return;
-        const prob2 = appData.settings.prob2 || 0, prob3 = appData.settings.prob3 || 0;
+        
+        // ========== 判断回复条数（传讯文件风格） ==========
+        const prob2 = appData.settings.prob2 || 0;
+        const prob3 = appData.settings.prob3 || 0;
         const rand = Math.random() * 100;
         let msgCount = 1;
         if (rand < prob2) msgCount = 2;
         else if (rand < prob2 + prob3) msgCount = 3;
+        
+        // ========== 多条回复间隔（传讯文件风格：每条之间间隔 multiMsgInterval 秒） ==========
         const intervalSec = appData.settings.multiMsgInterval || 2;
         const intervalMs = intervalSec * 1000;
+        
+        // ========== 逐条发送函数 ==========
         const sendNext = (count) => {
             if (count <= 0) return;
+            
             let finalContent = '', type = 'text', quote = null;
+            
+            // 随机合并回复（如果启用）
             if (appData.settings.mergeReplyEnabled) {
                 const mergeRand = Math.random() * 100;
                 let mergeCount = 1;
@@ -7142,10 +7367,15 @@ function executeRoleReply(role) {
             } else {
                 finalContent = all[Math.floor(Math.random() * all.length)];
             }
-            const msgs = appData.chats[role.id] || [], lastMe = msgs.slice().reverse().find(m => m.sender === 'me');
+            
+            // 引用功能
+            const msgs = appData.chats[role.id] || [];
+            const lastMe = msgs.slice().reverse().find(m => m.sender === 'me');
             if (lastMe && Math.random() * 100 < appData.settings.quoteMyProb) {
                 quote = { content: lastMe.content, type: lastMe.type || 'text' };
             }
+            
+            // Emoji 混入
             let emojiSuffix = '';
             if (appData.wordbanks.emojis.length > 0 && Math.random() * 100 < (appData.settings.emojiProb / 2)) {
                 emojiSuffix = ' ' + appData.wordbanks.emojis[Math.floor(Math.random() * appData.wordbanks.emojis.length)];
@@ -7160,14 +7390,21 @@ function executeRoleReply(role) {
                     }
                 }
             }
+            
+            // 创建消息
             const msg = { id: Date.now() + count, sender: role.id, content: finalContent, time: Date.now(), quote, type, read: false };
             if (!appData.chats[role.id]) appData.chats[role.id] = [];
             appData.chats[role.id].push(msg);
             role.lastActive = Date.now();
             debouncedSaveData();
 
-            // ★ 关键：判断当前是否正在查看该角色，若是则立即渲染，否则增加未读
+            // ★ 判断当前是否正在查看该角色
             if (currentChatType === 'role' && currentRoleId === role.id) {
+                // 每条消息发送前再显示一次正在输入（传讯文件风格）
+                if (count > 1) {
+                    showRoleTyping(role.id, role.name, role.avatar, 600);
+                    setTimeout(() => hideRoleTyping(role.id), 500);
+                }
                 appendMessageToDOM(role.id, finalContent, Date.now(), quote, type);
             } else {
                 incrementUnread(role.id);
@@ -7200,10 +7437,17 @@ function executeRoleReply(role) {
                     }
                 }, 400);
             }
-            if (count > 1) setTimeout(() => sendNext(count - 1), intervalMs);
+            
+            // 发送下一条（如果有）
+            if (count > 1) {
+                setTimeout(() => sendNext(count - 1), intervalMs);
+            }
         };
+        
+        // 开始发送
         sendNext(msgCount);
-    }, delay);
+        
+    }, baseDelay);
 }
 
 // 群聊回复独立执行函数（类似）
@@ -7310,6 +7554,7 @@ function appendMessageToDOM(sender, content, time, quote = null, type = 'text') 
         const msg = msgs.find(m => m.time === time && m.sender === sender && m.content === content);
         if (msg) read = msg.read;
     }
+    // 使用 createMessageElement 会自动添加 message-wrapper 类实现动画
     c.appendChild(createMessageElement(sender, content, time, quote, type, read));
     scrollToBottom();
 }
@@ -7919,7 +8164,24 @@ function updateAvatarPreview() {
 function openRoleManagement() { pageHistory.push('settings'); roleManagementTab = 'roles'; switchRoleManagementTab('roles'); document.getElementById('modal-settings-main').classList.add('hidden'); document.getElementById('modal-role-management').classList.remove('hidden'); }
 function closeRoleManagement() { document.getElementById('modal-role-management').classList.add('hidden'); if (pageHistory.pop() === 'settings') document.getElementById('modal-settings-main').classList.remove('hidden'); }
 function switchRoleManagementTab(tab) { roleManagementTab = tab; const listRoles = document.getElementById('role-management-list'), listGroups = document.getElementById('group-management-list'), createBtn = document.getElementById('mgmt-create-btn'), tabRoles = document.getElementById('mgmt-tab-roles'), tabGroups = document.getElementById('mgmt-tab-groups'); if (tab === 'roles') { tabRoles.style.color = 'var(--tab-active-text)'; tabRoles.style.borderColor = 'var(--tab-active-border)'; tabGroups.style.color = ''; tabGroups.style.borderColor = ''; listRoles.classList.remove('hidden'); listGroups.classList.add('hidden'); createBtn.textContent = '新建角色'; createBtn.onclick = () => { openCreateRole(); closeRoleManagement(); }; renderRoleManagementList(); } else { tabGroups.style.color = 'var(--tab-active-text)'; tabGroups.style.borderColor = 'var(--tab-active-border)'; tabRoles.style.color = ''; tabRoles.style.borderColor = ''; listRoles.classList.add('hidden'); listGroups.classList.remove('hidden'); createBtn.textContent = '新建群聊'; createBtn.onclick = () => { openCreateGroup(); closeRoleManagement(); }; renderGroupManagementList(); } }
-function renderRoleManagementList() { const list = document.getElementById('role-management-list'); list.innerHTML = ''; appData.roles.forEach(r => { const d = document.createElement('div'); d.className = 'bg-gray-50 p-4 rounded-2xl flex items-center justify-between'; d.innerHTML = `<div class="flex items-center gap-3"><img src="${r.avatar}" class="w-10 h-10 rounded-full"><div><h3 class="font-bold text-sm">${escapeHtml(r.name)}</h3></div></div><div class="flex gap-2"><button onclick="editRole('${r.id}')" class="p-2 bg-white text-amber-600 rounded-full"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button onclick="deleteRole('${r.id}')" class="p-2 bg-white text-red-500 rounded-full"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`; list.appendChild(d); }); lucide.createIcons(); }
+function renderRoleManagementList() { 
+    const list = document.getElementById('role-management-list'); 
+    list.innerHTML = ''; 
+    appData.roles.forEach(r => { 
+        const d = document.createElement('div'); 
+        d.className = 'bg-gray-50 p-4 rounded-2xl flex items-center justify-between'; 
+        let actionsHtml = `<button onclick="editRole('${r.id}')" class="p-2 bg-white text-amber-600 rounded-full"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                          <button onclick="deleteRole('${r.id}')" class="p-2 bg-white text-red-500 rounded-full"><i data-lucide="trash-2" class="w-4 h-4"></i></button>`;
+        // 添加背景操作按钮
+        actionsHtml += `<button onclick="uploadRoleChatBackground('${r.id}')" class="p-2 bg-white text-green-600 rounded-full" title="更换聊天背景"><i data-lucide="image" class="w-4 h-4"></i></button>`;
+        if (r.chatBackground) {
+            actionsHtml += `<button onclick="deleteRoleChatBackground('${r.id}')" class="p-2 bg-white text-red-500 rounded-full" title="删除聊天背景"><i data-lucide="trash-2" class="w-4 h-4"></i></button>`;
+        }
+        d.innerHTML = `<div class="flex items-center gap-3"><img src="${r.avatar}" class="w-10 h-10 rounded-full"><div><h3 class="font-bold text-sm">${escapeHtml(r.name)}</h3></div></div><div class="flex gap-2">${actionsHtml}</div>`; 
+        list.appendChild(d); 
+    }); 
+    lucide.createIcons(); 
+}
 function renderGroupManagementList() { const list = document.getElementById('group-management-list'); list.innerHTML = ''; if (!appData.groups.length) { list.innerHTML = '<div class="text-center text-gray-400 py-8">暂无群聊</div>'; return; } appData.groups.forEach(g => { const d = document.createElement('div'); d.className = 'bg-gray-50 p-4 rounded-2xl flex items-center justify-between'; d.innerHTML = `<div class="flex items-center gap-3"><img src="${g.avatar || DEFAULT_GROUP_AVATAR}" class="w-10 h-10 rounded-full"><div><h3 class="font-bold text-sm">${escapeHtml(g.name)}</h3><p class="text-xs text-gray-400">${g.members.length}人</p></div></div><div class="flex gap-2"><button onclick="clearGroupChatRecord('${g.id}')" class="p-2 bg-white text-orange-500 rounded-full" title="清空群聊天"><i data-lucide="eraser" class="w-4 h-4"></i></button><button onclick="deleteGroup('${g.id}')" class="p-2 bg-white text-red-500 rounded-full"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`; list.appendChild(d); }); lucide.createIcons(); }
 async function clearGroupChatRecord(groupId) { showConfirm('清空该群聊的所有聊天记录？', async () => { if (appData.groupChats[groupId]) { appData.groupChats[groupId] = []; } await saveData(); if (currentChatType === 'group' && currentGroupId === groupId) { renderChatMessages(); } showToast('群聊记录已清空'); }); }
 function deleteGroup(groupId) { showConfirm('删除群聊将同时清空聊天记录，确定？', async () => { appData.groups = appData.groups.filter(g => g.id !== groupId); delete appData.groupChats[groupId]; await saveData(); renderGroupManagementList(); renderGroupList(); if (currentChatType === 'group' && currentGroupId === groupId) goBack(); showToast('群聊已删除'); }); }
@@ -7928,7 +8190,7 @@ function deleteRole(id) { showConfirm('删除角色？', async () => { appData.r
 function openCreateRole() { document.getElementById('modal-create-role').classList.remove('hidden'); document.getElementById('role-name-input').value = ''; document.getElementById('role-avatar-preview').src = DEFAULT_AVATAR; document.getElementById('role-group-prob').value = 50; document.getElementById('role-group-prob-val').textContent = '50%'; document.getElementById('role-mail-prob').value = 15; document.getElementById('role-mail-prob-val').textContent = '15%'; }
 function closeCreateRole() { document.getElementById('modal-create-role').classList.add('hidden'); }
 async function handleAvatarUpload(input) { if (input.files?.[0]) { showToast('压缩中...'); const compressed = await compressImage(input.files[0], 400, 0.7); document.getElementById('role-avatar-preview').src = compressed; } }
-async function saveRole() { const name = document.getElementById('role-name-input').value.trim(); if (!name) { showToast('请输入名称'); return; } appData.roles.push({ id: Date.now().toString(), name, avatar: document.getElementById('role-avatar-preview').src, groupProb: parseInt(document.getElementById('role-group-prob').value), autoMailProbability: parseInt(document.getElementById('role-mail-prob').value) || 15, lastActive: Date.now(), lastAutoSendTime: Date.now(), lastLoveRefresh: 0, currentLoveState: null, pokeMyTexts: ['哥哥，我超爱你 😍😍'], pokeTheirTexts: ['老婆，我们永远不分开 😂😂'], onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 }, todayMomentCount: 0, lastDoodleDate: null, customPokes: [], pokeActions: [...PRESET_POKE_ACTIONS] }); await saveData(); renderRoleList(); closeCreateRole(); showToast('创建成功'); }
+async function saveRole() { const name = document.getElementById('role-name-input').value.trim(); if (!name) { showToast('请输入名称'); return; } appData.roles.push({ id: Date.now().toString(), name, avatar: document.getElementById('role-avatar-preview').src, groupProb: parseInt(document.getElementById('role-group-prob').value), autoMailProbability: parseInt(document.getElementById('role-mail-prob').value) || 15, lastActive: Date.now(), lastAutoSendTime: Date.now(), lastLoveRefresh: 0, currentLoveState: null, pokeMyTexts: ['哥哥，我超爱你 😍😍'], pokeTheirTexts: ['老婆，我们永远不分开 😂😂'], onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 }, todayMomentCount: 0, lastDoodleDate: null, customPokes: [], pokeActions: [...PRESET_POKE_ACTIONS], chatBackground: null }); await saveData(); renderRoleList(); closeCreateRole(); showToast('创建成功'); }
 
 function openDataManagement() { pageHistory.push('settings'); document.getElementById('modal-settings-main').classList.add('hidden'); document.getElementById('modal-settings-data').classList.remove('hidden'); updateStorageDisplay(); updateNotificationUI(); }
 function closeDataManagement() { document.getElementById('modal-settings-data').classList.add('hidden'); if (pageHistory.pop() === 'settings') document.getElementById('modal-settings-main').classList.remove('hidden'); }
@@ -8003,10 +8265,12 @@ function sendNotificationIfNeeded(title, body) {
 
 // --- 备份/恢复 ---
 function copyBackupToClipboard() { const jsonStr = JSON.stringify(appData, null, 2); navigator.clipboard.writeText(jsonStr).then(() => { showToast('备份数据已复制到剪贴板！可粘贴到备忘录保存'); }).catch(() => { showToast('复制失败，请手动选择文本复制'); }); }
-function openRestoreFromClipboardModal() { const overlay = document.createElement('div'); overlay.className = 'modal-overlay'; overlay.style.zIndex = '1200'; overlay.innerHTML = `<div class="modal-card" style="max-width:400px;width:90%;"><h3 class="text-lg font-bold mb-4">从备份恢复</h3><p class="text-xs text-gray-500 mb-2">请将之前复制的备份数据粘贴到下方文本框中，然后点击"恢复"。</p><textarea id="restore-backup-textarea" class="w-full h-40 bg-gray-100 rounded-xl p-3 text-sm outline-none resize-none" placeholder="在此粘贴备份数据..."></textarea><div class="flex gap-3 mt-4"><button id="restore-cancel-btn" class="flex-1 py-2.5 rounded-xl border border-gray-200 font-medium">取消</button><button id="restore-confirm-btn" class="flex-1 py-2.5 rounded-xl text-white font-medium shadow-lg" style="background-color: var(--button-primary-bg);">恢复</button></div></div>`; document.body.appendChild(overlay); const cancelBtn = overlay.querySelector('#restore-cancel-btn'); const confirmBtn = overlay.querySelector('#restore-confirm-btn'); const textarea = overlay.querySelector('#restore-backup-textarea'); cancelBtn.onclick = () => { document.body.removeChild(overlay); }; confirmBtn.onclick = () => { const content = textarea.value.trim(); if (!content) { showToast('请粘贴备份内容'); return; } try { const data = JSON.parse(content); if (data.roles && data.chats) { showConfirm('确定要恢复该备份吗？当前数据将被覆盖。', async () => { appData = data; if (!appData.wordbanks.wordGroups) appData.wordbanks.wordGroups = [{ name: '默认', words: [...(appData.wordbanks.replies || [])] }]; appData.wordbanks.wordGroups.forEach(g => { g.words = g.words.map(w => typeof w === 'string' ? { text: w, blocked: false } : w); }); if (!appData.favoriteMessages) appData.favoriteMessages = []; if (!appData.transferSettings) appData.transferSettings = { enabled: true, minAmount: 5.20, maxAmount: 200, probability: 15, checkInterval: 30 }; if (!appData.transferRecords) appData.transferRecords = []; if (!appData.redPackets) appData.redPackets = []; if (!appData.userProfile) appData.userProfile = { nickname: '我', avatar: DEFAULT_AVATAR }; if (!appData.balance) appData.balance = 1000000; if (!appData.moments || appData.moments.length === 0) appData.moments = JSON.parse(JSON.stringify(DEFAULT_DATA.moments)); if (!appData.momentPhotos) appData.momentPhotos = []; if (!appData.songLibrary || appData.songLibrary.length < 50) appData.songLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.songLibrary)); if (!appData.bookLibrary || appData.bookLibrary.length === 0) appData.bookLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.bookLibrary)); if (!appData.momentCommentBank) appData.momentCommentBank = [...DEFAULT_DATA.momentCommentBank]; if (!appData.musicLibrary) appData.musicLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.musicLibrary)); if (!appData.addressLibrary) appData.addressLibrary = [...DEFAULT_DATA.addressLibrary]; if (appData.settings.momentCover === undefined) appData.settings.momentCover = ''; if (!appData.pokeSymbols) appData.pokeSymbols = { my: { preset: 'heart', custom: '♡' }, partner: { preset: 'flower', custom: '✿' }, customSymbols: [] }; if (appData.settings.pokeAutoReplyEnabled === undefined) appData.settings.pokeAutoReplyEnabled = true; if (appData.settings.pokeAutoReplyProb === undefined) appData.settings.pokeAutoReplyProb = 45; await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('数据已恢复'); updateMusicPlayerCardVisibility(); }); } else { showToast('无效的备份数据'); } } catch (e) { showToast('数据格式错误，无法解析'); } document.body.removeChild(overlay); }; overlay.addEventListener('click', (e) => { if (e.target === overlay) { document.body.removeChild(overlay); } }); }
+function openRestoreFromClipboardModal() { const overlay = document.createElement('div'); overlay.className = 'modal-overlay'; overlay.style.zIndex = '1200'; overlay.innerHTML = `<div class="modal-card" style="max-width:400px;width:90%;"><h3 class="text-lg font-bold mb-4">从备份恢复</h3><p class="text-xs text-gray-500 mb-2">请将之前复制的备份数据粘贴到下方文本框中，然后点击"恢复"。</p><textarea id="restore-backup-textarea" class="w-full h-40 bg-gray-100 rounded-xl p-3 text-sm outline-none resize-none" placeholder="在此粘贴备份数据..."></textarea><div class="flex gap-3 mt-4"><button id="restore-cancel-btn" class="flex-1 py-2.5 rounded-xl border border-gray-200 font-medium">取消</button><button id="restore-confirm-btn" class="flex-1 py-2.5 rounded-xl text-white font-medium shadow-lg" style="background-color: var(--button-primary-bg);">恢复</button></div></div>`; document.body.appendChild(overlay); const cancelBtn = overlay.querySelector('#restore-cancel-btn'); const confirmBtn = overlay.querySelector('#restore-confirm-btn'); const textarea = overlay.querySelector('#restore-backup-textarea'); cancelBtn.onclick = () => { document.body.removeChild(overlay); }; confirmBtn.onclick = () => { const content = textarea.value.trim(); if (!content) { showToast('请粘贴备份内容'); return; } try { const data = JSON.parse(content); if (data.roles && data.chats) { showConfirm('确定要恢复该备份吗？当前数据将被覆盖。', async () => { appData = data; if (!appData.wordbanks.wordGroups) appData.wordbanks.wordGroups = [{ name: '默认', words: [...(appData.wordbanks.replies || [])] }]; appData.wordbanks.wordGroups.forEach(g => { g.words = g.words.map(w => typeof w === 'string' ? { text: w, blocked: false } : w); }); if (!appData.favoriteMessages) appData.favoriteMessages = []; if (!appData.transferSettings) appData.transferSettings = { enabled: true, minAmount: 5.20, maxAmount: 200, probability: 15, checkInterval: 30 }; if (!appData.transferRecords) appData.transferRecords = []; if (!appData.redPackets) appData.redPackets = []; if (!appData.userProfile) appData.userProfile = { nickname: '我', avatar: DEFAULT_AVATAR }; if (!appData.balance) appData.balance = 1000000; if (!appData.moments || appData.moments.length === 0) appData.moments = JSON.parse(JSON.stringify(DEFAULT_DATA.moments)); if (!appData.momentPhotos) appData.momentPhotos = []; if (!appData.songLibrary || appData.songLibrary.length < 50) appData.songLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.songLibrary)); if (!appData.bookLibrary || appData.bookLibrary.length === 0) appData.bookLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.bookLibrary)); if (!appData.momentCommentBank) appData.momentCommentBank = [...DEFAULT_DATA.momentCommentBank]; if (!appData.musicLibrary) appData.musicLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.musicLibrary)); if (!appData.addressLibrary) appData.addressLibrary = [...DEFAULT_DATA.addressLibrary]; if (appData.settings.momentCover === undefined) appData.settings.momentCover = ''; if (!appData.pokeSymbols) appData.pokeSymbols = { my: { preset: 'heart', custom: '♡' }, partner: { preset: 'flower', custom: '✿' }, customSymbols: [] }; if (appData.settings.pokeAutoReplyEnabled === undefined) appData.settings.pokeAutoReplyEnabled = true; if (appData.settings.pokeAutoReplyProb === undefined) appData.settings.pokeAutoReplyProb = 45; // 确保角色有 chatBackground 字段
+        appData.roles.forEach(r => { if (r.chatBackground === undefined) r.chatBackground = null; });
+        await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('数据已恢复'); updateMusicPlayerCardVisibility(); }); } else { showToast('无效的备份数据'); } } catch (e) { showToast('数据格式错误，无法解析'); } document.body.removeChild(overlay); }; overlay.addEventListener('click', (e) => { if (e.target === overlay) { document.body.removeChild(overlay); } }); }
 
 function exportData() { const jsonStr = JSON.stringify(appData, null, 2); const blob = new Blob([jsonStr], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `spiritual_connection_${new Date().toISOString().slice(0,10)}.json`; a.click(); showToast('导出成功'); setTimeout(() => URL.revokeObjectURL(a.href), 60000); }
-function importData() { const i = document.createElement('input'); i.type = 'file'; i.accept = '.json'; i.onchange = e => { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = async ev => { try { const d = JSON.parse(ev.target.result); if (d.roles && d.chats) { showConfirm('导入将覆盖现有数据，确定？', async () => { appData = d; if (!appData.wordbanks.wordGroups) appData.wordbanks.wordGroups = [{ name: '默认', words: [...(appData.wordbanks.replies || [])] }]; appData.wordbanks.wordGroups.forEach(g => { g.words = g.words.map(w => typeof w === 'string' ? { text: w, blocked: false } : w); }); if (d.appearance?.backgrounds) await saveBackgrounds(d.appearance.backgrounds); if (!appData.favoriteMessages) appData.favoriteMessages = []; if (!appData.transferSettings) appData.transferSettings = { enabled: true, minAmount: 5.20, maxAmount: 200, probability: 15, checkInterval: 30 }; if (!appData.transferRecords) appData.transferRecords = []; if (!appData.redPackets) appData.redPackets = []; if (!appData.userProfile) appData.userProfile = { nickname: '我', avatar: DEFAULT_AVATAR }; if (!appData.balance) appData.balance = 1000000; if (!appData.moments || appData.moments.length === 0) appData.moments = JSON.parse(JSON.stringify(DEFAULT_DATA.moments)); if (!appData.momentPhotos) appData.momentPhotos = []; if (!appData.songLibrary || appData.songLibrary.length < 50) appData.songLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.songLibrary)); if (!appData.bookLibrary || appData.bookLibrary.length === 0) appData.bookLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.bookLibrary)); if (!appData.momentCommentBank) appData.momentCommentBank = [...DEFAULT_DATA.momentCommentBank]; if (!appData.musicLibrary) appData.musicLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.musicLibrary)); if (!appData.addressLibrary) appData.addressLibrary = [...DEFAULT_DATA.addressLibrary]; if (appData.settings.momentCover === undefined) appData.settings.momentCover = ''; if (!appData.pokeSymbols) appData.pokeSymbols = { my: { preset: 'heart', custom: '♡' }, partner: { preset: 'flower', custom: '✿' }, customSymbols: [] }; if (appData.settings.pokeAutoReplyEnabled === undefined) appData.settings.pokeAutoReplyEnabled = true; if (appData.settings.pokeAutoReplyProb === undefined) appData.settings.pokeAutoReplyProb = 45; await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('导入成功'); updateMusicPlayerCardVisibility(); }); } else showToast('无效文件'); } catch { showToast('解析失败'); } }; r.readAsText(f); }; i.click(); }
+function importData() { const i = document.createElement('input'); i.type = 'file'; i.accept = '.json'; i.onchange = e => { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = async ev => { try { const d = JSON.parse(ev.target.result); if (d.roles && d.chats) { showConfirm('导入将覆盖现有数据，确定？', async () => { appData = d; if (!appData.wordbanks.wordGroups) appData.wordbanks.wordGroups = [{ name: '默认', words: [...(appData.wordbanks.replies || [])] }]; appData.wordbanks.wordGroups.forEach(g => { g.words = g.words.map(w => typeof w === 'string' ? { text: w, blocked: false } : w); }); if (d.appearance?.backgrounds) await saveBackgrounds(d.appearance.backgrounds); if (!appData.favoriteMessages) appData.favoriteMessages = []; if (!appData.transferSettings) appData.transferSettings = { enabled: true, minAmount: 5.20, maxAmount: 200, probability: 15, checkInterval: 30 }; if (!appData.transferRecords) appData.transferRecords = []; if (!appData.redPackets) appData.redPackets = []; if (!appData.userProfile) appData.userProfile = { nickname: '我', avatar: DEFAULT_AVATAR }; if (!appData.balance) appData.balance = 1000000; if (!appData.moments || appData.moments.length === 0) appData.moments = JSON.parse(JSON.stringify(DEFAULT_DATA.moments)); if (!appData.momentPhotos) appData.momentPhotos = []; if (!appData.songLibrary || appData.songLibrary.length < 50) appData.songLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.songLibrary)); if (!appData.bookLibrary || appData.bookLibrary.length === 0) appData.bookLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.bookLibrary)); if (!appData.momentCommentBank) appData.momentCommentBank = [...DEFAULT_DATA.momentCommentBank]; if (!appData.musicLibrary) appData.musicLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.musicLibrary)); if (!appData.addressLibrary) appData.addressLibrary = [...DEFAULT_DATA.addressLibrary]; if (appData.settings.momentCover === undefined) appData.settings.momentCover = ''; if (!appData.pokeSymbols) appData.pokeSymbols = { my: { preset: 'heart', custom: '♡' }, partner: { preset: 'flower', custom: '✿' }, customSymbols: [] }; if (appData.settings.pokeAutoReplyEnabled === undefined) appData.settings.pokeAutoReplyEnabled = true; if (appData.settings.pokeAutoReplyProb === undefined) appData.settings.pokeAutoReplyProb = 45; appData.roles.forEach(r => { if (r.chatBackground === undefined) r.chatBackground = null; }); await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('导入成功'); updateMusicPlayerCardVisibility(); }); } else showToast('无效文件'); } catch { showToast('解析失败'); } }; r.readAsText(f); }; i.click(); }
 async function clearChatRecords() { showConfirm('清空所有聊天记录？', async () => { appData.chats = {}; appData.groupChats = {}; unreadCounts = {}; await saveUnreadCounts(); appData.roles.forEach(r => r.lastActive = Date.now()); await saveData(); renderRoleList(); if (currentChatType === 'role') renderChatMessages(); updateStorageDisplay(); showToast('已清空'); }); }
 async function resetAllData() { showConfirm('重置所有数据？不可恢复！', async () => { appData = JSON.parse(JSON.stringify(DEFAULT_DATA)); await saveBackgrounds({ home: '', chat: '', group: '' }); await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('已重置'); }); }
 
@@ -9343,11 +9607,11 @@ function createPokeItemDiv(text, idx, type) {
 function editPokeItem(type, index) {
     let newText;
     if (type === 'my') {
-        newText = prompt('编辑“我戳他”文案：', tempPokeMyTexts[index]);
+        newText = prompt('编辑"我戳他"文案：', tempPokeMyTexts[index]);
         if (newText && newText.trim()) { tempPokeMyTexts[index] = newText.trim(); }
         else { return; }
     } else {
-        newText = prompt('编辑“他戳我”文案：', tempPokeTheirTexts[index]);
+        newText = prompt('编辑"他戳我"文案：', tempPokeTheirTexts[index]);
         if (newText && newText.trim()) { tempPokeTheirTexts[index] = newText.trim(); }
         else { return; }
     }
@@ -11790,7 +12054,7 @@ function drawRandomImages(count) {
 function getDailyFortune() {
     const levels = ['大吉','中吉','小吉','末吉','凶','大凶'];
     const level = levels[Math.floor(Math.random() * levels.length)];
-    const phrase = fortunePhrases[level][Math.floor(Math.random() * fortunePhrases[level].length)];
+    const phrase = fortunePhrases[level][Math.floor(Math.random() * fortunePhrases[level.length])];
     return { level, phrase, desc: `${level} · ${phrase}` };
 }
 async function openFortune() {
@@ -12449,8 +12713,7 @@ window._sendPartnerNotification = function(title, body) {
 
 // ========== 修复模拟回复中的通知调用 ==========
 // 在 simulateReply 函数中，在 addMessage 之后添加通知调用
-// 由于 simulateReply 函数已在上方定义，我们需要在它内部添加通知调用
-// 但由于代码已定义，我们通过 Monkey Patch 方式增强它
+// 由于 simulateReply 函数已在上方定义，我们通过 Monkey Patch 方式增强它
 
 // 保存原始的 simulateReply 函数引用
 const _originalSimulateReply = window.simulateReply || function() {};
@@ -12475,6 +12738,45 @@ window.simulateReply = function() {
             }
         }
     }
+};
+
+// ========== 批量发送优化（传讯文件风格：逐条发送带间隔） ==========
+// 重写 sendBatchMessages 函数
+const originalSendBatchMessages = sendBatchMessages;
+sendBatchMessages = function() {
+    if (batchMessages.length === 0) return;
+    showNotification(`正在发送 ${batchMessages.length} 条消息...`, 'info', 2000);
+    
+    // 逐条发送，每条间隔 300ms（传讯文件风格）
+    batchMessages.forEach((msg, index) => {
+        setTimeout(() => {
+            addMessage({
+                id: Date.now() + index,
+                sender: 'user',
+                text: msg.text || '',
+                image: msg.image || null,
+                timestamp: new Date(),
+                status: 'sent',
+                favorited: false,
+                type: 'normal'
+            });
+            playSound('send');
+        }, index * 300);
+    });
+    
+    // 最后一条发送完后触发回复
+    const totalDelay = batchMessages.length * 300;
+    const delayRange = settings.replyDelayMax - settings.replyDelayMin;
+    const randomDelay = settings.replyDelayMin + Math.random() * delayRange;
+    setTimeout(simulateReply, totalDelay + randomDelay);
+    
+    // 清理批量模式状态
+    isBatchMode = false;
+    batchMessages = [];
+    DOMElements.batchBtn.classList.remove('active');
+    DOMElements.batchPreview.style.display = 'none';
+    const placeholder = "";
+    DOMElements.messageInput.placeholder = placeholder.length > 20 ? placeholder.substring(0, 20) + "..." : placeholder;
 };
 
 </script>
