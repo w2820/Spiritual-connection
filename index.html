@@ -6726,12 +6726,7 @@ function renderRoleList() {
         const unread = unreadCounts[role.id] || 0, badge = unread ? `<div class="absolute top-2 right-2 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">${unread>99?'99+':unread}</div>` : '';
         const card = document.createElement('div'); card.className = 'role-card bg-white p-4 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer relative';
         card.onclick = () => openChat(role.id);
-        let pressTimer; 
-        card.addEventListener('touchstart', (e) => { 
-            pressTimer = setTimeout(() => showConfirm(`删除角色"${role.name}"？`, async () => { appData.roles = appData.roles.filter(r => r.id !== role.id); delete appData.chats[role.id]; await saveData(); renderRoleList(); renderGroupList(); showToast('已删除'); }), 500); 
-        }); 
-        card.addEventListener('touchend', () => clearTimeout(pressTimer)); 
-        card.addEventListener('touchmove', () => clearTimeout(pressTimer));
+        // 已移除长按删除功能，仅保留点击进入聊天
         card.innerHTML = `${badge}<img src="${role.avatar}" class="w-14 h-14 rounded-full object-cover border-2 border-amber-50"><div class="flex-1 min-w-0"><h3 class="font-bold text-gray-900 text-lg truncate">${escapeHtml(role.name)}</h3>${lastHtml}</div><i data-lucide="chevron-right" class="w-5 h-5 text-gray-300"></i>`;
         list.appendChild(card);
     });
