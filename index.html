@@ -3583,6 +3583,11 @@
                 <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: #8e44ad;"><i data-lucide="image" class="w-5 h-5"></i></div>
                 <span class="text-xs font-medium">角色背景管理</span>
             </button>
+            <!-- 新增：历史信箱入口 -->
+            <button onclick="openHistoryMailbox()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: #6c5b7b;"><i data-lucide="archive" class="w-5 h-5"></i></div>
+                <span class="text-xs font-medium">📜 历史信箱</span>
+            </button>
         </div>
         <div class="flex gap-4">
             <button onclick="closeAdvancedSettings()" class="flex-1 bg-gray-100 text-gray-600 p-3 rounded-xl font-bold">返回</button>
@@ -3835,6 +3840,41 @@
     <header class="safe-top bg-[#8B5E3C] text-white"><div class="px-4 py-4 flex items-center"><button onclick="closeMailbox()" class="p-2 -ml-2 rounded-full hover:bg-white/10"><i data-lucide="chevron-down" class="w-6 h-6"></i></button><h1 class="text-lg font-bold ml-2 text-white">信箱投递</h1></div></header>
     <main class="flex-1 overflow-auto p-6"><div class="flex bg-[#E8D5B8] p-1 rounded-xl mb-8"><button onclick="switchMailTab('sent')" id="tab-sent" class="flex-1 py-2 rounded-lg text-sm font-medium bg-white shadow-sm text-[#8B5E3C]">寄出的信</button><button onclick="switchMailTab('received')" id="tab-received" class="flex-1 py-2 rounded-lg text-sm font-medium text-[#8B5E3C] hover:bg-white/50">收到的信</button></div><div id="mail-list" class="space-y-4"></div></main>
     <div class="p-6 safe-bottom flex gap-4"><button onclick="composeMail()" class="flex-1 bg-[#8B5E3C] text-white p-4 rounded-full shadow-lg flex items-center justify-center gap-2 active:scale-95 transition"><i data-lucide="pen-tool" class="w-6 h-6"></i><span class="font-medium">提笔写信</span></button><button onclick="closeMailbox()" class="px-6 py-4 bg-white text-[#8B5E3C] border border-[#8B5E3C] rounded-full font-medium">关闭</button></div>
+</div>
+
+<!-- 历史信箱页面（全新卡片样式） -->
+<div id="page-history-mailbox" class="card-page" style="z-index: 1200;">
+    <div class="card-page-container" style="max-width: 560px; width: 94%; max-height: 85vh;">
+        <div class="card-page-header">
+            <button class="back-btn" onclick="closeHistoryMailbox()">
+                <i data-lucide="chevron-left" class="w-6 h-6"></i>
+            </button>
+            <span class="title">📜 历史信箱</span>
+            <span></span>
+        </div>
+        <div style="padding: 12px 20px; border-bottom: 1px solid var(--border-color); flex-shrink:0; background: var(--bg-secondary);">
+            <div class="flex flex-wrap gap-2 items-center">
+                <select id="history-role-filter" class="text-xs bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 flex-1 min-w-[80px]">
+                    <option value="">全部角色</option>
+                </select>
+                <input type="date" id="history-date-from" class="text-xs bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 flex-1 min-w-[100px]" placeholder="开始日期">
+                <span class="text-xs text-gray-400">至</span>
+                <input type="date" id="history-date-to" class="text-xs bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 flex-1 min-w-[100px]" placeholder="结束日期">
+                <button onclick="searchHistoryMails()" class="text-xs px-3 py-1.5 rounded-full" style="background-color: var(--accent-color); color: white;">🔍 搜索</button>
+                <button onclick="resetHistorySearch()" class="text-xs px-2 py-1.5 rounded-full bg-gray-200 text-gray-600">重置</button>
+            </div>
+            <div id="history-search-info" class="text-xs text-gray-400 mt-2 hidden"></div>
+        </div>
+        <div class="card-page-body" id="history-mail-list-body">
+            <div id="history-mail-list" class="space-y-3">
+                <div class="text-center text-gray-400 py-10 text-sm">暂无历史信件，查看过的信件将自动归档于此</div>
+            </div>
+            <div id="history-loading-indicator" class="text-center text-gray-400 py-4 text-sm hidden">加载中...</div>
+        </div>
+        <div class="card-page-footer">
+            <button class="btn-primary" onclick="closeHistoryMailbox()">关闭</button>
+        </div>
+    </div>
 </div>
 
 <!-- 写信弹窗 -->
@@ -4291,7 +4331,7 @@
 
 <!-- 发表动态弹窗 (底部sheet) -->
 <div id="modal-post-moment" class="modal-overlay hidden" style="align-items: flex-end; z-index: 1300;">
-    <div style="background:#fff; border-radius: 20px 20px 0 0; width:100%; max-width:500px; padding: 20px 16px calc(20px + env(safe-area-inset-bottom)); box-shadow: 0 -4px 12px rgba(0,0,0,0.15);">
+    <div style="background:#fff; border-radius:20px 20px 0 0; width:100%; max-width:500px; padding:20px 16px calc(20px+env(safe-area-inset-bottom)); box-shadow:0 -4px 12px rgba(0,0,0,0.15);">
         <div class="flex justify-between items-center mb-4">
             <button onclick="closePostMoment()" class="text-sm text-gray-500">取消</button>
             <h3 class="text-lg font-bold">发表动态</h3>
@@ -4691,7 +4731,6 @@
 </div>
 
 <script>
-// ========== 第一部分结束，第二部分从下一行开始 ==========
 
 // 初始化图标
 lucide.createIcons();
@@ -5970,6 +6009,13 @@ async function loadData() {
                         if (msg.read === undefined) msg.read = false;
                     });
                 }
+            }
+            
+            // 为信件添加 viewed 字段兼容
+            if (appData.mails) {
+                appData.mails.forEach(mail => {
+                    if (mail.viewed === undefined) mail.viewed = false;
+                });
             }
         } else {
             appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
@@ -8286,9 +8332,13 @@ function switchMailTab(t) {
 function renderMailList() {
     const container = document.getElementById('mail-list');
     container.innerHTML = '';
-    const mails = appData.mails.filter(m => currentMailTab === 'sent' ? m.type === 'sent' : m.type === 'received');
+    // 只显示未查看的信件（viewed === false）
+    const mails = appData.mails.filter(m => 
+        (currentMailTab === 'sent' ? m.type === 'sent' : m.type === 'received') && 
+        m.viewed === false
+    );
     if (!mails.length) {
-        container.innerHTML = '<div class="text-center text-gray-400 py-10">暂无信件</div>';
+        container.innerHTML = '<div class="text-center text-gray-400 py-10">暂无未读信件，查看过的信件已归档至历史信箱</div>';
         return;
     }
     mails.forEach(m => {
@@ -8303,6 +8353,8 @@ function renderMailList() {
                 const hoursLeft = Math.ceil((m.replyTime - Date.now()) / 3600000);
                 statusHtml = `<span class="text-xs text-amber-600 bg-amber-50 px-2 rounded-full">等待回复(${hoursLeft > 0 ? hoursLeft : '<1'}h)</span>`;
             }
+        } else {
+            statusHtml = '<span class="text-xs text-blue-500 bg-blue-50 px-2 rounded-full">新信</span>';
         }
         const timeStr = new Date(m.time).toLocaleString('zh-CN', {
             year: 'numeric',
@@ -8339,7 +8391,12 @@ function deleteMail(id) {
         appData.mails = appData.mails.filter(m => m.id !== id);
         await saveData();
         renderMailList();
+        // 如果删除的是当前查看的信件，关闭详情
         if (currentViewingMailId === id) closeLetterDetail();
+        // 刷新历史信箱列表（如果打开）
+        if (document.getElementById('page-history-mailbox').classList.contains('active')) {
+            renderHistoryMailList();
+        }
         showToast('已删除');
     });
 }
@@ -8389,7 +8446,8 @@ async function sendMail() {
         content,
         time: Date.now(),
         replyTime: Date.now() + delay,
-        replied: false
+        replied: false,
+        viewed: false  // 新信件默认未查看
     };
     appData.mails.push(newMail);
     await saveData();
@@ -8414,6 +8472,17 @@ function openLetterDetail(id) {
         return;
     }
     currentViewingMailId = mail.id;
+    // ★ 标记为已查看（viewed = true）
+    if (mail.viewed === false) {
+        mail.viewed = true;
+        debouncedSaveData();
+        // 刷新当前信箱列表（移除该信件）
+        renderMailList();
+        // 如果历史信箱打开，刷新历史列表
+        if (document.getElementById('page-history-mailbox').classList.contains('active')) {
+            renderHistoryMailList();
+        }
+    }
     const role = appData.roles.find(r => r.id === mail.roleId);
     const fullTime = new Date(mail.time).toLocaleString('zh-CN', {
         year: 'numeric',
@@ -8470,11 +8539,216 @@ async function saveLetterEdit() {
     btnEdit.classList.remove('hidden');
     btnSave.classList.add('hidden');
     renderMailList();
+    // 如果历史信箱打开，刷新历史列表
+    if (document.getElementById('page-history-mailbox').classList.contains('active')) {
+        renderHistoryMailList();
+    }
     showToast('保存成功');
 }
 function deleteCurrentLetter() {
     if (currentViewingMailId) deleteMail(currentViewingMailId);
 }
+
+// ========== 历史信箱功能（全新卡片样式 + 分页 + 搜索） ==========
+let historyMailPageSize = 20;
+let historyMailCurrentPage = 0;
+let historyMailFiltered = [];
+let historyMailAll = [];
+let historyMailObserver = null;
+
+function openHistoryMailbox() {
+    pageHistory.push('advanced');
+    document.getElementById('modal-settings-advanced').classList.add('hidden');
+    const page = document.getElementById('page-history-mailbox');
+    page.classList.add('active');
+    // 填充角色筛选下拉
+    populateHistoryRoleFilter();
+    // 重置搜索
+    document.getElementById('history-date-from').value = '';
+    document.getElementById('history-date-to').value = '';
+    document.getElementById('history-search-info').classList.add('hidden');
+    // 加载数据
+    loadHistoryMailData();
+}
+
+function closeHistoryMailbox() {
+    document.getElementById('page-history-mailbox').classList.remove('active');
+    if (pageHistory.pop() === 'advanced') {
+        document.getElementById('modal-settings-advanced').classList.remove('hidden');
+    }
+    // 断开观察器
+    if (historyMailObserver) {
+        historyMailObserver.disconnect();
+        historyMailObserver = null;
+    }
+}
+
+function populateHistoryRoleFilter() {
+    const select = document.getElementById('history-role-filter');
+    if (!select) return;
+    select.innerHTML = '<option value="">全部角色</option>';
+    appData.roles.forEach(role => {
+        const opt = document.createElement('option');
+        opt.value = role.id;
+        opt.textContent = role.name;
+        select.appendChild(opt);
+    });
+}
+
+function loadHistoryMailData() {
+    // 获取所有已查看的信件（viewed === true）
+    historyMailAll = appData.mails.filter(m => m.viewed === true);
+    // 按时间降序
+    historyMailAll.sort((a, b) => b.time - a.time);
+    historyMailCurrentPage = 0;
+    applyHistoryFilters();
+}
+
+function applyHistoryFilters() {
+    const roleFilter = document.getElementById('history-role-filter').value;
+    const dateFrom = document.getElementById('history-date-from').value;
+    const dateTo = document.getElementById('history-date-to').value;
+    
+    historyMailFiltered = historyMailAll.filter(m => {
+        if (roleFilter && m.roleId !== roleFilter) return false;
+        if (dateFrom) {
+            const d = new Date(m.time);
+            d.setHours(0,0,0,0);
+            const from = new Date(dateFrom);
+            from.setHours(0,0,0,0);
+            if (d < from) return false;
+        }
+        if (dateTo) {
+            const d = new Date(m.time);
+            d.setHours(0,0,0,0);
+            const to = new Date(dateTo);
+            to.setHours(23,59,59,999);
+            if (d > to) return false;
+        }
+        return true;
+    });
+    
+    // 更新信息
+    const info = document.getElementById('history-search-info');
+    if (historyMailFiltered.length > 0) {
+        info.textContent = `共 ${historyMailFiltered.length} 条历史信件`;
+        info.classList.remove('hidden');
+    } else {
+        info.textContent = '暂无匹配的历史信件';
+        info.classList.remove('hidden');
+    }
+    
+    historyMailCurrentPage = 0;
+    renderHistoryMailList();
+}
+
+function renderHistoryMailList() {
+    const container = document.getElementById('history-mail-list');
+    const loading = document.getElementById('history-loading-indicator');
+    if (!container) return;
+    
+    const start = historyMailCurrentPage * historyMailPageSize;
+    const end = Math.min(start + historyMailPageSize, historyMailFiltered.length);
+    const pageItems = historyMailFiltered.slice(start, end);
+    
+    // 如果是第一页，清空容器
+    if (historyMailCurrentPage === 0) {
+        container.innerHTML = '';
+    }
+    
+    if (pageItems.length === 0 && historyMailCurrentPage === 0) {
+        container.innerHTML = '<div class="text-center text-gray-400 py-10 text-sm">暂无历史信件，查看过的信件将自动归档于此</div>';
+        if (loading) loading.classList.add('hidden');
+        return;
+    }
+    
+    if (pageItems.length === 0) {
+        if (loading) loading.classList.add('hidden');
+        return;
+    }
+    
+    pageItems.forEach(mail => {
+        const role = appData.roles.find(r => r.id === mail.roleId);
+        const avatar = role?.avatar || DEFAULT_AVATAR;
+        const name = role?.name || '未知';
+        const typeLabel = mail.type === 'sent' ? '📤 寄出' : '📥 收到';
+        const timeStr = new Date(mail.time).toLocaleString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        const contentPreview = mail.content.substring(0, 60) + (mail.content.length > 60 ? '...' : '');
+        
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-xl p-3 shadow-sm border border-gray-100 flex items-start gap-3 cursor-pointer hover:bg-gray-50 transition';
+        card.onclick = () => openLetterDetail(mail.id);
+        card.innerHTML = `
+            <img src="${avatar}" class="w-10 h-10 rounded-full object-cover flex-shrink-0">
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="font-medium text-sm">${escapeHtml(name)}</span>
+                    <span class="text-xs text-gray-400">${typeLabel}</span>
+                    <span class="text-xs text-gray-400 ml-auto">${timeStr}</span>
+                </div>
+                <div class="text-sm text-gray-700 mt-1 break-words">${escapeHtml(contentPreview)}</div>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+    
+    // 显示加载更多
+    if (loading) {
+        if (end < historyMailFiltered.length) {
+            loading.classList.remove('hidden');
+            loading.textContent = '加载更多...';
+        } else {
+            loading.classList.add('hidden');
+        }
+    }
+    
+    // 设置观察器
+    setupHistoryIntersectionObserver();
+}
+
+function setupHistoryIntersectionObserver() {
+    if (historyMailObserver) {
+        historyMailObserver.disconnect();
+        historyMailObserver = null;
+    }
+    const loading = document.getElementById('history-loading-indicator');
+    if (!loading) return;
+    if (loading.classList.contains('hidden')) return;
+    
+    historyMailObserver = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+            const start = (historyMailCurrentPage + 1) * historyMailPageSize;
+            if (start < historyMailFiltered.length) {
+                historyMailCurrentPage++;
+                renderHistoryMailList();
+            } else {
+                loading.classList.add('hidden');
+            }
+        }
+    }, { root: document.getElementById('history-mail-list-body'), rootMargin: '0px 0px 100px 0px' });
+    historyMailObserver.observe(loading);
+}
+
+function searchHistoryMails() {
+    applyHistoryFilters();
+}
+
+function resetHistorySearch() {
+    document.getElementById('history-role-filter').value = '';
+    document.getElementById('history-date-from').value = '';
+    document.getElementById('history-date-to').value = '';
+    document.getElementById('history-search-info').classList.add('hidden');
+    applyHistoryFilters();
+}
+
+// 重写备份恢复中的信件处理，确保 viewed 字段保留
+// 在 exportData 和 importData 中已包含 mails 完整数据，无需额外修改
 
 function openDecision() { document.getElementById('decision-options').value = ''; document.getElementById('decision-result').innerHTML = ''; document.getElementById('modal-decision').classList.remove('hidden'); }
 function closeDecision() { document.getElementById('modal-decision').classList.add('hidden'); }
@@ -8528,12 +8802,17 @@ function generateReplyForMail(mail) {
         type: 'received', 
         content: replyContent, 
         time: Date.now(), 
-        replyTo: mail.id   // 记录回复的原信ID
+        replyTo: mail.id,   // 记录回复的原信ID
+        viewed: false       // 新回信默认未查看
     }; 
     appData.mails.push(replyMail); 
     mail.replied = true; 
     debouncedSaveData(); 
     if (document.getElementById('page-mailbox') && document.getElementById('page-mailbox').classList.contains('active')) renderMailList(); 
+    // 如果历史信箱打开，刷新历史列表（虽然新信未查看，但后续查看后会进入历史）
+    if (document.getElementById('page-history-mailbox').classList.contains('active')) {
+        loadHistoryMailData();
+    }
 }
 
 // --- 状态词库/内容库 ---
@@ -9840,7 +10119,7 @@ function checkAndTriggerAutoCall() { if (!appData.settings.autoCall?.enabled || 
 function triggerIncomingCall(role) { callState.active = true; callState.status = 'incoming'; callState.roleId = role.id; callState.roleName = role.name; callState.roleAvatar = role.avatar; callState.initiator = 'role'; callState.seconds = 0; document.getElementById('call-avatar').src = role.avatar; document.getElementById('call-name').textContent = role.name; document.getElementById('call-status').textContent = '邀请你视频通话...'; document.getElementById('call-timer').textContent = '00:00'; setCallWindowSize(callState.windowSize); updateCallActions(); document.getElementById('modal-call').classList.remove('hidden'); callState.userTimeoutTimer = setTimeout(() => { if (callState.active && callState.status === 'incoming') endCall('missed', 0); }, (appData.settings.autoCall?.userTimeout || 30) * 1000); playCustomRingtone(); }
 function startAutoMailGenerator() { if (autoMailGeneratorTimer) { clearTimeout(autoMailGeneratorTimer); autoMailGeneratorTimer = null; } if (!appData.settings.autoMail?.enabled) return; const interval = (appData.settings.autoMail.checkInterval || 10) * 60 * 1000; autoMailGeneratorTimer = setTimeout(() => { autoMailGeneratorTimer = null; checkAndGenerateAutoMail(); startAutoMailGenerator(); }, interval); }
 function checkAndGenerateAutoMail() { appData.roles.forEach(role => { if (Math.random() * 100 < (role.autoMailProbability ?? 15)) generateAutoLetter(role); }); }
-function generateAutoLetter(role) { const allWords = []; appData.wordbanks.wordGroups.forEach(g => g.words.forEach(w => { if (typeof w === 'object') allWords.push(w.text); else allWords.push(w); })); if (!allWords.length) allWords.push('今天不知道说什么好', '想你啦', '最近还好吗', '天气不错'); const content = Array.from({length: 3 + Math.floor(Math.random() * 6)}, () => allWords[Math.floor(Math.random() * allWords.length)]).join('。') + '。'; appData.mails.push({ id: generateUID(), roleId: role.id, type: 'received', content, time: Date.now(), replyTime: Date.now(), replied: true }); debouncedSaveData(); if (document.getElementById('page-mailbox') && document.getElementById('page-mailbox').classList.contains('active')) renderMailList(); }
+function generateAutoLetter(role) { const allWords = []; appData.wordbanks.wordGroups.forEach(g => g.words.forEach(w => { if (typeof w === 'object') allWords.push(w.text); else allWords.push(w); })); if (!allWords.length) allWords.push('今天不知道说什么好', '想你啦', '最近还好吗', '天气不错'); const content = Array.from({length: 3 + Math.floor(Math.random() * 6)}, () => allWords[Math.floor(Math.random() * allWords.length)]).join('。') + '。'; appData.mails.push({ id: generateUID(), roleId: role.id, type: 'received', content, time: Date.now(), replyTime: Date.now(), replied: true, viewed: false }); debouncedSaveData(); if (document.getElementById('page-mailbox') && document.getElementById('page-mailbox').classList.contains('active')) renderMailList(); }
 
 // ========== 转账功能 ==========
 function showTransferModal() { if (currentChatType !== 'role' || !currentRoleId) { showToast('仅支持在单人聊天中使用'); return; } const role = appData.roles.find(r => r.id === currentRoleId); if (!role) return; document.getElementById('transfer-recipient-name').textContent = `转给 ${role.name}`; document.getElementById('transfer-amount').value = ''; document.getElementById('transfer-note').value = ''; document.getElementById('modal-transfer').classList.remove('hidden'); }
