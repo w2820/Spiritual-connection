@@ -4736,6 +4736,57 @@
 
 <script>
 
+// ========== 性能优化工具函数 ==========
+function throttle(fn, delay) {
+    let lastCall = 0;
+    let timer = null;
+    return function(...args) {
+        const now = Date.now();
+        if (now - lastCall >= delay) {
+            lastCall = now;
+            fn.apply(this, args);
+        } else {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                lastCall = Date.now();
+                fn.apply(this, args);
+            }, delay);
+        }
+    };
+}
+
+function debounce(fn, delay) {
+    let timer = null;
+    return function(...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            fn.apply(this, args);
+        }, delay);
+    };
+}
+
+// ========== 定时器统一管理 ==========
+const timerManager = {
+    intervals: [],
+    timeouts: [],
+    setInterval: function(fn, ms) {
+        const id = setInterval(fn, ms);
+        this.intervals.push(id);
+        return id;
+    },
+    setTimeout: function(fn, ms) {
+        const id = setTimeout(fn, ms);
+        this.timeouts.push(id);
+        return id;
+    },
+    clearAll: function() {
+        this.intervals.forEach(clearInterval);
+        this.timeouts.forEach(clearTimeout);
+        this.intervals = [];
+        this.timeouts = [];
+    }
+};
+
 // 初始化图标
 lucide.createIcons();
 
@@ -5083,6 +5134,10 @@ const PRESET_POKE_ACTIONS = [
     '拍了拍头', '戳了戳肚子', '捏了捏脸', '摸了摸头', '弹了一下额头', '揉揉脸'
 ];
 
+// ========== 消息缓存与增量渲染 ==========
+let messageCache = {};
+let renderedMessageCount = {};
+
 // ========== 辅助函数 ==========
 function formatPokeText(text, type) {
     if (!appData.pokeSymbols) return text;
@@ -5099,31 +5154,23 @@ function formatPokeText(text, type) {
     return `${symbol} ${text} ${symbol}`;
 }
 
-// 清理所有定时器的辅助函数
+// 清理所有定时器的辅助函数（使用 timerManager）
 function clearAllTimers() {
-    if (autoSendTimer) clearInterval(autoSendTimer);
-    if (mailCheckTimer) clearInterval(mailCheckTimer);
-    if (autoCallTimer) clearTimeout(autoCallTimer);
-    if (autoMailGeneratorTimer) clearTimeout(autoMailGeneratorTimer);
-    if (autoTransferTimer) clearTimeout(autoTransferTimer);
-    if (momentTimer) clearInterval(momentTimer);
-    if (momentCommentTimer) clearInterval(momentCommentTimer);
-    if (momentLikeTimer) clearInterval(momentLikeTimer);
-    if (onlineStatusTimer) clearInterval(onlineStatusTimer);
-    if (callState.timerInterval) clearInterval(callState.timerInterval);
-    if (callState.autoHangupTimer) clearTimeout(callState.autoHangupTimer);
-    if (callState.userTimeoutTimer) clearTimeout(callState.userTimeoutTimer);
+    timerManager.clearAll();
+    if (autoSendTimer) { clearInterval(autoSendTimer); autoSendTimer = null; }
+    if (mailCheckTimer) { clearInterval(mailCheckTimer); mailCheckTimer = null; }
+    if (autoCallTimer) { clearTimeout(autoCallTimer); autoCallTimer = null; }
+    if (autoMailGeneratorTimer) { clearTimeout(autoMailGeneratorTimer); autoMailGeneratorTimer = null; }
+    if (autoTransferTimer) { clearTimeout(autoTransferTimer); autoTransferTimer = null; }
+    if (momentTimer) { clearInterval(momentTimer); momentTimer = null; }
+    if (momentCommentTimer) { clearInterval(momentCommentTimer); momentCommentTimer = null; }
+    if (momentLikeTimer) { clearInterval(momentLikeTimer); momentLikeTimer = null; }
+    if (onlineStatusTimer) { clearInterval(onlineStatusTimer); onlineStatusTimer = null; }
+    if (callState.timerInterval) { clearInterval(callState.timerInterval); callState.timerInterval = null; }
+    if (callState.autoHangupTimer) { clearTimeout(callState.autoHangupTimer); callState.autoHangupTimer = null; }
+    if (callState.userTimeoutTimer) { clearTimeout(callState.userTimeoutTimer); callState.userTimeoutTimer = null; }
     stopRingtone();
     stopRingback();
-    autoSendTimer = null;
-    mailCheckTimer = null;
-    autoCallTimer = null;
-    autoMailGeneratorTimer = null;
-    autoTransferTimer = null;
-    momentTimer = null;
-    momentCommentTimer = null;
-    momentLikeTimer = null;
-    onlineStatusTimer = null;
 }
 
 // --- Web Audio API 铃音引擎 ---
@@ -5543,8 +5590,8 @@ async function saveData() {
         if (document.getElementById('modal-settings-data') && !document.getElementById('modal-settings-data').classList.contains('hidden')) updateStorageDisplay();
     } catch (e) { showToast('保存失败，请清理数据'); }
 }
-const debouncedSaveData = debounce(saveData, 800);
-function debounce(fn, delay) { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); }; }
+// 将 debounce 延迟从 800ms 改为 1500ms，减少写入频率
+const debouncedSaveData = debounce(saveData, 1500);
 
 // --- 主题配色系统函数（增强持久化）---
 async function loadCustomThemes() {
@@ -5904,7 +5951,7 @@ function resetThemeToDefault() {
 // 在线状态自动切换（新增定时器）
 function startOnlineStatusTimer() {
     if (onlineStatusTimer) clearInterval(onlineStatusTimer);
-    onlineStatusTimer = setInterval(() => {
+    onlineStatusTimer = timerManager.setInterval(() => {
         const now = Date.now();
         appData.roles.forEach(role => {
             if (role.onlineStatus && role.onlineStatus.enabled) {
@@ -5925,7 +5972,7 @@ function startOnlineStatusTimer() {
 
 function startAutoSendTimer() {
     if (autoSendTimer) clearInterval(autoSendTimer);
-    autoSendTimer = setInterval(() => {
+    autoSendTimer = timerManager.setInterval(() => {
         if (!appData.settings.autoSend) return;
         const now = Date.now(), interval = appData.settings.autoInterval * 60 * 1000;
         const prob = appData.settings.autoSendProbEnabled ? (appData.settings.autoSendProbPercent / 100) : 0.5;
@@ -5964,7 +6011,7 @@ function triggerGroupAutoReply(group) {
     const speakers = [...group.members].sort(() => Math.random() - 0.5).slice(0, Math.min(selectedCount, memberCount));
     const allWords = getActiveWordList(); if (allWords.length === 0) return;
     if (!appData.groupChats[group.id]) appData.groupChats[group.id] = [];
-    speakers.forEach((speakerId, index) => { setTimeout(() => {
+    speakers.forEach((speakerId, index) => { timerManager.setTimeout(() => {
         let content = allWords[Math.floor(Math.random() * allWords.length)], type = 'text';
         if (appData.wordbanks.stickers.length > 0 && Math.random() * 100 < (appData.settings.stickerProb || 10)) { type = 'image'; content = appData.wordbanks.stickers[Math.floor(Math.random() * appData.wordbanks.stickers.length)]; }
         else { if (Math.random() * 100 < (appData.settings.emojiProb || 20) && appData.wordbanks.emojis.length > 0) content += ' ' + appData.wordbanks.emojis[Math.floor(Math.random() * appData.wordbanks.emojis.length)]; }
@@ -6147,7 +6194,7 @@ async function loadData() {
     startMomentTimer(); startMomentCommentTimer(); startMomentLikeTimer();
     startOnlineStatusTimer(); // 启动在线状态自动切换
     // 启动涂鸦自动触发定时器（每1小时检查一次）
-    setInterval(() => checkAndTriggerAutoDoodle(), 60 * 60 * 1000);
+    timerManager.setInterval(() => checkAndTriggerAutoDoodle(), 60 * 60 * 1000);
     disableAutoTransferUntil = Date.now() + 60 * 1000;
     applyMomentCover();
     updateMomentUnread();
@@ -6169,11 +6216,13 @@ async function loadData() {
         progressBar.addEventListener('click', seekMusic);
     }
     updateChatPageHeight();
-    window.addEventListener('resize', updateChatPageHeight);
-    window.addEventListener('orientationchange', updateChatPageHeight);
+    // 使用节流优化 resize 事件
+    const throttledUpdateChatHeight = throttle(updateChatPageHeight, 200);
+    window.addEventListener('resize', throttledUpdateChatHeight);
+    window.addEventListener('orientationchange', throttledUpdateChatHeight);
     if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', updateChatPageHeight);
-        window.visualViewport.addEventListener('scroll', updateChatPageHeight);
+        window.visualViewport.addEventListener('resize', throttledUpdateChatHeight);
+        window.visualViewport.addEventListener('scroll', throttledUpdateChatHeight);
     }
     const ringtoneAudio = document.getElementById('call-ringtone');
     if (ringtoneAudio) {
@@ -6286,7 +6335,7 @@ async function loadData() {
         if (!applyBtn || !resetBtn || !textarea) {
             console.warn('气泡 CSS 编辑器元素未找到');
             // 延迟重试一次
-            setTimeout(function() {
+            timerManager.setTimeout(function() {
                 const applyBtn2 = document.getElementById('apply-bubble-css');
                 const resetBtn2 = document.getElementById('reset-bubble-css');
                 const textarea2 = document.getElementById('custom-bubble-css');
@@ -6441,7 +6490,7 @@ async function loadData() {
     // 修复：朋友圈评论库添加按钮（重新绑定，确保 prompt 弹出）
     // ============================================================
     // 等待 DOM 完全加载后绑定，因为元素是固定的
-    setTimeout(function() {
+    timerManager.setTimeout(function() {
         const commentAddBtn = document.querySelector('#page-moment-comment-bank .header-action');
         if (commentAddBtn) {
             // 移除可能存在的旧绑定
@@ -6459,8 +6508,6 @@ async function loadData() {
                     if (typeof renderMomentCommentList === 'function') {
                         renderMomentCommentList();
                     } else {
-                        // 如果函数未定义，直接调用 openMomentCommentBank 内部的渲染逻辑可能会失败
-                        // 但正常情况下 renderMomentCommentList 是全局的
                         console.warn('renderMomentCommentList 未定义，尝试重新打开页面');
                     }
                     showToast('评论语句已添加');
@@ -6785,7 +6832,6 @@ function renderRoleList() {
         const unread = unreadCounts[role.id] || 0, badge = unread ? `<div class="absolute top-2 right-2 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">${unread>99?'99+':unread}</div>` : '';
         const card = document.createElement('div'); card.className = 'role-card bg-white p-4 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer relative';
         card.onclick = () => openChat(role.id);
-        // 已移除长按删除功能，仅保留点击进入聊天
         card.innerHTML = `${badge}<img src="${role.avatar}" class="w-14 h-14 rounded-full object-cover border-2 border-amber-50"><div class="flex-1 min-w-0"><h3 class="font-bold text-gray-900 text-lg truncate">${escapeHtml(role.name)}</h3>${lastHtml}</div><i data-lucide="chevron-right" class="w-5 h-5 text-gray-300"></i>`;
         list.appendChild(card);
     });
@@ -6999,19 +7045,79 @@ function goBack() {
     }
 }
 
-function renderChatMessages() {
-    const c = document.getElementById('chat-messages');
-    c.innerHTML = '';
+// ========== 消息缓存与增量渲染（核心优化） ==========
+function renderChatMessages(forceFull = false) {
+    const container = document.getElementById('chat-messages');
+    if (!container) return;
+    
     let msgs = [];
+    let chatId = '';
     if (currentChatType === 'role') {
         msgs = appData.chats[currentRoleId] || [];
+        chatId = 'role_' + currentRoleId;
     } else {
         msgs = appData.groupChats[currentGroupId] || [];
+        chatId = 'group_' + currentGroupId;
     }
-    lastMessageSender = null;
+    
+    // 初始化缓存计数
+    if (!renderedMessageCount[chatId]) renderedMessageCount[chatId] = 0;
+    
+    // 如果是强制刷新或消息数量变化超过阈值，全量重绘
+    if (forceFull || msgs.length < renderedMessageCount[chatId] || msgs.length - renderedMessageCount[chatId] > 20) {
+        // 全量渲染
+        container.innerHTML = '';
+        renderedMessageCount[chatId] = 0;
+        lastMessageSender = null;
+        let lastDate = null;
+        
+        msgs.forEach(m => {
+            const msgDate = new Date(m.time).toLocaleDateString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
+            if (lastDate !== msgDate) {
+                const dateDiv = document.createElement('div');
+                dateDiv.className = 'text-center text-gray-400 text-xs py-2 date-separator';
+                dateDiv.textContent = msgDate;
+                container.appendChild(dateDiv);
+                lastDate = msgDate;
+            }
+            const el = createMessageElement(m.sender, m.content, m.time, m.quote, m.type, m.read);
+            container.appendChild(el);
+        });
+        renderedMessageCount[chatId] = msgs.length;
+        scrollToBottom();
+        return;
+    }
+    
+    // 增量渲染：只添加新消息
+    const startIndex = renderedMessageCount[chatId];
+    if (startIndex >= msgs.length) return;
+    
+    // 获取最后一条消息的日期
     let lastDate = null;
-    msgs.forEach(m => {
-        // 获取消息日期
+    const lastMsgDiv = container.querySelector('.message-bubble-container:last-child');
+    if (lastMsgDiv) {
+        let prev = lastMsgDiv.previousSibling;
+        if (prev && prev.classList && prev.classList.contains('date-separator')) {
+            lastDate = prev.textContent;
+        } else {
+            const lastMsg = msgs[startIndex - 1];
+            if (lastMsg) {
+                lastDate = new Date(lastMsg.time).toLocaleDateString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                });
+            }
+        }
+    }
+    
+    const fragment = document.createDocumentFragment();
+    for (let i = startIndex; i < msgs.length; i++) {
+        const m = msgs[i];
         const msgDate = new Date(m.time).toLocaleDateString('zh-CN', {
             year: 'numeric',
             month: '2-digit',
@@ -7019,13 +7125,16 @@ function renderChatMessages() {
         });
         if (lastDate !== msgDate) {
             const dateDiv = document.createElement('div');
-            dateDiv.className = 'text-center text-gray-400 text-xs py-2';
+            dateDiv.className = 'text-center text-gray-400 text-xs py-2 date-separator';
             dateDiv.textContent = msgDate;
-            c.appendChild(dateDiv);
+            fragment.appendChild(dateDiv);
             lastDate = msgDate;
         }
-        appendMessageToDOM(m.sender, m.content, m.time, m.quote, m.type);
-    });
+        const el = createMessageElement(m.sender, m.content, m.time, m.quote, m.type, m.read);
+        fragment.appendChild(el);
+    }
+    container.appendChild(fragment);
+    renderedMessageCount[chatId] = msgs.length;
     scrollToBottom();
 }
 
@@ -7125,7 +7234,6 @@ function createMessageElement(sender, content, time, quote = null, type = 'text'
             <div class="flex flex-col max-w-[70%]">
                 ${showName ? `<div class="text-sm font-bold text-gray-700 mb-1">${escapeHtml(name)}</div>` : ''}
                 <div class="flex items-end gap-2">
-                    <!-- 修改：为图片气泡添加 message-received 类 -->
                     <div class="bubble-left message-received" style="background:transparent; box-shadow:none; padding:0;">${imgTag}</div>
                 </div>
                 <span class="text-xs text-gray-400 mt-1">${tsWithRead}</span>
@@ -7133,7 +7241,6 @@ function createMessageElement(sender, content, time, quote = null, type = 'text'
         } else {
             div.innerHTML = `<div class="flex flex-col items-end max-w-[70%]">
                 <div class="flex items-end gap-2">
-                    <!-- 修改：为图片气泡添加 message-sent 类 -->
                     <div class="bubble-right message-sent" style="background:transparent; box-shadow:none; padding:0;">${imgTag}</div>
                 </div>
                 <span class="text-xs text-gray-400 mt-1">${tsWithRead}</span>
@@ -7158,7 +7265,6 @@ function createMessageElement(sender, content, time, quote = null, type = 'text'
             <div class="flex flex-col max-w-[70%]">
                 ${showName ? `<div class="text-sm font-bold text-gray-700 mb-1">${escapeHtml(name)}</div>` : ''}
                 <div class="flex items-end gap-2">
-                    <!-- 修改：为对方文本气泡添加 message-received 类 -->
                     <div class="bubble-left message-received text-gray-900" style="max-width:100%; word-break:break-all; overflow-wrap:break-word; white-space:pre-wrap;">${qt}${escapeHtml(content)}</div>
                 </div>
                 <span class="text-xs text-gray-400 mt-1 text-left">${tsWithRead}</span>
@@ -7166,7 +7272,6 @@ function createMessageElement(sender, content, time, quote = null, type = 'text'
         } else {
             div.innerHTML = `<div class="flex flex-col items-end max-w-[70%]">
                 <div class="flex items-end gap-2">
-                    <!-- 修改：为我方文本气泡添加 message-sent 类 -->
                     <div class="bubble-right message-sent text-white" style="max-width:100%; word-break:break-all; overflow-wrap:break-word; white-space:pre-wrap;">${qt}${escapeHtml(content)}</div>
                 </div>
                 <span class="text-xs text-gray-400 mt-1 text-right">${tsWithRead}</span>
@@ -7323,7 +7428,7 @@ async function sendMessage() {
         const sentMsg = appData.chats[currentRoleId][appData.chats[currentRoleId].length - 1];
         if (sentMsg) {
             const delay = 1000 + Math.random() * 2000;
-            setTimeout(() => {
+            timerManager.setTimeout(() => {
                 sentMsg.read = true;
                 debouncedSaveData();
                 const messages = document.getElementById('chat-messages');
@@ -7373,7 +7478,7 @@ function executeRoleReply(role) {
     // ========== 显示正在输入 ==========
     showRoleTyping(role.id, role.name, role.avatar, baseDelay + 500);
     
-    setTimeout(async () => {
+    timerManager.setTimeout(async () => {
         hideRoleTyping(role.id);
         
         const all = getActiveWordList();
@@ -7451,7 +7556,7 @@ function executeRoleReply(role) {
                 // 每条消息发送前再显示一次正在输入（传讯文件风格）
                 if (count > 1) {
                     showRoleTyping(role.id, role.name, role.avatar, 600);
-                    setTimeout(() => hideRoleTyping(role.id), 500);
+                    timerManager.setTimeout(() => hideRoleTyping(role.id), 500);
                 }
                 appendMessageToDOM(role.id, finalContent, Date.now(), quote, type);
             } else {
@@ -7461,7 +7566,7 @@ function executeRoleReply(role) {
 
             // 随机拍一拍（保留）
             if (Math.random() < 0.03) {
-                setTimeout(() => {
+                timerManager.setTimeout(() => {
                     let actions = role.pokeActions;
                     if (!actions || actions.length === 0) {
                         actions = [...PRESET_POKE_ACTIONS];
@@ -7488,7 +7593,7 @@ function executeRoleReply(role) {
             
             // 发送下一条（如果有）
             if (count > 1) {
-                setTimeout(() => sendNext(count - 1), intervalMs);
+                timerManager.setTimeout(() => sendNext(count - 1), intervalMs);
             }
         };
         
@@ -7520,12 +7625,12 @@ function executeGroupReply(group) {
         tip.classList.add('active');
     }
     const delay = Math.random() * (appData.settings.maxDelay - appData.settings.minDelay) * 1000 + appData.settings.minDelay * 1000;
-    setTimeout(() => {
+    timerManager.setTimeout(() => {
         const tip = document.getElementById('typing-indicator');
         if (tip) tip.classList.remove('active');
         if (!appData.groupChats[group.id]) appData.groupChats[group.id] = [];
         speakers.forEach((speakerId, index) => {
-            setTimeout(() => {
+            timerManager.setTimeout(() => {
                 let content = (() => { const aw = getActiveWordList(); return aw.length ? aw[Math.floor(Math.random() * aw.length)] : ''; })();
                 let type = 'text';
                 if (!content) return;
@@ -7559,36 +7664,38 @@ function triggerGroupReply() {
     executeGroupReply(group);
 }
 
+// ========== appendMessageToDOM 使用增量渲染优化 ==========
 function appendMessageToDOM(sender, content, time, quote = null, type = 'text') {
     const c = document.getElementById('chat-messages');
-    // 获取最后一条消息的日期（如果存在）
+    if (!c) return;
+    
+    // 获取当前聊天ID
+    let chatId = '';
+    if (currentChatType === 'role') chatId = 'role_' + currentRoleId;
+    else chatId = 'group_' + currentGroupId;
+    
+    // 获取最后一条消息的日期
     let lastDate = null;
     const lastMsgDiv = c.querySelector('.message-bubble-container:last-child');
     if (lastMsgDiv) {
         let prev = lastMsgDiv.previousSibling;
         if (prev && prev.classList && prev.classList.contains('date-separator')) {
             lastDate = prev.textContent;
-        } else {
-            const lastMsgObj = [...(currentChatType === 'role' ? (appData.chats[currentRoleId] || []) : (appData.groupChats[currentGroupId] || []))].pop();
-            if (lastMsgObj) {
-                lastDate = new Date(lastMsgObj.time).toLocaleDateString('zh-CN', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit'
-                });
-            }
         }
     }
+    
     const currentDate = new Date(time).toLocaleDateString('zh-CN', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit'
     });
+    
+    const fragment = document.createDocumentFragment();
     if (lastDate !== currentDate) {
         const dateDiv = document.createElement('div');
         dateDiv.className = 'text-center text-gray-400 text-xs py-2 date-separator';
         dateDiv.textContent = currentDate;
-        c.appendChild(dateDiv);
+        fragment.appendChild(dateDiv);
     }
     
     // 获取消息的 read 状态
@@ -7602,10 +7709,19 @@ function appendMessageToDOM(sender, content, time, quote = null, type = 'text') 
         const msg = msgs.find(m => m.time === time && m.sender === sender && m.content === content);
         if (msg) read = msg.read;
     }
-    // 使用 createMessageElement 会自动添加 message-wrapper 类实现动画
-    c.appendChild(createMessageElement(sender, content, time, quote, type, read));
+    
+    const el = createMessageElement(sender, content, time, quote, type, read);
+    fragment.appendChild(el);
+    c.appendChild(fragment);
+    
+    // 更新缓存计数
+    if (chatId && renderedMessageCount[chatId] !== undefined) {
+        renderedMessageCount[chatId]++;
+    }
+    
     scrollToBottom();
 }
+
 function scrollToBottom() { const c = document.getElementById('chat-messages'); c.scrollTop = c.scrollHeight; }
 
 function triggerReply() { 
@@ -7629,7 +7745,7 @@ function showRoleTyping(roleId, roleName, roleAvatar, duration) {
         if (roleTypingStates[roleId].timer) {
             clearTimeout(roleTypingStates[roleId].timer);
         }
-        roleTypingStates[roleId].timer = setTimeout(() => {
+        roleTypingStates[roleId].timer = timerManager.setTimeout(() => {
             if (roleTypingStates[roleId]) {
                 roleTypingStates[roleId].active = false;
                 roleTypingStates[roleId].timer = null;
@@ -7664,7 +7780,7 @@ function showRoleTyping(roleId, roleName, roleAvatar, duration) {
     }
     
     // 设置定时器自动隐藏
-    roleTypingStates[roleId].timer = setTimeout(() => {
+    roleTypingStates[roleId].timer = timerManager.setTimeout(() => {
         if (roleTypingStates[roleId]) {
             roleTypingStates[roleId].active = false;
             roleTypingStates[roleId].timer = null;
@@ -7713,9 +7829,9 @@ async function sendRolePokeReply(role, count, initialDelayMs = 0) {
     if (allWords.length === 0) return;
     const intervalMs = (appData.settings.multiMsgInterval || 2) * 1000;
     // 先等待初始延迟
-    setTimeout(async () => {
+    timerManager.setTimeout(async () => {
         for (let i = 1; i <= count; i++) {
-            setTimeout(async () => {
+            timerManager.setTimeout(async () => {
                 let content = allWords[Math.floor(Math.random() * allWords.length)];
                 let type = 'text';
                 if (appData.wordbanks.stickers.length > 0 && Math.random() * 100 < (appData.settings.stickerProb || 10)) {
@@ -7766,7 +7882,7 @@ function executePokeWithText(text) {
     if (role) {
         const delay = 1500 + Math.random() * 2000;
         showRoleTyping(role.id, role.name, role.avatar, delay);
-        setTimeout(() => {
+        timerManager.setTimeout(() => {
             hideRoleTyping(role.id);
         }, delay + 500);
     }
@@ -7825,7 +7941,7 @@ function maybeTriggerRolePoke() {
     // 显示正在输入动画（独立管理）
     const delay = 1500 + Math.random() * 2000;
     showRoleTyping(role.id, role.name, role.avatar, delay);
-    setTimeout(() => {
+    timerManager.setTimeout(() => {
         hideRoleTyping(role.id);
     }, delay + 500);
 }
@@ -7838,7 +7954,7 @@ async function handleGroupAvatarUpload(input) { if (input.files?.[0]) { showToas
 function closeCreateGroup() { document.getElementById('modal-create-group').classList.add('hidden'); }
 async function createGroup() { const name = document.getElementById('group-name').value.trim(); if (!name) { showToast('请输入群名'); return; } const members = Array.from(document.querySelectorAll('#group-member-select .member-checkbox:checked')).map(cb => cb.value); if (members.length < 2) { showToast('至少选择2个成员'); return; } const newGroup = { id: Date.now().toString(), name, avatar: document.getElementById('group-avatar-preview').src, members, replyCountProb: {} }; appData.groups.push(newGroup); appData.groupChats[newGroup.id] = []; await saveData(); closeCreateGroup(); switchHomeTab('groups'); renderGroupList(); showToast('群聊创建成功'); }
 
-// ========== 以下为完整的原有函数（省略大量相同内容，但保证无删减） ==========
+// ========== 以下为完整的原有函数 ==========
 function loadGroupProbConfig() { const select = document.getElementById('group-prob-select'), groupId = select.value, panel = document.getElementById('group-prob-config-panel'), errorMsg = document.getElementById('prob-error-msg'); if (errorMsg) errorMsg.classList.add('hidden'); if (!groupId) { panel.classList.add('hidden'); return; } currentEditingGroupProbId = groupId; const group = appData.groups.find(g => g.id === groupId); if (!group) return; const memberCount = group.members.length; document.getElementById('group-member-count').textContent = memberCount; const inputsDiv = document.getElementById('group-prob-inputs'); inputsDiv.innerHTML = ''; if (![2,3,4,5,7].includes(memberCount)) { inputsDiv.innerHTML = '<p class="text-xs text-gray-500">当前群成员数不支持概率配置</p>'; panel.classList.remove('hidden'); return; } const config = group.replyCountProb?.[memberCount.toString()] || getDefaultProbConfig(memberCount); for (let i = 1; i <= memberCount; i++) { const div = document.createElement('div'); div.className = 'flex items-center gap-2'; div.innerHTML = `<span class="text-xs w-8">${i}人:</span><input type="number" min="0" max="100" value="${config[i] || 0}" data-count="${i}" class="group-prob-input flex-1 bg-white border border-gray-200 rounded-lg px-3 py-1 text-sm"> <span class="text-xs">%</span>`; inputsDiv.appendChild(div); } inputsDiv.appendChild(Object.assign(document.createElement('p'), { className: 'text-[10px] text-gray-400 mt-2', textContent: '各概率总和需为 100%' })); panel.classList.remove('hidden'); }
 function saveCurrentGroupProb() { const errorMsg = document.getElementById('prob-error-msg'); if (errorMsg) errorMsg.classList.add('hidden'); if (!currentEditingGroupProbId) { if (errorMsg) { errorMsg.textContent = '请先选择群聊'; errorMsg.classList.remove('hidden'); } else showToast('请先选择群聊'); return; } const group = appData.groups.find(g => g.id === currentEditingGroupProbId); if (!group) return; const memberCount = group.members.length; const inputs = document.querySelectorAll('.group-prob-input'); if (!inputs.length) { showToast('无法读取概率输入框'); return; } const newConfig = {}; let sum = 0; inputs.forEach(inp => { const v = parseInt(inp.value) || 0; newConfig[inp.dataset.count] = v; sum += v; }); if (sum !== 100) { const msg = `概率总和必须为100% (当前${sum}%)`; if (errorMsg) { errorMsg.textContent = msg; errorMsg.classList.remove('hidden'); } else showToast(msg); return; } if (!group.replyCountProb) group.replyCountProb = {}; group.replyCountProb[memberCount.toString()] = newConfig; debouncedSaveData(); showToast('概率已保存'); loadGroupProbConfig(); }
 function populateGroupSelect() { const select = document.getElementById('group-prob-select'); if (!select) return; select.innerHTML = '<option value="">选择群聊</option>'; appData.groups.forEach(g => { const option = document.createElement('option'); option.value = g.id; option.textContent = g.name; select.appendChild(option); }); }
@@ -7913,7 +8029,7 @@ function loadAndTestRingtone() {
     audio.src = url;
     audio.load();
     audio.play().then(() => {
-        setTimeout(() => {
+        timerManager.setTimeout(() => {
             audio.pause();
             audio.currentTime = 0;
             showToast('铃声加载成功，可正常使用');
@@ -8220,7 +8336,6 @@ function renderRoleManagementList() {
         d.className = 'bg-gray-50 p-4 rounded-2xl flex items-center justify-between'; 
         let actionsHtml = `<button onclick="editRole('${r.id}')" class="p-2 bg-white text-amber-600 rounded-full"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
                           <button onclick="deleteRole('${r.id}')" class="p-2 bg-white text-red-500 rounded-full"><i data-lucide="trash-2" class="w-4 h-4"></i></button>`;
-        // 移除原来的小按钮样式，改为在高级功能中统一管理
         d.innerHTML = `<div class="flex items-center gap-3"><img src="${r.avatar}" class="w-10 h-10 rounded-full"><div><h3 class="font-bold text-sm">${escapeHtml(r.name)}</h3></div></div><div class="flex gap-2">${actionsHtml}</div>`; 
         list.appendChild(d); 
     }); 
@@ -8313,10 +8428,127 @@ function openRestoreFromClipboardModal() { const overlay = document.createElemen
         appData.roles.forEach(r => { if (r.chatBackground === undefined) r.chatBackground = null; });
         await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('数据已恢复'); updateMusicPlayerCardVisibility(); }); } else { showToast('无效的备份数据'); } } catch (e) { showToast('数据格式错误，无法解析'); } document.body.removeChild(overlay); }; overlay.addEventListener('click', (e) => { if (e.target === overlay) { document.body.removeChild(overlay); } }); }
 
-function exportData() { const jsonStr = JSON.stringify(appData, null, 2); const blob = new Blob([jsonStr], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `spiritual_connection_${new Date().toISOString().slice(0,10)}.json`; a.click(); showToast('导出成功'); setTimeout(() => URL.revokeObjectURL(a.href), 60000); }
+function exportData() { const jsonStr = JSON.stringify(appData, null, 2); const blob = new Blob([jsonStr], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `spiritual_connection_${new Date().toISOString().slice(0,10)}.json`; a.click(); showToast('导出成功'); timerManager.setTimeout(() => URL.revokeObjectURL(a.href), 60000); }
 function importData() { const i = document.createElement('input'); i.type = 'file'; i.accept = '.json'; i.onchange = e => { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = async ev => { try { const d = JSON.parse(ev.target.result); if (d.roles && d.chats) { showConfirm('导入将覆盖现有数据，确定？', async () => { appData = d; if (!appData.wordbanks.wordGroups) appData.wordbanks.wordGroups = [{ name: '默认', words: [...(appData.wordbanks.replies || [])] }]; appData.wordbanks.wordGroups.forEach(g => { g.words = g.words.map(w => typeof w === 'string' ? { text: w, blocked: false } : w); }); if (d.appearance?.backgrounds) await saveBackgrounds(d.appearance.backgrounds); if (!appData.favoriteMessages) appData.favoriteMessages = []; if (!appData.transferSettings) appData.transferSettings = { enabled: true, minAmount: 5.20, maxAmount: 200, probability: 15, checkInterval: 30 }; if (!appData.transferRecords) appData.transferRecords = []; if (!appData.redPackets) appData.redPackets = []; if (!appData.userProfile) appData.userProfile = { nickname: '我', avatar: DEFAULT_AVATAR }; if (!appData.balance) appData.balance = 1000000; if (!appData.moments || appData.moments.length === 0) appData.moments = JSON.parse(JSON.stringify(DEFAULT_DATA.moments)); if (!appData.momentPhotos) appData.momentPhotos = []; if (!appData.songLibrary || appData.songLibrary.length < 50) appData.songLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.songLibrary)); if (!appData.bookLibrary || appData.bookLibrary.length === 0) appData.bookLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.bookLibrary)); if (!appData.momentCommentBank) appData.momentCommentBank = [...DEFAULT_DATA.momentCommentBank]; if (!appData.musicLibrary) appData.musicLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.musicLibrary)); if (!appData.addressLibrary) appData.addressLibrary = [...DEFAULT_DATA.addressLibrary]; if (appData.settings.momentCover === undefined) appData.settings.momentCover = ''; if (!appData.pokeSymbols) appData.pokeSymbols = { my: { preset: 'heart', custom: '♡' }, partner: { preset: 'flower', custom: '✿' }, customSymbols: [] }; if (appData.settings.pokeAutoReplyEnabled === undefined) appData.settings.pokeAutoReplyEnabled = true; if (appData.settings.pokeAutoReplyProb === undefined) appData.settings.pokeAutoReplyProb = 45; appData.roles.forEach(r => { if (r.chatBackground === undefined) r.chatBackground = null; }); await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('导入成功'); updateMusicPlayerCardVisibility(); }); } else showToast('无效文件'); } catch { showToast('解析失败'); } }; r.readAsText(f); }; i.click(); }
 async function clearChatRecords() { showConfirm('清空所有聊天记录？', async () => { appData.chats = {}; appData.groupChats = {}; unreadCounts = {}; await saveUnreadCounts(); appData.roles.forEach(r => r.lastActive = Date.now()); await saveData(); renderRoleList(); if (currentChatType === 'role') renderChatMessages(); updateStorageDisplay(); showToast('已清空'); }); }
 async function resetAllData() { showConfirm('重置所有数据？不可恢复！', async () => { appData = JSON.parse(JSON.stringify(DEFAULT_DATA)); await saveBackgrounds({ home: '', chat: '', group: '' }); await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('已重置'); }); }
+
+// ========== 导出聊天记录（修复版） ==========
+function exportChatRecords() {
+    try {
+        const chatData = {
+            version: '2.0',
+            exportTime: new Date().toISOString(),
+            chats: appData.chats || {},
+            groupChats: appData.groupChats || {},
+            roles: appData.roles.map(r => ({ id: r.id, name: r.name }))
+        };
+        
+        const jsonStr = JSON.stringify(chatData, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `chat_records_${new Date().toISOString().slice(0,10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        timerManager.setTimeout(() => URL.revokeObjectURL(url), 10000);
+        showToast('✅ 聊天记录导出成功！');
+    } catch (e) {
+        console.error('导出失败:', e);
+        showToast('❌ 导出失败：' + e.message);
+    }
+}
+
+// ========== 导入聊天记录（修复版） ==========
+function importChatRecords() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (!file) {
+            showToast('请选择文件');
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            try {
+                const data = JSON.parse(ev.target.result);
+                
+                // 验证数据格式
+                if (!data.chats && !data.groupChats) {
+                    showToast('❌ 无效的聊天记录文件');
+                    return;
+                }
+                
+                // 确认导入
+                const roleCount = Object.keys(data.chats || {}).length;
+                const groupCount = Object.keys(data.groupChats || {}).length;
+                const totalMsg = Object.values(data.chats || {}).reduce((sum, msgs) => sum + msgs.length, 0) +
+                                Object.values(data.groupChats || {}).reduce((sum, msgs) => sum + msgs.length, 0);
+                
+                showConfirm(
+                    `将导入 ${roleCount} 个角色的聊天记录，共 ${totalMsg} 条消息，是否继续？`,
+                    async (ok) => {
+                        if (!ok) return;
+                        
+                        // 合并数据（保留现有数据，新增或覆盖）
+                        if (data.chats) {
+                            for (let roleId in data.chats) {
+                                if (!appData.chats[roleId]) appData.chats[roleId] = [];
+                                // 合并消息，去重
+                                const existingIds = new Set(appData.chats[roleId].map(m => m.id));
+                                data.chats[roleId].forEach(msg => {
+                                    if (!existingIds.has(msg.id)) {
+                                        appData.chats[roleId].push(msg);
+                                        existingIds.add(msg.id);
+                                    }
+                                });
+                                // 按时间排序
+                                appData.chats[roleId].sort((a, b) => a.time - b.time);
+                            }
+                        }
+                        
+                        if (data.groupChats) {
+                            for (let groupId in data.groupChats) {
+                                if (!appData.groupChats[groupId]) appData.groupChats[groupId] = [];
+                                const existingIds = new Set(appData.groupChats[groupId].map(m => m.id));
+                                data.groupChats[groupId].forEach(msg => {
+                                    if (!existingIds.has(msg.id)) {
+                                        appData.groupChats[groupId].push(msg);
+                                        existingIds.add(msg.id);
+                                    }
+                                });
+                                appData.groupChats[groupId].sort((a, b) => a.time - b.time);
+                            }
+                        }
+                        
+                        await saveData();
+                        showToast(`✅ 成功导入 ${totalMsg} 条消息`);
+                        
+                        // 刷新聊天界面
+                        if (currentChatType === 'role' && currentRoleId) {
+                            renderChatMessages();
+                        } else if (currentChatType === 'group' && currentGroupId) {
+                            renderChatMessages();
+                        }
+                        renderRoleList();
+                        renderGroupList();
+                    }
+                );
+            } catch (err) {
+                showToast('❌ 文件解析失败：' + err.message);
+            }
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
 
 // ========== 信箱功能（增加原信展示） ==========
 function openMailbox() {
@@ -8800,7 +9032,7 @@ async function saveOnlineStatus() { if (!currentOnlineStatusRoleId) return; cons
 function refreshRoleOnlineStatus(role) { if (!role.onlineStatus || !role.onlineStatus.enabled) return; const now = Date.now(), threeHours = 3 * 60 * 60 * 1000; if (!role.onlineStatus.lastUpdate || (now - role.onlineStatus.lastUpdate) >= threeHours) { const list = role.onlineStatus.statusList; role.onlineStatus.currentStatus = (list && list.length > 0) ? list[Math.floor(Math.random() * list.length)] : '在线'; role.onlineStatus.lastUpdate = now; debouncedSaveData(); } }
 
 // --- 回信生成（修改为包含原信）---
-function startMailReplyChecker() { if (mailCheckTimer) clearInterval(mailCheckTimer); mailCheckTimer = setInterval(() => { const sentMails = appData.mails.filter(m => m.type === 'sent' && !m.replied && m.replyTime <= Date.now()); sentMails.forEach(mail => { generateReplyForMail(mail); }); }, 60000); }
+function startMailReplyChecker() { if (mailCheckTimer) clearInterval(mailCheckTimer); mailCheckTimer = timerManager.setInterval(() => { const sentMails = appData.mails.filter(m => m.type === 'sent' && !m.replied && m.replyTime <= Date.now()); sentMails.forEach(mail => { generateReplyForMail(mail); }); }, 60000); }
 function generateReplyForMail(mail) { 
     const allWords = []; 
     appData.wordbanks.wordGroups.forEach(g => g.words.forEach(w => { if (typeof w === 'object') allWords.push(w.text); else allWords.push(w); })); 
@@ -9296,7 +9528,7 @@ function bindExportButtons() {
     if (selectAllBtn) selectAllBtn.onclick = selectAllGroupsToggle;
 }
 // 初始化导出按钮
-setTimeout(bindExportButtons, 100);
+timerManager.setTimeout(bindExportButtons, 100);
 
 // ========== 字卡库搜索功能 ==========
 function initWordSearchUI() {
@@ -9358,7 +9590,7 @@ function performWordSearch(keyword, infoDiv, clearBtn) {
     updateSearchInfoUI(infoDiv, clearBtn, keyword);
     const first = currentSearchResults[0];
     switchWordGroup(first.groupIndex);
-    setTimeout(() => {
+    timerManager.setTimeout(() => {
         locateWordCard(first.groupIndex, first.wordIndex);
     }, 100);
 }
@@ -9386,7 +9618,7 @@ function navigateSearch(delta, infoDiv, clearBtn, keyword) {
     updateSearchInfoUI(infoDiv, clearBtn, keyword);
     const target = currentSearchResults[currentSearchIndex];
     switchWordGroup(target.groupIndex);
-    setTimeout(() => {
+    timerManager.setTimeout(() => {
         locateWordCard(target.groupIndex, target.wordIndex);
     }, 100);
 }
@@ -9395,21 +9627,21 @@ function locateWordCard(groupIndex, wordIndex) {
     if (currentWordGroup !== groupIndex) {
         switchWordGroup(groupIndex);
     }
-    setTimeout(() => {
+    timerManager.setTimeout(() => {
         const targetCard = document.querySelector(`.word-card-item[data-group-index="${groupIndex}"][data-word-index="${wordIndex}"]`);
         if (targetCard) {
             targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
             targetCard.classList.add('search-highlight');
-            setTimeout(() => {
+            timerManager.setTimeout(() => {
                 targetCard.classList.remove('search-highlight');
             }, 2000);
         } else {
-            setTimeout(() => {
+            timerManager.setTimeout(() => {
                 const card = document.querySelector(`.word-card-item[data-group-index="${groupIndex}"][data-word-index="${wordIndex}"]`);
                 if (card) {
                     card.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     card.classList.add('search-highlight');
-                    setTimeout(() => { card.classList.remove('search-highlight'); }, 2000);
+                    timerManager.setTimeout(() => { card.classList.remove('search-highlight'); }, 2000);
                 }
             }, 200);
         }
@@ -9444,7 +9676,7 @@ function closeMusicPlayer(e) { e.stopPropagation(); document.getElementById('mus
 function loadMusic() { const url = document.getElementById('music-url').value, audio = document.getElementById('music-audio'); audio.src = url; audio.load(); audio.play(); }
 function showConfirm(msg, cb) { const modal = document.getElementById('modal-confirm'); document.getElementById('confirm-msg').textContent = msg; confirmCallback = cb; modal.classList.remove('hidden'); }
 function closeConfirm(ok) { document.getElementById('modal-confirm').classList.add('hidden'); if (ok && confirmCallback) confirmCallback(); confirmCallback = null; }
-function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 2000); }
+function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.style.opacity = '1'; timerManager.setTimeout(() => t.style.opacity = '0', 2000); }
 function showSourceCode() { document.getElementById('source-code-content').value = document.documentElement.outerHTML; document.getElementById('modal-source').classList.add('active'); }
 function closeSourceCode() { document.getElementById('modal-source').classList.remove('active'); }
 function copySourceCode() { const ta = document.getElementById('source-code-content'); ta.select(); document.execCommand('copy'); showToast('已复制'); }
@@ -9545,7 +9777,7 @@ function showCustomPokeModal() {
     if (!modal) return;
     document.getElementById('custom-poke-input').value = '';
     modal.classList.remove('hidden');
-    setTimeout(() => document.getElementById('custom-poke-input').focus(), 100);
+    timerManager.setTimeout(() => document.getElementById('custom-poke-input').focus(), 100);
 }
 
 function closeCustomPokeModal() {
@@ -9977,14 +10209,14 @@ function executePoke() {
     // 显示正在输入动画（独立管理）
     const delay = 1500 + Math.random() * 2000;
     showRoleTyping(role.id, role.name, role.avatar, delay);
-    setTimeout(() => {
+    timerManager.setTimeout(() => {
         hideRoleTyping(role.id);
     }, delay + 500);
     // 戳一戳后角色主动回复（根据设置）
     if (appData.settings.pokeAutoReplyEnabled) {
         const prob = appData.settings.pokeAutoReplyProb || 45;
         if (Math.random() * 100 < prob) {
-            setTimeout(() => {
+            timerManager.setTimeout(() => {
                 const allWords = getActiveWordList();
                 if (allWords.length > 0) {
                     const replyContent = allWords[Math.floor(Math.random() * allWords.length)];
@@ -10047,19 +10279,19 @@ function startCall() {
     updateCallActions();
     document.getElementById('modal-call').classList.remove('hidden');
     playCustomRingtone();
-    setTimeout(() => {
+    timerManager.setTimeout(() => {
         if (!callState.active || callState.status !== 'calling' || callState.initiator !== 'user') return;
         const rand = Math.random() * 100;
         if (rand < callState.rejectProb) {
             callState.status = 'rejected';
             stopAllRingtones();
             document.getElementById('call-status').textContent = '对方拒绝了通话';
-            setTimeout(() => endCall('rejected'), 2000);
+            timerManager.setTimeout(() => endCall('rejected'), 2000);
         } else if (rand < callState.rejectProb + callState.missProb) {
             callState.status = 'missed';
             stopAllRingtones();
             document.getElementById('call-status').textContent = '对方未接听';
-            setTimeout(() => endCall('missed'), 2000);
+            timerManager.setTimeout(() => endCall('missed'), 2000);
         } else {
             callState.status = 'connected';
             stopAllRingtones();
@@ -10067,16 +10299,16 @@ function startCall() {
             startCallTimer();
             const minDur = (appData.settings.call?.minDuration || 0.5) * 60;
             const maxDur = (appData.settings.call?.maxDuration || 2) * 60;
-            callState.autoHangupTimer = setTimeout(() => {
+            callState.autoHangupTimer = timerManager.setTimeout(() => {
                 if (callState.active && callState.status === 'connected') hangUpCall(true);
             }, (minDur + Math.random() * (maxDur - minDur)) * 1000);
             updateCallActions();
         }
     }, callState.answerDelay);
 }
-function startCallTimer() { if (callState.timerInterval) clearInterval(callState.timerInterval); callState.timerInterval = setInterval(() => { callState.seconds++; const mins = Math.floor(callState.seconds / 60), secs = callState.seconds % 60, timeStr = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`; document.getElementById('call-timer').textContent = timeStr; if (callState.miniMode) document.getElementById('call-mini-timer').textContent = timeStr; }, 1000); }
+function startCallTimer() { if (callState.timerInterval) clearInterval(callState.timerInterval); callState.timerInterval = timerManager.setInterval(() => { callState.seconds++; const mins = Math.floor(callState.seconds / 60), secs = callState.seconds % 60, timeStr = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`; document.getElementById('call-timer').textContent = timeStr; if (callState.miniMode) document.getElementById('call-mini-timer').textContent = timeStr; }, 1000); }
 function hangUpCall(isAuto = false) { if (!callState.active) return; stopAllRingtones(); endCall(callState.status === 'connected' ? 'ended' : callState.status, callState.seconds, isAuto); }
-function answerCall() { if (!callState.active || callState.status !== 'incoming') return; stopAllRingtones(); if (callState.userTimeoutTimer) clearTimeout(callState.userTimeoutTimer); callState.status = 'connected'; document.getElementById('call-status').textContent = '通话中'; startCallTimer(); const minDur = (appData.settings.autoCall?.minDuration || 0.5) * 60, maxDur = (appData.settings.autoCall?.maxDuration || 3) * 60; callState.autoHangupTimer = setTimeout(() => { if (callState.active && callState.status === 'connected') hangUpCall(true); }, (minDur + Math.random() * (maxDur - minDur)) * 1000); updateCallActions(); }
+function answerCall() { if (!callState.active || callState.status !== 'incoming') return; stopAllRingtones(); if (callState.userTimeoutTimer) clearTimeout(callState.userTimeoutTimer); callState.status = 'connected'; document.getElementById('call-status').textContent = '通话中'; startCallTimer(); const minDur = (appData.settings.autoCall?.minDuration || 0.5) * 60, maxDur = (appData.settings.autoCall?.maxDuration || 3) * 60; callState.autoHangupTimer = timerManager.setTimeout(() => { if (callState.active && callState.status === 'connected') hangUpCall(true); }, (minDur + Math.random() * (maxDur - minDur)) * 1000); updateCallActions(); }
 function rejectIncomingCall() { if (!callState.active || callState.status !== 'incoming') return; stopAllRingtones(); if (callState.userTimeoutTimer) clearTimeout(callState.userTimeoutTimer); endCall('rejected', 0); }
 function endCall(status, duration = 0, isAuto = false) { 
     callState.active = false;
@@ -10091,7 +10323,7 @@ function endCall(status, duration = 0, isAuto = false) {
     else message = `通话时长 ${timeStr}`; 
     document.getElementById('call-status').textContent = message; 
     document.getElementById('call-timer').textContent = timeStr; 
-    setTimeout(() => { 
+    timerManager.setTimeout(() => { 
         document.getElementById('modal-call').classList.add('hidden'); 
         document.getElementById('call-mini-window').style.display = 'none'; 
         callState.miniMode = false; 
@@ -10127,10 +10359,10 @@ function closeMiniCallWindow(e) { e.stopPropagation(); if (callState.active) han
 function startDragMiniCall(e) { e.preventDefault(); const mini = document.getElementById('call-mini-window'); const rect = mini.getBoundingClientRect(); const clientX = e.touches ? e.touches[0].clientX : e.clientX; const clientY = e.touches ? e.touches[0].clientY : e.clientY; dragOffsetX = clientX - rect.left; dragOffsetY = clientY - rect.top; isDraggingMini = true; let hasMoved = false; function onDrag(ev) { if (!isDraggingMini) return; ev.preventDefault(); const x = (ev.touches ? ev.touches[0].clientX : ev.clientX) - dragOffsetX; const y = (ev.touches ? ev.touches[0].clientY : ev.clientY) - dragOffsetY; if (Math.abs(x - (clientX - dragOffsetX)) > 5 || Math.abs(y - (clientY - dragOffsetY)) > 5) hasMoved = true; mini.style.left = x + 'px'; mini.style.right = 'auto'; mini.style.bottom = 'auto'; mini.style.top = y + 'px'; } function onDragEnd() { isDraggingMini = false; window.removeEventListener('mousemove', onDrag); window.removeEventListener('touchmove', onDrag); window.removeEventListener('mouseup', onDragEnd); window.removeEventListener('touchend', onDragEnd); if (!hasMoved) { toggleMiniCallWindow(); } } window.addEventListener('mousemove', onDrag); window.addEventListener('touchmove', onDrag); window.addEventListener('mouseup', onDragEnd); window.addEventListener('touchend', onDragEnd); }
 function setCallWindowSize(size) { callState.windowSize = size; const card = document.getElementById('call-card'); if (size === 'mini') card.style.transform = 'scale(0.7)'; else if (size === 'small') card.style.transform = 'scale(0.85)'; else if (size === 'standard') card.style.transform = 'scale(1)'; else if (size === 'large') card.style.transform = 'scale(1.15)'; document.querySelectorAll('.call-size-btn').forEach(btn => { btn.classList.toggle('active', btn.dataset.size === size); }); if (appData.settings.call) appData.settings.call.windowSize = size; debouncedSaveData(); }
 async function handleCallBgUpload(input) { if (input.files?.[0]) { showToast('压缩中...'); const compressed = await compressImage(input.files[0], 800, 0.7); document.getElementById('call-bg').style.backgroundImage = `url(${compressed})`; if (!appData.settings.call) appData.settings.call = {}; appData.settings.call.background = compressed; debouncedSaveData(); } }
-function startAutoCallTimer() { if (autoCallTimer) { clearTimeout(autoCallTimer); autoCallTimer = null; } if (!appData.settings.autoCall?.enabled) return; const intervalMs = (Math.random() * (appData.settings.autoCall.maxInterval - appData.settings.autoCall.minInterval) + appData.settings.autoCall.minInterval) * 60 * 1000; autoCallTimer = setTimeout(() => { autoCallTimer = null; checkAndTriggerAutoCall(); startAutoCallTimer(); }, intervalMs); }
+function startAutoCallTimer() { if (autoCallTimer) { clearTimeout(autoCallTimer); autoCallTimer = null; } if (!appData.settings.autoCall?.enabled) return; const intervalMs = (Math.random() * (appData.settings.autoCall.maxInterval - appData.settings.autoCall.minInterval) + appData.settings.autoCall.minInterval) * 60 * 1000; autoCallTimer = timerManager.setTimeout(() => { autoCallTimer = null; checkAndTriggerAutoCall(); startAutoCallTimer(); }, intervalMs); }
 function checkAndTriggerAutoCall() { if (!appData.settings.autoCall?.enabled || callState.active) return; if (Math.random() * 100 < appData.settings.autoCall.probability) { const role = appData.roles[Math.floor(Math.random() * appData.roles.length)]; if (role) triggerIncomingCall(role); } }
-function triggerIncomingCall(role) { callState.active = true; callState.status = 'incoming'; callState.roleId = role.id; callState.roleName = role.name; callState.roleAvatar = role.avatar; callState.initiator = 'role'; callState.seconds = 0; document.getElementById('call-avatar').src = role.avatar; document.getElementById('call-name').textContent = role.name; document.getElementById('call-status').textContent = '邀请你视频通话...'; document.getElementById('call-timer').textContent = '00:00'; setCallWindowSize(callState.windowSize); updateCallActions(); document.getElementById('modal-call').classList.remove('hidden'); callState.userTimeoutTimer = setTimeout(() => { if (callState.active && callState.status === 'incoming') endCall('missed', 0); }, (appData.settings.autoCall?.userTimeout || 30) * 1000); playCustomRingtone(); }
-function startAutoMailGenerator() { if (autoMailGeneratorTimer) { clearTimeout(autoMailGeneratorTimer); autoMailGeneratorTimer = null; } if (!appData.settings.autoMail?.enabled) return; const interval = (appData.settings.autoMail.checkInterval || 10) * 60 * 1000; autoMailGeneratorTimer = setTimeout(() => { autoMailGeneratorTimer = null; checkAndGenerateAutoMail(); startAutoMailGenerator(); }, interval); }
+function triggerIncomingCall(role) { callState.active = true; callState.status = 'incoming'; callState.roleId = role.id; callState.roleName = role.name; callState.roleAvatar = role.avatar; callState.initiator = 'role'; callState.seconds = 0; document.getElementById('call-avatar').src = role.avatar; document.getElementById('call-name').textContent = role.name; document.getElementById('call-status').textContent = '邀请你视频通话...'; document.getElementById('call-timer').textContent = '00:00'; setCallWindowSize(callState.windowSize); updateCallActions(); document.getElementById('modal-call').classList.remove('hidden'); callState.userTimeoutTimer = timerManager.setTimeout(() => { if (callState.active && callState.status === 'incoming') endCall('missed', 0); }, (appData.settings.autoCall?.userTimeout || 30) * 1000); playCustomRingtone(); }
+function startAutoMailGenerator() { if (autoMailGeneratorTimer) { clearTimeout(autoMailGeneratorTimer); autoMailGeneratorTimer = null; } if (!appData.settings.autoMail?.enabled) return; const interval = (appData.settings.autoMail.checkInterval || 10) * 60 * 1000; autoMailGeneratorTimer = timerManager.setTimeout(() => { autoMailGeneratorTimer = null; checkAndGenerateAutoMail(); startAutoMailGenerator(); }, interval); }
 function checkAndGenerateAutoMail() { appData.roles.forEach(role => { if (Math.random() * 100 < (role.autoMailProbability ?? 15)) generateAutoLetter(role); }); }
 function generateAutoLetter(role) { const allWords = []; appData.wordbanks.wordGroups.forEach(g => g.words.forEach(w => { if (typeof w === 'object') allWords.push(w.text); else allWords.push(w); })); if (!allWords.length) allWords.push('今天不知道说什么好', '想你啦', '最近还好吗', '天气不错'); const content = Array.from({length: 3 + Math.floor(Math.random() * 6)}, () => allWords[Math.floor(Math.random() * allWords.length)]).join('。') + '。'; appData.mails.push({ id: generateUID(), roleId: role.id, type: 'received', content, time: Date.now(), replyTime: Date.now(), replied: true, viewed: false }); debouncedSaveData(); if (document.getElementById('page-mailbox') && document.getElementById('page-mailbox').classList.contains('active')) renderMailList(); }
 
@@ -10161,7 +10393,7 @@ function confirmTransfer() {
     appendMessageToDOM('me', msgContent, Date.now(), null, 'transfer');
     let collectDelay = appData.settings.transferTestMode ? 3000 : (20000 + Math.floor(Math.random() * 10000));
     const targetRoleId = currentRoleId;
-    setTimeout(() => {
+    timerManager.setTimeout(() => {
         const chatMsgs = appData.chats[targetRoleId] || [];
         const targetMsg = chatMsgs.find(m => m.transferId === transferId);
         if (targetMsg) {
@@ -10193,16 +10425,16 @@ function confirmTransfer() {
                         } else {
                             incrementUnread(targetRoleId);
                         }
-                        if (index < msgCount) { const nextDelay = Math.random() * (appData.settings.maxDelay - appData.settings.minDelay) * 1000 + appData.settings.minDelay * 1000; setTimeout(() => sendExtra(index + 1), nextDelay); }
+                        if (index < msgCount) { const nextDelay = Math.random() * (appData.settings.maxDelay - appData.settings.minDelay) * 1000 + appData.settings.minDelay * 1000; timerManager.setTimeout(() => sendExtra(index + 1), nextDelay); }
                     }; sendExtra(1);
                 }
             }
             if (appData.settings.transferTestMode) {
                 const roleTransferDelay = 3000;
-                setTimeout(() => { sendRoleTransfer(role, true); }, roleTransferDelay);
+                timerManager.setTimeout(() => { sendRoleTransfer(role, true); }, roleTransferDelay);
             } else {
                 const roleTransferDelay = 20000 + Math.floor(Math.random() * 10000);
-                setTimeout(() => { sendRoleTransfer(role, false); }, roleTransferDelay);
+                timerManager.setTimeout(() => { sendRoleTransfer(role, false); }, roleTransferDelay);
             }
         }
     }, collectDelay);
@@ -10250,7 +10482,7 @@ function sendRoleTransfer(role, force = false) {
     sendNotificationIfNeeded(`${role.name} 转账`, `收到 ¥${amount} ${note ? '—— ' + note : ''}`);
     window._transferSending = false;
 }
-function startAutoTransferTimer() { if (autoTransferTimer) { clearTimeout(autoTransferTimer); autoTransferTimer = null; } if (appData.settings.transferTestMode) return; if (!appData.transferSettings?.enabled) return; const interval = (appData.transferSettings.checkInterval || 30) * 60 * 1000; autoTransferTimer = setTimeout(() => { autoTransferTimer = null; checkAndTriggerAutoTransfer(); startAutoTransferTimer(); }, interval); }
+function startAutoTransferTimer() { if (autoTransferTimer) { clearTimeout(autoTransferTimer); autoTransferTimer = null; } if (appData.settings.transferTestMode) return; if (!appData.transferSettings?.enabled) return; const interval = (appData.transferSettings.checkInterval || 30) * 60 * 1000; autoTransferTimer = timerManager.setTimeout(() => { autoTransferTimer = null; checkAndTriggerAutoTransfer(); startAutoTransferTimer(); }, interval); }
 function checkAndTriggerAutoTransfer() { if (appData.settings.transferTestMode) return; if (!appData.transferSettings?.enabled) return; if (Date.now() < disableAutoTransferUntil) return; if (Date.now() - lastManualTransferTime < 5 * 60 * 1000) return; const recentManual = appData.transferRecords.some(r => r.direction === 'sent' && Date.now() - r.time < 5 * 60 * 1000); if (recentManual) return; if (Math.random() * 100 < (appData.transferSettings.probability || 15)) { const role = appData.roles[Math.floor(Math.random() * appData.roles.length)]; if (role) sendRoleTransfer(role); } }
 function openTransferSettings() { const s = appData.transferSettings; document.getElementById('setting-auto-transfer-switch').classList.toggle('active', s.enabled); document.getElementById('setting-transfer-min').value = s.minAmount; document.getElementById('setting-transfer-max').value = s.maxAmount; document.getElementById('setting-transfer-prob').value = s.probability; document.getElementById('setting-transfer-interval').value = s.checkInterval; const testSwitch = document.getElementById('setting-transfer-test-switch'); if (testSwitch) testSwitch.classList.toggle('active', appData.settings.transferTestMode); document.getElementById('modal-transfer-settings').classList.remove('hidden'); }
 function closeTransferSettings() { document.getElementById('modal-transfer-settings').classList.add('hidden'); }
@@ -10336,7 +10568,7 @@ function sendRedPacket() {
     if (!isGroup) {
         const targetRoleId = currentRoleId;
         let delay = appData.settings.transferTestMode ? 3000 : (8000 + Math.floor(Math.random() * 7000));
-        setTimeout(() => {
+        timerManager.setTimeout(() => {
             const pkt = appData.redPackets.find(p => p.id === packetId);
             if (!pkt || pkt.records.length >= pkt.count) return;
             const remaining = pkt.totalAmount - pkt.records.reduce((s,r)=>s+r.amount, 0);
@@ -10365,7 +10597,7 @@ function sendRedPacket() {
             group.members.forEach(memberId => {
                 if (memberId === 'me') return;
                 let delay = appData.settings.transferTestMode ? 3000 : (8000 + Math.floor(Math.random() * 52000));
-                setTimeout(() => {
+                timerManager.setTimeout(() => {
                     const currentPacket = appData.redPackets.find(p => p.id === packetId);
                     if (!currentPacket || currentPacket.records.length >= currentPacket.count) return;
                     const remaining = currentPacket.totalAmount - currentPacket.records.reduce((s,r)=>s+r.amount, 0);
@@ -10392,7 +10624,7 @@ function sendRedPacket() {
 }
 function openRedPacket(packetId) { const packet = appData.redPackets.find(p => p.id === packetId); if (!packet) return; currentOpenRedPacketId = packetId; const coin = document.getElementById('rp-coin'); const body = document.getElementById('rp-body'); const isMeSender = packet.sender === 'me'; const alreadyCollected = !isMeSender && packet.records.find(r => r.userId === 'me'); const isFinished = packet.status === 'finished' || packet.status === 'received' || packet.records.length >= packet.count; if (isMeSender || alreadyCollected || isFinished) { coin.classList.add('opened'); body.style.display = 'block'; updateRedPacketDetail(packet); } else { coin.classList.remove('opened', 'flipping'); body.style.display = 'none'; } document.getElementById('modal-redpacket-open').classList.remove('hidden'); }
 function updateRedPacketDetail(packet) { const isMeSender = packet.sender === 'me'; document.getElementById('rp-avatar').src = (isMeSender ? (appData.userProfile?.avatar || DEFAULT_AVATAR) : (appData.roles.find(r=>r.id===packet.sender)?.avatar || DEFAULT_AVATAR)); document.getElementById('rp-sender-name').textContent = (isMeSender ? '我' : (appData.roles.find(r=>r.id===packet.sender)?.name || '未知')) + '的红包'; document.getElementById('rp-blessing').textContent = packet.blessing; if (packet.status === 'expired') { document.getElementById('rp-amount-num').textContent = '0.00'; document.getElementById('rp-tip').textContent = '红包已过期'; } else if (packet.records.length >= packet.count || packet.status === 'finished') { document.getElementById('rp-amount-num').textContent = '0.00'; document.getElementById('rp-tip').textContent = '红包已被领完'; } else { const myRecord = packet.records.find(r => r.userId === 'me'); if (myRecord) { document.getElementById('rp-amount-num').textContent = myRecord.amount.toFixed(2); document.getElementById('rp-tip').textContent = '已存入零钱，可直接转账>'; } else if (isMeSender) { document.getElementById('rp-amount-num').textContent = packet.totalAmount.toFixed(2); document.getElementById('rp-tip').textContent = `已领取 ${packet.records.length}/${packet.count}`; } } document.getElementById('rp-action-text').textContent = isMeSender ? '' : '回复表情到聊天'; }
-function clickRedPacketCoin() { const coin = document.getElementById('rp-coin'); if (coin.classList.contains('flipping') || coin.classList.contains('opened')) return; coin.classList.add('flipping'); setTimeout(() => { coin.classList.remove('flipping'); coin.classList.add('opened'); document.getElementById('rp-body').style.display = 'block'; const packet = appData.redPackets.find(p => p.id === currentOpenRedPacketId); if (!packet) { closeRedPacketOpen(); return; } const isMeSender = packet.sender === 'me'; let newRecord = false; if (!isMeSender && !packet.records.find(r => r.userId === 'me') && packet.records.length < packet.count && packet.status !== 'finished' && packet.status !== 'expired') { let amount = 0; const remaining = packet.totalAmount - packet.records.reduce((s,r)=>s+r.amount, 0); const remainCount = packet.count - packet.records.length; if (packet.type === 'random') { if (remainCount <= 1) amount = Math.round(remaining * 100) / 100; else { const max = remaining / remainCount * 2; amount = Math.round((Math.random() * max + 0.01) * 100) / 100; if (amount > remaining) amount = Math.round(remaining * 100) / 100; if (amount < 0.01) amount = 0.01; } } else { amount = Math.round((packet.totalAmount / packet.count) * 100) / 100; } packet.records.push({ userId: 'me', amount, time: Date.now() }); appData.balance += amount; if (packet.records.length >= packet.count) packet.status = 'finished'; newRecord = true; } updateRedPacketDetail(packet); if (newRecord) { const chatId = packet.chatType === 'group' ? currentGroupId : currentRoleId; const chatMsgs = packet.chatType === 'group' ? appData.groupChats[chatId] : appData.chats[chatId]; if (chatMsgs) { const senderName = appData.roles.find(r=>r.id===packet.sender)?.name || '对方'; const sysText = `🧧 你已领取${senderName}的红包`; chatMsgs.push({ id: Date.now(), sender: 'system', content: sysText, time: Date.now(), type: 'system' }); debouncedSaveData(); appendMessageToDOM('system', sysText, Date.now(), null, 'system'); } } if (currentChatType === 'role' || currentChatType === 'group') { const chatMsgs = packet.chatType === 'group' ? appData.groupChats[currentGroupId] : appData.chats[currentRoleId]; const targetMsg = chatMsgs?.find(m => m.type === 'redpacket' && m.sender === packet.sender && m.packetId === packet.id); if (targetMsg) { const data = JSON.parse(targetMsg.content); data.receivedCount = packet.records.length; data.status = packet.status === 'finished' ? 'received' : (packet.records.length > 0 ? 'opened' : 'active'); targetMsg.content = JSON.stringify(data); debouncedSaveData(); renderChatMessages(); } } }, 800); }
+function clickRedPacketCoin() { const coin = document.getElementById('rp-coin'); if (coin.classList.contains('flipping') || coin.classList.contains('opened')) return; coin.classList.add('flipping'); timerManager.setTimeout(() => { coin.classList.remove('flipping'); coin.classList.add('opened'); document.getElementById('rp-body').style.display = 'block'; const packet = appData.redPackets.find(p => p.id === currentOpenRedPacketId); if (!packet) { closeRedPacketOpen(); return; } const isMeSender = packet.sender === 'me'; let newRecord = false; if (!isMeSender && !packet.records.find(r => r.userId === 'me') && packet.records.length < packet.count && packet.status !== 'finished' && packet.status !== 'expired') { let amount = 0; const remaining = packet.totalAmount - packet.records.reduce((s,r)=>s+r.amount, 0); const remainCount = packet.count - packet.records.length; if (packet.type === 'random') { if (remainCount <= 1) amount = Math.round(remaining * 100) / 100; else { const max = remaining / remainCount * 2; amount = Math.round((Math.random() * max + 0.01) * 100) / 100; if (amount > remaining) amount = Math.round(remaining * 100) / 100; if (amount < 0.01) amount = 0.01; } } else { amount = Math.round((packet.totalAmount / packet.count) * 100) / 100; } packet.records.push({ userId: 'me', amount, time: Date.now() }); appData.balance += amount; if (packet.records.length >= packet.count) packet.status = 'finished'; newRecord = true; } updateRedPacketDetail(packet); if (newRecord) { const chatId = packet.chatType === 'group' ? currentGroupId : currentRoleId; const chatMsgs = packet.chatType === 'group' ? appData.groupChats[chatId] : appData.chats[chatId]; if (chatMsgs) { const senderName = appData.roles.find(r=>r.id===packet.sender)?.name || '对方'; const sysText = `🧧 你已领取${senderName}的红包`; chatMsgs.push({ id: Date.now(), sender: 'system', content: sysText, time: Date.now(), type: 'system' }); debouncedSaveData(); appendMessageToDOM('system', sysText, Date.now(), null, 'system'); } } if (currentChatType === 'role' || currentChatType === 'group') { const chatMsgs = packet.chatType === 'group' ? appData.groupChats[currentGroupId] : appData.chats[currentRoleId]; const targetMsg = chatMsgs?.find(m => m.type === 'redpacket' && m.sender === packet.sender && m.packetId === packet.id); if (targetMsg) { const data = JSON.parse(targetMsg.content); data.receivedCount = packet.records.length; data.status = packet.status === 'finished' ? 'received' : (packet.records.length > 0 ? 'opened' : 'active'); targetMsg.content = JSON.stringify(data); debouncedSaveData(); renderChatMessages(); } } }, 800); }
 function closeRedPacketOpen() { document.getElementById('modal-redpacket-open').classList.add('hidden'); currentOpenRedPacketId = null; }
 function openStickerPicker() { document.getElementById('sticker-picker-panel').classList.add('active'); renderStickerPickerGrid(); }
 function closeStickerPicker() { document.getElementById('sticker-picker-panel').classList.remove('active'); }
@@ -10874,7 +11106,7 @@ function showMomentDetail(momentId) {
 function addCommentLongPress(el, moment, commentIndex) {
     let timer;
     el.addEventListener('touchstart', (e) => {
-        timer = setTimeout(() => {
+        timer = timerManager.setTimeout(() => {
             showConfirm('删除这条评论？', async () => {
                 moment.comments.splice(commentIndex, 1);
                 await saveData();
@@ -10947,7 +11179,7 @@ function triggerRoleReplyToUserComment(moment, userComment) {
         }
     };
     const delay = 5000 + Math.random() * 25000;
-    setTimeout(() => {
+    timerManager.setTimeout(() => {
         if (Math.random() < 0.6) {
             if (!moment.likes) moment.likes = [];
             if (!moment.likes.includes(replierId)) {
@@ -10999,7 +11231,7 @@ function openCommentModal(momentId) {
     input.placeholder = '写评论...';
     const modal = document.getElementById('comment-modal');
     modal.style.display = 'block';
-    setTimeout(() => modal.classList.add('active'), 10);
+    timerManager.setTimeout(() => modal.classList.add('active'), 10);
 }
 function openCommentModalFromDetail(momentId) {
     currentCommentMomentId = momentId;
@@ -11009,12 +11241,12 @@ function openCommentModalFromDetail(momentId) {
     input.placeholder = placeholder;
     const modal = document.getElementById('comment-modal');
     modal.style.display = 'block';
-    setTimeout(() => modal.classList.add('active'), 10);
+    timerManager.setTimeout(() => modal.classList.add('active'), 10);
 }
 function closeCommentModal() {
     const modal = document.getElementById('comment-modal');
     modal.classList.remove('active');
-    setTimeout(() => { modal.style.display = 'none'; }, 300);
+    timerManager.setTimeout(() => { modal.style.display = 'none'; }, 300);
     currentReplyingTo = null;
 }
 function submitComment() {
@@ -11130,7 +11362,7 @@ async function submitMoment() {
     appData.moments.push(moment); await saveData(); closePostMoment(); renderMomentList(currentMomentFilter); showToast('动态已发表');
 }
 function toggleMomentLike(momentId) { const moment = appData.moments.find(m => m.id === momentId); if (!moment) return; if (!moment.likes) moment.likes = []; const idx = moment.likes.indexOf('me'); if (idx >= 0) { moment.likes.splice(idx, 1); } else { moment.likes.push('me'); } debouncedSaveData(); if (document.getElementById('page-moments').classList.contains('active')) { renderMomentList(currentMomentFilter); } else if (document.getElementById('page-moment-detail').classList.contains('active')) { showMomentDetail(momentId); } }
-function startMomentTimer() { if (momentTimer) clearInterval(momentTimer); momentTimer = setInterval(() => { if (!appData.settings.moment?.enabled) return; const now = new Date(); const today = now.toDateString(); appData.roles.forEach(role => { if (!role.lastMomentDate || role.lastMomentDate !== today) { role.todayMomentCount = 0; role.lastMomentDate = today; } if (role.todayMomentCount >= (appData.settings.moment.maxPerDay || 3)) return; const checkProb = (appData.settings.moment.probability || 15) / 48; if (Math.random() * 100 < checkProb) { generateAutoMoment(role); } }); }, 30 * 60 * 1000); }
+function startMomentTimer() { if (momentTimer) clearInterval(momentTimer); momentTimer = timerManager.setInterval(() => { if (!appData.settings.moment?.enabled) return; const now = new Date(); const today = now.toDateString(); appData.roles.forEach(role => { if (!role.lastMomentDate || role.lastMomentDate !== today) { role.todayMomentCount = 0; role.lastMomentDate = today; } if (role.todayMomentCount >= (appData.settings.moment.maxPerDay || 3)) return; const checkProb = (appData.settings.moment.probability || 15) / 48; if (Math.random() * 100 < checkProb) { generateAutoMoment(role); } }); }, 30 * 60 * 1000); }
 function generateAutoMoment(role) {
     const typeRand = Math.random() * 100; let type, images, musicId, bookId;
     if (typeRand < 50) { type = 'text'; } else if (typeRand < 70) { type = 'music'; if (appData.songLibrary.length > 0) musicId = appData.songLibrary[Math.floor(Math.random() * appData.songLibrary.length)].id; else type = 'text'; }
@@ -11204,7 +11436,7 @@ window.triggerMomentCheck = function() {
 };
 function startMomentCommentTimer() {
     if (momentCommentTimer) clearInterval(momentCommentTimer);
-    momentCommentTimer = setInterval(() => {
+    momentCommentTimer = timerManager.setInterval(() => {
         if (!appData.settings.moment?.enabled) return;
         const threeDaysAgo = Date.now() - 3 * 24 * 60 * 60 * 1000;
         const recentMoments = appData.moments.filter(m => m.time > threeDaysAgo);
@@ -11246,7 +11478,7 @@ function startMomentCommentTimer() {
 }
 function startMomentLikeTimer() {
     if (momentLikeTimer) clearInterval(momentLikeTimer);
-    momentLikeTimer = setInterval(() => {
+    momentLikeTimer = timerManager.setInterval(() => {
         if (!appData.settings.moment?.enabled) return;
         const threeDaysAgo = Date.now() - 3 * 24 * 60 * 60 * 1000;
         const recentMoments = appData.moments.filter(m => m.time > threeDaysAgo);
@@ -11305,7 +11537,7 @@ function exportMomentCommentBank() {
     a.href = URL.createObjectURL(blob);
     a.download = `moment_comment_bank_${Date.now()}.txt`;
     a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+    timerManager.setTimeout(() => URL.revokeObjectURL(a.href), 60000);
     showToast('导出成功');
 }
 function importMomentCommentBank(input) {
@@ -11458,7 +11690,7 @@ function renderAddressLibrary() {
 function openAddressAddModal() {
     document.getElementById('new-address-input').value = '';
     document.getElementById('modal-address-add').classList.add('active');
-    setTimeout(() => document.getElementById('new-address-input').focus(), 100);
+    timerManager.setTimeout(() => document.getElementById('new-address-input').focus(), 100);
 }
 function closeAddressAddModal() {
     document.getElementById('modal-address-add').classList.remove('active');
@@ -11531,7 +11763,7 @@ function submitDecisionRequest() {
     const role = appData.roles.find(r => r.id === currentRoleId);
     if (!role) return;
     const delay = 3000 + Math.random() * 2000;
-    setTimeout(() => {
+    timerManager.setTimeout(() => {
         const chosen = options[Math.floor(Math.random() * options.length)];
         const replyContent = `✨ 我帮你决定：${chosen}`;
         const replyMsg = { id: Date.now(), sender: currentRoleId, content: replyContent, time: Date.now(), type: 'text' };
@@ -11820,8 +12052,8 @@ function startSplashAnimation() {
     document.getElementById("titleText").innerHTML = 'Spiritual connection'.split('').map((c,i) => `<span style="animation-delay:${i*0.08}s">${c}</span>`).join(''); 
     function showQuote() { quoteText.innerHTML = ""; let text = quotes[idx++ % quotes.length]; text.split('').forEach((c,i) => { let s = document.createElement("span"); s.textContent = c; s.style.animationDelay = `${i*0.07}s`; quoteText.appendChild(s); }); } 
     function createStars() { const c = document.getElementById("starsContainer"); for(let i=0;i<120;i++){ let s = document.createElement("div"); s.className = "star"; let x=(Math.random()-0.5)*1400, y=(Math.random()-0.5)*1400; s.style.setProperty("--x",x+"px"); s.style.setProperty("--y",y+"px"); s.style.left=Math.random()*100+"vw"; s.style.top=Math.random()*100+"vh"; s.style.animationDelay=Math.random()*1.2+"s"; c.appendChild(s); } } 
-    createStars(); setTimeout(() => loadingCard.classList.add("visible"), 300); showQuote(); setInterval(showQuote, 3200); 
-    let timer = setInterval(() => { progress += Math.random()*1.5+0.5; if(progress>=100) progress=100; progressBar.style.width = progress+"%"; statusText.textContent = "正在连接中..."; if(progress>=100){ clearInterval(timer); statusText.textContent = "连接成功"; setTimeout(() => { splashScreen.classList.add("hidden"); loadData(); }, 1000); } }, 100); 
+    createStars(); timerManager.setTimeout(() => loadingCard.classList.add("visible"), 300); showQuote(); timerManager.setInterval(showQuote, 3200); 
+    let timer = timerManager.setInterval(() => { progress += Math.random()*1.5+0.5; if(progress>=100) progress=100; progressBar.style.width = progress+"%"; statusText.textContent = "正在连接中..."; if(progress>=100){ clearInterval(timer); statusText.textContent = "连接成功"; timerManager.setTimeout(() => { splashScreen.classList.add("hidden"); loadData(); }, 1000); } }, 100); 
 }
 function getSolarTerm(date) { const y = date.getFullYear(), m = date.getMonth() + 1, d = date.getDate(); const terms = [{ name: '小寒', emoji: '❄️', month: 1, day: 5 },{ name: '大寒', emoji: '🧊', month: 1, day: 20 },{ name: '立春', emoji: '🌱', month: 2, day: 4 },{ name: '雨水', emoji: '💧', month: 2, day: 19 },{ name: '惊蛰', emoji: '🐛', month: 3, day: 5 },{ name: '春分', emoji: '🌿', month: 3, day: 20 },{ name: '清明', emoji: '🍃', month: 4, day: 4 },{ name: '谷雨', emoji: '🌧️', month: 4, day: 20 },{ name: '立夏', emoji: '☀️', month: 5, day: 5 },{ name: '小满', emoji: '🌾', month: 5, day: 21 },{ name: '芒种', emoji: '🌾', month: 6, day: 5 },{ name: '夏至', emoji: '☀️', month: 6, day: 21 },{ name: '小暑', emoji: '🔥', month: 7, day: 7 },{ name: '大暑', emoji: '🔥', month: 7, day: 22 },{ name: '立秋', emoji: '🍂', month: 8, day: 7 },{ name: '处暑', emoji: '🍂', month: 8, day: 23 },{ name: '白露', emoji: '💧', month: 9, day: 7 },{ name: '秋分', emoji: '🍂', month: 9, day: 23 },{ name: '寒露', emoji: '💧', month: 10, day: 8 },{ name: '霜降', emoji: '❄️', month: 10, day: 23 },{ name: '立冬', emoji: '❄️', month: 11, day: 7 },{ name: '小雪', emoji: '❄️', month: 11, day: 22 },{ name: '大雪', emoji: '❄️', month: 12, day: 7 },{ name: '冬至', emoji: '🧊', month: 12, day: 21 }]; for (let t of terms) { if (t.month === m && t.day === d) return { name: t.name, emoji: t.emoji, greeting: `${t.name}快乐`, eng: t.name.toUpperCase() }; } return null; }
 function getFestivalGreeting(date) { const solarHolidays = { '1,1': '元旦快乐', '2,14': '情人节快乐', '3,8': '女神节快乐', '4,1': '愚人节快乐', '5,1': '劳动节快乐', '6,1': '儿童节快乐', '10,1': '国庆快乐', '12,25': '圣诞快乐' }; return solarHolidays[`${date.getMonth()+1},${date.getDate()}`] || null; }
@@ -11836,7 +12068,7 @@ window.addEventListener('beforeunload', function() {
 });
 // ==================== 运势占卜模块（最终稳定版 - 含管理库导入导出） ====================
 function escapeHtml(s) { if (!s) return ''; return s.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m]); }
-function showToast(msg) { let t = document.getElementById('toast'); if (!t) { t = document.createElement('div'); t.id = 'toast'; t.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:#fff;padding:10px 20px;border-radius:40px;font-size:14px;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;'; document.body.appendChild(t); } t.textContent = msg; t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 2000); }
+function showToast(msg) { let t = document.getElementById('toast'); if (!t) { t = document.createElement('div'); t.id = 'toast'; t.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:#fff;padding:10px 20px;border-radius:40px;font-size:14px;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;'; document.body.appendChild(t); } t.textContent = msg; t.style.opacity = '1'; timerManager.setTimeout(() => t.style.opacity = '0', 2000); }
 function showConfirm(msg, cb) { const modal = document.createElement('div'); modal.className = 'modal-overlay'; modal.style.zIndex = '10000'; modal.innerHTML = `<div class="modal-card" style="max-width:300px;"><p style="margin-bottom:20px;">${escapeHtml(msg)}</p><div style="display:flex; gap:12px;"><button id="confirm-yes" class="btn-primary" style="flex:1;">确定</button><button id="confirm-no" class="btn-secondary" style="flex:1;">取消</button></div></div>`; document.body.appendChild(modal); modal.querySelector('#confirm-yes').onclick = () => { modal.remove(); cb(true); }; modal.querySelector('#confirm-no').onclick = () => { modal.remove(); cb(false); }; }
 function compressImage(file, maxWidth = 300, quality = 0.6) { return new Promise((resolve) => { const reader = new FileReader(); reader.onload = (e) => { const img = new Image(); img.onload = () => { const canvas = document.createElement('canvas'); let width = img.width, height = img.height; if (width > maxWidth) { height = (height * maxWidth) / width; width = maxWidth; } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); resolve(canvas.toDataURL('image/jpeg', quality)); }; img.src = e.target.result; }; reader.readAsDataURL(file); }); }
 const tarotCards = [
@@ -13026,7 +13258,7 @@ sendBatchMessages = function() {
     
     // 逐条发送，每条间隔 300ms（传讯文件风格）
     batchMessages.forEach((msg, index) => {
-        setTimeout(() => {
+        timerManager.setTimeout(() => {
             addMessage({
                 id: Date.now() + index,
                 sender: 'user',
@@ -13045,7 +13277,7 @@ sendBatchMessages = function() {
     const totalDelay = batchMessages.length * 300;
     const delayRange = settings.replyDelayMax - settings.replyDelayMin;
     const randomDelay = settings.replyDelayMin + Math.random() * delayRange;
-    setTimeout(simulateReply, totalDelay + randomDelay);
+    timerManager.setTimeout(simulateReply, totalDelay + randomDelay);
     
     // 清理批量模式状态
     isBatchMode = false;
@@ -13202,6 +13434,7 @@ window.applyRoleChatBackground = applyRoleChatBackground;
 
 // ========== 加载完成 ==========
 console.log('Spiritual connection v2.0 - 所有功能已加载');
+
 </script>
 </body>
 </html>
