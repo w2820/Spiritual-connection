@@ -2013,7 +2013,9 @@
             background: #C62828;
             border: 2px solid #FFD54F;
             border-radius: 6px;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             flex-shrink: 0;
             font-size: 22px;
             color: #FFD54F;
@@ -3818,11 +3820,13 @@
             <div class="storage-categories"><div class="storage-category"><div class="cat-icon">💬</div><div class="cat-size" id="chat-storage-size">0KB</div><div class="cat-label">聊天记录</div></div><div class="storage-category"><div class="cat-icon">⚙️</div><div class="cat-size" id="settings-storage-size">0KB</div><div class="cat-label">设置数据</div></div><div class="storage-category"><div class="cat-icon">🖼️</div><div class="cat-size" id="media-storage-size">0KB</div><div class="cat-label">图片媒体</div></div></div>
             <div class="storage-progress-bar"><div class="storage-progress-fill" id="storage-progress-fill" style="width:0%"></div></div>
         </div>
-        <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="grid grid-cols-4 gap-4 mb-6">
             <button onclick="exportData()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-2"><i data-lucide="download" class="w-5 h-5" style="color: var(--accent-color);"></i><span class="text-xs font-medium">下载备份</span></button>
             <button onclick="copyBackupToClipboard()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-2"><i data-lucide="copy" class="w-5 h-5" style="color: var(--accent-color);"></i><span class="text-xs font-medium">复制备份</span></button>
             <button onclick="openRestoreFromClipboardModal()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-2"><i data-lucide="clipboard-paste" class="w-5 h-5" style="color: var(--accent-color);"></i><span class="text-xs font-medium">粘贴恢复</span></button>
             <button onclick="importData()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-2"><i data-lucide="upload" class="w-5 h-5" style="color: var(--accent-color);"></i><span class="text-xs font-medium">恢复备份</span></button>
+            <button onclick="exportChatRecords()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-2"><i data-lucide="message-square" class="w-5 h-5" style="color: #3b82f6;"></i><span class="text-xs font-medium">导出聊天</span></button>
+            <button onclick="importChatRecords()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-2"><i data-lucide="message-square" class="w-5 h-5" style="color: #22c55e;"></i><span class="text-xs font-medium">导入聊天</span></button>
             <button onclick="clearChatRecords()" class="bg-red-50 p-4 rounded-2xl flex flex-col items-center gap-2"><i data-lucide="trash-2" class="w-5 h-5 text-red-500"></i><span class="text-xs font-medium text-red-700">清空聊天</span></button>
             <button onclick="resetAllData()" class="bg-red-50 p-4 rounded-2xl flex flex-col items-center gap-2"><i data-lucide="trash" class="w-5 h-5 text-red-500"></i><span class="text-xs font-medium text-red-700">重置全部</span></button>
         </div>
@@ -5480,10 +5484,10 @@ async function updateStorageDisplay() {
     document.getElementById('storage-progress-fill').style.width = percent + '%';
 }
 
-// 自动清理旧消息（新增）
+// 自动清理旧消息（保持500条）
 function autoCleanChats() {
-    const MAX_MESSAGES = 300;
-    const KEEP = 250;
+    const MAX_MESSAGES = 500;
+    const KEEP = 450;
     for (let id in appData.chats) {
         if (appData.chats[id] && appData.chats[id].length > MAX_MESSAGES) {
             appData.chats[id] = appData.chats[id].slice(-KEEP);
@@ -5504,9 +5508,18 @@ function syncAllReplies() {
 
 async function saveData() {
     try {
-        autoCleanChats(); // 自动清理旧消息
-        Object.keys(appData.chats).forEach(k => { if (appData.chats[k].length > 100) appData.chats[k] = appData.chats[k].slice(-100); });
-        Object.keys(appData.groupChats).forEach(k => { if (appData.groupChats[k].length > 100) appData.groupChats[k] = appData.groupChats[k].slice(-100); });
+        autoCleanChats(); // 自动清理旧消息（保持500条）
+        // 保留完整消息，不自动截断（只保留500条上限）
+        Object.keys(appData.chats).forEach(k => { 
+            if (appData.chats[k] && appData.chats[k].length > 500) {
+                appData.chats[k] = appData.chats[k].slice(-450); 
+            }
+        });
+        Object.keys(appData.groupChats).forEach(k => { 
+            if (appData.groupChats[k] && appData.groupChats[k].length > 500) {
+                appData.groupChats[k] = appData.groupChats[k].slice(-450); 
+            }
+        });
         syncAllReplies();
         const dataToSave = JSON.parse(JSON.stringify(appData));
         delete dataToSave.appearance?.backgrounds;
