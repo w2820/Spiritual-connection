@@ -10524,8 +10524,12 @@ function closeRedPacketOpen() { document.getElementById('modal-redpacket-open').
 
 // ========== 修复：表情包选择面板和发送功能 ==========
 function openStickerPicker() { 
-    document.getElementById('sticker-picker-panel').classList.add('active'); 
-    renderStickerPickerGrid(); 
+    const panel = document.getElementById('sticker-picker-panel');
+    if (panel) {
+        panel.classList.add('active');
+        panel.style.display = 'flex';
+        renderStickerPickerGrid(); 
+    }
 }
 
 function closeStickerPicker() { 
@@ -10541,9 +10545,14 @@ function renderStickerPickerGrid() {
     if (!grid) return;
     
     // 保留上传按钮
-    const uploadBtn = grid.querySelector('.sticker-picker-upload');
+    let uploadBtn = grid.querySelector('.sticker-picker-upload');
+    if (!uploadBtn) {
+        uploadBtn = document.createElement('label');
+        uploadBtn.className = 'sticker-picker-upload';
+        uploadBtn.innerHTML = '<span>+</span><input type="file" accept="image/*" style="display:none;" onchange="quickStickerUpload(this)">';
+    }
     grid.innerHTML = '';
-    if (uploadBtn) grid.appendChild(uploadBtn);
+    grid.appendChild(uploadBtn);
     
     const stickers = appData.wordbanks.stickers || [];
     stickers.forEach(src => {
@@ -10597,7 +10606,7 @@ function sendStickerMessage(src) {
     debouncedSaveData();
     appendMessageToDOM('me', src, Date.now(), null, 'image');
     
-    // ★ 修复1：立即关闭表情包选择面板
+    // ★ 修复1：立即关闭表情包选择面板（使用正确的关闭函数）
     closeStickerPicker();
     
     // ★ 修复2：触发角色回复（与发送文本消息一致）
