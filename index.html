@@ -6963,27 +6963,49 @@ function flushPendingMessages() {
     const msgs = pendingMessages;
     pendingMessages = [];
     
-    // 获取最后一条消息的日期
+    // ★ 修复：从容器中获取最后一条消息的日期
     let lastDate = null;
-    const lastWrapper = c.querySelector('.message-wrapper:last-child');
-    if (lastWrapper) {
-        const prev = lastWrapper.previousSibling;
-        if (prev && prev.classList && prev.classList.contains('date-separator')) {
-            lastDate = prev.textContent;
+    const allDateSeparators = c.querySelectorAll('.date-separator');
+    if (allDateSeparators.length > 0) {
+        lastDate = allDateSeparators[allDateSeparators.length - 1].textContent;
+    }
+    // 如果没有日期分隔符，从最后一条消息获取
+    if (lastDate === null) {
+        const lastWrapper = c.querySelector('.message-wrapper:last-child');
+        if (lastWrapper) {
+            const lastTime = parseInt(lastWrapper.dataset.msgTime);
+            if (lastTime) {
+                lastDate = formatDate(lastTime);
+            }
         }
     }
     
     msgs.forEach(({ sender, content, time, quote, type }) => {
         const currentDate = formatDate(time);
-        if (lastDate !== currentDate) {
+        // ★ 修复：只有当日期真正变化时才插入新的日期分隔符
+        if (lastDate !== null && lastDate !== currentDate) {
             const dateDiv = document.createElement('div');
             dateDiv.className = 'text-center text-gray-400 text-xs py-2 date-separator';
             dateDiv.textContent = currentDate;
             fragment.appendChild(dateDiv);
             lastDate = currentDate;
+        } else if (lastDate === null) {
+            // 第一条消息：检查容器是否为空
+            const hasMessages = c.querySelector('.message-wrapper') !== null;
+            if (!hasMessages) {
+                const dateDiv = document.createElement('div');
+                dateDiv.className = 'text-center text-gray-400 text-xs py-2 date-separator';
+                dateDiv.textContent = currentDate;
+                fragment.appendChild(dateDiv);
+                lastDate = currentDate;
+            } else {
+                // 容器有消息但 lastDate 为 null，使用当前日期
+                lastDate = currentDate;
+            }
         }
         const el = createMessageElement(sender, content, time, quote, type, false);
         el.dataset.msgId = time + sender + Math.random().toString(36).substr(2, 4);
+        el.dataset.msgTime = time; // ★ 新增：存储消息时间戳用于日期比较
         fragment.appendChild(el);
     });
     
@@ -7003,31 +7025,30 @@ function renderChatMessages() {
 
     // 如果容器为空，全量渲染；否则增量添加
     if (container.children.length === 0) {
-        // 首次渲染：全量构建
         renderFullMessages(container, msgs);
     } else {
-        // 增量更新：检查最后一条已渲染的消息ID，只添加新消息
+        // ★ 修复：增量更新时，只添加新消息
         const existingMsgIds = new Set();
         container.querySelectorAll('.message-wrapper').forEach(el => {
             const id = el.dataset.msgId;
             if (id) existingMsgIds.add(id);
         });
-        // 获取最新的消息（未渲染的）
         const newMsgs = msgs.filter(m => !existingMsgIds.has(m.id));
         if (newMsgs.length === 0) return;
 
-        // 确定最后一条消息的日期，用于插入新的日期分割线
+        // ★ 修复：从容器中获取最后一条消息的日期
         let lastDate = null;
-        const lastWrapper = container.querySelector('.message-wrapper:last-child');
-        if (lastWrapper) {
-            const prev = lastWrapper.previousSibling;
-            if (prev && prev.classList && prev.classList.contains('date-separator')) {
-                lastDate = prev.textContent;
-            } else {
-                // 从最后一条消息自身获取日期
-                const lastMsg = msgs[msgs.length - 1];
-                if (lastMsg) {
-                    lastDate = formatDate(lastMsg.time);
+        const allDateSeparators = container.querySelectorAll('.date-separator');
+        if (allDateSeparators.length > 0) {
+            lastDate = allDateSeparators[allDateSeparators.length - 1].textContent;
+        }
+        // 如果没有日期分隔符，从最后一条消息获取
+        if (lastDate === null) {
+            const lastWrapper = container.querySelector('.message-wrapper:last-child');
+            if (lastWrapper) {
+                const lastTime = parseInt(lastWrapper.dataset.msgTime);
+                if (lastTime) {
+                    lastDate = formatDate(lastTime);
                 }
             }
         }
@@ -7035,8 +7056,13 @@ function renderChatMessages() {
         // 逐个添加新消息
         newMsgs.forEach(m => {
             const currentDate = formatDate(m.time);
-            // 如果日期与最后一条不同，插入日期分隔符
-            if (lastDate !== currentDate) {
+            if (lastDate !== null && lastDate !== currentDate) {
+                const dateDiv = document.createElement('div');
+                dateDiv.className = 'text-center text-gray-400 text-xs py-2 date-separator';
+                dateDiv.textContent = currentDate;
+                container.appendChild(dateDiv);
+                lastDate = currentDate;
+            } else if (lastDate === null) {
                 const dateDiv = document.createElement('div');
                 dateDiv.className = 'text-center text-gray-400 text-xs py-2 date-separator';
                 dateDiv.textContent = currentDate;
@@ -7045,6 +7071,7 @@ function renderChatMessages() {
             }
             const el = createMessageElement(m.sender, m.content, m.time, m.quote, m.type, m.read);
             el.dataset.msgId = m.id + m.sender + Math.random().toString(36).substr(2, 4);
+            el.dataset.msgTime = m.time;
             container.appendChild(el);
         });
         scrollToBottom();
@@ -7066,6 +7093,7 @@ function renderFullMessages(container, msgs) {
         }
         const el = createMessageElement(m.sender, m.content, m.time, m.quote, m.type, m.read);
         el.dataset.msgId = m.id + m.sender + Math.random().toString(36).substr(2, 4);
+        el.dataset.msgTime = m.time;
         container.appendChild(el);
     });
     scrollToBottom();
