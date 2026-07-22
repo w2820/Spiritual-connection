@@ -6100,7 +6100,7 @@ function checkAutoMailGeneration() {
     });
 }
 
-// ========== 生成自动信件（3~20句随机，每句都有可能触发，用·分隔） ==========
+// ========== 生成自动信件（3~20句随机，用 · 分隔，不添加其他标点符号） ==========
 function generateAutoLetter(role) {
     if (!role) return;
     
@@ -6117,14 +6117,11 @@ function generateAutoLetter(role) {
     
     // 构建句子，确保总字数不超过300
     for (let i = 0; i < sentenceCount; i++) {
-        // 从词库中随机选取一个词
+        // 从词库中随机选取一个词（保留原句，不添加任何标点符号）
         const word = allWords[Math.floor(Math.random() * allWords.length)];
         
-        // 随机加标点使句子更自然
-        const punctuation = ['.', '。', '!', '！', '?', '？', '~', '～', '', ''];
-        const punc = punctuation[Math.floor(Math.random() * punctuation.length)];
-        
-        let sentence = word + punc;
+        // 直接使用原句，不添加任何标点符号
+        let sentence = word;
         
         // 如果加上这句会超过300字，则停止添加
         if (totalLength + sentence.length > MAX_LENGTH) {
@@ -6138,14 +6135,14 @@ function generateAutoLetter(role) {
     // 如果一句都没生成（极端情况），至少保证有一句
     if (sentences.length === 0) {
         const word = allWords[Math.floor(Math.random() * allWords.length)];
-        sentences.push(word + '。');
-        totalLength = word.length + 1;
+        sentences.push(word);
+        totalLength = word.length;
     }
     
-    // 使用 · 分隔所有句子（修复：统一用·分隔，不加其他符号）
+    // 用 · 分隔所有句子
     let content = sentences.join(' · ');
     
-    // 随机添加 Emoji（40%概率，在末尾添加）
+    // 随机添加 Emoji（40%概率，放在最后）
     if (appData.wordbanks.emojis.length > 0 && Math.random() < 0.4) {
         const emojiCount = 1 + Math.floor(Math.random() * 2);
         const pickedEmojis = [];
@@ -6156,7 +6153,7 @@ function generateAutoLetter(role) {
         
         // 如果加上emoji超过300字，则不添加
         if (totalLength + emojiSuffix.length <= MAX_LENGTH) {
-            content = content + emojiSuffix;
+            content += emojiSuffix;
         }
     }
     
