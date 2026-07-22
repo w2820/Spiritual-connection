@@ -6100,7 +6100,7 @@ function checkAutoMailGeneration() {
     });
 }
 
-// ========== 生成自动信件（3~20句随机，每句都有可能触发） ==========
+// ========== 生成自动信件（3~20句随机，每句都有可能触发，用·分隔） ==========
 function generateAutoLetter(role) {
     if (!role) return;
     
@@ -6142,23 +6142,23 @@ function generateAutoLetter(role) {
         totalLength = word.length + 1;
     }
     
-    // 随机添加 Emoji（40%概率）
-    let emojiSuffix = '';
+    // 使用 · 分隔所有句子（修复：统一用·分隔，不加其他符号）
+    let content = sentences.join(' · ');
+    
+    // 随机添加 Emoji（40%概率，在末尾添加）
     if (appData.wordbanks.emojis.length > 0 && Math.random() < 0.4) {
         const emojiCount = 1 + Math.floor(Math.random() * 2);
         const pickedEmojis = [];
         for (let i = 0; i < emojiCount; i++) {
             pickedEmojis.push(appData.wordbanks.emojis[Math.floor(Math.random() * appData.wordbanks.emojis.length)]);
         }
-        emojiSuffix = ' ' + pickedEmojis.join(' ');
+        const emojiSuffix = ' ' + pickedEmojis.join(' ');
         
         // 如果加上emoji超过300字，则不添加
-        if (totalLength + emojiSuffix.length > MAX_LENGTH) {
-            emojiSuffix = '';
+        if (totalLength + emojiSuffix.length <= MAX_LENGTH) {
+            content = content + emojiSuffix;
         }
     }
-    
-    const content = sentences.join(' ') + emojiSuffix;
     
     // 检查是否已有未读的自动信件（避免轰炸）
     const existingAutoMails = appData.mails.filter(m => 
