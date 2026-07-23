@@ -38,6 +38,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#82cbb2">
 
+    <!-- ★ 新增：Marck Script 字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Marck+Script&display=swap" rel="stylesheet">
+
     <script src="https://marscode-static.doubaocdn.com/_lib/app-main.js"></script>
     <script src="https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/resource/npm/@tailwindcss/browser@3.4.17/dist/index.global.js"></script>
     <script src="https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/resource/npm/lucide@0.560.0/dist/umd/lucide.min.js"></script>
@@ -336,74 +339,251 @@
         .ios-switch.active::after { transform: translateX(20px); }
         .ios-switch.disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* 启动页 */
+        /* ★★★ 开场动画 - 全新样式 ★★★ */
         .splash-screen {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100dvh;
             height: 100vh;
-            background-color: #f0f8f4; display: flex; align-items: center; justify-content: center;
-            z-index: 99999; transition: opacity 0.8s ease, visibility 0.8s ease;
+            background-color: #f5e6d3; /* 藕粉色 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
         }
-        .splash-screen.hidden { opacity: 0; visibility: hidden; }
-        .stars-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100dvh; height: 100vh; z-index: -1; pointer-events: none; }
+        .splash-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        /* 背景星星装饰（参考文件二） */
+        .stars-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100dvh;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
         .star {
-            position: absolute; width: 2.5px; height: 2.5px; background: #ffffff;
-            border-radius: 50%; box-shadow: 0 0 6px rgba(100, 180, 140, 0.9);
-            animation: starFly 2.2s ease-out forwards;
+            position: absolute;
+            width: 2.5px;
+            height: 2.5px;
+            background: rgba(180, 160, 140, 0.35);
+            border-radius: 50%;
+            animation: starTwinkle 3s ease-in-out infinite alternate;
         }
-        @keyframes starFly {
-            0% { transform: scale(0) translate(0, 0); opacity: 1; }
-            100% { transform: scale(1) translate(var(--x), var(--y)); opacity: 0; }
+        @keyframes starTwinkle {
+            0% { opacity: 0.15; transform: scale(0.8); }
+            100% { opacity: 0.7; transform: scale(1.2); }
         }
+
+        /* 背景光晕 */
+        .splash-glow {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .splash-glow-1 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(130, 203, 178, 0.15) 0%, transparent 65%);
+            top: -10%;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: glowPulse 6s ease-in-out infinite;
+        }
+        .splash-glow-2 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(200, 180, 160, 0.1) 0%, transparent 65%);
+            bottom: 5%;
+            right: 5%;
+            animation: glowPulse 8s ease-in-out infinite reverse;
+        }
+        @keyframes glowPulse {
+            0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+            50% { opacity: 1; transform: translateX(-50%) scale(1.15); }
+        }
+
+        /* 加载卡片 - 湖绿色 + 玻璃磨砂 */
         .loading-container {
-            width: 82%; max-width: 340px; padding: 50px 32px; background: rgba(255, 255, 255, 0.92);
-            border-radius: 28px; box-shadow: 0 10px 34px rgba(100, 180, 140, 0.18);
-            display: flex; flex-direction: column; align-items: center;
-            animation: card-float 3s ease-in-out infinite alternate;
-            opacity: 0; transform: translateY(60px) scale(0.9);
-            transition: all 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            z-index: 1;
+            width: 82%;
+            max-width: 340px;
+            padding: 50px 32px 40px;
+            background: rgba(130, 203, 178, 0.2);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 28px;
+            box-shadow: 0 8px 32px rgba(130, 203, 178, 0.15), inset 0 1px 0 rgba(255,255,255,0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(40px) scale(0.92);
+            transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
         }
-        .loading-container.visible { opacity: 1; transform: translateY(0) scale(1); }
-        @keyframes card-float { from { transform: translateY(0); } to { transform: translateY(-4px); } }
-        .icon-wrapper { position: relative; width: 110px; height: 110px; margin-bottom: 24px; }
+        .loading-container.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* 地球图标 + 轨道 */
+        .icon-wrapper {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            margin-bottom: 24px;
+        }
         .orbit {
-            position: absolute; inset: 0; border: 1px dashed rgba(100, 180, 140, 0.28);
-            border-radius: 50%; animation: orbit-rotate 4.2s linear infinite;
+            position: absolute;
+            inset: 0;
+            border: 1.5px dashed rgba(130, 203, 178, 0.35);
+            border-radius: 50%;
+            animation: orbitRotate 4.2s linear infinite;
         }
         .orbit::before {
-            content: ''; position: absolute; top: 7px; left: 50%; transform: translateX(-50%);
-            width: 7px; height: 7px; background: #64b48c; border-radius: 50%;
-            box-shadow: 0 0 7px rgba(100, 180, 140, 0.45);
+            content: '';
+            position: absolute;
+            top: 7px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 7px;
+            height: 7px;
+            background: #82cbb2;
+            border-radius: 50%;
+            box-shadow: 0 0 12px rgba(130, 203, 178, 0.5);
         }
-        .orbit:nth-child(2) { width: 82px; height: 82px; margin: 14px; animation-duration: 6.2s; animation-direction: reverse; }
-        .orbit:nth-child(2)::before { top: auto; bottom: 7px; background: #86c7a8; }
-        @keyframes orbit-rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .orbit:nth-child(2) {
+            width: 82px;
+            height: 82px;
+            margin: 14px;
+            animation-duration: 6.2s;
+            animation-direction: reverse;
+        }
+        .orbit:nth-child(2)::before {
+            top: auto;
+            bottom: 7px;
+            background: #a8d5c0;
+        }
+        @keyframes orbitRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         .earth-icon {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 54px; height: 54px; color: #64b48c; opacity: 0;
-            animation: earth-appear 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 54px;
+            height: 54px;
+            color: #82cbb2;
+            opacity: 0;
+            animation: earthAppear 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
             animation-delay: 0.3s;
+            filter: drop-shadow(0 0 20px rgba(130, 203, 178, 0.3));
         }
-        @keyframes earth-appear {
+        @keyframes earthAppear {
             0% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
             70% { transform: translate(-50%, -50%) scale(1.08); }
             100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         }
-        .loading-label { font-size: 10px; letter-spacing: 3px; color: rgba(100, 180, 140, 0.6); margin-bottom: 12px; text-transform: uppercase; }
-        .title-text { font-family: Georgia, serif; font-size: 1.3rem; font-weight: bold; color: #5aa87f; margin-bottom: 16px; text-align: center; display: inline-block; }
-        .title-text span { display: inline-block; animation: clear-blur 2s ease-in-out forwards; }
-        @keyframes clear-blur { 0% { filter: blur(0px); } 100% { filter: blur(1.5px); } }
-        .quote-text { height: 20px; font-size: 11px; color: #5aa87f; text-align: center; white-space: nowrap; margin-bottom: 28px; text-shadow: 0 0 4px rgba(102, 204, 153, 0.35), 0 0 7px rgba(134, 199, 168, 0.25); overflow: hidden; }
-        .quote-text span { display: inline-block; opacity: 0; animation: letterShowHide 3.2s ease-in-out forwards; }
-        @keyframes letterShowHide {
-            0% { opacity: 0; transform: translateX(-2px); }
-            30% { opacity: 1; transform: translateX(0); }
-            70% { opacity: 1; transform: translateX(0); }
-            100% { opacity: 0; transform: translateX(2px); }
+
+        .loading-label {
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: rgba(130, 203, 178, 0.6);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            font-weight: 500;
         }
-        .progress-bar-box { width: 100%; height: 3px; background: rgba(100, 180, 140, 0.14); border-radius: 99px; overflow: hidden; margin-bottom: 14px; }
-        .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #64b48c, #86c7a8); border-radius: 99px; transition: width 0.2s ease; position: relative; }
-        .progress-bar::after { content: ''; position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 9px; height: 9px; background: #fff; border-radius: 50%; box-shadow: 0 0 5px rgba(100, 180, 140, 0.7); }
-        .status-text { font-size: 0.8rem; color: #64b48c; opacity: 0.85; }
+
+        /* ★ 标题 - Marck Script 字体 ★ */
+        .title-text {
+            font-family: 'Marck Script', cursive;
+            font-size: 1.6rem;
+            font-weight: 400;
+            color: #5aa87f;
+            margin-bottom: 16px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        .title-text span {
+            display: inline-block;
+        }
+
+        /* 句子切换 - 逐字显现（参考文件二） */
+        .quote-text {
+            height: 24px;
+            font-size: 12px;
+            color: #5aa87f;
+            text-align: center;
+            white-space: nowrap;
+            margin-bottom: 28px;
+            overflow: hidden;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+        }
+        .quote-text span {
+            display: inline-block;
+            opacity: 0;
+            animation: letterReveal 3.2s ease-in-out forwards;
+        }
+        @keyframes letterReveal {
+            0% { opacity: 0; transform: translateY(4px) scale(0.9); }
+            15% { opacity: 1; transform: translateY(0) scale(1); }
+            85% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-4px) scale(0.9); }
+        }
+
+        /* 进度条 */
+        .progress-bar-box {
+            width: 100%;
+            height: 3px;
+            background: rgba(130, 203, 178, 0.15);
+            border-radius: 99px;
+            overflow: hidden;
+            margin-bottom: 14px;
+            position: relative;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #82cbb2, #a8d5c0, #82cbb2);
+            border-radius: 99px;
+            transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            position: relative;
+        }
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            right: -4px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 9px;
+            height: 9px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 12px rgba(130, 203, 178, 0.6), 0 0 24px rgba(130, 203, 178, 0.3);
+        }
+
+        .status-text {
+            font-size: 0.75rem;
+            color: rgba(130, 203, 178, 0.7);
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
 
         /* ========== 音乐卡片（悬浮可拖动，新样式 - 带进度条，修复拉伸和主题跟随） ========== */
         #music-player-card {
@@ -2043,7 +2223,8 @@
             color: #fff; font-size: 18px; cursor: pointer; z-index: 2;
         }
         .redpacket-card .rp-coin {
-            width: 70px; height: 70px;
+            width: 70px;
+            height: 70px;
             margin: 0 auto 12px;
             background: radial-gradient(circle, #FFD54F 0%, #F9A825 100%);
             border-radius: 50%;
@@ -2071,7 +2252,9 @@
             padding: 20px;
         }
         .redpacket-card .rp-avatar {
-            width: 60px; height: 60px; border-radius: 50%; object-fit: cover;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%; object-fit: cover;
             border: 2px solid #E64340; margin: -30px auto 10px;
             position: relative; z-index: 1; background: #fff;
         }
@@ -3148,7 +3331,12 @@
 
 <!-- 进场动画 -->
 <div id="splash-screen" class="splash-screen">
+  <!-- 背景星星 -->
   <div class="stars-container" id="starsContainer"></div>
+  <!-- 光晕 -->
+  <div class="splash-glow splash-glow-1"></div>
+  <div class="splash-glow splash-glow-2"></div>
+  
   <div class="loading-container" id="loadingCard">
     <div class="icon-wrapper">
       <div class="orbit"></div>
@@ -3159,7 +3347,7 @@
     </div>
     <p class="loading-label">LOADING</p>
     <div class="title-text" id="titleText">Spiritual connection</div>
-    <p class="quote-text" id="quoteText"></p>
+    <div class="quote-text" id="quoteText"></div>
     <div class="progress-bar-box">
       <div class="progress-bar" id="progressBar"></div>
     </div>
@@ -6006,12 +6194,10 @@ function startUnifiedTimers() {
             checkMailReplies();
         }
         
-        // 每5分钟（10 ticks）执行的任务 - 加快自动写信检查频率
+        // 每5分钟（10 ticks）执行的任务
         if (unifiedTickCount % 10 === 0) {
-            // 检查自动写信
-            if (appData.settings.autoMail?.enabled) {
-                checkAutoMailGeneration();
-            }
+            // 检查自动写信 - 已通过开关控制
+            checkAutoMailGeneration();
         }
         
         // 每10分钟（20 ticks）执行的任务
@@ -6079,20 +6265,27 @@ function checkAutoCall() {
     }
 }
 
-// ========== 修复：自动写信功能（核心修复 - 3到20句话随机） ==========
+// ========== 修复：自动写信功能（核心修复 - 概率与间隔成反比，开关控制） ==========
 function checkAutoMailGeneration() {
-    if (!appData.settings.autoMail?.enabled) return;
+    // ★ 修复：首先检查开关是否启用
+    if (!appData.settings.autoMail?.enabled) {
+        return;
+    }
     
     // 获取检查间隔（分钟），默认10分钟
     const checkInterval = appData.settings.autoMail.checkInterval || 10;
+    // 基准间隔：10分钟
+    const baseInterval = 10;
     
     appData.roles.forEach(role => {
         // 获取角色写信概率，默认15%
         const prob = role.autoMailProbability ?? 15;
         
-        // 根据检查间隔调整概率：间隔越长，单次触发概率越高
-        // 基准：10分钟间隔对应原始概率，间隔翻倍则概率翻倍
-        const adjustedProb = Math.min(100, prob * (checkInterval / 10));
+        // ★ 核心修复：概率与检查间隔成反比
+        // 间隔越长，单次触发概率越低，保持总体触发频率稳定
+        // 公式：调整后概率 = 原始概率 × (基准间隔 / 当前间隔)
+        // 例如：间隔10分钟 → 15%，间隔30分钟 → 5%，间隔60分钟 → 2.5%
+        const adjustedProb = Math.min(100, prob * (baseInterval / checkInterval));
         
         if (Math.random() * 100 < adjustedProb) {
             generateAutoLetter(role);
@@ -6102,6 +6295,11 @@ function checkAutoMailGeneration() {
 
 // ========== 生成自动信件（3~20句随机，用 · 分隔，不添加其他标点符号） ==========
 function generateAutoLetter(role) {
+    // ★ 修复：增加开关前置检查，防止绕过开关调用
+    if (!appData.settings.autoMail?.enabled) {
+        return;
+    }
+    
     if (!role) return;
     
     // 从词库中获取可用的文字
@@ -12218,10 +12416,68 @@ function startSplashAnimation() {
     const loadingCard = document.getElementById("loadingCard"), splashScreen = document.getElementById("splash-screen"); 
     let idx = 0, progress = 0; 
     document.getElementById("titleText").innerHTML = 'Spiritual connection'.split('').map((c,i) => `<span style="animation-delay:${i*0.08}s">${c}</span>`).join(''); 
-    function showQuote() { quoteText.innerHTML = ""; let text = quotes[idx++ % quotes.length]; text.split('').forEach((c,i) => { let s = document.createElement("span"); s.textContent = c; s.style.animationDelay = `${i*0.07}s`; quoteText.appendChild(s); }); } 
-    function createStars() { const c = document.getElementById("starsContainer"); for(let i=0;i<120;i++){ let s = document.createElement("div"); s.className = "star"; let x=(Math.random()-0.5)*1400, y=(Math.random()-0.5)*1400; s.style.setProperty("--x",x+"px"); s.style.setProperty("--y",y+"px"); s.style.left=Math.random()*100+"vw"; s.style.top=Math.random()*100+"vh"; s.style.animationDelay=Math.random()*1.2+"s"; c.appendChild(s); } } 
-    createStars(); setTimeout(() => loadingCard.classList.add("visible"), 300); showQuote(); setInterval(showQuote, 3200); 
-    let timer = setInterval(() => { progress += Math.random()*1.5+0.5; if(progress>=100) progress=100; progressBar.style.width = progress+"%"; statusText.textContent = "正在连接中..."; if(progress>=100){ clearInterval(timer); statusText.textContent = "连接成功"; setTimeout(() => { splashScreen.classList.add("hidden"); loadData(); }, 1000); } }, 100); 
+    
+    // ★ 修复：星星生成
+    const starsContainer = document.getElementById("starsContainer");
+    if (starsContainer) {
+        starsContainer.innerHTML = '';
+        for (let i = 0; i < 80; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            const size = 1.5 + Math.random() * 2.5;
+            const duration = 3 + Math.random() * 4;
+            const delay = Math.random() * 5;
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.width = size + 'px';
+            star.style.height = size + 'px';
+            star.style.animationDuration = duration + 's';
+            star.style.animationDelay = delay + 's';
+            starsContainer.appendChild(star);
+        }
+    }
+    
+    function showQuote() { 
+        quoteText.innerHTML = ""; 
+        const text = quotes[idx++ % quotes.length]; 
+        text.split('').forEach((c, i) => { 
+            let s = document.createElement("span"); 
+            s.textContent = c; 
+            s.style.animationDelay = `${i * 0.07}s`; 
+            // 强制触发重排
+            void s.offsetWidth;
+            quoteText.appendChild(s); 
+        }); 
+    } 
+    
+    setTimeout(() => loadingCard.classList.add("visible"), 300); 
+    showQuote(); 
+    const quoteInterval = setInterval(showQuote, 3200); 
+    
+    // ★ 修复：进度条动画 - 强制回流
+    function updateProgress() {
+        progress += Math.random() * 1.5 + 0.5; 
+        if (progress >= 100) {
+            progress = 100;
+            progressBar.style.width = progress + "%";
+            // 强制回流
+            void progressBar.offsetWidth;
+            statusText.textContent = "连接成功"; 
+            clearInterval(timer); 
+            clearInterval(quoteInterval);
+            setTimeout(() => { 
+                splashScreen.classList.add("hidden"); 
+                loadData(); 
+            }, 1000); 
+            return;
+        }
+        progressBar.style.width = progress + "%";
+        // 强制回流
+        void progressBar.offsetWidth;
+        statusText.textContent = "正在连接中..."; 
+    }
+    
+    const timer = setInterval(updateProgress, 100); 
 }
 function getSolarTerm(date) { const y = date.getFullYear(), m = date.getMonth() + 1, d = date.getDate(); const terms = [{ name: '小寒', emoji: '❄️', month: 1, day: 5 },{ name: '大寒', emoji: '🧊', month: 1, day: 20 },{ name: '立春', emoji: '🌱', month: 2, day: 4 },{ name: '雨水', emoji: '💧', month: 2, day: 19 },{ name: '惊蛰', emoji: '🐛', month: 3, day: 5 },{ name: '春分', emoji: '🌿', month: 3, day: 20 },{ name: '清明', emoji: '🍃', month: 4, day: 4 },{ name: '谷雨', emoji: '🌧️', month: 4, day: 20 },{ name: '立夏', emoji: '☀️', month: 5, day: 5 },{ name: '小满', emoji: '🌾', month: 5, day: 21 },{ name: '芒种', emoji: '🌾', month: 6, day: 5 },{ name: '夏至', emoji: '☀️', month: 6, day: 21 },{ name: '小暑', emoji: '🔥', month: 7, day: 7 },{ name: '大暑', emoji: '🔥', month: 7, day: 22 },{ name: '立秋', emoji: '🍂', month: 8, day: 7 },{ name: '处暑', emoji: '🍂', month: 8, day: 23 },{ name: '白露', emoji: '💧', month: 9, day: 7 },{ name: '秋分', emoji: '🍂', month: 9, day: 23 },{ name: '寒露', emoji: '💧', month: 10, day: 8 },{ name: '霜降', emoji: '❄️', month: 10, day: 23 },{ name: '立冬', emoji: '❄️', month: 11, day: 7 },{ name: '小雪', emoji: '❄️', month: 11, day: 22 },{ name: '大雪', emoji: '❄️', month: 12, day: 7 },{ name: '冬至', emoji: '🧊', month: 12, day: 21 }]; for (let t of terms) { if (t.month === m && t.day === d) return { name: t.name, emoji: t.emoji, greeting: `${t.name}快乐`, eng: t.name.toUpperCase() }; } return null; }
 function getFestivalGreeting(date) { const solarHolidays = { '1,1': '元旦快乐', '2,14': '情人节快乐', '3,8': '女神节快乐', '4,1': '愚人节快乐', '5,1': '劳动节快乐', '6,1': '儿童节快乐', '10,1': '国庆快乐', '12,25': '圣诞快乐' }; return solarHolidays[`${date.getMonth()+1},${date.getDate()}`] || null; }
