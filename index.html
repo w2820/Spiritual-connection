@@ -5260,6 +5260,22 @@ let lastMessageSender = null;
 // 拍一拍编辑模式标志
 let pokeEditMode = false;
 
+// 消息渲染队列（用于取消待处理任务）
+let pendingMessages = [];
+let pendingTimer = null;
+let renderedMessageIds = new Set();
+let messageRenderAbortController = null;
+
+// 防抖保存队列
+let saveQueue = [];
+let saveInProgress = false;
+
+// iOS 主题自动保存定时器
+let iosAutoSaveTimer = null;
+
+// CSS 变量监控定时器
+let cssMonitorTimer = null;
+
 // 符号映射
 const POKE_SYMBOL_MAP = {
     none: '',
@@ -5336,31 +5352,26 @@ function formatPokeText(text, type) {
     return `${symbol} ${text} ${symbol}`;
 }
 
-// ========== 清理所有定时器的辅助函数（保留用于兼容，但将被统一调度器替代） ==========
+// ========== 清理所有定时器的辅助函数 ==========
 function clearAllTimers() {
-    if (autoSendTimer) clearInterval(autoSendTimer);
-    if (mailCheckTimer) clearInterval(mailCheckTimer);
-    if (autoCallTimer) clearTimeout(autoCallTimer);
-    if (autoMailGeneratorTimer) clearTimeout(autoMailGeneratorTimer);
-    if (autoTransferTimer) clearTimeout(autoTransferTimer);
-    if (momentTimer) clearInterval(momentTimer);
-    if (momentCommentTimer) clearInterval(momentCommentTimer);
-    if (momentLikeTimer) clearInterval(momentLikeTimer);
-    if (onlineStatusTimer) clearInterval(onlineStatusTimer);
-    if (callState.timerInterval) clearInterval(callState.timerInterval);
-    if (callState.autoHangupTimer) clearTimeout(callState.autoHangupTimer);
-    if (callState.userTimeoutTimer) clearTimeout(callState.userTimeoutTimer);
+    if (autoSendTimer) { clearInterval(autoSendTimer); autoSendTimer = null; }
+    if (mailCheckTimer) { clearInterval(mailCheckTimer); mailCheckTimer = null; }
+    if (autoCallTimer) { clearTimeout(autoCallTimer); autoCallTimer = null; }
+    if (autoMailGeneratorTimer) { clearTimeout(autoMailGeneratorTimer); autoMailGeneratorTimer = null; }
+    if (autoTransferTimer) { clearTimeout(autoTransferTimer); autoTransferTimer = null; }
+    if (momentTimer) { clearInterval(momentTimer); momentTimer = null; }
+    if (momentCommentTimer) { clearInterval(momentCommentTimer); momentCommentTimer = null; }
+    if (momentLikeTimer) { clearInterval(momentLikeTimer); momentLikeTimer = null; }
+    if (onlineStatusTimer) { clearInterval(onlineStatusTimer); onlineStatusTimer = null; }
+    if (callState.timerInterval) { clearInterval(callState.timerInterval); callState.timerInterval = null; }
+    if (callState.autoHangupTimer) { clearTimeout(callState.autoHangupTimer); callState.autoHangupTimer = null; }
+    if (callState.userTimeoutTimer) { clearTimeout(callState.userTimeoutTimer); callState.userTimeoutTimer = null; }
+    if (unifiedTimer) { clearInterval(unifiedTimer); unifiedTimer = null; }
+    if (iosAutoSaveTimer) { clearInterval(iosAutoSaveTimer); iosAutoSaveTimer = null; }
+    if (cssMonitorTimer) { clearInterval(cssMonitorTimer); cssMonitorTimer = null; }
+    if (pendingTimer) { clearTimeout(pendingTimer); pendingTimer = null; }
     stopRingtone();
     stopRingback();
-    autoSendTimer = null;
-    mailCheckTimer = null;
-    autoCallTimer = null;
-    autoMailGeneratorTimer = null;
-    autoTransferTimer = null;
-    momentTimer = null;
-    momentCommentTimer = null;
-    momentLikeTimer = null;
-    onlineStatusTimer = null;
 }
 
 // --- Web Audio API 铃音引擎 ---
@@ -5595,38 +5606,64 @@ const store = localforage.createInstance({ name: 'SpiritualConnectionV2' });
 
 // --- 图片压缩（优化：更小尺寸和 WebP 格式）---
 async function compressImage(file, maxWidth = 150, quality = 0.5) {
-    return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                let width = img.width;
-                let height = img.height;
-                if (width > maxWidth) {
-                    height = (height * maxWidth) / width;
-                    width = maxWidth;
+    return new Promise((resolve, reject) => {
+        try {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const img = new Image();
+                    img.onload = () => {
+                        try {
+                            const canvas = document.createElement('canvas');
+                            let width = img.width;
+                            let height = img.height;
+                            if (width > maxWidth) {
+                                height = (height * maxWidth) / width;
+                                width = maxWidth;
+                            }
+                            canvas.width = width;
+                            canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+                            resolve(canvas.toDataURL('image/webp', quality));
+                        } catch (err) {
+                            reject(err);
+                        }
+                    };
+                    img.onerror = () => {
+                        // 如果图片加载失败，尝试直接使用原始数据
+                        resolve(e.target.result);
+                    };
+                    img.src = e.target.result;
+                } catch (err) {
+                    reject(err);
                 }
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-                resolve(canvas.toDataURL('image/webp', quality));
             };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
+            reader.onerror = () => {
+                reject(new Error('文件读取失败'));
+            };
+            reader.readAsDataURL(file);
+        } catch (err) {
+            reject(err);
+        }
     });
 }
 
 // ========== 不压缩图片存储（用于角色聊天背景） ==========
 async function storeImageAsBlob(file) {
-    return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            resolve(e.target.result);
-        };
-        reader.readAsDataURL(file);
+    return new Promise((resolve, reject) => {
+        try {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                resolve(e.target.result);
+            };
+            reader.onerror = () => {
+                reject(new Error('文件读取失败'));
+            };
+            reader.readAsDataURL(file);
+        } catch (err) {
+            reject(err);
+        }
     });
 }
 
@@ -5652,7 +5689,6 @@ async function saveRoleChatBackground(roleId, imageData) {
     } else {
         await store.removeItem(key);
     }
-    // 更新 appData 中的引用
     const role = appData.roles.find(r => r.id === roleId);
     if (role) {
         role.chatBackground = imageData || null;
@@ -5702,7 +5738,6 @@ async function calculateStorageUsage() {
     if (appData.songLibrary) mediaBytes += appData.songLibrary.reduce((acc, s) => acc + (s.cover ? s.cover.length * 2 : 0), 0);
     if (appData.bookLibrary) mediaBytes += appData.bookLibrary.reduce((acc, s) => acc + (s.cover ? s.cover.length * 2 : 0), 0);
     if (appData.settings?.momentCover?.startsWith('data:')) mediaBytes += appData.settings.momentCover.length * 2;
-    // 角色聊天背景
     appData.roles?.forEach(r => { if (r.chatBackground && r.chatBackground.startsWith('data:')) mediaBytes += r.chatBackground.length * 2; });
     const totalBytes = new Blob([dataStr]).size + bgStr.length + unreadStr.length + mediaBytes;
     return { total: totalBytes, chat: chatBytes, settings: settingsBytes, media: mediaBytes };
@@ -5712,7 +5747,7 @@ function formatBytes(bytes) { if (bytes < 1024) return bytes + 'B'; if (bytes < 
 
 async function updateStorageDisplay() {
     const usage = await calculateStorageUsage();
-    const maxBytes = 8 * 1024 * 1024 * 1024; // 8GB
+    const maxBytes = 8 * 1024 * 1024 * 1024;
     const percent = Math.min(100, (usage.total / maxBytes) * 100).toFixed(1);
     document.getElementById('storage-total-text').textContent = `${formatBytes(usage.total)} / ~8GB (${percent}%)`;
     document.getElementById('chat-storage-size').textContent = formatBytes(usage.chat);
@@ -5743,7 +5778,7 @@ function syncAllReplies() {
     appData.wordbanks.replies = [...new Set(all)]; 
 }
 
-// --- 防抖保存函数（性能优化核心） ---
+// --- 防抖保存函数（优化：添加队列机制）---
 function debounce(fn, delay) {
     let timer;
     return function(...args) {
@@ -5752,40 +5787,50 @@ function debounce(fn, delay) {
     };
 }
 
-async function saveData() {
+// 立即保存函数（用于关键操作）
+async function saveDataImmediately() {
     try {
         autoCleanChats();
-        // 修改为500条
         Object.keys(appData.chats).forEach(k => { if (appData.chats[k].length > 500) appData.chats[k] = appData.chats[k].slice(-450); });
         Object.keys(appData.groupChats).forEach(k => { if (appData.groupChats[k].length > 500) appData.groupChats[k] = appData.groupChats[k].slice(-450); });
         syncAllReplies();
         const dataToSave = JSON.parse(JSON.stringify(appData));
         delete dataToSave.appearance?.backgrounds;
         await store.setItem('appData', dataToSave);
-        // 保存自定义主题和方案
         await store.setItem('customThemes', customThemes);
         await store.setItem('themeSchemes', themeSchemes);
-        // 额外备份主题到 localStorage（防止 IndexedDB 丢失）
+        // 额外备份到 localStorage
         try {
             localStorage.setItem('spiritual_theme_backup', JSON.stringify({
-                customThemeColors: appData.appearance.customThemeColors,
-                theme: appData.appearance.theme,
-                customColor: appData.appearance.customColor,
-                backgrounds: appData.appearance.backgrounds,
-                bubble: appData.appearance.bubble,
-                avatarShape: appData.appearance.avatarShape,
-                avatarSettings: appData.appearance.avatarSettings,
-                customBubbleCss: appData.appearance.customBubbleCss
+                customThemeColors: appData.appearance?.customThemeColors || {},
+                theme: appData.appearance?.theme || 'custom',
+                customColor: appData.appearance?.customColor || '#82cbb2',
+                backgrounds: appData.appearance?.backgrounds || {},
+                bubble: appData.appearance?.bubble || {},
+                avatarShape: appData.appearance?.avatarShape || 'circle',
+                avatarSettings: appData.appearance?.avatarSettings || {},
+                customBubbleCss: appData.appearance?.customBubbleCss || '',
+                _timestamp: Date.now()
             }));
         } catch(e) {}
         if (document.getElementById('modal-settings-data') && !document.getElementById('modal-settings-data').classList.contains('hidden')) updateStorageDisplay();
-    } catch (e) { showToast('保存失败，请清理数据'); }
+    } catch (e) { 
+        console.warn('立即保存失败:', e);
+    }
 }
 
-// 使用防抖包装 saveData，减少频繁写入
-const debouncedSaveData = debounce(saveData, 500);
+async function saveData() {
+    try {
+        await saveDataImmediately();
+    } catch (e) {
+        console.error('保存失败，请清理数据', e);
+    }
+}
 
-// --- 主题配色系统函数（增强持久化）---
+// 使用防抖包装 saveData（用于非关键操作）
+const debouncedSaveData = debounce(saveDataImmediately, 500);
+
+// --- 主题配色系统函数（增强持久化 - 修复 iOS 兼容性）---
 async function loadCustomThemes() {
     try {
         const stored = await store.getItem('customThemes');
@@ -5799,51 +5844,68 @@ async function loadThemeSchemes() {
     } catch(e) { themeSchemes = []; }
 }
 
-// 强制恢复主题（在 loadData 结束时调用，并在每次主题切换后重新设置 bg-secondary-rgb）
+// 强制恢复主题（在 loadData 结束时调用）
 function forceApplyTheme() {
+    // 优先从 localStorage 恢复（iOS 更可靠）
+    let restoredFromBackup = false;
+    try {
+        const backup = localStorage.getItem('spiritual_theme_backup');
+        if (backup) {
+            const data = JSON.parse(backup);
+            const isValid = data._timestamp && (Date.now() - data._timestamp < 5 * 60 * 1000);
+            if (isValid && data.customThemeColors && Object.keys(data.customThemeColors).length > 0) {
+                applyCustomColors(data.customThemeColors);
+                if (data.customBubbleCss !== undefined) {
+                    appData.appearance.customBubbleCss = data.customBubbleCss;
+                    applyCustomBubbleCss(data.customBubbleCss);
+                }
+                restoredFromBackup = true;
+                console.log('✅ 从 localStorage 恢复主题成功');
+            }
+        }
+    } catch(e) {}
+    
+    if (restoredFromBackup) {
+        updateBgSecondaryRgb();
+        return;
+    }
+    
     const colors = appData.appearance?.customThemeColors;
     if (colors && Object.keys(colors).length > 0) {
         applyCustomColors(colors);
-        // 恢复气泡 CSS
         if (appData.appearance.customBubbleCss) {
             applyCustomBubbleCss(appData.appearance.customBubbleCss);
         }
-    } else {
-        const themeId = appData.appearance?.theme;
-        if (themeId && themeId !== 'custom') {
-            applyBuiltinTheme(themeId);
-            if (appData.appearance.customBubbleCss) {
-                applyCustomBubbleCss(appData.appearance.customBubbleCss);
-            }
-        } else {
-            // 尝试从 localStorage 恢复
-            const backup = localStorage.getItem('spiritual_theme_backup');
-            if (backup) {
-                try {
-                    const { customThemeColors, theme, customColor, customBubbleCss } = JSON.parse(backup);
-                    if (customThemeColors && Object.keys(customThemeColors).length > 0) {
-                        applyCustomColors(customThemeColors);
-                        if (customBubbleCss !== undefined) {
-                            appData.appearance.customBubbleCss = customBubbleCss;
-                            applyCustomBubbleCss(customBubbleCss);
-                        }
-                        return;
-                    }
-                    if (theme && theme !== 'custom') {
-                        applyBuiltinTheme(theme);
-                        if (customBubbleCss !== undefined) {
-                            appData.appearance.customBubbleCss = customBubbleCss;
-                            applyCustomBubbleCss(customBubbleCss);
-                        }
-                        return;
-                    }
-                } catch(e) {}
-            }
-            // 默认主题
-            applyBuiltinTheme('green');
-        }
+        return;
     }
-    // 确保背景色 RGB 变量被正确设置（用于音乐卡片）
+    
+    const themeId = appData.appearance?.theme;
+    if (themeId && themeId !== 'custom') {
+        applyBuiltinTheme(themeId);
+        if (appData.appearance.customBubbleCss) {
+            applyCustomBubbleCss(appData.appearance.customBubbleCss);
+        }
+        return;
+    }
+    
+    // 尝试从 localStorage 恢复备份（无时间戳限制）
+    try {
+        const backup = localStorage.getItem('spiritual_theme_backup');
+        if (backup) {
+            const data = JSON.parse(backup);
+            if (data.customThemeColors && Object.keys(data.customThemeColors).length > 0) {
+                applyCustomColors(data.customThemeColors);
+                if (data.customBubbleCss !== undefined) {
+                    appData.appearance.customBubbleCss = data.customBubbleCss;
+                    applyCustomBubbleCss(data.customBubbleCss);
+                }
+                return;
+            }
+        }
+    } catch(e) {}
+    
+    // 默认主题
+    applyBuiltinTheme('green');
     updateBgSecondaryRgb();
 }
 
@@ -5865,7 +5927,7 @@ function updateBgSecondaryRgb() {
     }
 }
 
-// 应用内置主题（修复持久化）
+// 应用内置主题
 function applyBuiltinTheme(themeId) {
     const theme = BUILTIN_THEMES.find(t => t.id === themeId);
     if (!theme) return;
@@ -5877,31 +5939,31 @@ function applyBuiltinTheme(themeId) {
     root.style.setProperty('--tab-active-border', theme.accentColor);
     root.style.setProperty('--accent-light', hexToRgba(theme.accentColor, 0.1));
     
-    // 重置其他自定义颜色变量为默认值
     for (const variable of Object.keys(THEME_COLOR_MAPPINGS)) {
         if (variable === '--accent-color') continue;
         root.style.removeProperty(variable);
     }
-    // 恢复 bg-secondary 默认值
     root.style.setProperty('--bg-secondary', '#ffffff');
     root.style.setProperty('--bg-secondary-rgb', '255,255,255');
     
-    // 清空自定义颜色集
     appData.appearance.customThemeColors = {};
-    
-    // 更新设置并保存
     appData.appearance.theme = themeId;
     appData.appearance.customColor = theme.accentColor;
-    // 清空自定义颜色集，确保使用内置主题
     appData.appearance.customThemeColors = {};
     debouncedSaveData();
     updateBgSecondaryRgb();
+    // 强制重绘
+    root.style.transform = 'translateZ(0)';
+    void root.offsetHeight;
+    root.style.transform = '';
     showToast(`已应用「${theme.name}」主题`);
 }
 
-// 应用自定义颜色集合
+// 应用自定义颜色集合（增强 iOS 兼容性）
 function applyCustomColors(colors) {
     const root = document.documentElement;
+    
+    // 1. 应用所有颜色变量
     for (const [variable, color] of Object.entries(colors)) {
         if (color) {
             root.style.setProperty(variable, color);
@@ -5914,12 +5976,64 @@ function applyCustomColors(colors) {
             }
         }
     }
-    // 保存到持久化数据
+    
+    // 2. ★ iOS 修复：强制触发样式重绘
+    root.classList.add('theme-updating');
+    void root.offsetHeight;
+    root.classList.remove('theme-updating');
+    
+    // 3. ★ iOS 修复：修改过渡属性强制重排
+    const originalTransition = root.style.transition;
+    root.style.transition = 'none';
+    void root.offsetHeight;
+    root.style.transition = originalTransition;
+    
+    // 4. ★ iOS 修复：使用 transform 触发 GPU 渲染
+    root.style.transform = 'translateZ(0)';
+    void root.offsetHeight;
+    root.style.transform = '';
+    
+    // 5. 保存到持久化数据
     appData.appearance.customThemeColors = colors;
     appData.appearance.theme = 'custom';
     appData.appearance.customColor = colors['--accent-color'] || '#82cbb2';
-    debouncedSaveData();
+    
+    // 6. ★ iOS 修复：立即同步保存到 localStorage
+    try {
+        localStorage.setItem('spiritual_theme_backup', JSON.stringify({
+            customThemeColors: colors,
+            theme: 'custom',
+            customColor: colors['--accent-color'] || '#82cbb2',
+            backgrounds: appData.appearance.backgrounds || {},
+            bubble: appData.appearance.bubble || {},
+            avatarShape: appData.appearance.avatarShape || 'circle',
+            avatarSettings: appData.appearance.avatarSettings || {},
+            customBubbleCss: appData.appearance.customBubbleCss || '',
+            _timestamp: Date.now()
+        }));
+    } catch(e) {}
+    
+    // 7. 立即保存到 IndexedDB
+    saveDataImmediately().catch(() => {});
+    
     updateBgSecondaryRgb();
+    
+    // 8. ★ iOS 修复：延迟二次确认
+    setTimeout(() => {
+        const appliedColor = getComputedStyle(root).getPropertyValue('--accent-color').trim();
+        const expectedColor = colors['--accent-color'] || '#82cbb2';
+        if (appliedColor !== expectedColor) {
+            for (const [variable, color] of Object.entries(colors)) {
+                if (color) {
+                    root.style.setProperty(variable, color);
+                }
+            }
+            root.style.transform = 'translateZ(0)';
+            void root.offsetHeight;
+            root.style.transform = '';
+            console.warn('⚠️ iOS 主题二次修复应用');
+        }
+    }, 150);
 }
 
 // 获取当前所有主题颜色变量
@@ -5969,6 +6083,12 @@ async function saveCurrentThemeAsScheme() {
         createdAt: Date.now()
     };
     themeSchemes.push(scheme);
+    
+    // ★ iOS 修复：先同步保存到 localStorage
+    try {
+        localStorage.setItem('spiritual_schemes_backup', JSON.stringify(themeSchemes));
+    } catch(e) {}
+    
     await saveData();
     renderSchemeList();
     showToast(`主题方案「${name}」已保存`);
@@ -6043,10 +6163,12 @@ function openThemeEditor() {
     const panel = document.getElementById('theme-editor-panel');
     if (!panel) return;
     
+    // 检测是否为 iOS Safari
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    
     const currentColors = getCurrentThemeColors();
     let html = '';
     
-    // 分组渲染颜色选择器
     const groups = {
         '背景颜色': ['--bg-primary', '--bg-secondary', '--header-bg', '--footer-bg'],
         '文字颜色': ['--text-primary', '--text-secondary', '--header-text'],
@@ -6080,6 +6202,39 @@ function openThemeEditor() {
     
     panel.innerHTML = html;
     document.getElementById('modal-appearance-theme-editor').classList.remove('hidden');
+    
+    // ★ iOS 修复：iOS 上自动保存
+    if (isIOS) {
+        if (iosAutoSaveTimer) {
+            clearInterval(iosAutoSaveTimer);
+        }
+        iosAutoSaveTimer = setInterval(() => {
+            const currentColors2 = getCurrentThemeColors();
+            const savedColors = appData.appearance.customThemeColors || {};
+            let hasChanged = false;
+            for (const key of Object.keys(currentColors2)) {
+                if (currentColors2[key] !== savedColors[key]) {
+                    hasChanged = true;
+                    break;
+                }
+            }
+            if (hasChanged) {
+                appData.appearance.customThemeColors = currentColors2;
+                appData.appearance.theme = 'custom';
+                appData.appearance.customColor = currentColors2['--accent-color'] || '#82cbb2';
+                try {
+                    localStorage.setItem('spiritual_theme_backup', JSON.stringify({
+                        customThemeColors: currentColors2,
+                        theme: 'custom',
+                        customColor: currentColors2['--accent-color'] || '#82cbb2',
+                        _timestamp: Date.now()
+                    }));
+                } catch(e) {}
+                debouncedSaveData();
+                console.log('🔄 iOS 自动保存主题');
+            }
+        }, 5000);
+    }
 }
 
 // 更新主题颜色（从编辑器）
@@ -6095,9 +6250,13 @@ window.updateThemeColorFromEditor = function(variable, value) {
     if (variable === '--bg-secondary') {
         updateBgSecondaryRgb();
     }
-    // 更新显示值
     const displaySpan = document.getElementById(`value-${variable.replace(/--/g, '')}`);
     if (displaySpan) displaySpan.textContent = value;
+    
+    // iOS 修复：强制重绘
+    document.documentElement.style.transform = 'translateZ(0)';
+    void document.documentElement.offsetHeight;
+    document.documentElement.style.transform = '';
 };
 
 window.updateThemeColorChannel = function(variable, channel, val) {
@@ -6116,6 +6275,10 @@ window.updateThemeColorChannel = function(variable, channel, val) {
 
 function closeThemeEditor() {
     document.getElementById('modal-appearance-theme-editor').classList.add('hidden');
+    if (iosAutoSaveTimer) {
+        clearInterval(iosAutoSaveTimer);
+        iosAutoSaveTimer = null;
+    }
 }
 
 function resetThemeToDefault() {
@@ -6143,7 +6306,57 @@ function resetThemeToDefault() {
     showToast('已重置为默认主题');
 }
 
-// 在线状态自动切换（新增定时器）
+// ========== CSS 变量监控（修复 iOS 主题丢失） ==========
+function setupCSSVariableMonitor() {
+    if (cssMonitorTimer) {
+        clearInterval(cssMonitorTimer);
+        cssMonitorTimer = null;
+    }
+    
+    let lastAccentColor = getComputedStyle(document.documentElement)
+        .getPropertyValue('--accent-color').trim();
+    
+    cssMonitorTimer = setInterval(() => {
+        const currentColor = getComputedStyle(document.documentElement)
+            .getPropertyValue('--accent-color').trim();
+        
+        const expectedColor = appData.appearance?.customThemeColors?.['--accent-color'] || 
+                             appData.appearance?.customColor || 
+                             '#82cbb2';
+        
+        if (currentColor !== expectedColor && currentColor !== lastAccentColor) {
+            console.warn('⚠️ CSS 变量异常，正在恢复...', { currentColor, expectedColor });
+            
+            if (appData.appearance?.customThemeColors && 
+                Object.keys(appData.appearance.customThemeColors).length > 0) {
+                applyCustomColors(appData.appearance.customThemeColors);
+            } else {
+                applyBuiltinTheme(appData.appearance?.theme || 'green');
+            }
+        }
+        
+        lastAccentColor = currentColor;
+    }, 3000);
+}
+
+// ========== 页面可见性变化监听（iOS 切换应用时保存） ==========
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        const currentColors = getCurrentThemeColors();
+        try {
+            localStorage.setItem('spiritual_theme_backup', JSON.stringify({
+                customThemeColors: currentColors,
+                theme: appData.appearance?.theme || 'custom',
+                customColor: currentColors['--accent-color'] || '#82cbb2',
+                _timestamp: Date.now()
+            }));
+        } catch(e) {}
+        // 页面隐藏时保存数据
+        saveDataImmediately().catch(() => {});
+    }
+});
+
+// 在线状态自动切换
 function startOnlineStatusTimer() {
     if (onlineStatusTimer) clearInterval(onlineStatusTimer);
     onlineStatusTimer = setInterval(() => {
@@ -6162,10 +6375,10 @@ function startOnlineStatusTimer() {
                 }
             }
         });
-    }, 60 * 60 * 1000); // 每小时检查一次
+    }, 60 * 60 * 1000);
 }
 
-// ========== 统一定时器管理（性能优化核心） ==========
+// ========== 统一定时器管理 ==========
 let unifiedTimer = null;
 let unifiedTickCount = 0;
 
@@ -6175,63 +6388,50 @@ function startUnifiedTimers() {
         unifiedTimer = null;
     }
     
-    // 先清除所有旧定时器
     clearAllTimers();
     
     unifiedTimer = setInterval(() => {
         unifiedTickCount++;
         
-        // 每30秒（1 tick）执行的任务 - 更新音乐进度
-        updateMusicProgress();
-        
-        // 每60秒（2 ticks）执行的任务
         if (unifiedTickCount % 2 === 0) {
-            // 检查自动发送（原 startAutoSendTimer）
             if (appData.settings.autoSend) {
                 checkAutoSendMessages();
             }
-            // 检查邮件回复（原 startMailReplyChecker）
             checkMailReplies();
         }
         
-        // 每5分钟（10 ticks）执行的任务
         if (unifiedTickCount % 10 === 0) {
-            // 检查自动写信 - 已通过开关控制
             checkAutoMailGeneration();
         }
         
-        // 每10分钟（20 ticks）执行的任务
         if (unifiedTickCount % 20 === 0) {
-            // 检查自动来电
             if (appData.settings.autoCall?.enabled) {
                 checkAutoCall();
             }
-            // 检查自动转账
             if (appData.transferSettings?.enabled && !appData.settings.transferTestMode) {
                 checkAutoTransfer();
             }
         }
         
-        // 每30分钟（60 ticks）检查朋友圈
         if (unifiedTickCount % 60 === 0) {
             if (appData.settings.moment?.enabled) {
                 checkAutoMoments();
             }
         }
         
-        // 每小时（120 ticks）检查一次在线状态
         if (unifiedTickCount % 120 === 0) {
             updateOnlineStatuses();
         }
         
-        // 重置计数器防止溢出
+        // 每30秒更新音乐进度
+        updateMusicProgress();
+        
         if (unifiedTickCount > 100000) {
             unifiedTickCount = 0;
         }
-    }, 30000); // 30秒间隔
+    }, 30000);
 }
 
-// 拆分出的检查函数
 function checkAutoSendMessages() {
     const now = Date.now();
     const interval = appData.settings.autoInterval * 60 * 1000;
@@ -6265,26 +6465,14 @@ function checkAutoCall() {
     }
 }
 
-// ========== 修复：自动写信功能（核心修复 - 概率与间隔成反比，开关控制） ==========
 function checkAutoMailGeneration() {
-    // ★ 修复：首先检查开关是否启用
-    if (!appData.settings.autoMail?.enabled) {
-        return;
-    }
+    if (!appData.settings.autoMail?.enabled) return;
     
-    // 获取检查间隔（分钟），默认10分钟
     const checkInterval = appData.settings.autoMail.checkInterval || 10;
-    // 基准间隔：10分钟
     const baseInterval = 10;
     
     appData.roles.forEach(role => {
-        // 获取角色写信概率，默认15%
         const prob = role.autoMailProbability ?? 15;
-        
-        // ★ 核心修复：概率与检查间隔成反比
-        // 间隔越长，单次触发概率越低，保持总体触发频率稳定
-        // 公式：调整后概率 = 原始概率 × (基准间隔 / 当前间隔)
-        // 例如：间隔10分钟 → 15%，间隔30分钟 → 5%，间隔60分钟 → 2.5%
         const adjustedProb = Math.min(100, prob * (baseInterval / checkInterval));
         
         if (Math.random() * 100 < adjustedProb) {
@@ -6293,54 +6481,34 @@ function checkAutoMailGeneration() {
     });
 }
 
-// ========== 生成自动信件（3~20句随机，用 · 分隔，不添加其他标点符号） ==========
 function generateAutoLetter(role) {
-    // ★ 修复：增加开关前置检查，防止绕过开关调用
-    if (!appData.settings.autoMail?.enabled) {
-        return;
-    }
-    
+    if (!appData.settings.autoMail?.enabled) return;
     if (!role) return;
     
-    // 从词库中获取可用的文字
     const allWords = getActiveWordList();
     if (allWords.length === 0) return;
     
-    // 随机句数：3 到 20 句（每个句数都有可能触发）
-    const sentenceCount = 3 + Math.floor(Math.random() * 18); // 3 ~ 20
-    
+    const sentenceCount = 3 + Math.floor(Math.random() * 18);
     const sentences = [];
     let totalLength = 0;
-    const MAX_LENGTH = 300; // 最大字数限制
+    const MAX_LENGTH = 300;
     
-    // 构建句子，确保总字数不超过300
     for (let i = 0; i < sentenceCount; i++) {
-        // 从词库中随机选取一个词（保留原句，不添加任何标点符号）
         const word = allWords[Math.floor(Math.random() * allWords.length)];
-        
-        // 直接使用原句，不添加任何标点符号
         let sentence = word;
-        
-        // 如果加上这句会超过300字，则停止添加
-        if (totalLength + sentence.length > MAX_LENGTH) {
-            break;
-        }
-        
+        if (totalLength + sentence.length > MAX_LENGTH) break;
         sentences.push(sentence);
         totalLength += sentence.length;
     }
     
-    // 如果一句都没生成（极端情况），至少保证有一句
     if (sentences.length === 0) {
         const word = allWords[Math.floor(Math.random() * allWords.length)];
         sentences.push(word);
         totalLength = word.length;
     }
     
-    // 用 · 分隔所有句子
     let content = sentences.join(' · ');
     
-    // 随机添加 Emoji（40%概率，放在最后）
     if (appData.wordbanks.emojis.length > 0 && Math.random() < 0.4) {
         const emojiCount = 1 + Math.floor(Math.random() * 2);
         const pickedEmojis = [];
@@ -6348,14 +6516,11 @@ function generateAutoLetter(role) {
             pickedEmojis.push(appData.wordbanks.emojis[Math.floor(Math.random() * appData.wordbanks.emojis.length)]);
         }
         const emojiSuffix = ' ' + pickedEmojis.join(' ');
-        
-        // 如果加上emoji超过300字，则不添加
         if (totalLength + emojiSuffix.length <= MAX_LENGTH) {
             content += emojiSuffix;
         }
     }
     
-    // 检查是否已有未读的自动信件（避免轰炸）
     const existingAutoMails = appData.mails.filter(m => 
         m.roleId === role.id && 
         m.type === 'received' && 
@@ -6363,7 +6528,6 @@ function generateAutoLetter(role) {
         m.isAutoGenerated === true
     );
     
-    // 如果已有2封未读自动信，不再生成
     if (existingAutoMails.length >= 2) return;
     
     const mail = {
@@ -6379,17 +6543,13 @@ function generateAutoLetter(role) {
     appData.mails.push(mail);
     debouncedSaveData();
     
-    // 如果有未读信件，增加通知
     if (document.visibilityState !== 'visible') {
         sendNotificationIfNeeded(`📨 来自 ${role.name} 的新信件`, content.substring(0, 30) + '...');
     }
     
-    // 如果当前在信箱页面，刷新列表
     if (document.getElementById('page-mailbox') && document.getElementById('page-mailbox').classList.contains('active')) {
         renderMailList();
     }
-    
-    // 如果历史信箱页面打开，刷新历史列表
     if (document.getElementById('page-history-mailbox') && document.getElementById('page-history-mailbox').classList.contains('active')) {
         loadHistoryMailData();
     }
@@ -6443,32 +6603,6 @@ function updateOnlineStatuses() {
     });
 }
 
-// 保留原有的定时器启动函数用于兼容
-function startAutoSendTimer() {
-    // 已由统一定时器管理
-}
-function startMailReplyChecker() {
-    // 已由统一定时器管理
-}
-function startAutoCallTimer() {
-    // 已由统一定时器管理
-}
-function startAutoMailGenerator() {
-    // 已由统一定时器管理
-}
-function startAutoTransferTimer() {
-    // 已由统一定时器管理
-}
-function startMomentTimer() {
-    // 已由统一定时器管理
-}
-function startMomentCommentTimer() {
-    // 已由统一定时器管理
-}
-function startMomentLikeTimer() {
-    // 已由统一定时器管理
-}
-
 function sendAutoMessageForRole(role) {
     const all = getActiveWordList(); if (all.length === 0) return;
     let content = all[Math.floor(Math.random() * all.length)], type = 'text';
@@ -6517,7 +6651,6 @@ async function loadData() {
         const stored = await store.getItem('appData'); 
         if (stored) {
             appData = stored;
-            // 兼容旧数据：确保新增字段存在
             if (!appData.pokeSymbols) appData.pokeSymbols = { my: { preset: 'heart', custom: '♡' }, partner: { preset: 'flower', custom: '✿' }, customSymbols: [] };
             if (!appData.pokeSymbols.customSymbols) appData.pokeSymbols.customSymbols = [];
             if (!appData.settings.pokeAutoReplyEnabled) appData.settings.pokeAutoReplyEnabled = true;
@@ -6527,13 +6660,9 @@ async function loadData() {
             if (appData.settings.mergeProb2 === undefined) appData.settings.mergeProb2 = 30;
             if (appData.settings.mergeProb3 === undefined) appData.settings.mergeProb3 = 20;
             appData.roles.forEach(r => { if (!r.customPokes) r.customPokes = []; });
-            
-            // 确保每个角色都有 chatBackground 字段
             appData.roles.forEach(r => {
                 if (r.chatBackground === undefined) r.chatBackground = null;
             });
-            
-            // 为已有消息添加 read 属性兼容（已读功能）
             for (let roleId in appData.chats) {
                 if (appData.chats[roleId]) {
                     appData.chats[roleId].forEach(msg => {
@@ -6548,8 +6677,6 @@ async function loadData() {
                     });
                 }
             }
-            
-            // 为信件添加 viewed 字段兼容
             if (appData.mails) {
                 appData.mails.forEach(mail => {
                     if (mail.viewed === undefined) mail.viewed = false;
@@ -6558,7 +6685,6 @@ async function loadData() {
         } else {
             appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
         }
-        // 尝试从 localStorage 恢复主题备份（如果 IndexedDB 中的主题数据不完整）
         if ((!appData.appearance || !appData.appearance.customThemeColors || Object.keys(appData.appearance.customThemeColors).length === 0) && localStorage.getItem('spiritual_theme_backup')) {
             try {
                 const backup = JSON.parse(localStorage.getItem('spiritual_theme_backup'));
@@ -6571,7 +6697,6 @@ async function loadData() {
                     appData.appearance.bubble = backup.bubble || { radius: 13, shadow: 1 };
                     appData.appearance.avatarShape = backup.avatarShape || 'circle';
                     appData.appearance.avatarSettings = backup.avatarSettings || { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' };
-                    // ★ 恢复自定义气泡 CSS
                     if (backup.customBubbleCss !== undefined) {
                         appData.appearance.customBubbleCss = backup.customBubbleCss;
                         applyCustomBubbleCss(backup.customBubbleCss);
@@ -6581,16 +6706,13 @@ async function loadData() {
                 }
             } catch(e) {}
         }
-        // 加载自定义主题和方案
         await loadCustomThemes();
         await loadThemeSchemes();
         
         if (!appData.wordbanks.wordGroups) appData.wordbanks.wordGroups = [{ name: '默认', words: [...(appData.wordbanks.replies || [])] }];
-        // 确保 words 是对象数组
         appData.wordbanks.wordGroups.forEach(g => {
             g.words = g.words.map(w => typeof w === 'string' ? { text: w, blocked: false } : w);
         });
-        // 兼容旧版戳一戳字段：将字符串转为数组
         appData.roles.forEach(r => {
             if (typeof r.pokeMyText === 'string') {
                 r.pokeMyTexts = [r.pokeMyText];
@@ -6604,11 +6726,9 @@ async function loadData() {
             if (!r.pokeTheirTexts) r.pokeTheirTexts = ['老婆，我们永远不分开 😂😂'];
             if (!r.lastDoodleDate) r.lastDoodleDate = null;
             if (!r.customPokes) r.customPokes = [];
-            // 初始化为默认动作数组
             if (!r.pokeActions || r.pokeActions.length === 0) {
                 r.pokeActions = [...PRESET_POKE_ACTIONS];
             }
-            // 确保 chatBackground 字段存在
             if (r.chatBackground === undefined) r.chatBackground = null;
         });
         if (!appData.groups) appData.groups = []; appData.groups.forEach(g => { if (!g.avatar) g.avatar = DEFAULT_GROUP_AVATAR; if (!g.replyCountProb) g.replyCountProb = {}; });
@@ -6637,7 +6757,6 @@ async function loadData() {
         if (!appData.settings.musicCardPosition) appData.settings.musicCardPosition = { left: 'auto', top: '70px', right: '16px' };
         if (appData.settings.pokeAutoReplyEnabled === undefined) appData.settings.pokeAutoReplyEnabled = true;
         if (appData.settings.pokeAutoReplyProb === undefined) appData.settings.pokeAutoReplyProb = 45;
-        // 初始化头像设置
         if (!appData.appearance) appData.appearance = { theme: 'custom', customColor: '#82cbb2', savedSchemes: [], backgrounds: { home: '', chat: '', group: '' }, bubble: { radius: 13, shadow: 1 }, avatarShape: 'circle', avatarSettings: { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' }, customThemeColors: {}, customBubbleCss: '' };
         else if (!appData.appearance.avatarSettings) appData.appearance.avatarSettings = { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' };
         if (!appData.appearance.customThemeColors) appData.appearance.customThemeColors = {};
@@ -6668,12 +6787,10 @@ async function loadData() {
     } catch (e) { appData = JSON.parse(JSON.stringify(DEFAULT_DATA)); }
     await initAppearance(); renderRoleList(); renderGroupList(); updateDate(); await loadUnreadCounts();
     
-    // 使用统一定时器管理
     startUnifiedTimers();
     
     initNotificationSwitch(); updateCallButtonVisibility();
     startOnlineStatusTimer();
-    // 启动涂鸦自动触发定时器（每1小时检查一次）
     setInterval(() => checkAndTriggerAutoDoodle(), 60 * 60 * 1000);
     disableAutoTransferUntil = Date.now() + 60 * 1000;
     applyMomentCover();
@@ -6682,7 +6799,6 @@ async function loadData() {
     if (coverAvatar) coverAvatar.src = (appData.userProfile && appData.userProfile.avatar) ? appData.userProfile.avatar : DEFAULT_AVATAR;
     updateMusicPlayerCardVisibility();
     restoreMusicCardPosition();
-    // 音乐进度条事件
     musicAudio.addEventListener('ended', () => {
         if (appData.settings.musicShuffle) {
             playRandomMusic();
@@ -6707,7 +6823,6 @@ async function loadData() {
         ringtoneAudio.src = appData.settings.call.ringtone;
         ringtoneAudio.load();
     }
-    // 初始化戳一戳设置临时数据
     if (currentRoleId) {
         const role = appData.roles.find(r => r.id === currentRoleId);
         if (role) {
@@ -6715,33 +6830,23 @@ async function loadData() {
             tempPokeTheirTexts = [...(role.pokeTheirTexts || [])];
         }
     }
-    // 帮我决策计数器监听
     const decisionOptionsInput = document.getElementById('decision-options-input');
     if (decisionOptionsInput) {
         decisionOptionsInput.addEventListener('input', updateDecisionOptionsCounter);
     }
-    // 涂鸦本字母区绑定
     initDoodleCanvasEvents();
-    // 全局点击关闭浮动菜单
     document.addEventListener('click', function(e) {
         if (currentContextMenu && !currentContextMenu.contains(e.target)) {
             closeContextMenu();
         }
     });
-    // 字卡库搜索功能初始化
     initWordSearchUI();
-    // 词云容器 resize 监听（修复词云显示问题）
     setupWordcloudResizeListener();
-    // 加载头像设置到UI
     loadAvatarSettingsToUI();
-    // 绑定头像设置预览刷新
     bindAvatarSettingsEvents();
-    // 绑定拍一拍居中菜单按钮
     bindPokeActionModalEvents();
-    // 渲染主题色块和方案列表
     renderThemeColorPalette();
     renderSchemeList();
-    // 绑定主题编辑器按钮
     const customThemeBtn = document.getElementById('custom-theme-btn');
     if (customThemeBtn) customThemeBtn.onclick = openThemeEditor;
     const saveSchemeBtn = document.getElementById('save-current-scheme-btn');
@@ -6760,17 +6865,14 @@ async function loadData() {
             showToast('主题已保存并应用');
         };
     }
-    // 挂载全局函数
     window.applyBuiltinTheme = applyBuiltinTheme;
     window.applyThemeScheme = applyThemeScheme;
     window.deleteThemeScheme = deleteThemeScheme;
     window.closeThemeEditor = closeThemeEditor;
     window.applyCustomColors = applyCustomColors;
     
-    // 初始化戳一戳装饰符号UI
     initPokeSymbolUI();
     
-    // 拍一拍面板 Tab 切换逻辑
     const pokeTabs = document.querySelectorAll('#modal-poke-action .poke-tab');
     if (pokeTabs.length) {
         pokeTabs.forEach(tab => {
@@ -6790,17 +6892,12 @@ async function loadData() {
             };
         });
     }
-    // 拍一拍列表渲染
     renderPokeActionsList();
-    // 符号表格渲染
     renderSymbolTable();
-    // 添加自定义符号按钮
     const addCustomSymbolBtn = document.getElementById('add-custom-symbol-btn');
     if (addCustomSymbolBtn) addCustomSymbolBtn.onclick = addCustomSymbol;
     
-    // 最后强制应用一次主题，确保颜色正确
     forceApplyTheme();
-    // 额外确保背景色 RGB 变量正确（音乐卡片背景问题）
     updateBgSecondaryRgb();
     
     // ============================================================
@@ -7002,7 +7099,6 @@ function restoreMusicCardPosition() {
         else card.style.bottom = '';
     }
 }
-// 保存音乐卡片位置（在拖拽结束时调用）
 function saveMusicCardPosition() {
     const card = document.getElementById('music-player-card');
     if (!card) return;
@@ -7016,7 +7112,6 @@ function saveMusicCardPosition() {
     };
     debouncedSaveData();
 }
-// 重写音乐卡片拖拽结束部分，添加保存
 function startDragMusicCard(e) {
     if (e.target.closest('.music-card-btn') || e.target.closest('.music-card-progress-bar')) return;
     e.preventDefault();
@@ -7147,7 +7242,6 @@ function applyAppearance() {
     const { theme, customColor, backgrounds, bubble, avatarShape, avatarSettings, customThemeColors, customBubbleCss } = appData.appearance;
     const root = document.documentElement;
     let mainColor = '#82cbb2';
-    // 如果有自定义颜色集，直接应用
     if (customThemeColors && Object.keys(customThemeColors).length > 0) {
         for (const [varName, color] of Object.entries(customThemeColors)) {
             root.style.setProperty(varName, color);
@@ -7171,7 +7265,6 @@ function applyAppearance() {
     document.body.className = `text-gray-800 transition-colors duration-300 ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-[#f3f4f6]'}`;
     const home = document.getElementById('page-home'); if (backgrounds.home) { home.style.backgroundImage = `url(${backgrounds.home})`; home.style.backgroundSize = 'cover'; home.style.backgroundColor = 'transparent'; } else { home.style.backgroundImage = ''; home.style.backgroundColor = theme === 'dark' ? '#111827' : '#f9fafb'; }
     const chat = document.getElementById('page-chat'); 
-    // 检查当前是否有角色聊天背景
     let chatBg = null;
     if (currentChatType === 'role' && currentRoleId) {
         const role = appData.roles.find(r => r.id === currentRoleId);
@@ -7194,15 +7287,12 @@ function applyAppearance() {
     const style = document.createElement('style'); style.id = 'appearance-style';
     style.textContent = `.message-received { border-radius: ${bubble.radius}px ${bubble.radius}px ${bubble.radius}px 6px !important; box-shadow: 0 1px ${bubble.shadow}px rgba(0,0,0,0.08) !important; } .message-sent { border-radius: ${bubble.radius}px ${bubble.radius}px 6px ${bubble.radius}px !important; box-shadow: 0 1px ${bubble.shadow}px rgba(0,0,0,0.1) !important; } .role-card img, .chat-header img, #typing-avatar { border-radius: ${avatarShape === 'circle' ? '50%' : '8px'} !important; }`;
     const old = document.getElementById('appearance-style'); if (old) old.remove(); document.head.appendChild(style);
-    // 应用头像设置到UI（如果当前打开聊天，重新渲染）
     if (currentChatType === 'role' && currentRoleId) renderChatMessages();
-    // 更新背景色 RGB 变量（音乐卡片背景）
     updateBgSecondaryRgb();
-    // ★ 新增：应用自定义气泡 CSS
     if (customBubbleCss) {
         applyCustomBubbleCss(customBubbleCss);
     } else {
-        applyCustomBubbleCss(''); // 清除已有样式
+        applyCustomBubbleCss('');
     }
 }
 
@@ -7239,7 +7329,6 @@ function getMsgPreview(m) {
 function renderRoleList() {
     const list = document.getElementById('role-list'), empty = document.getElementById('empty-tip'); if (!list) return;
     list.querySelectorAll('.role-card').forEach(c => c.remove()); if (appData.roles.length === 0) { empty.classList.remove('hidden'); return; } empty.classList.add('hidden');
-    // 使用 DocumentFragment 批量添加
     const fragment = document.createDocumentFragment();
     appData.roles.forEach(role => {
         const msgs = appData.chats[role.id] || [];
@@ -7315,10 +7404,19 @@ function formatDate(timestamp) {
     });
 }
 
-// ========== 消息积攒批量渲染（性能优化核心 - 增量渲染） ==========
-let pendingMessages = [];
-let pendingTimer = null;
-let renderedMessageIds = new Set();
+// ========== 消息积攒批量渲染（优化：取消机制） ==========
+// 取消所有待处理的消息渲染任务
+function cancelPendingMessageRenders() {
+    if (pendingTimer) {
+        clearTimeout(pendingTimer);
+        pendingTimer = null;
+    }
+    pendingMessages = [];
+    if (messageRenderAbortController) {
+        messageRenderAbortController.abort();
+        messageRenderAbortController = null;
+    }
+}
 
 // 核心：增量添加消息（只添加新消息，不全量重建）
 function appendMessageToDOM(sender, content, time, quote = null, type = 'text') {
@@ -7328,9 +7426,13 @@ function appendMessageToDOM(sender, content, time, quote = null, type = 'text') 
     const isActive = (currentChatType === 'role' && currentRoleId) || (currentChatType === 'group' && currentGroupId);
     if (!isActive && sender !== 'me' && sender !== 'system') return;
     
+    // 取消旧定时器，用新定时器合并
+    if (pendingTimer) {
+        clearTimeout(pendingTimer);
+    }
+    
     pendingMessages.push({ sender, content, time, quote, type });
     
-    if (pendingTimer) clearTimeout(pendingTimer);
     pendingTimer = setTimeout(() => {
         flushPendingMessages();
     }, 80);
@@ -7339,11 +7441,22 @@ function appendMessageToDOM(sender, content, time, quote = null, type = 'text') 
 function flushPendingMessages() {
     if (pendingMessages.length === 0) return;
     const container = document.getElementById('chat-messages');
-    if (!container) { pendingMessages = []; return; }
+    if (!container) { 
+        pendingMessages = []; 
+        return; 
+    }
     
-    const fragment = document.createDocumentFragment();
     const msgs = pendingMessages;
     pendingMessages = [];
+    
+    // 创建 AbortController 用于取消本次渲染
+    if (messageRenderAbortController) {
+        messageRenderAbortController.abort();
+    }
+    messageRenderAbortController = new AbortController();
+    const signal = messageRenderAbortController.signal;
+    
+    const fragment = document.createDocumentFragment();
     
     // 获取最后一条消息的日期
     let lastDate = null;
@@ -7361,7 +7474,12 @@ function flushPendingMessages() {
         }
     }
     
+    // 检查是否已取消
+    if (signal.aborted) return;
+    
     msgs.forEach(({ sender, content, time, quote, type }) => {
+        if (signal.aborted) return;
+        
         const currentDate = formatDate(time);
         if (lastDate !== null && lastDate !== currentDate) {
             const dateDiv = document.createElement('div');
@@ -7389,9 +7507,10 @@ function flushPendingMessages() {
         fragment.appendChild(el);
     });
     
+    if (signal.aborted) return;
+    
     container.appendChild(fragment);
     
-    // 只有用户在最底部时才自动滚动
     const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 150;
     if (isNearBottom) {
         requestAnimationFrame(() => {
@@ -7400,8 +7519,11 @@ function flushPendingMessages() {
     }
 }
 
-// ========== 聊天消息渲染函数（优化版：默认只显示最新50条） ==========
+// ========== 聊天消息渲染函数（优化版：取消机制） ==========
 function renderChatMessages() {
+    // 取消所有待处理的消息渲染
+    cancelPendingMessageRenders();
+    
     const container = document.getElementById('chat-messages');
     let msgs = [];
     if (currentChatType === 'role') {
@@ -7410,7 +7532,6 @@ function renderChatMessages() {
         msgs = appData.groupChats[currentGroupId] || [];
     }
 
-    // 默认只显示最新 50 条消息
     const DEFAULT_DISPLAY_COUNT = 50;
     let displayMsgs = msgs;
     let hasMore = false;
@@ -7423,7 +7544,6 @@ function renderChatMessages() {
     container.innerHTML = '';
     renderedMessageIds.clear();
     
-    // 如果有更多消息，在顶部添加"加载更早消息"按钮
     if (hasMore) {
         const loadMoreDiv = document.createElement('div');
         loadMoreDiv.className = 'text-center py-3';
@@ -7448,7 +7568,6 @@ function renderChatMessages() {
         container.appendChild(loadMoreDiv);
     }
 
-    // 渲染最新消息
     let lastDate = null;
     displayMsgs.forEach(m => {
         const currentDate = formatDate(m.time);
@@ -7467,13 +7586,12 @@ function renderChatMessages() {
         container.appendChild(el);
     });
 
-    // 滚动到底部（最新消息位置）
     requestAnimationFrame(() => {
         container.scrollTop = container.scrollHeight;
     });
 }
 
-// ========== 全量渲染函数（用于加载全部消息） ==========
+// ========== 全量渲染函数 ==========
 function renderFullMessages(container, msgs) {
     container.innerHTML = '';
     renderedMessageIds.clear();
@@ -7510,14 +7628,14 @@ function openChat(roleId) {
     document.getElementById('chat-subtitle').textContent = role.onlineStatus?.currentStatus || '在线';
     document.getElementById('page-home').classList.remove('active'); document.getElementById('page-chat').classList.add('active');
     
-    // 先更新高度
     updateChatPageHeight();
     
-    // 使用 requestAnimationFrame 延迟渲染，让 UI 先响应
+    // 取消之前的渲染任务
+    cancelPendingMessageRenders();
+    
     requestAnimationFrame(() => {
         renderChatMessages();
         updateCallButtonVisibility();
-        // 确保滚动到底部
         setTimeout(() => {
             const container = document.getElementById('chat-messages');
             if (container) {
@@ -7526,14 +7644,10 @@ function openChat(roleId) {
         }, 50);
     });
     
-    // 重置缓存
     cachedAvatarSettings = null;
     cachedAvatarShape = null;
-    
-    // 应用角色独立聊天背景
     applyRoleChatBackground(roleId);
     
-    // 进入聊天时，清除该角色的"正在输入"状态
     if (roleTypingStates[roleId]) {
         if (roleTypingStates[roleId].timer) {
             clearTimeout(roleTypingStates[roleId].timer);
@@ -7544,7 +7658,6 @@ function openChat(roleId) {
         if (tip) tip.classList.remove('active');
     }
     
-    // 进入聊天时，将所有对方发送的未读消息标记为已读（使用 requestAnimationFrame 延迟执行）
     requestAnimationFrame(() => {
         const msgs = appData.chats[roleId];
         if (msgs) {
@@ -7563,7 +7676,6 @@ function openChat(roleId) {
     });
 }
 
-// 辅助函数：只更新已读状态，不重新渲染
 function updateReadReceiptsInDOM() {
     const container = document.getElementById('chat-messages');
     if (!container) return;
@@ -7592,7 +7704,6 @@ function updateReadReceiptsInDOM() {
     });
 }
 
-// 应用角色聊天背景
 function applyRoleChatBackground(roleId) {
     const role = appData.roles.find(r => r.id === roleId);
     if (!role) return;
@@ -7616,7 +7727,6 @@ function applyRoleChatBackground(roleId) {
     }
 }
 
-// 新增：角色聊天背景上传
 async function uploadRoleChatBackground(roleId) {
     const input = document.createElement('input');
     input.type = 'file';
@@ -7642,7 +7752,6 @@ async function uploadRoleChatBackground(roleId) {
     input.click();
 }
 
-// 新增：删除角色聊天背景
 async function deleteRoleChatBackground(roleId) {
     showConfirm('确定要删除该角色的聊天背景吗？', async (ok) => {
         if (ok) {
@@ -7659,6 +7768,7 @@ function openGroupChat(groupId) {
     document.getElementById('chat-title').textContent = group.name; document.getElementById('chat-subtitle').textContent = `${group.members.length}人`;
     document.getElementById('page-home').classList.remove('active'); document.getElementById('page-chat').classList.add('active');
     updateChatPageHeight();
+    cancelPendingMessageRenders();
     renderChatMessages(); updateCallButtonVisibility();
     
     cachedAvatarSettings = null;
@@ -7691,11 +7801,12 @@ function goBack() {
         roleTypingStates[currentRoleId].active = false;
     }
     
-    // 先切换页面（视觉上立即响应）
+    // ★ 修复：取消所有待处理的消息渲染
+    cancelPendingMessageRenders();
+    
     document.getElementById('page-chat').classList.remove('active');
     document.getElementById('page-home').classList.add('active');
     
-    // 重置状态
     const oldRoleId = currentRoleId;
     const oldGroupId = currentGroupId;
     const oldChatType = currentChatType;
@@ -7703,7 +7814,6 @@ function goBack() {
     currentRoleId = null;
     currentGroupId = null;
     
-    // 清理聊天页面样式
     const chatPage = document.getElementById('page-chat');
     if (chatPage) {
         chatPage.style.height = '';
@@ -7715,7 +7825,9 @@ function goBack() {
         messagesEl.style.maxHeight = '';
     }
     
-    // 使用 requestAnimationFrame 延迟渲染列表，让页面切换先完成
+    // 清理浮动菜单
+    closeContextMenu();
+    
     requestAnimationFrame(() => {
         renderRoleList();
         renderGroupList();
@@ -7869,7 +7981,6 @@ function createMessageElement(sender, content, time, quote = null, type = 'text'
             <div class="flex-shrink-0 ${showAvatarThisMsg ? '' : 'hidden'}" style="width:${avatarSize}px; height:${avatarSize}px; margin-left:8px;"><img src="${myProfile.avatar || DEFAULT_AVATAR}" class="w-full h-full ${avatarShapeClassLocal} object-cover border border-gray-100"></div>`;
         }
     }
-    // 为消息元素绑定单击菜单（使用事件委托，不直接绑定）
     if (sender !== 'system' && type !== 'poke' && type !== 'call' && type !== 'call_missed') {
         div.dataset.msgSender = sender;
         div.dataset.msgContent = content;
@@ -7881,7 +7992,7 @@ function createMessageElement(sender, content, time, quote = null, type = 'text'
     return div;
 }
 
-// ========== 浮动消息菜单（精致版 - 参考文件二） ==========
+// ========== 浮动消息菜单 ==========
 function showMessageContextMenu(event, msg, senderName) {
     closeContextMenu();
     const rect = event.currentTarget.getBoundingClientRect();
@@ -7889,7 +8000,6 @@ function showMessageContextMenu(event, msg, senderName) {
     menu.className = 'message-context-menu';
     const isMe = msg.sender === 'me';
     
-    // 引用按钮
     const quoteBtn = document.createElement('button');
     quoteBtn.innerHTML = '↶<span class="tooltip">引用</span>';
     quoteBtn.title = '';
@@ -7899,7 +8009,6 @@ function showMessageContextMenu(event, msg, senderName) {
         closeContextMenu();
     };
     
-    // 收藏按钮
     const favBtn = document.createElement('button');
     favBtn.innerHTML = '★<span class="tooltip">收藏</span>';
     favBtn.title = '';
@@ -7917,7 +8026,6 @@ function showMessageContextMenu(event, msg, senderName) {
         closeContextMenu();
     };
     
-    // 复制按钮
     const copyBtn = document.createElement('button');
     copyBtn.innerHTML = '◆<span class="tooltip">复制</span>';
     copyBtn.title = '';
@@ -7931,7 +8039,6 @@ function showMessageContextMenu(event, msg, senderName) {
     menu.appendChild(favBtn);
     menu.appendChild(copyBtn);
     
-    // 如果是自己发的消息，添加删除按钮
     if (isMe) {
         const delBtn = document.createElement('button');
         delBtn.innerHTML = '✖<span class="tooltip">删除</span>';
@@ -7949,17 +8056,14 @@ function showMessageContextMenu(event, msg, senderName) {
     
     document.body.appendChild(menu);
     
-    // 定位菜单（确保不超出屏幕）
     const menuWidth = menu.offsetWidth || 200;
     const menuHeight = menu.offsetHeight || 50;
     let menuTop = rect.top - menuHeight - 12;
     let menuLeft = rect.left + (rect.width / 2) - (menuWidth / 2);
     
-    // 如果上方空间不足，显示在下方
     if (menuTop < 10) {
         menuTop = rect.bottom + 12;
     }
-    // 确保不超出左右边界
     if (menuLeft < 10) menuLeft = 10;
     if (menuLeft + menuWidth > window.innerWidth - 10) {
         menuLeft = window.innerWidth - menuWidth - 10;
@@ -8037,7 +8141,8 @@ async function sendMessage() {
     const msg = { id: Date.now(), sender: 'me', content, time: Date.now(), type: 'text', quote, read: false };
     if (currentChatType === 'role') { if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = []; appData.chats[currentRoleId].push(msg); }
     else { if (!appData.groupChats[currentGroupId]) appData.groupChats[currentGroupId] = []; appData.groupChats[currentGroupId].push(msg); }
-    debouncedSaveData(); 
+    // 关键操作立即保存
+    await saveDataImmediately().catch(() => {});
     appendMessageToDOM('me', content, Date.now(), quote, 'text');
     input.value = ''; input.style.height = 'auto';
     if (currentChatType === 'role' && currentRoleId) {
@@ -8045,9 +8150,7 @@ async function sendMessage() {
     } else if (currentChatType === 'group' && currentGroupId) {
         triggerGroupReplyForGroup(currentGroupId);
     }
-    // 用户发送消息后，角色有概率主动拍一拍用户（概率9%）
     maybeTriggerRolePoke();
-    // 模拟对方已读（仅单聊）
     if (currentChatType === 'role') {
         const sentMsg = appData.chats[currentRoleId][appData.chats[currentRoleId].length - 1];
         if (sentMsg) {
@@ -8068,14 +8171,12 @@ async function sendMessage() {
     }
 }
 
-// 新增：根据角色ID触发回复
 function triggerRoleReplyForRole(roleId) {
     const role = appData.roles.find(r => r.id === roleId);
     if (!role) return;
     executeRoleReply(role);
 }
 
-// 新增：根据群组ID触发群聊回复
 function triggerGroupReplyForGroup(groupId) {
     const group = appData.groups.find(g => g.id === groupId);
     if (!group) return;
@@ -8261,7 +8362,6 @@ function executeGroupReply(group) {
 function scrollToBottom() {
     const c = document.getElementById('chat-messages');
     if (!c) return;
-    // 只在用户没有手动滚动时自动滚动到底部
     const isNearBottom = c.scrollHeight - c.scrollTop - c.clientHeight < 100;
     if (isNearBottom) {
         requestAnimationFrame(() => {
@@ -8382,7 +8482,6 @@ async function sendRolePokeReply(role, count, initialDelayMs = 0) {
     }, initialDelayMs);
 }
 
-// 用户戳一戳角色
 function executePokeWithText(text) {
     if (currentChatType !== 'role' || !currentRoleId) return;
     
@@ -8427,7 +8526,6 @@ function executePokeWithText(text) {
     }
 }
 
-// 角色主动拍一拍用户（概率9%）
 function maybeTriggerRolePoke() {
     if (currentChatType !== 'role' || !currentRoleId) return;
     if (Math.random() >= 0.09) return;
@@ -8926,7 +9024,18 @@ function sendNotificationIfNeeded(title, body) {
 }
 
 // --- 备份/恢复 ---
-function copyBackupToClipboard() { const jsonStr = JSON.stringify(appData, null, 2); navigator.clipboard.writeText(jsonStr).then(() => { showToast('备份数据已复制到剪贴板！可粘贴到备忘录保存'); }).catch(() => { showToast('复制失败，请手动选择文本复制'); }); }
+function copyBackupToClipboard() { 
+    showConfirm('备份数据包含所有聊天记录、转账记录等敏感信息，确认复制到剪贴板？', async (ok) => {
+        if (ok) {
+            const jsonStr = JSON.stringify(appData, null, 2);
+            navigator.clipboard.writeText(jsonStr).then(() => { 
+                showToast('备份数据已复制到剪贴板！请注意数据敏感性'); 
+            }).catch(() => { 
+                showToast('复制失败，请手动选择文本复制'); 
+            });
+        }
+    });
+}
 function openRestoreFromClipboardModal() { const overlay = document.createElement('div'); overlay.className = 'modal-overlay'; overlay.style.zIndex = '1200'; overlay.innerHTML = `<div class="modal-card" style="max-width:400px;width:90%;"><h3 class="text-lg font-bold mb-4">从备份恢复</h3><p class="text-xs text-gray-500 mb-2">请将之前复制的备份数据粘贴到下方文本框中，然后点击"恢复"。</p><textarea id="restore-backup-textarea" class="w-full h-40 bg-gray-100 rounded-xl p-3 text-sm outline-none resize-none" placeholder="在此粘贴备份数据..."></textarea><div class="flex gap-3 mt-4"><button id="restore-cancel-btn" class="flex-1 py-2.5 rounded-xl border border-gray-200 font-medium">取消</button><button id="restore-confirm-btn" class="flex-1 py-2.5 rounded-xl text-white font-medium shadow-lg" style="background-color: var(--button-primary-bg);">恢复</button></div></div>`; document.body.appendChild(overlay); const cancelBtn = overlay.querySelector('#restore-cancel-btn'); const confirmBtn = overlay.querySelector('#restore-confirm-btn'); const textarea = overlay.querySelector('#restore-backup-textarea'); cancelBtn.onclick = () => { document.body.removeChild(overlay); }; confirmBtn.onclick = () => { const content = textarea.value.trim(); if (!content) { showToast('请粘贴备份内容'); return; } try { const data = JSON.parse(content); if (data.roles && data.chats) { showConfirm('确定要恢复该备份吗？当前数据将被覆盖。', async () => { appData = data; if (!appData.wordbanks.wordGroups) appData.wordbanks.wordGroups = [{ name: '默认', words: [...(appData.wordbanks.replies || [])] }]; appData.wordbanks.wordGroups.forEach(g => { g.words = g.words.map(w => typeof w === 'string' ? { text: w, blocked: false } : w); }); if (!appData.favoriteMessages) appData.favoriteMessages = []; if (!appData.transferSettings) appData.transferSettings = { enabled: true, minAmount: 5.20, maxAmount: 200, probability: 15, checkInterval: 30 }; if (!appData.transferRecords) appData.transferRecords = []; if (!appData.redPackets) appData.redPackets = []; if (!appData.userProfile) appData.userProfile = { nickname: '我', avatar: DEFAULT_AVATAR }; if (!appData.balance) appData.balance = 1000000; if (!appData.moments || appData.moments.length === 0) appData.moments = JSON.parse(JSON.stringify(DEFAULT_DATA.moments)); if (!appData.momentPhotos) appData.momentPhotos = []; if (!appData.songLibrary || appData.songLibrary.length < 50) appData.songLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.songLibrary)); if (!appData.bookLibrary || appData.bookLibrary.length === 0) appData.bookLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.bookLibrary)); if (!appData.momentCommentBank) appData.momentCommentBank = [...DEFAULT_DATA.momentCommentBank]; if (!appData.musicLibrary) appData.musicLibrary = JSON.parse(JSON.stringify(DEFAULT_DATA.musicLibrary)); if (!appData.addressLibrary) appData.addressLibrary = [...DEFAULT_DATA.addressLibrary]; if (appData.settings.momentCover === undefined) appData.settings.momentCover = ''; if (!appData.pokeSymbols) appData.pokeSymbols = { my: { preset: 'heart', custom: '♡' }, partner: { preset: 'flower', custom: '✿' }, customSymbols: [] }; if (appData.settings.pokeAutoReplyEnabled === undefined) appData.settings.pokeAutoReplyEnabled = true; if (appData.settings.pokeAutoReplyProb === undefined) appData.settings.pokeAutoReplyProb = 45;
         appData.roles.forEach(r => { if (r.chatBackground === undefined) r.chatBackground = null; });
         await saveData(); await initAppearance(); renderRoleList(); renderGroupList(); showToast('数据已恢复'); updateMusicPlayerCardVisibility(); }); } else { showToast('无效的备份数据'); } } catch (e) { showToast('数据格式错误，无法解析'); } document.body.removeChild(overlay); }; overlay.addEventListener('click', (e) => { if (e.target === overlay) { document.body.removeChild(overlay); } }); }
@@ -10692,9 +10801,6 @@ function startDragMiniCall(e) { e.preventDefault(); const mini = document.getEle
 function setCallWindowSize(size) { callState.windowSize = size; const card = document.getElementById('call-card'); if (size === 'mini') card.style.transform = 'scale(0.7)'; else if (size === 'small') card.style.transform = 'scale(0.85)'; else if (size === 'standard') card.style.transform = 'scale(1)'; else if (size === 'large') card.style.transform = 'scale(1.15)'; document.querySelectorAll('.call-size-btn').forEach(btn => { btn.classList.toggle('active', btn.dataset.size === size); }); if (appData.settings.call) appData.settings.call.windowSize = size; debouncedSaveData(); }
 async function handleCallBgUpload(input) { if (input.files?.[0]) { showToast('压缩中...'); const compressed = await compressImage(input.files[0], 800, 0.7); document.getElementById('call-bg').style.backgroundImage = `url(${compressed})`; if (!appData.settings.call) appData.settings.call = {}; appData.settings.call.background = compressed; debouncedSaveData(); } }
 
-// 统一定时器已在上方实现（startUnifiedTimers）
-// 以下函数保留为空实现以兼容旧调用
-
 // 转账功能
 function showTransferModal() { if (currentChatType !== 'role' || !currentRoleId) { showToast('仅支持在单人聊天中使用'); return; } const role = appData.roles.find(r => r.id === currentRoleId); if (!role) return; document.getElementById('transfer-recipient-name').textContent = `转给 ${role.name}`; document.getElementById('transfer-amount').value = ''; document.getElementById('transfer-note').value = ''; document.getElementById('modal-transfer').classList.remove('hidden'); }
 function closeTransferModal() { document.getElementById('modal-transfer').classList.add('hidden'); }
@@ -10953,7 +11059,7 @@ function updateRedPacketDetail(packet) { const isMeSender = packet.sender === 'm
 function clickRedPacketCoin() { const coin = document.getElementById('rp-coin'); if (coin.classList.contains('flipping') || coin.classList.contains('opened')) return; coin.classList.add('flipping'); setTimeout(() => { coin.classList.remove('flipping'); coin.classList.add('opened'); document.getElementById('rp-body').style.display = 'block'; const packet = appData.redPackets.find(p => p.id === currentOpenRedPacketId); if (!packet) { closeRedPacketOpen(); return; } const isMeSender = packet.sender === 'me'; let newRecord = false; if (!isMeSender && !packet.records.find(r => r.userId === 'me') && packet.records.length < packet.count && packet.status !== 'finished' && packet.status !== 'expired') { let amount = 0; const remaining = packet.totalAmount - packet.records.reduce((s,r)=>s+r.amount, 0); const remainCount = packet.count - packet.records.length; if (packet.type === 'random') { if (remainCount <= 1) amount = Math.round(remaining * 100) / 100; else { const max = remaining / remainCount * 2; amount = Math.round((Math.random() * max + 0.01) * 100) / 100; if (amount > remaining) amount = Math.round(remaining * 100) / 100; if (amount < 0.01) amount = 0.01; } } else { amount = Math.round((packet.totalAmount / packet.count) * 100) / 100; } packet.records.push({ userId: 'me', amount, time: Date.now() }); appData.balance += amount; if (packet.records.length >= packet.count) packet.status = 'finished'; newRecord = true; } updateRedPacketDetail(packet); if (newRecord) { const chatId = packet.chatType === 'group' ? currentGroupId : currentRoleId; const chatMsgs = packet.chatType === 'group' ? appData.groupChats[chatId] : appData.chats[chatId]; if (chatMsgs) { const senderName = appData.roles.find(r=>r.id===packet.sender)?.name || '对方'; const sysText = `🧧 你已领取${senderName}的红包`; chatMsgs.push({ id: Date.now(), sender: 'system', content: sysText, time: Date.now(), type: 'system' }); debouncedSaveData(); appendMessageToDOM('system', sysText, Date.now(), null, 'system'); } } if (currentChatType === 'role' || currentChatType === 'group') { const chatMsgs = packet.chatType === 'group' ? appData.groupChats[currentGroupId] : appData.chats[currentRoleId]; const targetMsg = chatMsgs?.find(m => m.type === 'redpacket' && m.sender === packet.sender && m.packetId === packet.id); if (targetMsg) { const data = JSON.parse(targetMsg.content); data.receivedCount = packet.records.length; data.status = packet.status === 'finished' ? 'received' : (packet.records.length > 0 ? 'opened' : 'active'); targetMsg.content = JSON.stringify(data); debouncedSaveData(); renderChatMessages(); } } }, 800); }
 function closeRedPacketOpen() { document.getElementById('modal-redpacket-open').classList.add('hidden'); currentOpenRedPacketId = null; }
 
-// ========== 修复：表情包选择面板和发送功能 ==========
+// ========== 表情包选择面板和发送功能 ==========
 function openStickerPicker() { 
     const panel = document.getElementById('sticker-picker-panel');
     if (panel) {
@@ -12374,14 +12480,93 @@ function checkAndTriggerAutoDoodle() {
 function showChatHeaderMenu() { showToast('聊天信息'); }
 function showChatSettings() { openChatSettings(); }
 function batchFavorite() { showToast('长按消息可收藏'); }
-function runMsgSearch() { const keyword = document.getElementById('msg-search-input').value.trim().toLowerCase(), from = document.getElementById('msg-search-date-from').value, to = document.getElementById('msg-search-date-to').value; let results = getAllMessages().filter(m => { if (keyword && !m.content.toLowerCase().includes(keyword)) return false; const d = new Date(m.time).setHours(0,0,0,0); if (from && d < new Date(from).getTime()) return false; if (to && d > new Date(to).getTime()) return false; return true; }); const container = document.getElementById('msg-search-results'); if (!results.length) { container.innerHTML = '<div class="text-gray-400 text-center py-4">无结果</div>'; return; } container.innerHTML = results.slice(0,50).map(m => { const sender = m.sender === 'me' ? '我' : (appData.roles.find(r=>r.id===m.sender)?.name || '角色'); return `<div class="search-result-item"><div><span class="font-medium">${escapeHtml(sender)}</span>: ${escapeHtml(m.content)}<div class="text-xs text-gray-400">${new Date(m.time).toLocaleString()}</div></div><button onclick='addFavorite(${JSON.stringify(m).replace(/'/g, "\\'")}, "${sender}")' class="text-amber-500"><i data-lucide="star" class="w-4 h-4"></i></button></div>`; }).join(''); lucide.createIcons(); }
+function runMsgSearch() { 
+    const keyword = document.getElementById('msg-search-input').value.trim().toLowerCase(); 
+    const from = document.getElementById('msg-search-date-from').value; 
+    const to = document.getElementById('msg-search-date-to').value; 
+    
+    // 限制处理条数
+    let allMsgs = getAllMessagesLimited();
+    let results = allMsgs.filter(m => { 
+        if (keyword && !m.content.toLowerCase().includes(keyword)) return false; 
+        const d = new Date(m.time).setHours(0,0,0,0); 
+        if (from && d < new Date(from).getTime()) return false; 
+        if (to && d > new Date(to).getTime()) return false; 
+        return true; 
+    }); 
+    
+    const container = document.getElementById('msg-search-results'); 
+    if (!results.length) { 
+        container.innerHTML = '<div class="text-gray-400 text-center py-4">无结果</div>'; 
+        return; 
+    } 
+    
+    // 最多显示100条
+    const displayResults = results.slice(0, 100);
+    container.innerHTML = displayResults.map(m => { 
+        const sender = m.sender === 'me' ? '我' : (appData.roles.find(r=>r.id===m.sender)?.name || '角色'); 
+        return `<div class="search-result-item"><div><span class="font-medium">${escapeHtml(sender)}</span>: ${escapeHtml(m.content)}<div class="text-xs text-gray-400">${new Date(m.time).toLocaleString()}</div></div><button onclick='addFavorite(${JSON.stringify(m).replace(/'/g, "\\'")}, "${sender}")' class="text-amber-500"><i data-lucide="star" class="w-4 h-4"></i></button></div>`; 
+    }).join(''); 
+    lucide.createIcons(); 
+}
+
+// 限制获取消息数量（性能优化）
+function getAllMessagesLimited(limit = 1000) {
+    let msgs = [];
+    const chats = Object.values(appData.chats);
+    const groupChats = Object.values(appData.groupChats);
+    
+    // 先收集所有消息
+    chats.forEach(arr => {
+        if (arr && arr.length > 0) {
+            // 只取最近的 limit 条
+            const start = Math.max(0, arr.length - limit);
+            msgs.push(...arr.slice(start));
+        }
+    });
+    groupChats.forEach(arr => {
+        if (arr && arr.length > 0) {
+            const start = Math.max(0, arr.length - limit);
+            msgs.push(...arr.slice(start));
+        }
+    });
+    
+    // 按时间排序并限制总数
+    msgs.sort((a, b) => b.time - a.time);
+    return msgs.slice(0, limit);
+}
+
 function clearSearch() { document.getElementById('msg-search-input').value = ''; document.getElementById('msg-search-date-from').value = ''; document.getElementById('msg-search-date-to').value = ''; document.getElementById('msg-search-results').innerHTML = ''; }
-function getAllMessages() { let msgs = []; Object.values(appData.chats).forEach(arr => msgs.push(...arr)); Object.values(appData.groupChats).forEach(arr => msgs.push(...arr)); return msgs; }
-function renderStatsOverview() { const msgs = getAllMessages(), total = msgs.length, my = msgs.filter(m => m.sender === 'me').length, roleMsgs = msgs.filter(m => m.sender !== 'me' && m.sender !== 'system').length; const roleMap = {}; msgs.forEach(m => { if (m.sender !== 'me' && m.sender !== 'system') roleMap[m.sender] = (roleMap[m.sender] || 0) + 1; }); let html = `<div class="grid grid-cols-2 gap-3"><div class="bg-gray-100 p-3 rounded-xl"><span class="text-xs text-gray-500">总消息</span><div class="text-2xl font-bold">${total}</div></div><div class="bg-gray-100 p-3 rounded-xl"><span class="text-xs text-gray-500">我发送</span><div class="text-2xl font-bold">${my}</div></div><div class="bg-gray-100 p-3 rounded-xl"><span class="text-xs text-gray-500">角色发送</span><div class="text-2xl font-bold">${roleMsgs}</div></div></div><div class="mt-4"><h3 class="font-semibold mb-2">各角色发言</h3>`; Object.entries(roleMap).forEach(([id, count]) => { const role = appData.roles.find(r => r.id === id); html += `<div class="flex justify-between text-sm py-1 cursor-pointer hover:bg-gray-50" onclick="showRoleWordCloud('${id}')"><span>${role?.name || id}</span><span class="font-medium">${count} 条</span><i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></div>`; }); html += `</div>`; document.getElementById('stats-content').innerHTML = html; lucide.createIcons(); }
+function renderStatsOverview() { 
+    const msgs = getAllMessagesLimited(2000); 
+    const total = msgs.length; 
+    const my = msgs.filter(m => m.sender === 'me').length; 
+    const roleMsgs = msgs.filter(m => m.sender !== 'me' && m.sender !== 'system').length; 
+    const roleMap = {}; 
+    msgs.forEach(m => { if (m.sender !== 'me' && m.sender !== 'system') roleMap[m.sender] = (roleMap[m.sender] || 0) + 1; }); 
+    let html = `<div class="grid grid-cols-2 gap-3"><div class="bg-gray-100 p-3 rounded-xl"><span class="text-xs text-gray-500">总消息</span><div class="text-2xl font-bold">${total}</div></div><div class="bg-gray-100 p-3 rounded-xl"><span class="text-xs text-gray-500">我发送</span><div class="text-2xl font-bold">${my}</div></div><div class="bg-gray-100 p-3 rounded-xl"><span class="text-xs text-gray-500">角色发送</span><div class="text-2xl font-bold">${roleMsgs}</div></div></div><div class="mt-4"><h3 class="font-semibold mb-2">各角色发言</h3>`; 
+    Object.entries(roleMap).slice(0, 20).forEach(([id, count]) => { const role = appData.roles.find(r => r.id === id); html += `<div class="flex justify-between text-sm py-1 cursor-pointer hover:bg-gray-50" onclick="showRoleWordCloud('${id}')"><span>${role?.name || id}</span><span class="font-medium">${count} 条</span><i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></div>`; }); 
+    html += `</div>`; 
+    document.getElementById('stats-content').innerHTML = html; 
+    lucide.createIcons(); 
+}
 function showRoleWordCloud(roleId) { currentRoleWordCloudId = roleId; switchStatsTab('wordcloud'); document.getElementById('wordcloud-container').innerHTML = '<button class="wordcloud-back-btn" onclick="showGlobalWordCloud()"><i data-lucide="arrow-left" class="w-3 h-3 inline"></i> 返回全局</button><div id="wordcloud-canvas-wrapper"></div>'; renderWordCloudForRole(roleId); }
 function showGlobalWordCloud() { currentRoleWordCloudId = null; renderWordCloud(); }
-function renderWordCloud() { const msgs = getAllMessages().filter(m => m.type !== 'call' && m.type !== 'call_missed' && m.type !== 'poke'); if (currentRoleWordCloudId) { renderWordCloudForRole(currentRoleWordCloudId); return; } const words = msgs.flatMap(m => m.content.split(/[\s,，。.!?？!、]+/)).filter(w => w.length >= 2 && w.length <= 10); const freq = {}; words.forEach(w => { w = w.toLowerCase(); freq[w] = (freq[w] || 0) + 1; }); drawWordCloud(Object.entries(freq).map(([word, size]) => [word, Math.min(60, 12 + size * 3)])); }
-function renderWordCloudForRole(roleId) { const msgs = getAllMessages().filter(m => m.sender === roleId && m.type !== 'call' && m.type !== 'call_missed'); const words = msgs.flatMap(m => m.content.split(/[\s,，。.!?？!、]+/)).filter(w => w.length >= 2 && w.length <= 10); const freq = {}; words.forEach(w => { w = w.toLowerCase(); freq[w] = (freq[w] || 0) + 1; }); drawWordCloud(Object.entries(freq).map(([word, size]) => [word, Math.min(60, 12 + size * 3)])); }
+function renderWordCloud() { 
+    const msgs = getAllMessagesLimited(2000).filter(m => m.type !== 'call' && m.type !== 'call_missed' && m.type !== 'poke'); 
+    if (currentRoleWordCloudId) { renderWordCloudForRole(currentRoleWordCloudId); return; } 
+    const words = msgs.flatMap(m => String(m.content || '').split(/[\s,，。.!?？!、]+/)).filter(w => w && w.length >= 2 && w.length <= 10); 
+    const freq = {}; 
+    words.forEach(w => { w = w.toLowerCase(); freq[w] = (freq[w] || 0) + 1; }); 
+    drawWordCloud(Object.entries(freq).map(([word, size]) => [word, Math.min(60, 12 + size * 3)])); 
+}
+function renderWordCloudForRole(roleId) { 
+    const msgs = getAllMessagesLimited(2000).filter(m => m.sender === roleId && m.type !== 'call' && m.type !== 'call_missed'); 
+    const words = msgs.flatMap(m => String(m.content || '').split(/[\s,，。.!?？!、]+/)).filter(w => w && w.length >= 2 && w.length <= 10); 
+    const freq = {}; 
+    words.forEach(w => { w = w.toLowerCase(); freq[w] = (freq[w] || 0) + 1; }); 
+    drawWordCloud(Object.entries(freq).map(([word, size]) => [word, Math.min(60, 12 + size * 3)])); 
+}
 function drawWordCloud(list) { const container = document.getElementById('wordcloud-container'); if (!container) return; let wrapper = document.getElementById('wordcloud-canvas-wrapper'); if (!wrapper) { wrapper = document.createElement('div'); wrapper.id = 'wordcloud-canvas-wrapper'; container.appendChild(wrapper); } wrapper.innerHTML = ''; const canvas = document.createElement('canvas'); canvas.width = wrapper.clientWidth || 300; canvas.height = 250; wrapper.appendChild(canvas); if (list.length > 0 && window.WordCloud) { WordCloud(canvas, { list: list.slice(0, 80), gridSize: 10, weightMode: 'size', shape: 'circle', color: () => `hsl(${Math.random()*360}, 70%, 60%)` }); } else { wrapper.innerHTML = '<div class="text-center text-gray-400 py-8">暂无数据</div>'; } }
 function renderFavoritesList() { const list = document.getElementById('favorites-list'), favs = appData.favoriteMessages || []; if (!favs.length) { list.innerHTML = '<div class="text-center text-gray-400 py-8">暂无收藏</div>'; return; } list.innerHTML = favs.map(f => `<div class="fav-message-item"><div><span class="font-medium">${escapeHtml(f.senderName)}</span>: ${escapeHtml(f.content.substring(0,30))}</div><button onclick="removeFavorite('${f.id}')" class="text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`).join(''); lucide.createIcons(); }
 function addFavorite(msg, senderName) {
@@ -12417,7 +12602,6 @@ function startSplashAnimation() {
     let idx = 0, progress = 0; 
     document.getElementById("titleText").innerHTML = 'Spiritual connection'.split('').map((c,i) => `<span style="animation-delay:${i*0.08}s">${c}</span>`).join(''); 
     
-    // ★ 修复：星星生成
     const starsContainer = document.getElementById("starsContainer");
     if (starsContainer) {
         starsContainer.innerHTML = '';
@@ -12444,7 +12628,6 @@ function startSplashAnimation() {
             let s = document.createElement("span"); 
             s.textContent = c; 
             s.style.animationDelay = `${i * 0.07}s`; 
-            // 强制触发重排
             void s.offsetWidth;
             quoteText.appendChild(s); 
         }); 
@@ -12454,13 +12637,11 @@ function startSplashAnimation() {
     showQuote(); 
     const quoteInterval = setInterval(showQuote, 3200); 
     
-    // ★ 修复：进度条动画 - 强制回流
     function updateProgress() {
         progress += Math.random() * 1.5 + 0.5; 
         if (progress >= 100) {
             progress = 100;
             progressBar.style.width = progress + "%";
-            // 强制回流
             void progressBar.offsetWidth;
             statusText.textContent = "连接成功"; 
             clearInterval(timer); 
@@ -12468,11 +12649,12 @@ function startSplashAnimation() {
             setTimeout(() => { 
                 splashScreen.classList.add("hidden"); 
                 loadData(); 
+                // 启动 CSS 变量监控
+                setupCSSVariableMonitor();
             }, 1000); 
             return;
         }
         progressBar.style.width = progress + "%";
-        // 强制回流
         void progressBar.offsetWidth;
         statusText.textContent = "正在连接中..."; 
     }
@@ -12489,6 +12671,7 @@ function toggleLovePanel() { const m = document.getElementById('modal-love-panel
 window.toggleLovePanel = toggleLovePanel;
 window.addEventListener('beforeunload', function() {
     clearAllTimers();
+    saveDataImmediately().catch(() => {});
 });
 
 // ========== 聊天记录导入导出功能 ==========
@@ -13365,6 +13548,15 @@ function closeCosmicGraphicModal() {
 
 window.openCosmicGraphicModal = openCosmicGraphicModal;
 window.closeCosmicGraphicModal = closeCosmicGraphicModal;
+
+// ========== Toast z-index 修复 ==========
+// 确保 Toast 的 z-index 最高
+(function fixToastZIndex() {
+    const toast = document.getElementById('toast');
+    if (toast) {
+        toast.style.zIndex = '99999';
+    }
+})();
 
 console.log('Spiritual connection v2.0 - 所有功能已加载');
 
