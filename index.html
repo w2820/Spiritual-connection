@@ -5266,11 +5266,11 @@ let pendingTimer = null;
 let renderedMessageIds = new Set();
 let messageRenderAbortController = null;
 
-// ★ 新增：发送锁，防止重复发送
+// ★ 发送锁，防止重复发送
 let isSending = false;
 let lastSentMessageId = null;
 
-// ★ 新增：聊天初始化锁
+// ★ 聊天初始化锁
 let isChatInitializing = false;
 
 // 防抖保存队列
@@ -5282,6 +5282,9 @@ let iosAutoSaveTimer = null;
 
 // CSS 变量监控定时器
 let cssMonitorTimer = null;
+
+// ★ 性能优化：渲染节流
+let renderThrottle = false;
 
 // 符号映射
 const POKE_SYMBOL_MAP = {
@@ -5341,6 +5344,74 @@ let themeSchemes = [];
 // 预设拍一拍动作列表（6个）
 const PRESET_POKE_ACTIONS = [
     '拍了拍头', '戳了戳肚子', '捏了捏脸', '摸了摸头', '弹了一下额头', '揉揉脸'
+];
+
+// ========== ★ 塔罗牌 + 雷诺曼占卜数据 ==========
+
+// 塔罗牌大阿卡那（22张）
+const TAROT_CARDS = [
+    { id: '0', name: '愚者', meaning: '新的开始、冒险、天真、自由', reverse: '鲁莽、冒险、愚蠢、轻率' },
+    { id: '1', name: '魔术师', meaning: '创造力、自信、技巧、沟通', reverse: '欺骗、操纵、失败、无能' },
+    { id: '2', name: '女祭司', meaning: '直觉、潜意识、智慧、内在声音', reverse: '压抑、无知、隐藏、表面' },
+    { id: '3', name: '皇后', meaning: '丰盛、母性、自然、感官享受', reverse: '依赖、缺乏、创造受阻' },
+    { id: '4', name: '皇帝', meaning: '权威、结构、稳定、父亲形象', reverse: '独裁、僵化、控制欲强' },
+    { id: '5', name: '教皇', meaning: '传统、信仰、教育、精神导师', reverse: '教条、叛逆、误导' },
+    { id: '6', name: '恋人', meaning: '爱情、选择、和谐、合作关系', reverse: '失衡、冲突、背叛' },
+    { id: '7', name: '战车', meaning: '胜利、意志力、行动、控制', reverse: '失控、冲突、失败' },
+    { id: '8', name: '力量', meaning: '勇气、耐心、内在力量、仁慈', reverse: '软弱、自我怀疑、失控' },
+    { id: '9', name: '隐士', meaning: '内省、智慧、孤独、指导', reverse: '孤立、拒绝指导、固执' },
+    { id: '10', name: '命运之轮', meaning: '命运、变化、机遇、转折点', reverse: '厄运、抗拒变化、停滞' },
+    { id: '11', name: '正义', meaning: '公正、真相、因果、平衡', reverse: '不公、谎言、法律麻烦' },
+    { id: '12', name: '倒吊人', meaning: '牺牲、等待、换个角度看问题', reverse: '抗拒、拖延、固执己见' },
+    { id: '13', name: '死神', meaning: '结束、改变、转变、新生', reverse: '抗拒结束、停滞、无法放手' },
+    { id: '14', name: '节制', meaning: '平衡、调和、耐心、适度', reverse: '失衡、冲动、缺乏耐心' },
+    { id: '15', name: '恶魔', meaning: '束缚、物质主义、欲望、依赖', reverse: '解脱、觉醒、重获自由' },
+    { id: '16', name: '高塔', meaning: '突变、混乱、觉醒、崩溃', reverse: '灾难的延续、拒绝改变' },
+    { id: '17', name: '星星', meaning: '希望、灵感、疗愈、平静', reverse: '绝望、失望、缺乏灵感' },
+    { id: '18', name: '月亮', meaning: '幻想、潜意识、恐惧、迷惑', reverse: '真相揭示、恐惧消散' },
+    { id: '19', name: '太阳', meaning: '成功、快乐、活力和信心', reverse: '骄傲、暂时的挫折' },
+    { id: '20', name: '审判', meaning: '觉醒、重生、宽恕、因果', reverse: '逃避责任、拒绝觉醒' },
+    { id: '21', name: '世界', meaning: '完成、整合、成就、圆满', reverse: '未完成、缺乏整合、延迟' }
+];
+
+// 雷诺曼36张牌
+const LENORMAND_CARDS = [
+    { id: '1', name: '骑士', meaning: '消息、到达、运动、消息带来变化' },
+    { id: '2', name: '三叶草', meaning: '运气、机会、小幸运、希望' },
+    { id: '3', name: '船', meaning: '旅行、探索、远行、新的方向' },
+    { id: '4', name: '房子', meaning: '家庭、家园、安全、稳定' },
+    { id: '5', name: '树', meaning: '健康、成长、根基、生命力' },
+    { id: '6', name: '云', meaning: '困惑、不确定、短暂困难' },
+    { id: '7', name: '蛇', meaning: '谎言、嫉妒、麻烦、女性智慧' },
+    { id: '8', name: '棺材', meaning: '结束、转变、悲痛、新的开始' },
+    { id: '9', name: '花束', meaning: '礼物、快乐、赞美、美好的事物' },
+    { id: '10', name: '镰刀', meaning: '切断、决定、紧急、危险' },
+    { id: '11', name: '鞭子', meaning: '冲突、争吵、紧张、惩罚' },
+    { id: '12', name: '鸟', meaning: '交谈、社交、焦虑、消息' },
+    { id: '13', name: '孩子', meaning: '新的开始、纯真、信任、小孩' },
+    { id: '14', name: '狐狸', meaning: '狡猾、策略、智慧、警惕' },
+    { id: '15', name: '熊', meaning: '力量、保护、资源、威严' },
+    { id: '16', name: '星星', meaning: '希望、指引、梦想、灵性' },
+    { id: '17', name: '鹳', meaning: '变化、搬动、上升、改善' },
+    { id: '18', name: '狗', meaning: '忠诚、朋友、信任、陪伴' },
+    { id: '19', name: '塔', meaning: '目标、孤独、骄傲、权威' },
+    { id: '20', name: '花园', meaning: '社交、聚会、公众、认可' },
+    { id: '21', name: '山', meaning: '障碍、挑战、延迟、等待' },
+    { id: '22', name: '十字路口', meaning: '选择、新路径、犹豫、岔路' },
+    { id: '23', name: '老鼠', meaning: '损失、焦虑、压力、小问题' },
+    { id: '24', name: '心', meaning: '爱情、情感、幸福、表达爱意' },
+    { id: '25', name: '戒指', meaning: '承诺、结合、循环、连接' },
+    { id: '26', name: '书', meaning: '学习、秘密、知识、隐藏的真相' },
+    { id: '27', name: '信', meaning: '消息、文件、沟通、通知' },
+    { id: '28', name: '男人', meaning: '男性、伴侣、目标、主动性' },
+    { id: '29', name: '女人', meaning: '女性、伴侣、直觉、包容性' },
+    { id: '30', name: '百合', meaning: '和平、成熟、尊严、平静' },
+    { id: '31', name: '太阳', meaning: '成功、喜悦、光明、活力' },
+    { id: '32', name: '月亮', meaning: '情感、梦想、认可、美好时光' },
+    { id: '33', name: '钥匙', meaning: '答案、解决方案、重要机会' },
+    { id: '34', name: '鱼', meaning: '财富、流动、金钱、丰盛' },
+    { id: '35', name: '锚', meaning: '稳定、希望、安全、安顿' },
+    { id: '36', name: '十字架', meaning: '负担、苦痛、责任、灵性考验' }
 ];
 
 // ========== 辅助函数 ==========
@@ -5611,7 +5682,7 @@ function stopAllRingtones() {
 // --- localforage 实例 ---
 const store = localforage.createInstance({ name: 'SpiritualConnectionV2' });
 
-// --- 图片压缩（优化：更小尺寸和 WebP 格式）---
+// --- 图片压缩 ---
 async function compressImage(file, maxWidth = 150, quality = 0.5) {
     return new Promise((resolve, reject) => {
         try {
@@ -5655,7 +5726,7 @@ async function compressImage(file, maxWidth = 150, quality = 0.5) {
     });
 }
 
-// ========== 不压缩图片存储（用于角色聊天背景） ==========
+// ========== 不压缩图片存储 ==========
 async function storeImageAsBlob(file) {
     return new Promise((resolve, reject) => {
         try {
@@ -5686,7 +5757,7 @@ async function loadBackgrounds() { return await store.getItem('appBackgrounds') 
 async function saveUnreadCounts() { await store.setItem('appUnread', unreadCounts); }
 async function loadUnreadCounts() { unreadCounts = await store.getItem('appUnread') || {}; renderRoleList(); renderGroupList(); }
 
-// ========== 新增：角色聊天背景存储 ==========
+// ========== 角色聊天背景存储 ==========
 async function saveRoleChatBackground(roleId, imageData) {
     if (!roleId) return;
     const key = 'roleBg_' + roleId;
@@ -5762,7 +5833,6 @@ async function updateStorageDisplay() {
     document.getElementById('storage-progress-fill').style.width = percent + '%';
 }
 
-// 自动清理旧消息（修改为500条）
 function autoCleanChats() {
     const MAX_MESSAGES = 500;
     const KEEP = 450;
@@ -5784,7 +5854,7 @@ function syncAllReplies() {
     appData.wordbanks.replies = [...new Set(all)]; 
 }
 
-// --- 防抖保存函数（优化：添加队列机制）---
+// --- 防抖保存函数 ---
 function debounce(fn, delay) {
     let timer;
     return function(...args) {
@@ -5793,7 +5863,7 @@ function debounce(fn, delay) {
     };
 }
 
-// 立即保存函数（用于关键操作）
+// 立即保存函数
 async function saveDataImmediately() {
     try {
         autoCleanChats();
@@ -5832,10 +5902,10 @@ async function saveData() {
     }
 }
 
-// 使用防抖包装 saveData（用于非关键操作）
-const debouncedSaveData = debounce(saveDataImmediately, 500);
+// ★ 性能优化：从 500ms 改为 1000ms，减少写入频率
+const debouncedSaveData = debounce(saveDataImmediately, 1000);
 
-// --- 主题配色系统函数（增强持久化 - 修复 iOS 兼容性）---
+// --- 主题配色系统函数 ---
 async function loadCustomThemes() {
     try {
         const stored = await store.getItem('customThemes');
@@ -5849,7 +5919,6 @@ async function loadThemeSchemes() {
     } catch(e) { themeSchemes = []; }
 }
 
-// 强制恢复主题（在 loadData 结束时调用）
 function forceApplyTheme() {
     let restoredFromBackup = false;
     try {
@@ -5911,7 +5980,6 @@ function forceApplyTheme() {
     updateBgSecondaryRgb();
 }
 
-// 根据当前 bg-secondary 更新 rgb 变量
 function updateBgSecondaryRgb() {
     const root = document.documentElement;
     const bgSecondary = getComputedStyle(root).getPropertyValue('--bg-secondary').trim();
@@ -5929,7 +5997,6 @@ function updateBgSecondaryRgb() {
     }
 }
 
-// 应用内置主题
 function applyBuiltinTheme(themeId) {
     const theme = BUILTIN_THEMES.find(t => t.id === themeId);
     if (!theme) return;
@@ -5960,7 +6027,6 @@ function applyBuiltinTheme(themeId) {
     showToast(`已应用「${theme.name}」主题`);
 }
 
-// 应用自定义颜色集合（增强 iOS 兼容性）
 function applyCustomColors(colors) {
     const root = document.documentElement;
     
@@ -6029,7 +6095,6 @@ function applyCustomColors(colors) {
     }, 150);
 }
 
-// 获取当前所有主题颜色变量
 function getCurrentThemeColors() {
     const root = getComputedStyle(document.documentElement);
     const colors = {};
@@ -6063,7 +6128,6 @@ function getDefaultVariableValue(variable) {
     return defaults[variable] || '';
 }
 
-// 保存当前主题为方案
 async function saveCurrentThemeAsScheme() {
     const name = prompt('请输入主题方案名称：');
     if (!name || !name.trim()) return;
@@ -6086,7 +6150,6 @@ async function saveCurrentThemeAsScheme() {
     showToast(`主题方案「${name}」已保存`);
 }
 
-// 应用主题方案
 async function applyThemeScheme(schemeId) {
     const scheme = themeSchemes.find(s => s.id === schemeId);
     if (!scheme) return;
@@ -6095,7 +6158,6 @@ async function applyThemeScheme(schemeId) {
     showToast(`已应用方案「${scheme.name}」`);
 }
 
-// 删除主题方案
 async function deleteThemeScheme(schemeId) {
     showConfirm('确定删除这个主题方案吗？', async (ok) => {
         if (ok) {
@@ -6107,7 +6169,6 @@ async function deleteThemeScheme(schemeId) {
     });
 }
 
-// 渲染方案列表
 function renderSchemeList() {
     const container = document.getElementById('scheme-list');
     if (!container) return;
@@ -6134,7 +6195,6 @@ function renderSchemeList() {
     container.innerHTML = html;
 }
 
-// 渲染主题色块
 function renderThemeColorPalette() {
     const container = document.getElementById('theme-color-palette');
     if (!container) return;
@@ -6150,7 +6210,6 @@ function renderThemeColorPalette() {
     container.innerHTML = html;
 }
 
-// 打开主题编辑器
 function openThemeEditor() {
     const panel = document.getElementById('theme-editor-panel');
     if (!panel) return;
@@ -6227,7 +6286,6 @@ function openThemeEditor() {
     }
 }
 
-// 更新主题颜色（从编辑器）
 window.updateThemeColorFromEditor = function(variable, value) {
     const root = document.documentElement;
     root.style.setProperty(variable, value);
@@ -6244,7 +6302,6 @@ window.updateThemeColorFromEditor = function(variable, value) {
     const displaySpan = document.getElementById(`value-${variable.replace(/--/g, '')}`);
     if (displaySpan) displaySpan.textContent = value;
     
-    // ★ 修复：强制重绘所有使用该变量的元素
     document.querySelectorAll('*').forEach(el => {
         const display = window.getComputedStyle(el).display;
         if (display !== 'none') {
@@ -6306,7 +6363,7 @@ function resetThemeToDefault() {
     showToast('已重置为默认主题');
 }
 
-// ========== CSS 变量监控 ==========
+// ========== CSS 变量监控（性能优化：从3秒改为10秒） ==========
 function setupCSSVariableMonitor() {
     if (cssMonitorTimer) {
         clearInterval(cssMonitorTimer);
@@ -6316,6 +6373,7 @@ function setupCSSVariableMonitor() {
     let lastAccentColor = getComputedStyle(document.documentElement)
         .getPropertyValue('--accent-color').trim();
     
+    // ★ 性能优化：从 3000ms 改为 10000ms
     cssMonitorTimer = setInterval(() => {
         const currentColor = getComputedStyle(document.documentElement)
             .getPropertyValue('--accent-color').trim();
@@ -6336,7 +6394,7 @@ function setupCSSVariableMonitor() {
         }
         
         lastAccentColor = currentColor;
-    }, 3000);
+    }, 10000);
 }
 
 // ========== 页面可见性变化监听 ==========
@@ -6355,7 +6413,6 @@ document.addEventListener('visibilitychange', function() {
     }
 });
 
-// 在线状态自动切换
 function startOnlineStatusTimer() {
     if (onlineStatusTimer) clearInterval(onlineStatusTimer);
     onlineStatusTimer = setInterval(() => {
@@ -6377,7 +6434,7 @@ function startOnlineStatusTimer() {
     }, 60 * 60 * 1000);
 }
 
-// ========== 统一定时器管理 ==========
+// ========== 统一定时器管理（性能优化：从30秒改为60秒） ==========
 let unifiedTimer = null;
 let unifiedTickCount = 0;
 
@@ -6389,6 +6446,7 @@ function startUnifiedTimers() {
     
     clearAllTimers();
     
+    // ★ 性能优化：从 30000ms 改为 60000ms，减少CPU占用
     unifiedTimer = setInterval(() => {
         unifiedTickCount++;
         
@@ -6427,7 +6485,7 @@ function startUnifiedTimers() {
         if (unifiedTickCount > 100000) {
             unifiedTickCount = 0;
         }
-    }, 30000);
+    }, 60000);
 }
 
 function checkAutoSendMessages() {
@@ -6632,7 +6690,6 @@ function triggerGroupAutoReply(group) {
 
 function getDefaultProbConfig(count) { const config = {}; for (let i = 1; i <= count; i++) config[i] = Math.floor(100 / count); const sum = Object.values(config).reduce((a,b)=>a+b,0); if (sum < 100) config[1] += 100 - sum; return config; }
 
-// 获取所有未被屏蔽的字卡文本
 function getActiveWordList() {
     const active = [];
     appData.wordbanks.wordGroups.forEach(g => {
@@ -7081,7 +7138,6 @@ function initPokeSymbolUI() {
     }
 }
 
-// 恢复音乐卡片位置
 function restoreMusicCardPosition() {
     const card = document.getElementById('music-player-card');
     if (!card) return;
@@ -7433,6 +7489,7 @@ function appendMessageToDOM(sender, content, time, quote = null, type = 'text') 
     }, 80);
 }
 
+// ★ 性能优化：使用 requestAnimationFrame 进行批量渲染
 function flushPendingMessages() {
     if (pendingMessages.length === 0) return;
     const container = document.getElementById('chat-messages');
@@ -7450,70 +7507,72 @@ function flushPendingMessages() {
     messageRenderAbortController = new AbortController();
     const signal = messageRenderAbortController.signal;
     
-    const fragment = document.createDocumentFragment();
-    
-    let lastDate = null;
-    const allDateSeparators = container.querySelectorAll('.date-separator');
-    if (allDateSeparators.length > 0) {
-        lastDate = allDateSeparators[allDateSeparators.length - 1].textContent;
-    }
-    if (lastDate === null) {
-        const lastWrapper = container.querySelector('.message-wrapper:last-child');
-        if (lastWrapper) {
-            const lastTime = parseInt(lastWrapper.dataset.msgTime);
-            if (lastTime) {
-                lastDate = formatDate(lastTime);
-            }
-        }
-    }
-    
-    if (signal.aborted) return;
-    
-    msgs.forEach(({ sender, content, time, quote, type }) => {
+    // ★ 使用 requestAnimationFrame 在下一帧渲染
+    requestAnimationFrame(() => {
         if (signal.aborted) return;
         
-        const currentDate = formatDate(time);
-        if (lastDate !== null && lastDate !== currentDate) {
-            const dateDiv = document.createElement('div');
-            dateDiv.className = 'text-center text-gray-400 text-xs py-2 date-separator';
-            dateDiv.textContent = currentDate;
-            fragment.appendChild(dateDiv);
-            lastDate = currentDate;
-        } else if (lastDate === null) {
-            const hasMessages = container.querySelector('.message-wrapper') !== null;
-            if (!hasMessages) {
+        const fragment = document.createDocumentFragment();
+        
+        let lastDate = null;
+        const allDateSeparators = container.querySelectorAll('.date-separator');
+        if (allDateSeparators.length > 0) {
+            lastDate = allDateSeparators[allDateSeparators.length - 1].textContent;
+        }
+        if (lastDate === null) {
+            const lastWrapper = container.querySelector('.message-wrapper:last-child');
+            if (lastWrapper) {
+                const lastTime = parseInt(lastWrapper.dataset.msgTime);
+                if (lastTime) {
+                    lastDate = formatDate(lastTime);
+                }
+            }
+        }
+        
+        if (signal.aborted) return;
+        
+        msgs.forEach(({ sender, content, time, quote, type }) => {
+            if (signal.aborted) return;
+            
+            const currentDate = formatDate(time);
+            if (lastDate !== null && lastDate !== currentDate) {
                 const dateDiv = document.createElement('div');
                 dateDiv.className = 'text-center text-gray-400 text-xs py-2 date-separator';
                 dateDiv.textContent = currentDate;
                 fragment.appendChild(dateDiv);
                 lastDate = currentDate;
-            } else {
-                lastDate = currentDate;
+            } else if (lastDate === null) {
+                const hasMessages = container.querySelector('.message-wrapper') !== null;
+                if (!hasMessages) {
+                    const dateDiv = document.createElement('div');
+                    dateDiv.className = 'text-center text-gray-400 text-xs py-2 date-separator';
+                    dateDiv.textContent = currentDate;
+                    fragment.appendChild(dateDiv);
+                    lastDate = currentDate;
+                } else {
+                    lastDate = currentDate;
+                }
             }
-        }
-        const el = createMessageElement(sender, content, time, quote, type, false);
-        const msgId = time + sender + Math.random().toString(36).substr(2, 4);
-        el.dataset.msgId = msgId;
-        el.dataset.msgTime = time;
-        renderedMessageIds.add(msgId);
-        fragment.appendChild(el);
-    });
-    
-    if (signal.aborted) return;
-    
-    container.appendChild(fragment);
-    
-    const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 150;
-    if (isNearBottom) {
-        requestAnimationFrame(() => {
-            container.scrollTop = container.scrollHeight;
+            const el = createMessageElement(sender, content, time, quote, type, false);
+            const msgId = time + sender + Math.random().toString(36).substr(2, 4);
+            el.dataset.msgId = msgId;
+            el.dataset.msgTime = time;
+            renderedMessageIds.add(msgId);
+            fragment.appendChild(el);
         });
-    }
+        
+        if (signal.aborted) return;
+        
+        container.appendChild(fragment);
+        
+        const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 150;
+        if (isNearBottom) {
+            container.scrollTop = container.scrollHeight;
+        }
+    });
 }
 
-// ========== 聊天消息渲染函数（优化版：取消机制 + 防止重复初始化） ==========
+// ========== 聊天消息渲染函数（优化版：取消机制） ==========
 function renderChatMessages() {
-    // 防止并发渲染
     if (isChatInitializing) {
         return;
     }
@@ -7599,7 +7658,6 @@ function renderChatMessages() {
     }
 }
 
-// ========== 全量渲染函数 ==========
 function renderFullMessages(container, msgs) {
     container.innerHTML = '';
     renderedMessageIds.clear();
@@ -7625,19 +7683,16 @@ function renderFullMessages(container, msgs) {
     });
 }
 
-// 缓存头像设置
 let cachedAvatarSettings = null;
 let cachedAvatarShape = null;
 
 function openChat(roleId) {
-    // 防止重复打开同一个聊天
     if (currentRoleId === roleId && currentChatType === 'role') {
         document.getElementById('page-home').classList.remove('active');
         document.getElementById('page-chat').classList.add('active');
         return;
     }
     
-    // 防止快速切换导致冲突
     if (isChatInitializing) {
         setTimeout(() => openChat(roleId), 100);
         return;
@@ -7662,7 +7717,6 @@ function openChat(roleId) {
     
     cancelPendingMessageRenders();
     
-    // 使用 requestAnimationFrame 延迟渲染
     requestAnimationFrame(() => {
         renderChatMessages();
         updateCallButtonVisibility();
@@ -7874,7 +7928,6 @@ function goBack() {
     
     closeContextMenu();
     
-    // 重置发送锁
     isSending = false;
     lastSentMessageId = null;
     
@@ -8181,7 +8234,7 @@ function forceRoleReply() {
     }
 }
 
-// ========== ★ 核心修复：发送消息（防重复发送 + 性能优化） ==========
+// ========== ★ 核心修复：发送消息（立即响应，键盘回落不阻塞） ==========
 async function sendMessage() {
     // 防重复发送锁
     if (isSending) {
@@ -8195,69 +8248,61 @@ async function sendMessage() {
     
     // 生成消息ID用于去重
     const msgId = Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-    if (lastSentMessageId === msgId) {
-        return;
-    }
+    if (lastSentMessageId === msgId) return;
     
     isSending = true;
     
     try {
-        let quote = null;
-        if (quoteMessageObject) {
-            quote = { ...quoteMessageObject };
-            clearQuotePreview();
-        }
+        // ★ 修复：立即清空输入框（触发键盘回落，但消息已经发送）
+        input.value = '';
+        input.style.height = 'auto';
         
+        // ★ 修复：立即构建消息对象并渲染（不等待任何异步操作）
         const msg = { 
             id: msgId, 
             sender: 'me', 
             content, 
             time: Date.now(), 
             type: 'text', 
-            quote, 
+            quote: quoteMessageObject ? { ...quoteMessageObject } : null, 
             read: false 
         };
         
-        // 确定目标聊天
-        let targetChats;
-        let targetId;
+        // 清空引用预览
+        if (quoteMessageObject) {
+            clearQuotePreview();
+        }
+        
+        // ★ 修复：立即添加到数据并渲染（同步执行，不等待保存）
         if (currentChatType === 'role' && currentRoleId) {
             if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = [];
             appData.chats[currentRoleId].push(msg);
-            targetChats = appData.chats;
-            targetId = currentRoleId;
         } else if (currentChatType === 'group' && currentGroupId) {
             if (!appData.groupChats[currentGroupId]) appData.groupChats[currentGroupId] = [];
             appData.groupChats[currentGroupId].push(msg);
-            targetChats = appData.groupChats;
-            targetId = currentGroupId;
         } else {
-            showToast('请先进入聊天');
             isSending = false;
             return;
         }
         
-        // 立即保存
-        await saveDataImmediately().catch(() => {});
-        
-        // 渲染消息
-        appendMessageToDOM('me', content, Date.now(), quote, 'text');
-        
-        // 清空输入框
-        input.value = '';
-        input.style.height = 'auto';
+        // ★ 修复：立即渲染消息到DOM（不等待任何异步操作）
+        appendMessageToDOM('me', content, Date.now(), msg.quote, 'text');
         lastSentMessageId = msgId;
         
-        // 触发角色回复
+        // ★ 修复：保存操作放到微任务队列，不阻塞UI
+        queueMicrotask(() => {
+            saveDataImmediately().catch(() => {});
+        });
+        
+        // ★ 修复：触发角色回复（使用setTimeout，但不阻塞发送）
         if (currentChatType === 'role' && currentRoleId) {
-            // 使用 setTimeout 避免阻塞 UI
             setTimeout(() => {
                 triggerRoleReplyForRole(currentRoleId);
-            }, 100);
+            }, 50);
         } else if (currentChatType === 'group' && currentGroupId) {
             setTimeout(() => {
                 triggerGroupReplyForGroup(currentGroupId);
-            }, 100);
+            }, 50);
         }
         
         // 角色主动拍一拍（概率9%）
@@ -8290,7 +8335,6 @@ async function sendMessage() {
         showToast('发送失败，请重试');
     } finally {
         isSending = false;
-        // 延迟重置去重标记
         setTimeout(() => {
             if (lastSentMessageId === msgId) {
                 lastSentMessageId = null;
@@ -8298,6 +8342,19 @@ async function sendMessage() {
         }, 500);
     }
 }
+
+// ★ 新增：回车键发送
+document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('chat-input');
+    if (input) {
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    }
+});
 
 function triggerRoleReplyForRole(roleId) {
     const role = appData.roles.find(r => r.id === roleId);
@@ -8311,7 +8368,7 @@ function triggerGroupReplyForGroup(groupId) {
     executeGroupReply(group);
 }
 
-// ========== 核心执行函数 ==========
+// ========== 核心执行函数（角色回复逻辑保持不变） ==========
 function executeRoleReply(role) {
     if (!role) return;
     
@@ -8434,7 +8491,7 @@ function executeRoleReply(role) {
     }, baseDelay);
 }
 
-// ========== 群聊回复执行函数 ==========
+// ========== 群聊回复执行函数（保持不变） ==========
 function executeGroupReply(group) {
     if (!group || !group.members || group.members.length < 2) return;
     
@@ -9601,9 +9658,71 @@ function openDecision() { document.getElementById('decision-options').value = ''
 function closeDecision() { document.getElementById('modal-decision').classList.add('hidden'); }
 function makeDecision() { let text = document.getElementById('decision-options').value; let opts = text.split(/[,\n]/).map(s=>s.trim()).filter(s=>s); if (!opts.length) { showToast('请输入选项'); return; } document.getElementById('decision-result').innerHTML = `✨ ${opts[Math.floor(Math.random()*opts.length)]} ✨`; }
 const fortunes = ['大吉','中吉','小吉','末吉','凶','大凶']; const fortuneTexts = { '大吉':'万事如意','中吉':'好事将近','小吉':'小确幸','末吉':'平常心','凶':'注意小人','大凶':'破財消災' };
-function openFortune() { document.getElementById('modal-fortune').classList.remove('hidden'); drawFortune(); }
+
+// ========== ★ 占卜功能：塔罗牌 + 雷诺曼（已恢复） ==========
+function openFortune() { 
+    document.getElementById('modal-fortune').classList.remove('hidden'); 
+    drawFortune(); 
+}
 function closeFortune() { document.getElementById('modal-fortune').classList.add('hidden'); }
-function drawFortune() { const f = fortunes[Math.floor(Math.random()*fortunes.length)]; document.getElementById('fortune-text').innerHTML = `<span class="text-3xl">${f}</span><br>${fortuneTexts[f]}`; }
+
+function drawFortune() {
+    const type = Math.random() < 0.5 ? 'tarot' : 'lenormand';
+    const resultDiv = document.getElementById('fortune-text');
+    
+    if (type === 'tarot') {
+        // 塔罗牌占卜：抽3张牌（过去、现在、未来）
+        const shuffled = [...TAROT_CARDS].sort(() => Math.random() - 0.5);
+        const cards = shuffled.slice(0, 3);
+        const positions = ['过去', '现在', '未来'];
+        const isReversed = cards.map(() => Math.random() < 0.3);
+        
+        resultDiv.innerHTML = `
+            <div class="tarot-reading" style="text-align:left; font-size:13px; line-height:1.6;">
+                <div class="tarot-title" style="font-size:18px; font-weight:700; text-align:center; margin-bottom:12px; color:var(--accent-color);">🔮 塔罗占卜</div>
+                <div class="tarot-cards" style="display:flex; flex-direction:column; gap:10px;">
+                    ${cards.map((card, i) => `
+                        <div class="tarot-card" style="background:#f8f9fa; border-radius:12px; padding:10px 14px; border-left:4px solid ${isReversed[i] ? '#e74c3c' : 'var(--accent-color)'};">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span style="font-weight:700; font-size:15px;">${card.name}</span>
+                                <span style="font-size:11px; color:#999;">${positions[i]}</span>
+                            </div>
+                            <div style="font-size:12px; color:#666; margin-top:2px;">
+                                ${isReversed[i] ? '⬇️ 逆位：' : '⬆️ 正位：'}
+                                ${isReversed[i] ? card.reverse : card.meaning}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div style="text-align:center; font-size:11px; color:#aaa; margin-top:12px;">✦ 点击抽签可重新占卜 ✦</div>
+            </div>
+        `;
+    } else {
+        // 雷诺曼占卜：抽3张牌组合解读
+        const shuffled = [...LENORMAND_CARDS].sort(() => Math.random() - 0.5);
+        const cards = shuffled.slice(0, 3);
+        
+        resultDiv.innerHTML = `
+            <div class="lenormand-reading" style="text-align:left; font-size:13px; line-height:1.6;">
+                <div class="lenormand-title" style="font-size:18px; font-weight:700; text-align:center; margin-bottom:12px; color:var(--accent-color);">🃏 雷诺曼占卜</div>
+                <div class="lenormand-cards" style="display:flex; flex-direction:column; gap:10px;">
+                    ${cards.map((card, i) => `
+                        <div class="lenormand-card" style="background:#f8f9fa; border-radius:12px; padding:10px 14px; border-left:4px solid var(--accent-color);">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span style="font-weight:700; font-size:15px;">${card.id}. ${card.name}</span>
+                            </div>
+                            <div style="font-size:12px; color:#666; margin-top:2px;">${card.meaning}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div style="text-align:center; font-size:12px; color:#666; margin-top:12px; padding:8px; background:#f0f0f0; border-radius:8px;">
+                    📖 组合解读：${cards.map(c => c.name).join(' → ')}
+                </div>
+                <div style="text-align:center; font-size:11px; color:#aaa; margin-top:8px;">✦ 点击抽签可重新占卜 ✦</div>
+            </div>
+        `;
+    }
+}
 
 // --- 重要日 ---
 function openImportantDays() { if (!appData.importantDays) appData.importantDays = []; selectedImportantId = appData.importantDays.length > 0 ? appData.importantDays[0].id : null; importantTab = 'card'; switchImportantTab('card'); renderImportantList(); updateBannerDays(); document.getElementById('modal-important-days').classList.remove('hidden'); }
@@ -9671,7 +9790,6 @@ function closeContentLibrary() { document.getElementById('modal-library-main').c
 function openWordCardLibrary() { pageHistory.push('library'); tempWordGroups = JSON.parse(JSON.stringify(appData.wordbanks.wordGroups)); currentWordGroup = 'all'; renderWordGroups(); renderWordCardList(); document.getElementById('modal-library-main').classList.add('hidden'); document.getElementById('modal-library-words').classList.add('active'); }
 function closeWordCardLibrary() { document.getElementById('modal-library-words').classList.remove('active'); if (pageHistory.pop() === 'library') document.getElementById('modal-library-main').classList.remove('hidden'); }
 
-// 修改 renderWordGroups：添加分组复选框，支持全选/反选
 let selectedGroups = [];
 
 function renderWordGroups() {
@@ -9725,7 +9843,6 @@ function renderWordGroups() {
 
 function switchWordGroup(g) { currentWordGroup = g; renderWordGroups(); renderWordCardList(); }
 
-// ========== 字卡列表渲染 ==========
 function findWordByFlatIndex(flatIndex) {
     if (currentWordGroup === 'all') {
         let count = 0;
@@ -9961,7 +10078,6 @@ function processWords(type) {
     renderWordCardList();
 }
 
-// 打开分组导出弹窗
 function openGroupExportModal() {
     if (tempWordGroups.length === 0) {
         showToast('暂无分组数据');
@@ -10441,7 +10557,6 @@ function bindPokeActionModalEvents() {
     if (showCustomBtn) showCustomBtn.onclick = showCustomPokeModal;
 }
 
-// 符号表格渲染
 function renderSymbolTable() {
     const tbody = document.getElementById('symbol-list-body');
     if (!tbody) return;
