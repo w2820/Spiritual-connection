@@ -5266,6 +5266,13 @@ let pendingTimer = null;
 let renderedMessageIds = new Set();
 let messageRenderAbortController = null;
 
+// ★ 新增：发送锁，防止重复发送
+let isSending = false;
+let lastSentMessageId = null;
+
+// ★ 新增：聊天初始化锁
+let isChatInitializing = false;
+
 // 防抖保存队列
 let saveQueue = [];
 let saveInProgress = false;
@@ -5631,7 +5638,6 @@ async function compressImage(file, maxWidth = 150, quality = 0.5) {
                         }
                     };
                     img.onerror = () => {
-                        // 如果图片加载失败，尝试直接使用原始数据
                         resolve(e.target.result);
                     };
                     img.src = e.target.result;
@@ -5799,7 +5805,6 @@ async function saveDataImmediately() {
         await store.setItem('appData', dataToSave);
         await store.setItem('customThemes', customThemes);
         await store.setItem('themeSchemes', themeSchemes);
-        // 额外备份到 localStorage
         try {
             localStorage.setItem('spiritual_theme_backup', JSON.stringify({
                 customThemeColors: appData.appearance?.customThemeColors || {},
@@ -5846,7 +5851,6 @@ async function loadThemeSchemes() {
 
 // 强制恢复主题（在 loadData 结束时调用）
 function forceApplyTheme() {
-    // 优先从 localStorage 恢复（iOS 更可靠）
     let restoredFromBackup = false;
     try {
         const backup = localStorage.getItem('spiritual_theme_backup');
@@ -5888,7 +5892,6 @@ function forceApplyTheme() {
         return;
     }
     
-    // 尝试从 localStorage 恢复备份（无时间戳限制）
     try {
         const backup = localStorage.getItem('spiritual_theme_backup');
         if (backup) {
@@ -5904,7 +5907,6 @@ function forceApplyTheme() {
         }
     } catch(e) {}
     
-    // 默认主题
     applyBuiltinTheme('green');
     updateBgSecondaryRgb();
 }
@@ -5952,7 +5954,6 @@ function applyBuiltinTheme(themeId) {
     appData.appearance.customThemeColors = {};
     debouncedSaveData();
     updateBgSecondaryRgb();
-    // 强制重绘
     root.style.transform = 'translateZ(0)';
     void root.offsetHeight;
     root.style.transform = '';
@@ -5963,7 +5964,6 @@ function applyBuiltinTheme(themeId) {
 function applyCustomColors(colors) {
     const root = document.documentElement;
     
-    // 1. 应用所有颜色变量
     for (const [variable, color] of Object.entries(colors)) {
         if (color) {
             root.style.setProperty(variable, color);
@@ -5977,28 +5977,23 @@ function applyCustomColors(colors) {
         }
     }
     
-    // 2. ★ iOS 修复：强制触发样式重绘
     root.classList.add('theme-updating');
     void root.offsetHeight;
     root.classList.remove('theme-updating');
     
-    // 3. ★ iOS 修复：修改过渡属性强制重排
     const originalTransition = root.style.transition;
     root.style.transition = 'none';
     void root.offsetHeight;
     root.style.transition = originalTransition;
     
-    // 4. ★ iOS 修复：使用 transform 触发 GPU 渲染
     root.style.transform = 'translateZ(0)';
     void root.offsetHeight;
     root.style.transform = '';
     
-    // 5. 保存到持久化数据
     appData.appearance.customThemeColors = colors;
     appData.appearance.theme = 'custom';
     appData.appearance.customColor = colors['--accent-color'] || '#82cbb2';
     
-    // 6. ★ iOS 修复：立即同步保存到 localStorage
     try {
         localStorage.setItem('spiritual_theme_backup', JSON.stringify({
             customThemeColors: colors,
@@ -6013,12 +6008,10 @@ function applyCustomColors(colors) {
         }));
     } catch(e) {}
     
-    // 7. 立即保存到 IndexedDB
     saveDataImmediately().catch(() => {});
     
     updateBgSecondaryRgb();
     
-    // 8. ★ iOS 修复：延迟二次确认
     setTimeout(() => {
         const appliedColor = getComputedStyle(root).getPropertyValue('--accent-color').trim();
         const expectedColor = colors['--accent-color'] || '#82cbb2';
@@ -6084,7 +6077,6 @@ async function saveCurrentThemeAsScheme() {
     };
     themeSchemes.push(scheme);
     
-    // ★ iOS 修复：先同步保存到 localStorage
     try {
         localStorage.setItem('spiritual_schemes_backup', JSON.stringify(themeSchemes));
     } catch(e) {}
@@ -6163,7 +6155,6 @@ function openThemeEditor() {
     const panel = document.getElementById('theme-editor-panel');
     if (!panel) return;
     
-    // 检测是否为 iOS Safari
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     
     const currentColors = getCurrentThemeColors();
@@ -6203,7 +6194,6 @@ function openThemeEditor() {
     panel.innerHTML = html;
     document.getElementById('modal-appearance-theme-editor').classList.remove('hidden');
     
-    // ★ iOS 修复：iOS 上自动保存
     if (isIOS) {
         if (iosAutoSaveTimer) {
             clearInterval(iosAutoSaveTimer);
@@ -6239,13 +6229,14 @@ function openThemeEditor() {
 
 // 更新主题颜色（从编辑器）
 window.updateThemeColorFromEditor = function(variable, value) {
-    document.documentElement.style.setProperty(variable, value);
+    const root = document.documentElement;
+    root.style.setProperty(variable, value);
     if (variable === '--accent-color') {
-        document.documentElement.style.setProperty('--accent-rgb', hexToRgb(value).join(','));
-        document.documentElement.style.setProperty('--button-primary-bg', value);
-        document.documentElement.style.setProperty('--tab-active-text', value);
-        document.documentElement.style.setProperty('--tab-active-border', value);
-        document.documentElement.style.setProperty('--accent-light', hexToRgba(value, 0.1));
+        root.style.setProperty('--accent-rgb', hexToRgb(value).join(','));
+        root.style.setProperty('--button-primary-bg', value);
+        root.style.setProperty('--tab-active-text', value);
+        root.style.setProperty('--tab-active-border', value);
+        root.style.setProperty('--accent-light', hexToRgba(value, 0.1));
     }
     if (variable === '--bg-secondary') {
         updateBgSecondaryRgb();
@@ -6253,10 +6244,19 @@ window.updateThemeColorFromEditor = function(variable, value) {
     const displaySpan = document.getElementById(`value-${variable.replace(/--/g, '')}`);
     if (displaySpan) displaySpan.textContent = value;
     
-    // iOS 修复：强制重绘
-    document.documentElement.style.transform = 'translateZ(0)';
-    void document.documentElement.offsetHeight;
-    document.documentElement.style.transform = '';
+    // ★ 修复：强制重绘所有使用该变量的元素
+    document.querySelectorAll('*').forEach(el => {
+        const display = window.getComputedStyle(el).display;
+        if (display !== 'none') {
+            el.style.willChange = 'auto';
+            void el.offsetHeight;
+            el.style.willChange = '';
+        }
+    });
+    
+    root.style.transform = 'translateZ(0)';
+    void root.offsetHeight;
+    root.style.transform = '';
 };
 
 window.updateThemeColorChannel = function(variable, channel, val) {
@@ -6306,7 +6306,7 @@ function resetThemeToDefault() {
     showToast('已重置为默认主题');
 }
 
-// ========== CSS 变量监控（修复 iOS 主题丢失） ==========
+// ========== CSS 变量监控 ==========
 function setupCSSVariableMonitor() {
     if (cssMonitorTimer) {
         clearInterval(cssMonitorTimer);
@@ -6339,7 +6339,7 @@ function setupCSSVariableMonitor() {
     }, 3000);
 }
 
-// ========== 页面可见性变化监听（iOS 切换应用时保存） ==========
+// ========== 页面可见性变化监听 ==========
 document.addEventListener('visibilitychange', function() {
     if (document.hidden) {
         const currentColors = getCurrentThemeColors();
@@ -6351,7 +6351,6 @@ document.addEventListener('visibilitychange', function() {
                 _timestamp: Date.now()
             }));
         } catch(e) {}
-        // 页面隐藏时保存数据
         saveDataImmediately().catch(() => {});
     }
 });
@@ -6423,7 +6422,6 @@ function startUnifiedTimers() {
             updateOnlineStatuses();
         }
         
-        // 每30秒更新音乐进度
         updateMusicProgress();
         
         if (unifiedTickCount > 100000) {
@@ -6901,7 +6899,7 @@ async function loadData() {
     updateBgSecondaryRgb();
     
     // ============================================================
-    // 修复：气泡 CSS 编辑器功能
+    // 气泡 CSS 编辑器功能
     // ============================================================
     function initBubbleCssEditor() {
         const applyBtn = document.getElementById('apply-bubble-css');
@@ -7405,7 +7403,6 @@ function formatDate(timestamp) {
 }
 
 // ========== 消息积攒批量渲染（优化：取消机制） ==========
-// 取消所有待处理的消息渲染任务
 function cancelPendingMessageRenders() {
     if (pendingTimer) {
         clearTimeout(pendingTimer);
@@ -7418,7 +7415,6 @@ function cancelPendingMessageRenders() {
     }
 }
 
-// 核心：增量添加消息（只添加新消息，不全量重建）
 function appendMessageToDOM(sender, content, time, quote = null, type = 'text') {
     const container = document.getElementById('chat-messages');
     if (!container) return;
@@ -7426,7 +7422,6 @@ function appendMessageToDOM(sender, content, time, quote = null, type = 'text') 
     const isActive = (currentChatType === 'role' && currentRoleId) || (currentChatType === 'group' && currentGroupId);
     if (!isActive && sender !== 'me' && sender !== 'system') return;
     
-    // 取消旧定时器，用新定时器合并
     if (pendingTimer) {
         clearTimeout(pendingTimer);
     }
@@ -7449,7 +7444,6 @@ function flushPendingMessages() {
     const msgs = pendingMessages;
     pendingMessages = [];
     
-    // 创建 AbortController 用于取消本次渲染
     if (messageRenderAbortController) {
         messageRenderAbortController.abort();
     }
@@ -7458,7 +7452,6 @@ function flushPendingMessages() {
     
     const fragment = document.createDocumentFragment();
     
-    // 获取最后一条消息的日期
     let lastDate = null;
     const allDateSeparators = container.querySelectorAll('.date-separator');
     if (allDateSeparators.length > 0) {
@@ -7474,7 +7467,6 @@ function flushPendingMessages() {
         }
     }
     
-    // 检查是否已取消
     if (signal.aborted) return;
     
     msgs.forEach(({ sender, content, time, quote, type }) => {
@@ -7519,76 +7511,92 @@ function flushPendingMessages() {
     }
 }
 
-// ========== 聊天消息渲染函数（优化版：取消机制） ==========
+// ========== 聊天消息渲染函数（优化版：取消机制 + 防止重复初始化） ==========
 function renderChatMessages() {
-    // 取消所有待处理的消息渲染
-    cancelPendingMessageRenders();
-    
-    const container = document.getElementById('chat-messages');
-    let msgs = [];
-    if (currentChatType === 'role') {
-        msgs = appData.chats[currentRoleId] || [];
-    } else {
-        msgs = appData.groupChats[currentGroupId] || [];
+    // 防止并发渲染
+    if (isChatInitializing) {
+        return;
     }
-
-    const DEFAULT_DISPLAY_COUNT = 50;
-    let displayMsgs = msgs;
-    let hasMore = false;
+    isChatInitializing = true;
     
-    if (msgs.length > DEFAULT_DISPLAY_COUNT) {
-        displayMsgs = msgs.slice(-DEFAULT_DISPLAY_COUNT);
-        hasMore = true;
-    }
-
-    container.innerHTML = '';
-    renderedMessageIds.clear();
-    
-    if (hasMore) {
-        const loadMoreDiv = document.createElement('div');
-        loadMoreDiv.className = 'text-center py-3';
-        loadMoreDiv.innerHTML = `
-            <button class="load-more-btn px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 hover:scale-105 active:scale-95"
-                    style="background-color: var(--accent-light); color: var(--accent-color); border: 1px solid var(--border-color);">
-                <i class="fas fa-chevron-up mr-1"></i> 加载更早的 ${msgs.length - DEFAULT_DISPLAY_COUNT} 条消息
-            </button>
-        `;
-        const loadBtn = loadMoreDiv.querySelector('.load-more-btn');
-        loadBtn.onclick = function(e) {
-            e.stopPropagation();
-            const allMsgs = msgs;
-            container.innerHTML = '';
-            renderedMessageIds.clear();
-            renderFullMessages(container, allMsgs);
-            setTimeout(() => {
-                container.scrollTop = container.scrollHeight;
-            }, 50);
-            showToast('已加载全部消息');
-        };
-        container.appendChild(loadMoreDiv);
-    }
-
-    let lastDate = null;
-    displayMsgs.forEach(m => {
-        const currentDate = formatDate(m.time);
-        if (lastDate !== currentDate) {
-            const dateDiv = document.createElement('div');
-            dateDiv.className = 'text-center text-gray-400 text-xs py-2 date-separator';
-            dateDiv.textContent = currentDate;
-            container.appendChild(dateDiv);
-            lastDate = currentDate;
+    try {
+        cancelPendingMessageRenders();
+        
+        const container = document.getElementById('chat-messages');
+        if (!container) {
+            isChatInitializing = false;
+            return;
         }
-        const el = createMessageElement(m.sender, m.content, m.time, m.quote, m.type, m.read);
-        const id = m.id + m.sender + Math.random().toString(36).substr(2, 4);
-        el.dataset.msgId = id;
-        el.dataset.msgTime = m.time;
-        renderedMessageIds.add(id);
-        container.appendChild(el);
-    });
+        
+        let msgs = [];
+        if (currentChatType === 'role') {
+            msgs = appData.chats[currentRoleId] || [];
+        } else {
+            msgs = appData.groupChats[currentGroupId] || [];
+        }
 
-    requestAnimationFrame(() => {
-        container.scrollTop = container.scrollHeight;
-    });
+        const DEFAULT_DISPLAY_COUNT = 50;
+        let displayMsgs = msgs;
+        let hasMore = false;
+        
+        if (msgs.length > DEFAULT_DISPLAY_COUNT) {
+            displayMsgs = msgs.slice(-DEFAULT_DISPLAY_COUNT);
+            hasMore = true;
+        }
+
+        container.innerHTML = '';
+        renderedMessageIds.clear();
+        
+        if (hasMore) {
+            const loadMoreDiv = document.createElement('div');
+            loadMoreDiv.className = 'text-center py-3';
+            loadMoreDiv.innerHTML = `
+                <button class="load-more-btn px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 hover:scale-105 active:scale-95"
+                        style="background-color: var(--accent-light); color: var(--accent-color); border: 1px solid var(--border-color);">
+                    <i class="fas fa-chevron-up mr-1"></i> 加载更早的 ${msgs.length - DEFAULT_DISPLAY_COUNT} 条消息
+                </button>
+            `;
+            const loadBtn = loadMoreDiv.querySelector('.load-more-btn');
+            loadBtn.onclick = function(e) {
+                e.stopPropagation();
+                const allMsgs = msgs;
+                container.innerHTML = '';
+                renderedMessageIds.clear();
+                renderFullMessages(container, allMsgs);
+                setTimeout(() => {
+                    container.scrollTop = container.scrollHeight;
+                }, 50);
+                showToast('已加载全部消息');
+            };
+            container.appendChild(loadMoreDiv);
+        }
+
+        let lastDate = null;
+        displayMsgs.forEach(m => {
+            const currentDate = formatDate(m.time);
+            if (lastDate !== currentDate) {
+                const dateDiv = document.createElement('div');
+                dateDiv.className = 'text-center text-gray-400 text-xs py-2 date-separator';
+                dateDiv.textContent = currentDate;
+                container.appendChild(dateDiv);
+                lastDate = currentDate;
+            }
+            const el = createMessageElement(m.sender, m.content, m.time, m.quote, m.type, m.read);
+            const id = m.id + m.sender + Math.random().toString(36).substr(2, 4);
+            el.dataset.msgId = id;
+            el.dataset.msgTime = m.time;
+            renderedMessageIds.add(id);
+            container.appendChild(el);
+        });
+
+        requestAnimationFrame(() => {
+            container.scrollTop = container.scrollHeight;
+        });
+    } catch (e) {
+        console.warn('渲染消息时出现错误:', e);
+    } finally {
+        isChatInitializing = false;
+    }
 }
 
 // ========== 全量渲染函数 ==========
@@ -7622,17 +7630,39 @@ let cachedAvatarSettings = null;
 let cachedAvatarShape = null;
 
 function openChat(roleId) {
-    currentChatType = 'role'; currentRoleId = roleId; currentGroupId = null; const role = appData.roles.find(r => r.id === roleId); if (!role) return;
-    clearUnread(roleId); role.lastActive = Date.now(); debouncedSaveData();
-    document.getElementById('chat-title').textContent = role.name; refreshRoleOnlineStatus(role);
+    // 防止重复打开同一个聊天
+    if (currentRoleId === roleId && currentChatType === 'role') {
+        document.getElementById('page-home').classList.remove('active');
+        document.getElementById('page-chat').classList.add('active');
+        return;
+    }
+    
+    // 防止快速切换导致冲突
+    if (isChatInitializing) {
+        setTimeout(() => openChat(roleId), 100);
+        return;
+    }
+    
+    currentChatType = 'role'; 
+    currentRoleId = roleId; 
+    currentGroupId = null; 
+    const role = appData.roles.find(r => r.id === roleId); 
+    if (!role) return;
+    
+    clearUnread(roleId); 
+    role.lastActive = Date.now(); 
+    debouncedSaveData();
+    document.getElementById('chat-title').textContent = role.name; 
+    refreshRoleOnlineStatus(role);
     document.getElementById('chat-subtitle').textContent = role.onlineStatus?.currentStatus || '在线';
-    document.getElementById('page-home').classList.remove('active'); document.getElementById('page-chat').classList.add('active');
+    document.getElementById('page-home').classList.remove('active'); 
+    document.getElementById('page-chat').classList.add('active');
     
     updateChatPageHeight();
     
-    // 取消之前的渲染任务
     cancelPendingMessageRenders();
     
+    // 使用 requestAnimationFrame 延迟渲染
     requestAnimationFrame(() => {
         renderChatMessages();
         updateCallButtonVisibility();
@@ -7763,13 +7793,31 @@ async function deleteRoleChatBackground(roleId) {
 }
 
 function openGroupChat(groupId) {
-    currentChatType = 'group'; currentGroupId = groupId; currentRoleId = null; const group = appData.groups.find(g => g.id === groupId); if (!group) return;
+    if (currentGroupId === groupId && currentChatType === 'group') {
+        document.getElementById('page-home').classList.remove('active');
+        document.getElementById('page-chat').classList.add('active');
+        return;
+    }
+    
+    if (isChatInitializing) {
+        setTimeout(() => openGroupChat(groupId), 100);
+        return;
+    }
+    
+    currentChatType = 'group'; 
+    currentGroupId = groupId; 
+    currentRoleId = null; 
+    const group = appData.groups.find(g => g.id === groupId); 
+    if (!group) return;
     clearUnread('group_' + groupId);
-    document.getElementById('chat-title').textContent = group.name; document.getElementById('chat-subtitle').textContent = `${group.members.length}人`;
-    document.getElementById('page-home').classList.remove('active'); document.getElementById('page-chat').classList.add('active');
+    document.getElementById('chat-title').textContent = group.name; 
+    document.getElementById('chat-subtitle').textContent = `${group.members.length}人`;
+    document.getElementById('page-home').classList.remove('active'); 
+    document.getElementById('page-chat').classList.add('active');
     updateChatPageHeight();
     cancelPendingMessageRenders();
-    renderChatMessages(); updateCallButtonVisibility();
+    renderChatMessages(); 
+    updateCallButtonVisibility();
     
     cachedAvatarSettings = null;
     cachedAvatarShape = null;
@@ -7801,7 +7849,6 @@ function goBack() {
         roleTypingStates[currentRoleId].active = false;
     }
     
-    // ★ 修复：取消所有待处理的消息渲染
     cancelPendingMessageRenders();
     
     document.getElementById('page-chat').classList.remove('active');
@@ -7825,8 +7872,11 @@ function goBack() {
         messagesEl.style.maxHeight = '';
     }
     
-    // 清理浮动菜单
     closeContextMenu();
+    
+    // 重置发送锁
+    isSending = false;
+    lastSentMessageId = null;
     
     requestAnimationFrame(() => {
         renderRoleList();
@@ -8131,43 +8181,121 @@ function forceRoleReply() {
     }
 }
 
+// ========== ★ 核心修复：发送消息（防重复发送 + 性能优化） ==========
 async function sendMessage() {
-    const input = document.getElementById('chat-input'); let content = input.value.trim(); if (!content) return;
-    let quote = null;
-    if (quoteMessageObject) {
-        quote = { ...quoteMessageObject };
-        clearQuotePreview();
+    // 防重复发送锁
+    if (isSending) {
+        showToast('消息正在发送中，请稍候...');
+        return;
     }
-    const msg = { id: Date.now(), sender: 'me', content, time: Date.now(), type: 'text', quote, read: false };
-    if (currentChatType === 'role') { if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = []; appData.chats[currentRoleId].push(msg); }
-    else { if (!appData.groupChats[currentGroupId]) appData.groupChats[currentGroupId] = []; appData.groupChats[currentGroupId].push(msg); }
-    // 关键操作立即保存
-    await saveDataImmediately().catch(() => {});
-    appendMessageToDOM('me', content, Date.now(), quote, 'text');
-    input.value = ''; input.style.height = 'auto';
-    if (currentChatType === 'role' && currentRoleId) {
-        triggerRoleReplyForRole(currentRoleId);
-    } else if (currentChatType === 'group' && currentGroupId) {
-        triggerGroupReplyForGroup(currentGroupId);
+    
+    const input = document.getElementById('chat-input');
+    let content = input.value.trim();
+    if (!content) return;
+    
+    // 生成消息ID用于去重
+    const msgId = Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+    if (lastSentMessageId === msgId) {
+        return;
     }
-    maybeTriggerRolePoke();
-    if (currentChatType === 'role') {
-        const sentMsg = appData.chats[currentRoleId][appData.chats[currentRoleId].length - 1];
-        if (sentMsg) {
-            const delay = 1000 + Math.random() * 2000;
-            setTimeout(() => {
-                sentMsg.read = true;
-                debouncedSaveData();
-                const messages = document.getElementById('chat-messages');
-                const lastBubble = messages?.querySelector('.message-bubble-container:last-child');
-                if (lastBubble) {
-                    const timeSpan = lastBubble.querySelector('.text-right, .text-left');
-                    if (timeSpan && timeSpan.textContent.includes('✓')) {
-                        timeSpan.textContent = timeSpan.textContent.replace('✓', '✓✓');
-                    }
-                }
-            }, delay);
+    
+    isSending = true;
+    
+    try {
+        let quote = null;
+        if (quoteMessageObject) {
+            quote = { ...quoteMessageObject };
+            clearQuotePreview();
         }
+        
+        const msg = { 
+            id: msgId, 
+            sender: 'me', 
+            content, 
+            time: Date.now(), 
+            type: 'text', 
+            quote, 
+            read: false 
+        };
+        
+        // 确定目标聊天
+        let targetChats;
+        let targetId;
+        if (currentChatType === 'role' && currentRoleId) {
+            if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = [];
+            appData.chats[currentRoleId].push(msg);
+            targetChats = appData.chats;
+            targetId = currentRoleId;
+        } else if (currentChatType === 'group' && currentGroupId) {
+            if (!appData.groupChats[currentGroupId]) appData.groupChats[currentGroupId] = [];
+            appData.groupChats[currentGroupId].push(msg);
+            targetChats = appData.groupChats;
+            targetId = currentGroupId;
+        } else {
+            showToast('请先进入聊天');
+            isSending = false;
+            return;
+        }
+        
+        // 立即保存
+        await saveDataImmediately().catch(() => {});
+        
+        // 渲染消息
+        appendMessageToDOM('me', content, Date.now(), quote, 'text');
+        
+        // 清空输入框
+        input.value = '';
+        input.style.height = 'auto';
+        lastSentMessageId = msgId;
+        
+        // 触发角色回复
+        if (currentChatType === 'role' && currentRoleId) {
+            // 使用 setTimeout 避免阻塞 UI
+            setTimeout(() => {
+                triggerRoleReplyForRole(currentRoleId);
+            }, 100);
+        } else if (currentChatType === 'group' && currentGroupId) {
+            setTimeout(() => {
+                triggerGroupReplyForGroup(currentGroupId);
+            }, 100);
+        }
+        
+        // 角色主动拍一拍（概率9%）
+        setTimeout(() => {
+            maybeTriggerRolePoke();
+        }, 200);
+        
+        // 模拟已读
+        if (currentChatType === 'role') {
+            const sentMsg = appData.chats[currentRoleId]?.[appData.chats[currentRoleId].length - 1];
+            if (sentMsg && sentMsg.id === msgId) {
+                const delay = 1000 + Math.random() * 2000;
+                setTimeout(() => {
+                    sentMsg.read = true;
+                    debouncedSaveData();
+                    const messages = document.getElementById('chat-messages');
+                    const lastBubble = messages?.querySelector('.message-bubble-container:last-child');
+                    if (lastBubble) {
+                        const timeSpan = lastBubble.querySelector('.text-right, .text-left');
+                        if (timeSpan && timeSpan.textContent.includes('✓')) {
+                            timeSpan.textContent = timeSpan.textContent.replace('✓', '✓✓');
+                        }
+                    }
+                }, delay);
+            }
+        }
+        
+    } catch (e) {
+        console.error('发送消息失败:', e);
+        showToast('发送失败，请重试');
+    } finally {
+        isSending = false;
+        // 延迟重置去重标记
+        setTimeout(() => {
+            if (lastSentMessageId === msgId) {
+                lastSentMessageId = null;
+            }
+        }, 500);
     }
 }
 
@@ -12485,7 +12613,6 @@ function runMsgSearch() {
     const from = document.getElementById('msg-search-date-from').value; 
     const to = document.getElementById('msg-search-date-to').value; 
     
-    // 限制处理条数
     let allMsgs = getAllMessagesLimited();
     let results = allMsgs.filter(m => { 
         if (keyword && !m.content.toLowerCase().includes(keyword)) return false; 
@@ -12501,7 +12628,6 @@ function runMsgSearch() {
         return; 
     } 
     
-    // 最多显示100条
     const displayResults = results.slice(0, 100);
     container.innerHTML = displayResults.map(m => { 
         const sender = m.sender === 'me' ? '我' : (appData.roles.find(r=>r.id===m.sender)?.name || '角色'); 
@@ -12510,16 +12636,13 @@ function runMsgSearch() {
     lucide.createIcons(); 
 }
 
-// 限制获取消息数量（性能优化）
 function getAllMessagesLimited(limit = 1000) {
     let msgs = [];
     const chats = Object.values(appData.chats);
     const groupChats = Object.values(appData.groupChats);
     
-    // 先收集所有消息
     chats.forEach(arr => {
         if (arr && arr.length > 0) {
-            // 只取最近的 limit 条
             const start = Math.max(0, arr.length - limit);
             msgs.push(...arr.slice(start));
         }
@@ -12531,7 +12654,6 @@ function getAllMessagesLimited(limit = 1000) {
         }
     });
     
-    // 按时间排序并限制总数
     msgs.sort((a, b) => b.time - a.time);
     return msgs.slice(0, limit);
 }
@@ -12649,7 +12771,6 @@ function startSplashAnimation() {
             setTimeout(() => { 
                 splashScreen.classList.add("hidden"); 
                 loadData(); 
-                // 启动 CSS 变量监控
                 setupCSSVariableMonitor();
             }, 1000); 
             return;
@@ -13048,7 +13169,7 @@ window.uploadRoleChatBackground = uploadRoleChatBackground;
 window.deleteRoleChatBackground = deleteRoleChatBackground;
 window.applyRoleChatBackground = applyRoleChatBackground;
 
-// ========== 宇宙图形通信系统（新增融合） ==========
+// ========== 宇宙图形通信系统 ==========
 function openCosmicGraphicModal() {
     const modal = document.getElementById('modal-cosmic-graphic');
     if (!modal) return;
@@ -13550,7 +13671,6 @@ window.openCosmicGraphicModal = openCosmicGraphicModal;
 window.closeCosmicGraphicModal = closeCosmicGraphicModal;
 
 // ========== Toast z-index 修复 ==========
-// 确保 Toast 的 z-index 最高
 (function fixToastZIndex() {
     const toast = document.getElementById('toast');
     if (toast) {
