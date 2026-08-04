@@ -702,11 +702,12 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.2s, color 0.2s;
+            transition: background 0.2s, color 0.2s, transform 0.15s;
         }
         .music-card-btn:active {
             background: var(--accent-color);
             color: white;
+            transform: scale(0.92);
         }
 
         /* 悬浮音乐播放器 (左下角) - 已废弃，永久隐藏 */
@@ -821,8 +822,17 @@
         .btn {
             padding: 10px 18px; border-radius: 40px; border: none; font-weight: 600; cursor: pointer;
             background: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .btn:active {
+            transform: scale(0.96);
         }
         .btn-primary { background: var(--accent-color); color: white; border: none; }
+        .btn-primary:hover { opacity: 0.9; box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.3); }
 
         /* 新版🥰面板 */
         #modal-love-panel .love-card {
@@ -3323,9 +3333,379 @@
         .date-separator::after {
             right: 10%;
         }
+
+        /* ========== 便利贴页面（卡片样式 - 双列网格，精美纸张效果，小尺寸） ========== */
+        #page-sticky {
+            z-index: 1200;
+            background: #f5f0eb;
+        }
+        .sticky-header {
+            background: var(--bg-secondary);
+            padding: 12px 16px;
+            padding-top: max(12px, env(safe-area-inset-top));
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .sticky-header .title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .sticky-header .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .sticky-header .header-actions button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 4px;
+        }
+        .sticky-header .header-actions button:active {
+            color: var(--accent-color);
+        }
+        /* 便利贴主体：双列网格 */
+        .sticky-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 12px 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            align-content: start;
+            background: #f5f0eb;
+        }
+        /* 便利贴卡片 - 精致纸张效果，小尺寸 */
+        .sticky-card {
+            background: #fffcf5;
+            border-radius: 4px;
+            padding: 12px 12px 10px;
+            box-shadow: 
+                0 1px 1px rgba(0,0,0,0.05),
+                0 2px 4px rgba(0,0,0,0.06),
+                0 4px 10px rgba(0,0,0,0.04);
+            position: relative;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border-left: 4px solid #f5d742;
+            border-top: 1px solid #f0ebe4;
+            border-right: 1px solid #f0ebe4;
+            border-bottom: 1px solid #e8e0d6;
+            transform: rotate(var(--rotate, 0deg));
+            backdrop-filter: blur(2px);
+            display: flex;
+            flex-direction: column;
+            min-height: 120px;
+            font-size: 12px; /* 整体字体调小 */
+        }
+        .sticky-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(
+                    transparent,
+                    transparent 28px,
+                    rgba(0,0,0,0.02) 28px,
+                    rgba(0,0,0,0.02) 29px
+                );
+            pointer-events: none;
+            border-radius: 4px;
+        }
+        .sticky-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(
+                    to bottom,
+                    rgba(255,255,240,0.3) 0%,
+                    transparent 18px,
+                    transparent 80%,
+                    rgba(200,180,160,0.05) 100%
+                );
+            pointer-events: none;
+            border-radius: 4px;
+        }
+        .sticky-card:active {
+            transform: scale(0.99) rotate(var(--rotate, 0deg));
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+        /* 便利贴内容 */
+        .sticky-card .sticky-content {
+            font-family: 'Times New Roman', serif;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #2c2c2c;
+            margin-bottom: 8px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            position: relative;
+            z-index: 1;
+            flex: 1;
+        }
+        .sticky-card .sticky-content strong {
+            color: #5a3e2b;
+            font-weight: 700;
+            display: block;  /* 使“致”独占一行，但要求不空格，所以使用块级但不加额外间距 */
+            margin-bottom: 2px;
+        }
+        /* 署名样式 */
+        .sticky-card .sticky-content .sticky-signature {
+            display: block;
+            text-align: right;
+            font-style: italic;
+            color: #8a7a6a;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+        /* 便利贴顶部 */
+        .sticky-card .sticky-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+            font-size: 10px;
+            color: #b0a090;
+            position: relative;
+            z-index: 1;
+        }
+        .sticky-card .sticky-top .date-label {
+            font-weight: 500;
+            color: #b8a898;
+            letter-spacing: 0.3px;
+        }
+        .sticky-card .sticky-top .actions {
+            display: flex;
+            gap: 4px;
+        }
+        .sticky-card .sticky-top .actions button {
+            background: none;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            color: #bbb;
+            padding: 0 2px;
+            transition: color 0.2s;
+        }
+        .sticky-card .sticky-top .actions button:active {
+            color: var(--accent-color);
+        }
+        /* 便利贴底部 */
+        .sticky-card .sticky-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            color: #b0a090;
+            padding-top: 6px;
+            border-top: 1px dashed rgba(180,160,140,0.2);
+            position: relative;
+            z-index: 1;
+            margin-top: auto;
+        }
+        .sticky-card .sticky-footer .role-info {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .sticky-card .sticky-footer .role-info img {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #e8e0d6;
+        }
+        .sticky-card .sticky-footer .role-info span {
+            color: #b0a090;
+            font-style: italic;
+        }
+        .sticky-card .sticky-footer .reply-area {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        .sticky-card .sticky-footer .reply-area button {
+            background: none;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            color: #b0a090;
+            padding: 0 2px;
+            transition: color 0.2s;
+        }
+        .sticky-card .sticky-footer .reply-area button:active {
+            color: var(--accent-color);
+        }
+        /* 便利贴回复输入区域 */
+        .sticky-reply-input-area {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(200,180,160,0.15);
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        .sticky-reply-input-area input {
+            flex: 1;
+            padding: 4px 10px;
+            border: 1px solid #e8e0d6;
+            border-radius: 16px;
+            font-size: 11px;
+            background: rgba(255,255,255,0.6);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            color: #333;
+        }
+        .sticky-reply-input-area input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.1);
+            background: rgba(255,255,255,0.9);
+        }
+        .sticky-reply-input-area button {
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 500;
+            border: none;
+            background: var(--accent-color);
+            color: white;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+            white-space: nowrap;
+        }
+        .sticky-reply-input-area button:active {
+            transform: scale(0.95);
+            opacity: 0.85;
+        }
+        .sticky-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px solid rgba(200,180,160,0.12);
+            position: relative;
+            z-index: 1;
+        }
+        .sticky-replies .reply-bubble {
+            background: rgba(240,235,225,0.6);
+            border-radius: 12px 12px 12px 4px;
+            padding: 2px 8px;
+            font-size: 10px;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .sticky-replies .reply-bubble img {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            object-fit: cover;
+        }
+        .sticky-replies .reply-bubble .reply-text {
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .sticky-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: #b0a090;
+            padding: 40px 0;
+            font-size: 13px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 20px;
+            backdrop-filter: blur(4px);
+        }
+        .sticky-empty span {
+            display: block;
+            font-size: 11px;
+            color: #c0b0a0;
+            margin-top: 6px;
+        }
+
+        /* 便利贴收藏盒 */
+        #sticky-collection-modal {
+            z-index: 1300;
+        }
+        .collection-panel {
+            background: var(--bg-secondary);
+            border-radius: 28px;
+            padding: 20px;
+            max-width: 400px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            margin: auto;
+            position: relative;
+        }
+        .collection-panel .collection-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .collection-panel .collection-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .collection-panel .collection-header button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 4px 8px;
+        }
+        .collection-panel .collection-item {
+            background: #fffcf5;
+            border-radius: 4px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid #f5d742;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            border: 1px solid #f0ebe4;
+            font-size: 13px;
+        }
+        .collection-panel .collection-item .content {
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 4px;
+            color: #2c2c2c;
+            font-family: 'Times New Roman', serif;
+        }
+        .collection-panel .collection-item .meta {
+            font-size: 11px;
+            color: #b0a090;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 6px;
+        }
+        .collection-panel .collection-item .meta button {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 2px 6px;
+        }
     </style>
-    <!-- ========== 新增：气泡 CSS 实时预览样式标签 ========== -->
-    <style id="css-live-preview-style"></style>
 </head>
 <body class="text-gray-800">
 
@@ -3368,6 +3748,11 @@
                 <button onclick="openMomentPage('all')" class="p-2 rounded-full hover:bg-gray-100 active:bg-gray-200 transition relative">
                     <i data-lucide="image" class="w-6 h-6 text-gray-700" style="color: var(--header-text);"></i>
                     <span id="moment-unread-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full hidden">0</span>
+                </button>
+                <!-- 便利贴入口 -->
+                <button onclick="openStickyPage()" class="p-2 rounded-full hover:bg-gray-100 active:bg-gray-200 transition relative">
+                    <i data-lucide="sticky-note" class="w-6 h-6 text-gray-700" style="color: var(--header-text);"></i>
+                    <span id="sticky-unread-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full hidden">0</span>
                 </button>
                 <button onclick="openSettings()" class="p-2 rounded-full hover:bg-gray-100 active:bg-gray-200 transition">
                     <i data-lucide="settings" class="w-6 h-6 text-gray-700" style="color: var(--header-text);"></i>
@@ -3792,7 +4177,6 @@
             </button>
             <button onclick="openMusicLibrary()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="music-2" class="w-5 h-5"></i></div><span class="text-xs font-medium">音乐库</span></button>
             <button onclick="openStats()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="bar-chart-2" class="w-5 h-5"></i></div><span class="text-xs font-medium">消息统计</span></button>
-            <button onclick="openDecision()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="zap" class="w-5 h-5"></i></div><span class="text-xs font-medium">抉择</span></button>
             <button onclick="openFortune()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="clock" class="w-5 h-5"></i></div><span class="text-xs font-medium">运势·占卜</span></button>
             <button onclick="openImportantDays()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="heart" class="w-5 h-5"></i></div><span class="text-xs font-medium">重要日</span></button>
             <button onclick="openMailbox()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="mail" class="w-5 h-5"></i></div><span class="text-xs font-medium">写信功能</span></button>
@@ -3807,16 +4191,7 @@
             <button onclick="openMomentCommentBank()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: #8e24aa;"><i data-lucide="message-square" class="w-5 h-5"></i></div><span class="text-xs font-medium">朋友圈评论库</span></button>
             <button onclick="openAddressLibrary()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: #c2185b;"><i data-lucide="map-pin" class="w-5 h-5"></i></div><span class="text-xs font-medium">地址库</span></button>
             <button onclick="window.triggerMomentCheck && triggerMomentCheck()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="zap" class="w-5 h-5"></i></div><span class="text-xs font-medium">测试朋友圈</span></button>
-            <!-- 新增：帮我决策入口 -->
-            <button onclick="openDecisionHelper()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3">
-                <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="help-circle" class="w-5 h-5"></i></div>
-                <span class="text-xs font-medium">帮我决策</span>
-            </button>
-            <!-- 新增：涂鸦本入口 -->
-            <button onclick="openDoodlePad()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3">
-                <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="brush" class="w-5 h-5"></i></div>
-                <span class="text-xs font-medium">涂鸦本</span>
-            </button>
+            <!-- 新增：情绪面板入口已移除 -->
             <!-- 新增：角色背景管理入口 -->
             <button onclick="openRoleBackgroundManager()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3">
                 <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: #8e44ad;"><i data-lucide="image" class="w-5 h-5"></i></div>
@@ -4166,9 +4541,6 @@
     <div class="modal-card max-w-md max-h-[85vh] overflow-hidden flex flex-col"><div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold"><i class="fas fa-chart-bar mr-2" style="color: var(--accent-color);"></i>消息统计</h2><button onclick="closeStats()" class="p-2 rounded-full hover:bg-gray-100"><i data-lucide="x" class="w-5 h-5"></i></button></div><div class="stats-tab-bar"><button class="stats-nav-btn active" id="stats-tab-btn" onclick="switchStatsTab('stats')">统计</button><button class="stats-nav-btn" id="search-tab-btn" onclick="switchStatsTab('search')">搜索</button><button class="stats-nav-btn" id="favorites-tab-btn" onclick="switchStatsTab('favorites')">收藏</button><button class="stats-nav-btn" id="wordcloud-tab-btn" onclick="switchStatsTab('wordcloud')">词云</button></div><div class="flex-1 overflow-auto"><div id="stats-panel"><div id="stats-content" class="space-y-3"></div></div><div id="search-panel" style="display:none;"><div class="stats-search-box"><div class="flex gap-2 mb-2"><div class="relative flex-1"><i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i><input type="text" id="msg-search-input" placeholder="搜索聊天内容..." class="w-full pl-9 pr-3 py-2 bg-gray-100 rounded-xl text-sm border-none outline-none"></div><button onclick="runMsgSearch()" class="text-white px-4 py-2 rounded-xl text-sm" style="background-color: var(--button-primary-bg);">搜索</button></div><div class="flex gap-2 text-xs"><input type="date" id="msg-search-date-from" class="bg-gray-100 rounded-lg px-2 py-1 border-none"><span class="text-gray-400">至</span><input type="date" id="msg-search-date-to" class="bg-gray-100 rounded-lg px-2 py-1 border-none"><button onclick="clearSearch()" class="text-gray-500 px-2">重置</button></div></div><div id="msg-search-results" class="mt-3"></div></div><div id="favorites-panel" style="display:none;"><div class="flex justify-end mb-2"><button onclick="batchFavorite()" class="text-xs px-3 py-1 rounded-full" style="background-color: var(--accent-light); color: var(--accent-color);">批量收藏</button></div><div id="favorites-list"></div></div><div id="wordcloud-panel" style="display:none;"><div id="wordcloud-container" class="wordcloud-container"></div><p class="text-xs text-gray-400 text-center mt-2">基于聊天记录生成词云</p></div></div></div>
 </div>
 
-<!-- 抉择 -->
-<div id="modal-decision" class="modal-overlay hidden"><div class="modal-card"><h2 class="text-xl font-bold mb-4">抉择</h2><textarea id="decision-options" class="w-full h-32 bg-gray-50 rounded-xl p-3 text-sm" placeholder="输入选项，每行一个或逗号分隔"></textarea><button onclick="makeDecision()" class="w-full text-white p-3 rounded-xl mt-3" style="background-color: var(--button-primary-bg);">随机选择</button><div id="decision-result" class="mt-3 text-center text-lg font-bold" style="color: var(--accent-color);"></div><button onclick="closeDecision()" class="mt-3 w-full bg-gray-100 p-3 rounded-xl">关闭</button></div></div>
-
 <!-- 运势占卜 -->
 <div id="modal-fortune" class="modal-overlay hidden"><div class="modal-card text-center"><h2 class="text-xl font-bold mb-4">✨ 今日运势 ✨</h2><div id="fortune-text" class="text-lg italic mb-4" style="color: var(--accent-color);">点击抽签</div><button onclick="drawFortune()" class="text-white px-6 py-2 rounded-full" style="background-color: var(--button-primary-bg);">抽签</button><button onclick="closeFortune()" class="mt-4 w-full bg-gray-100 p-2 rounded-xl">关闭</button></div></div>
 
@@ -4343,7 +4715,7 @@
 <!-- 操作菜单容器 -->
 <div id="action-sheet-container"></div>
 
-<!-- 加号面板 - 新增相册按钮 -->
+<!-- 加号面板 - 移除涂鸦本和帮我决策，增加情绪和便利贴入口 -->
 <div id="plus-panel" class="action-sheet" style="display:none; z-index:350;">
     <div class="flex justify-around items-center px-4 py-6 flex-wrap gap-y-4">
         <div class="flex flex-col items-center gap-2 cursor-pointer" onclick="showTransferModal(); closePlusPanel();">
@@ -4367,15 +4739,11 @@
             <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl" style="background:#E8F5E9; color:#388E3C;">🖼️</div>
             <span class="text-xs text-gray-600">相册</span>
         </div>
-        <!-- 帮我决策入口（加号面板） -->
-        <div class="flex flex-col items-center gap-2 cursor-pointer" onclick="openDecisionHelper(); closePlusPanel();">
-            <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl" style="background:#E8F0FE; color:#1A73E8;">🤔</div>
-            <span class="text-xs text-gray-600">帮我决策</span>
-        </div>
-        <!-- 涂鸦本入口（加号面板） -->
-        <div class="flex flex-col items-center gap-2 cursor-pointer" onclick="openDoodlePad(); closePlusPanel();">
-            <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl" style="background:#FFF0F5; color:#DB2777;">🎨</div>
-            <span class="text-xs text-gray-600">涂鸦本</span>
+        <!-- 情绪面板入口已移除 -->
+        <!-- 便利贴入口 -->
+        <div class="flex flex-col items-center gap-2 cursor-pointer" onclick="openStickyPage(); closePlusPanel();">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl" style="background:#FFF8E1; color:#F9A825;">📋</div>
+            <span class="text-xs text-gray-600">便利贴</span>
         </div>
     </div>
     <button class="action-sheet-btn action-sheet-cancel" onclick="closePlusPanel()">取消</button>
@@ -4831,60 +5199,36 @@
     </div>
 </div>
 
-<!-- ========== 新增：帮我决策弹窗（增加选项计数器） ========== -->
-<div id="modal-decision-helper" class="modal-overlay hidden">
-    <div class="modal-card" style="max-width:360px; width:90%;">
-        <h2 class="text-xl font-bold mb-4">🤔 帮我决策</h2>
-        <div class="mb-4">
-            <label class="text-sm font-medium block mb-1">你的问题</label>
-            <input type="text" id="decision-question-input" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm" placeholder="例如：晚上吃什么？">
+<!-- ========== 新增：便利贴页面（卡片样式 - 双列网格，已由CSS控制） ========== -->
+<div id="page-sticky" class="page" style="z-index: 1200; background: #f5f0eb;">
+    <div class="sticky-header safe-top">
+        <div class="title">📋 便利贴</div>
+        <div class="header-actions">
+            <button onclick="openStickyCollection()" title="便签盒">
+                <i data-lucide="archive" class="w-5 h-5"></i>
+            </button>
+            <button onclick="closeStickyPage()" title="关闭">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
         </div>
-        <div class="mb-4">
-            <label class="text-sm font-medium block mb-1">选项 (每行一个，2~9个)</label>
-            <textarea id="decision-options-input" rows="4" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm" placeholder="火锅&#10;烧烤&#10;在家做饭"></textarea>
-            <div id="decision-options-counter" class="text-xs text-gray-400 mt-1">有效选项: 0 个 (需要2-9个)</div>
-        </div>
-        <div class="flex gap-3 mt-2">
-            <button onclick="closeDecisionHelper()" class="flex-1 py-2.5 rounded-xl border border-gray-200 font-medium">取消</button>
-            <button onclick="submitDecisionRequest()" class="flex-1 py-2.5 rounded-xl text-white font-medium shadow-lg" style="background-color: var(--button-primary-bg);">让角色帮我选</button>
-        </div>
+    </div>
+    <div class="sticky-body" id="sticky-body">
+        <!-- 动态生成 -->
     </div>
 </div>
 
-<!-- ========== 新增：涂鸦本弹窗（增强版） ========== -->
-<div id="modal-doodle-pad" class="modal-overlay hidden" style="z-index: 2000;">
-    <div class="modal-card" style="max-width:500px; width:95%; max-height:85vh; display:flex; flex-direction:column;">
-        <div class="flex justify-between items-center mb-3">
-            <h2 class="text-xl font-bold">🎨 涂鸦本</h2>
-            <button onclick="closeDoodlePad()" class="p-2 rounded-full hover:bg-gray-100">✕</button>
-        </div>
-        <div style="display:flex; justify-content:center; gap:12px; margin-bottom:10px; flex-wrap:wrap;">
-            <!-- 7种颜色 -->
-            <div class="color-picker" style="display:flex; gap:8px;">
-                <div class="color-btn" data-color="#FF4136" style="background:#FF4136; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
-                <div class="color-btn" data-color="#FF851B" style="background:#FF851B; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
-                <div class="color-btn" data-color="#FFDC00" style="background:#FFDC00; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
-                <div class="color-btn" data-color="#2ECC40" style="background:#2ECC40; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
-                <div class="color-btn" data-color="#0074D9" style="background:#0074D9; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
-                <div class="color-btn" data-color="#B10DC9" style="background:#B10DC9; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
-                <div class="color-btn" data-color="#F012BE" style="background:#F012BE; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
-            </div>
-            <button id="doodle-eraser" class="px-3 py-1 rounded-full bg-gray-200 text-sm">🧽 橡皮</button>
-            <button id="doodle-clear" class="px-3 py-1 rounded-full bg-gray-200 text-sm">🗑️ 清空</button>
-        </div>
-        <canvas id="doodle-canvas" width="400" height="400" style="width:100%; height:auto; background:#fff; border:1px solid #ccc; border-radius:12px; touch-action: none; cursor: crosshair;"></canvas>
-        <div style="margin-top:12px; display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
-            <!-- 26个字母按钮 -->
-            <div id="doodle-letters" style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-bottom:8px;"></div>
-        </div>
-        <div style="display:flex; gap:12px; margin-top:12px;">
-            <button id="doodle-random-draw" class="flex-1 py-2 rounded-xl bg-gray-100">🎲 随机图形</button>
-            <button id="doodle-random-spell" class="flex-1 py-2 rounded-xl bg-gray-100">🔤 随机拼写(画布)</button>
-        </div>
+<!-- 便利贴收藏盒弹窗（带关闭按钮） -->
+<div id="sticky-collection-modal" class="modal-overlay hidden" style="z-index: 1300;">
+    <div class="collection-panel" id="collection-panel-content">
+        <!-- 动态渲染 -->
     </div>
 </div>
 
-<!-- ========== 宇宙图形通信系统模态框（新增） ========== -->
+<!-- ========== 删除涂鸦本和抉择相关元素（已移除） ========== -->
+<!-- 原涂鸦本 modal-doodle-pad 已删除 -->
+<!-- 原决策 modal-decision 和 modal-decision-helper 已删除 -->
+
+<!-- ========== 新增：宇宙图形通信系统模态框（保持不变） ========== -->
 <div id="modal-cosmic-graphic" class="modal-overlay hidden" style="z-index: 10001;">
     <div class="modal-card" style="max-width: 650px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 0; background: transparent; box-shadow: none;">
         <div style="background: #ffffff; border-radius: 32px; padding: 20px; position: relative;">
@@ -4990,8 +5334,12 @@ const DEFAULT_GROUP_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org
 // --- 默认数据结构 ---
 const DEFAULT_DATA = {
     roles: [
-        { id: '1', name: '老公', avatar: 'https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/b706d6c461e44df0b82fda4381e66f56~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947761&x-signature=WPDM%2Fe%2Bq9Ltf6sL1Rc2vcm320jw%3D', groupProb: 50, lastActive: Date.now(), lastAutoSendTime: Date.now(), lastLoveRefresh: 0, pokeMyTexts: ['哥哥，我超爱你 😍😍'], pokeTheirTexts: ['老婆，我们永远不分开 😂😂'], onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 }, autoMailProbability: 20, lastDoodleDate: null, customPokes: [], chatBackground: null },
-        { id: '2', name: '菜🥬', avatar: 'https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/cd47e4d6c7734a9f8c189d3d6c277eb6~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947762&x-signature=a5JLFkIXlkbkhZMc%2BJ%2FUogUFVKc%3D', groupProb: 30, lastActive: Date.now() - 3600000, lastAutoSendTime: Date.now() - 3600000, lastLoveRefresh: 0, pokeMyTexts: ['贴贴 🥰'], pokeTheirTexts: ['想你啦 💕'], onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭'], currentStatus: '在线', lastUpdate: 0 }, autoMailProbability: 15, lastDoodleDate: null, customPokes: [], chatBackground: null }
+        { id: '1', name: '老公', avatar: 'https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/b706d6c461e44df0b82fda4381e66f56~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947761&x-signature=WPDM%2Fe%2Bq9Ltf6sL1Rc2vcm320jw%3D', groupProb: 50, lastActive: Date.now(), lastAutoSendTime: Date.now(), lastLoveRefresh: 0, pokeMyTexts: ['哥哥，我超爱你 😍😍'], pokeTheirTexts: ['老婆，我们永远不分开 😂😂'], onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 }, autoMailProbability: 20, lastDoodleDate: null, customPokes: [], chatBackground: null,
+            emotions: { happy: 0, angry: 0, worried: 0, sad: 0, shy: 0, jealous: 0, depressed: 0, confused: 0 },
+            lastEmotionUpdate: 0 },
+        { id: '2', name: '菜🥬', avatar: 'https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/cd47e4d6c7734a9f8c189d3d6c277eb6~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260417000804AE38762F99F6FCF256F7&rrcfp=f06b921b&x-expires=1778947762&x-signature=a5JLFkIXlkbkhZMc%2BJ%2FUogUFVKc%3D', groupProb: 30, lastActive: Date.now() - 3600000, lastAutoSendTime: Date.now() - 3600000, lastLoveRefresh: 0, pokeMyTexts: ['贴贴 🥰'], pokeTheirTexts: ['想你啦 💕'], onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭'], currentStatus: '在线', lastUpdate: 0 }, autoMailProbability: 15, lastDoodleDate: null, customPokes: [], chatBackground: null,
+            emotions: { happy: 0, angry: 0, worried: 0, sad: 0, shy: 0, jealous: 0, depressed: 0, confused: 0 },
+            lastEmotionUpdate: 0 }
     ],
     groups: [],
     chats: {},
@@ -5152,7 +5500,11 @@ const DEFAULT_DATA = {
         partner: { preset: 'flower', custom: '✿' },
         customSymbols: []
     },
-    customPokes: []
+    customPokes: [],
+    // 新增：便利贴存储
+    stickies: [],
+    // 新增：收藏的便利贴
+    collectedStickies: []
 };
 
 // --- 全局状态 ---
@@ -5225,13 +5577,6 @@ let quoteMessageObject = null;
 let currentMusicId = null;
 let musicAudio = new Audio();
 let isMusicPlaying = false;
-
-// 涂鸦本相关全局变量
-let doodleCanvas = null, doodleCtx = null;
-let doodleDrawing = false;
-let doodleLastX = 0, doodleLastY = 0;
-let doodleCurrentColor = '#FF4136';
-let doodleIsErasing = false;
 
 // 戳一戳设置相关
 let currentPokeRoleId = null;
@@ -6373,7 +6718,6 @@ function setupCSSVariableMonitor() {
     let lastAccentColor = getComputedStyle(document.documentElement)
         .getPropertyValue('--accent-color').trim();
     
-    // ★ 性能优化：从 3000ms 改为 10000ms
     cssMonitorTimer = setInterval(() => {
         const currentColor = getComputedStyle(document.documentElement)
             .getPropertyValue('--accent-color').trim();
@@ -6446,7 +6790,6 @@ function startUnifiedTimers() {
     
     clearAllTimers();
     
-    // ★ 性能优化：从 30000ms 改为 60000ms，减少CPU占用
     unifiedTimer = setInterval(() => {
         unifiedTickCount++;
         
@@ -6737,9 +7080,51 @@ async function loadData() {
                     if (mail.viewed === undefined) mail.viewed = false;
                 });
             }
+            
+            // 初始化角色情绪数据
+            appData.roles.forEach(role => {
+                if (!role.emotions) {
+                    role.emotions = { happy: 0, angry: 0, worried: 0, sad: 0, shy: 0, jealous: 0, depressed: 0, confused: 0 };
+                    role.lastEmotionUpdate = 0;
+                }
+                // 确保所有情绪键存在
+                ['happy','angry','worried','sad','shy','jealous','depressed','confused'].forEach(key => {
+                    if (role.emotions[key] === undefined) role.emotions[key] = 0;
+                });
+            });
+            
+            // 初始化便利贴
+            if (!appData.stickies) appData.stickies = [];
+            if (!appData.collectedStickies) appData.collectedStickies = [];
+            
         } else {
             appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
         }
+        
+        // 初始化角色情绪默认随机值（主导情绪算法）
+        appData.roles.forEach(role => {
+            if (role.emotions && Object.values(role.emotions).every(v => v === 0)) {
+                // 使用主导情绪算法初始化
+                const emotionKeys = ['happy','angry','worried','sad','shy','jealous','depressed','confused'];
+                // 随机选择主导情绪（权重60%）
+                const dominantKey = emotionKeys[Math.floor(Math.random() * emotionKeys.length)];
+                role.emotions[dominantKey] = Math.floor(Math.random() * 21) + 75; // 75-95
+                // 选择2~3个次级情绪（权重30%）
+                const secondaryKeys = emotionKeys.filter(k => k !== dominantKey);
+                const shuffled = secondaryKeys.sort(() => Math.random() - 0.5);
+                const numSecondary = 2 + Math.floor(Math.random() * 2); // 2或3
+                for (let i = 0; i < numSecondary && i < shuffled.length; i++) {
+                    role.emotions[shuffled[i]] = Math.floor(Math.random() * 26) + 30; // 30-55
+                }
+                // 其余情绪（剩余4~5个）赋低值
+                const remainingKeys = emotionKeys.filter(k => k !== dominantKey && !secondaryKeys.slice(0, numSecondary).includes(k));
+                remainingKeys.forEach(k => {
+                    role.emotions[k] = Math.floor(Math.random() * 21) + 10; // 10-30
+                });
+                role.lastEmotionUpdate = Date.now();
+            }
+        });
+        
         if ((!appData.appearance || !appData.appearance.customThemeColors || Object.keys(appData.appearance.customThemeColors).length === 0) && localStorage.getItem('spiritual_theme_backup')) {
             try {
                 const backup = JSON.parse(localStorage.getItem('spiritual_theme_backup'));
@@ -6846,7 +7231,7 @@ async function loadData() {
     
     initNotificationSwitch(); updateCallButtonVisibility();
     startOnlineStatusTimer();
-    setInterval(() => checkAndTriggerAutoDoodle(), 60 * 60 * 1000);
+    // 移除对 checkAndTriggerAutoDoodle 的调用（涂鸦本已删除）
     disableAutoTransferUntil = Date.now() + 60 * 1000;
     applyMomentCover();
     updateMomentUnread();
@@ -6885,11 +7270,7 @@ async function loadData() {
             tempPokeTheirTexts = [...(role.pokeTheirTexts || [])];
         }
     }
-    const decisionOptionsInput = document.getElementById('decision-options-input');
-    if (decisionOptionsInput) {
-        decisionOptionsInput.addEventListener('input', updateDecisionOptionsCounter);
-    }
-    initDoodleCanvasEvents();
+    // 移除 initDoodleCanvasEvents() 调用
     document.addEventListener('click', function(e) {
         if (currentContextMenu && !currentContextMenu.contains(e.target)) {
             closeContextMenu();
@@ -6899,7 +7280,6 @@ async function loadData() {
     setupWordcloudResizeListener();
     loadAvatarSettingsToUI();
     bindAvatarSettingsEvents();
-    bindPokeActionModalEvents();
     renderThemeColorPalette();
     renderSchemeList();
     const customThemeBtn = document.getElementById('custom-theme-btn');
@@ -7489,7 +7869,6 @@ function appendMessageToDOM(sender, content, time, quote = null, type = 'text') 
     }, 80);
 }
 
-// ★ 性能优化：使用 requestAnimationFrame 进行批量渲染
 function flushPendingMessages() {
     if (pendingMessages.length === 0) return;
     const container = document.getElementById('chat-messages');
@@ -7507,7 +7886,6 @@ function flushPendingMessages() {
     messageRenderAbortController = new AbortController();
     const signal = messageRenderAbortController.signal;
     
-    // ★ 使用 requestAnimationFrame 在下一帧渲染
     requestAnimationFrame(() => {
         if (signal.aborted) return;
         
@@ -7720,6 +8098,7 @@ function openChat(roleId) {
     requestAnimationFrame(() => {
         renderChatMessages();
         updateCallButtonVisibility();
+        // updateEmotionDot removed
         setTimeout(() => {
             const container = document.getElementById('chat-messages');
             if (container) {
@@ -7945,7 +8324,7 @@ function getQuotePreview(msg) {
     return msg.content ? msg.content.substring(0, 20) : '';
 }
 
-// ========== 创建消息元素 ==========
+// ========== 创建消息元素（增强版：支持点击弹出菜单，线性图标） ==========
 function createMessageElement(sender, content, time, quote = null, type = 'text', read = false) {
     const avatarSettings = cachedAvatarSettings || (cachedAvatarSettings = appData.appearance?.avatarSettings || { 
         showAvatar: true, 
@@ -8091,20 +8470,62 @@ function createMessageElement(sender, content, time, quote = null, type = 'text'
         div.dataset.msgQuote = quote ? JSON.stringify(quote) : '';
         div.dataset.msgType = type;
         div.dataset.msgRead = read;
+        
+        // ★★★ 消息菜单改为点击弹出（单击触发） ★★★
+        div.addEventListener('click', function(e) {
+            if (e.target.closest('.message-context-menu')) return;
+            e.stopPropagation();
+            const senderName = sender === 'me' ? (appData.userProfile?.nickname || '我') : 
+                              (appData.roles.find(r => r.id === sender)?.name || '对方');
+            const msgObj = {
+                sender: sender,
+                content: content,
+                time: time,
+                quote: quote,
+                type: type,
+                id: div.dataset.msgId || (time + sender)
+            };
+            showMessageContextMenu(e, msgObj, senderName);
+        });
+        
+        // 保留右键菜单支持
+        div.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const senderName = sender === 'me' ? (appData.userProfile?.nickname || '我') : 
+                              (appData.roles.find(r => r.id === sender)?.name || '对方');
+            const msgObj = {
+                sender: sender,
+                content: content,
+                time: time,
+                quote: quote,
+                type: type,
+                id: div.dataset.msgId || (time + sender)
+            };
+            showMessageContextMenu(e, msgObj, senderName);
+        });
     }
     return div;
 }
 
-// ========== 浮动消息菜单 ==========
+// ========== 浮动消息菜单（修复：使用线性图标，定位优化） ==========
 function showMessageContextMenu(event, msg, senderName) {
     closeContextMenu();
-    const rect = event.currentTarget.getBoundingClientRect();
+    let clientX, clientY;
+    if (event.touches) {
+        clientX = event.touches[0].clientX;
+        clientY = event.touches[0].clientY;
+    } else {
+        clientX = event.clientX;
+        clientY = event.clientY;
+    }
+    
     const menu = document.createElement('div');
     menu.className = 'message-context-menu';
     const isMe = msg.sender === 'me';
     
     const quoteBtn = document.createElement('button');
-    quoteBtn.innerHTML = '↶<span class="tooltip">引用</span>';
+    quoteBtn.innerHTML = '<i data-lucide="message-square" class="w-4 h-4"></i><span class="tooltip">引用</span>';
     quoteBtn.title = '';
     quoteBtn.onclick = (e) => {
         e.stopPropagation();
@@ -8113,24 +8534,22 @@ function showMessageContextMenu(event, msg, senderName) {
     };
     
     const favBtn = document.createElement('button');
-    favBtn.innerHTML = '★<span class="tooltip">收藏</span>';
+    favBtn.innerHTML = '<i data-lucide="star" class="w-4 h-4"></i><span class="tooltip">收藏</span>';
     favBtn.title = '';
     favBtn.onclick = (e) => {
         e.stopPropagation();
         const isFavorited = addFavorite(msg, senderName);
         if (isFavorited) {
-            favBtn.innerHTML = '⭐<span class="tooltip">已收藏</span>';
-            favBtn.style.color = '#ffc107';
+            favBtn.innerHTML = '<i data-lucide="star" class="w-4 h-4" style="fill:#ffc107;color:#ffc107;"></i><span class="tooltip">已收藏</span>';
             setTimeout(() => {
-                favBtn.innerHTML = '★<span class="tooltip">收藏</span>';
-                favBtn.style.color = '';
+                favBtn.innerHTML = '<i data-lucide="star" class="w-4 h-4"></i><span class="tooltip">收藏</span>';
             }, 800);
         }
         closeContextMenu();
     };
     
     const copyBtn = document.createElement('button');
-    copyBtn.innerHTML = '◆<span class="tooltip">复制</span>';
+    copyBtn.innerHTML = '<i data-lucide="copy" class="w-4 h-4"></i><span class="tooltip">复制</span>';
     copyBtn.title = '';
     copyBtn.onclick = (e) => {
         e.stopPropagation();
@@ -8144,9 +8563,9 @@ function showMessageContextMenu(event, msg, senderName) {
     
     if (isMe) {
         const delBtn = document.createElement('button');
-        delBtn.innerHTML = '✖<span class="tooltip">删除</span>';
+        delBtn.innerHTML = '<i data-lucide="trash-2" class="w-4 h-4"></i><span class="tooltip">删除</span>';
         delBtn.title = '';
-        delBtn.style.color = 'rgba(255,80,80,0.7)';
+        delBtn.className = 'danger';
         delBtn.onclick = (e) => {
             e.stopPropagation();
             showConfirm('删除这条消息？', () => {
@@ -8161,11 +8580,11 @@ function showMessageContextMenu(event, msg, senderName) {
     
     const menuWidth = menu.offsetWidth || 200;
     const menuHeight = menu.offsetHeight || 50;
-    let menuTop = rect.top - menuHeight - 12;
-    let menuLeft = rect.left + (rect.width / 2) - (menuWidth / 2);
+    let menuLeft = clientX - menuWidth / 2;
+    let menuTop = clientY - menuHeight - 12;
     
     if (menuTop < 10) {
-        menuTop = rect.bottom + 12;
+        menuTop = clientY + 12;
     }
     if (menuLeft < 10) menuLeft = 10;
     if (menuLeft + menuWidth > window.innerWidth - 10) {
@@ -8177,6 +8596,8 @@ function showMessageContextMenu(event, msg, senderName) {
     currentContextMenu = menu;
     currentContextMenuMsg = msg;
     currentContextMenuElement = event.currentTarget;
+    
+    lucide.createIcons();
 }
 
 function closeContextMenu() {
@@ -8236,7 +8657,6 @@ function forceRoleReply() {
 
 // ========== ★ 核心修复：发送消息（立即响应，键盘回落不阻塞） ==========
 async function sendMessage() {
-    // 防重复发送锁
     if (isSending) {
         showToast('消息正在发送中，请稍候...');
         return;
@@ -8246,18 +8666,15 @@ async function sendMessage() {
     let content = input.value.trim();
     if (!content) return;
     
-    // 生成消息ID用于去重
     const msgId = Date.now() + '_' + Math.random().toString(36).substr(2, 6);
     if (lastSentMessageId === msgId) return;
     
     isSending = true;
     
     try {
-        // ★ 修复：立即清空输入框（触发键盘回落，但消息已经发送）
         input.value = '';
         input.style.height = 'auto';
         
-        // ★ 修复：立即构建消息对象并渲染（不等待任何异步操作）
         const msg = { 
             id: msgId, 
             sender: 'me', 
@@ -8268,12 +8685,10 @@ async function sendMessage() {
             read: false 
         };
         
-        // 清空引用预览
         if (quoteMessageObject) {
             clearQuotePreview();
         }
         
-        // ★ 修复：立即添加到数据并渲染（同步执行，不等待保存）
         if (currentChatType === 'role' && currentRoleId) {
             if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = [];
             appData.chats[currentRoleId].push(msg);
@@ -8285,16 +8700,13 @@ async function sendMessage() {
             return;
         }
         
-        // ★ 修复：立即渲染消息到DOM（不等待任何异步操作）
         appendMessageToDOM('me', content, Date.now(), msg.quote, 'text');
         lastSentMessageId = msgId;
         
-        // ★ 修复：保存操作放到微任务队列，不阻塞UI
         queueMicrotask(() => {
             saveDataImmediately().catch(() => {});
         });
         
-        // ★ 修复：触发角色回复（使用setTimeout，但不阻塞发送）
         if (currentChatType === 'role' && currentRoleId) {
             setTimeout(() => {
                 triggerRoleReplyForRole(currentRoleId);
@@ -8305,12 +8717,10 @@ async function sendMessage() {
             }, 50);
         }
         
-        // 角色主动拍一拍（概率9%）
         setTimeout(() => {
             maybeTriggerRolePoke();
         }, 200);
         
-        // 模拟已读
         if (currentChatType === 'role') {
             const sentMsg = appData.chats[currentRoleId]?.[appData.chats[currentRoleId].length - 1];
             if (sentMsg && sentMsg.id === msgId) {
@@ -9138,7 +9548,50 @@ function deleteRole(id) { showConfirm('删除角色？', async () => { appData.r
 function openCreateRole() { document.getElementById('modal-create-role').classList.remove('hidden'); document.getElementById('role-name-input').value = ''; document.getElementById('role-avatar-preview').src = DEFAULT_AVATAR; document.getElementById('role-group-prob').value = 50; document.getElementById('role-group-prob-val').textContent = '50%'; document.getElementById('role-mail-prob').value = 15; document.getElementById('role-mail-prob-val').textContent = '15%'; }
 function closeCreateRole() { document.getElementById('modal-create-role').classList.add('hidden'); }
 async function handleAvatarUpload(input) { if (input.files?.[0]) { showToast('压缩中...'); const compressed = await compressImage(input.files[0], 400, 0.7); document.getElementById('role-avatar-preview').src = compressed; } }
-async function saveRole() { const name = document.getElementById('role-name-input').value.trim(); if (!name) { showToast('请输入名称'); return; } appData.roles.push({ id: Date.now().toString(), name, avatar: document.getElementById('role-avatar-preview').src, groupProb: parseInt(document.getElementById('role-group-prob').value), autoMailProbability: parseInt(document.getElementById('role-mail-prob').value) || 15, lastActive: Date.now(), lastAutoSendTime: Date.now(), lastLoveRefresh: 0, currentLoveState: null, pokeMyTexts: ['哥哥，我超爱你 😍😍'], pokeTheirTexts: ['老婆，我们永远不分开 😂😂'], onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 }, todayMomentCount: 0, lastDoodleDate: null, customPokes: [], pokeActions: [...PRESET_POKE_ACTIONS], chatBackground: null }); await saveData(); renderRoleList(); closeCreateRole(); showToast('创建成功'); }
+async function saveRole() { const name = document.getElementById('role-name-input').value.trim(); if (!name) { showToast('请输入名称'); return; } 
+    const newRole = { 
+        id: Date.now().toString(), 
+        name, 
+        avatar: document.getElementById('role-avatar-preview').src, 
+        groupProb: parseInt(document.getElementById('role-group-prob').value), 
+        autoMailProbability: parseInt(document.getElementById('role-mail-prob').value) || 15, 
+        lastActive: Date.now(), 
+        lastAutoSendTime: Date.now(), 
+        lastLoveRefresh: 0, 
+        currentLoveState: null, 
+        pokeMyTexts: ['哥哥，我超爱你 😍😍'], 
+        pokeTheirTexts: ['老婆，我们永远不分开 😂😂'], 
+        onlineStatus: { enabled: true, statusList: ['在忙', '工作中', '在吃饭', '睡觉中', '勿扰'], currentStatus: '在线', lastUpdate: 0 }, 
+        todayMomentCount: 0, 
+        lastDoodleDate: null, 
+        customPokes: [], 
+        pokeActions: [...PRESET_POKE_ACTIONS], 
+        chatBackground: null,
+        emotions: { happy: 0, angry: 0, worried: 0, sad: 0, shy: 0, jealous: 0, depressed: 0, confused: 0 },
+        lastEmotionUpdate: 0
+    };
+    // 初始化情绪（主导情绪算法）
+    const emotionKeys = ['happy','angry','worried','sad','shy','jealous','depressed','confused'];
+    const dominantKey = emotionKeys[Math.floor(Math.random() * emotionKeys.length)];
+    newRole.emotions[dominantKey] = Math.floor(Math.random() * 21) + 75;
+    const secondaryKeys = emotionKeys.filter(k => k !== dominantKey);
+    const shuffled = secondaryKeys.sort(() => Math.random() - 0.5);
+    const numSecondary = 2 + Math.floor(Math.random() * 2);
+    for (let i = 0; i < numSecondary && i < shuffled.length; i++) {
+        newRole.emotions[shuffled[i]] = Math.floor(Math.random() * 26) + 30;
+    }
+    const remainingKeys = emotionKeys.filter(k => k !== dominantKey && !secondaryKeys.slice(0, numSecondary).includes(k));
+    remainingKeys.forEach(k => {
+        newRole.emotions[k] = Math.floor(Math.random() * 21) + 10;
+    });
+    newRole.lastEmotionUpdate = Date.now();
+    
+    appData.roles.push(newRole); 
+    await saveData(); 
+    renderRoleList(); 
+    closeCreateRole(); 
+    showToast('创建成功'); 
+}
 
 function openDataManagement() { pageHistory.push('settings'); document.getElementById('modal-settings-main').classList.add('hidden'); document.getElementById('modal-settings-data').classList.remove('hidden'); updateStorageDisplay(); updateNotificationUI(); }
 function closeDataManagement() { document.getElementById('modal-settings-data').classList.add('hidden'); if (pageHistory.pop() === 'settings') document.getElementById('modal-settings-main').classList.remove('hidden'); }
@@ -9654,12 +10107,6 @@ function resetHistorySearch() {
     applyHistoryFilters();
 }
 
-function openDecision() { document.getElementById('decision-options').value = ''; document.getElementById('decision-result').innerHTML = ''; document.getElementById('modal-decision').classList.remove('hidden'); }
-function closeDecision() { document.getElementById('modal-decision').classList.add('hidden'); }
-function makeDecision() { let text = document.getElementById('decision-options').value; let opts = text.split(/[,\n]/).map(s=>s.trim()).filter(s=>s); if (!opts.length) { showToast('请输入选项'); return; } document.getElementById('decision-result').innerHTML = `✨ ${opts[Math.floor(Math.random()*opts.length)]} ✨`; }
-const fortunes = ['大吉','中吉','小吉','末吉','凶','大凶']; const fortuneTexts = { '大吉':'万事如意','中吉':'好事将近','小吉':'小确幸','末吉':'平常心','凶':'注意小人','大凶':'破財消災' };
-
-// ========== ★ 占卜功能：塔罗牌 + 雷诺曼（已恢复） ==========
 function openFortune() { 
     document.getElementById('modal-fortune').classList.remove('hidden'); 
     drawFortune(); 
@@ -9671,7 +10118,6 @@ function drawFortune() {
     const resultDiv = document.getElementById('fortune-text');
     
     if (type === 'tarot') {
-        // 塔罗牌占卜：抽3张牌（过去、现在、未来）
         const shuffled = [...TAROT_CARDS].sort(() => Math.random() - 0.5);
         const cards = shuffled.slice(0, 3);
         const positions = ['过去', '现在', '未来'];
@@ -9698,7 +10144,6 @@ function drawFortune() {
             </div>
         `;
     } else {
-        // 雷诺曼占卜：抽3张牌组合解读
         const shuffled = [...LENORMAND_CARDS].sort(() => Math.random() - 0.5);
         const cards = shuffled.slice(0, 3);
         
@@ -12412,314 +12857,24 @@ async function saveAddressLibrary() {
     closeAddressLibrary();
     showToast('地址库已保存');
 }
-function updateDecisionOptionsCounter() {
-    const textarea = document.getElementById('decision-options-input');
-    if (!textarea) return;
-    const options = textarea.value.split(/\n/).filter(line => line.trim().length > 0);
-    const count = options.length;
-    const counter = document.getElementById('decision-options-counter');
-    if (counter) {
-        if (count < 2) counter.innerHTML = `有效选项: ${count} 个 (至少需要2个)`;
-        else if (count > 9) counter.innerHTML = `有效选项: ${count} 个 (最多9个，将只取前9个)`;
-        else counter.innerHTML = `有效选项: ${count} 个 ✓`;
-    }
-}
-function openDecisionHelper() {
-    if (currentChatType !== 'role' || !currentRoleId) {
-        showToast('请在单人聊天中使用此功能');
-        return;
-    }
-    document.getElementById('decision-question-input').value = '';
-    document.getElementById('decision-options-input').value = '';
-    updateDecisionOptionsCounter();
-    document.getElementById('modal-decision-helper').classList.remove('hidden');
-}
-function closeDecisionHelper() {
-    document.getElementById('modal-decision-helper').classList.add('hidden');
-}
-function submitDecisionRequest() {
-    const question = document.getElementById('decision-question-input').value.trim();
-    let optionsRaw = document.getElementById('decision-options-input').value;
-    let options = optionsRaw.split(/\n/).map(s => s.trim()).filter(s => s);
-    if (options.length < 2) {
-        showToast('至少需要2个选项');
-        return;
-    }
-    if (options.length > 9) {
-        options = options.slice(0, 9);
-        showToast('选项超过9个，已自动截取前9个');
-    }
-    const questionText = question || '帮我选一下';
-    const optionList = options.map((opt, idx) => `${idx+1}. ${opt}`).join('\n');
-    const userMsgContent = `【帮我决策】\n问题：${questionText}\n选项：\n${optionList}`;
-    const userMsg = { id: Date.now(), sender: 'me', content: userMsgContent, time: Date.now(), type: 'text' };
-    if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = [];
-    appData.chats[currentRoleId].push(userMsg);
-    debouncedSaveData();
-    appendMessageToDOM('me', userMsgContent, Date.now(), null, 'text');
-    closeDecisionHelper();
-    const role = appData.roles.find(r => r.id === currentRoleId);
-    if (!role) return;
-    const delay = 3000 + Math.random() * 2000;
-    setTimeout(() => {
-        const chosen = options[Math.floor(Math.random() * options.length)];
-        const replyContent = `✨ 我帮你决定：${chosen}`;
-        const replyMsg = { id: Date.now(), sender: currentRoleId, content: replyContent, time: Date.now(), type: 'text' };
-        appData.chats[currentRoleId].push(replyMsg);
-        debouncedSaveData();
-        appendMessageToDOM(currentRoleId, replyContent, Date.now(), null, 'text');
-    }, delay);
-}
-let doodleRandomTimer = null;
-function initDoodleCanvasEvents() {
-}
-function openDoodlePad() {
-    const modal = document.getElementById('modal-doodle-pad');
-    if (!modal) return;
-    modal.classList.remove('hidden');
-    initDoodleCanvas();
-    renderDoodleLetters();
-    const clearBtn = document.getElementById('doodle-clear');
-    const eraserBtn = document.getElementById('doodle-eraser');
-    const randomDrawBtn = document.getElementById('doodle-random-draw');
-    const randomSpellBtn = document.getElementById('doodle-random-spell');
-    if (clearBtn) clearBtn.onclick = () => { if (doodleCtx) doodleCtx.clearRect(0, 0, doodleCanvas.width, doodleCanvas.height); };
-    if (eraserBtn) eraserBtn.onclick = () => { doodleIsErasing = !doodleIsErasing; eraserBtn.classList.toggle('bg-gray-400', doodleIsErasing); };
-    if (randomDrawBtn) randomDrawBtn.onclick = () => roleRandomDoodle();
-    if (randomSpellBtn) randomSpellBtn.onclick = () => roleRandomSpellAndSend(true);
-    document.querySelectorAll('.color-btn').forEach(btn => {
-        btn.onclick = () => {
-            doodleCurrentColor = btn.getAttribute('data-color');
-            doodleIsErasing = false;
-            if (eraserBtn) eraserBtn.classList.remove('bg-gray-400');
-        };
-    });
-}
-function closeDoodlePad() {
-    document.getElementById('modal-doodle-pad').classList.add('hidden');
-    if (doodleRandomTimer) clearTimeout(doodleRandomTimer);
-}
-function initDoodleCanvas() {
-    const canvas = document.getElementById('doodle-canvas');
-    if (!canvas) return;
-    if (doodleCanvas) {
-        return;
-    }
-    doodleCanvas = canvas;
-    doodleCtx = canvas.getContext('2d');
-    doodleCtx.lineCap = 'round';
-    doodleCtx.lineJoin = 'round';
-    doodleCtx.lineWidth = 5;
-    doodleCtx.strokeStyle = doodleCurrentColor;
-    doodleCanvas.width = 400;
-    doodleCanvas.height = 400;
-    doodleCtx.fillStyle = '#fff';
-    doodleCtx.fillRect(0, 0, doodleCanvas.width, doodleCanvas.height);
-    let drawing = false;
-    let lastX = 0, lastY = 0;
-    function startDrawing(e) {
-        e.preventDefault();
-        drawing = true;
-        const pos = getCanvasCoordinates(e);
-        lastX = pos.x;
-        lastY = pos.y;
-        doodleCtx.beginPath();
-        doodleCtx.moveTo(lastX, lastY);
-    }
-    function draw(e) {
-        if (!drawing) return;
-        e.preventDefault();
-        const pos = getCanvasCoordinates(e);
-        const currentX = pos.x;
-        const currentY = pos.y;
-        doodleCtx.beginPath();
-        doodleCtx.moveTo(lastX, lastY);
-        if (doodleIsErasing) {
-            doodleCtx.globalCompositeOperation = 'destination-out';
-            doodleCtx.lineWidth = 20;
-        } else {
-            doodleCtx.globalCompositeOperation = 'source-over';
-            doodleCtx.strokeStyle = doodleCurrentColor;
-            doodleCtx.lineWidth = 5;
-        }
-        doodleCtx.lineTo(currentX, currentY);
-        doodleCtx.stroke();
-        lastX = currentX;
-        lastY = currentY;
-    }
-    function stopDrawing() { drawing = false; doodleCtx.globalCompositeOperation = 'source-over'; }
-    function getCanvasCoordinates(e) {
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        let clientX, clientY;
-        if (e.touches) {
-            clientX = e.touches[0].clientX;
-            clientY = e.touches[0].clientY;
-        } else {
-            clientX = e.clientX;
-            clientY = e.clientY;
-        }
-        let x = (clientX - rect.left) * scaleX;
-        let y = (clientY - rect.top) * scaleY;
-        x = Math.min(Math.max(0, x), canvas.width);
-        y = Math.min(Math.max(0, y), canvas.height);
-        return { x, y };
-    }
-    canvas.addEventListener('touchstart', startDrawing);
-    canvas.addEventListener('touchmove', draw);
-    canvas.addEventListener('touchend', stopDrawing);
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', stopDrawing);
-}
-function renderDoodleLetters() {
-    const container = document.getElementById('doodle-letters');
-    if (!container) return;
-    container.innerHTML = '';
-    for (let i = 65; i <= 90; i++) {
-        const letter = String.fromCharCode(i);
-        const btn = document.createElement('button');
-        btn.textContent = letter;
-        btn.className = 'w-8 h-8 rounded-full bg-gray-200 text-sm font-bold hover:bg-gray-300';
-        btn.onclick = (function(l) {
-            return function() {
-                if (!doodleCtx || !doodleCanvas) return;
-                const x = Math.random() * (doodleCanvas.width - 40) + 20;
-                const y = Math.random() * (doodleCanvas.height - 40) + 20;
-                doodleCtx.font = `${20 + Math.random() * 20}px Arial`;
-                doodleCtx.fillStyle = doodleIsErasing ? '#fff' : doodleCurrentColor;
-                doodleCtx.fillText(l, x, y);
-            };
-        })(letter);
-        container.appendChild(btn);
-    }
-}
-function roleRandomDoodle() {
-    if (!doodleCtx || !doodleCanvas) return;
-    const shapeCount = 6 + Math.floor(Math.random() * 15);
-    for (let i = 0; i < shapeCount; i++) {
-        const shapeType = Math.floor(Math.random() * 5);
-        const x1 = Math.random() * doodleCanvas.width;
-        const y1 = Math.random() * doodleCanvas.height;
-        const x2 = Math.random() * doodleCanvas.width;
-        const y2 = Math.random() * doodleCanvas.height;
-        const color = `hsl(${Math.random() * 360}, 70%, 60%)`;
-        doodleCtx.beginPath();
-        doodleCtx.strokeStyle = color;
-        doodleCtx.fillStyle = color;
-        doodleCtx.lineWidth = 2 + Math.random() * 6;
-        switch(shapeType) {
-            case 0:
-                doodleCtx.moveTo(x1, y1);
-                doodleCtx.lineTo(x2, y2);
-                doodleCtx.stroke();
-                break;
-            case 1:
-                const radius = 10 + Math.random() * 40;
-                doodleCtx.arc(x1, y1, radius, 0, 2 * Math.PI);
-                if (Math.random() > 0.5) doodleCtx.fill(); else doodleCtx.stroke();
-                break;
-            case 2:
-                const width = 20 + Math.random() * 60;
-                const height = 20 + Math.random() * 60;
-                doodleCtx.rect(x1, y1, width, height);
-                if (Math.random() > 0.5) doodleCtx.fill(); else doodleCtx.stroke();
-                break;
-            case 3:
-                doodleCtx.arc(x1, y1, 30 + Math.random() * 40, 0, Math.PI * (Math.random() + 0.5));
-                doodleCtx.stroke();
-                break;
-            case 4:
-                doodleCtx.ellipse(x1, y1, 20 + Math.random() * 40, 20 + Math.random() * 40, 0, 0, 2 * Math.PI);
-                if (Math.random() > 0.5) doodleCtx.fill(); else doodleCtx.stroke();
-                break;
-        }
-    }
-    const dotCount = 30 + Math.floor(Math.random() * 70);
-    for (let i = 0; i < dotCount; i++) {
-        const x = Math.random() * doodleCanvas.width;
-        const y = Math.random() * doodleCanvas.height;
-        doodleCtx.fillStyle = `hsl(${Math.random() * 360}, 80%, 60%)`;
-        doodleCtx.fillRect(x, y, 2, 2);
-    }
-}
-async function sendCanvasAsImage(canvas, caption = '') {
-    if (!canvas) return;
-    const dataURL = canvas.toDataURL('image/png');
-    const role = appData.roles.find(r => r.id === currentRoleId);
-    if (!role) {
-        showToast('未找到当前角色');
-        return;
-    }
-    const msgContent = caption ? `${caption}\n${dataURL}` : dataURL;
-    const msg = { id: Date.now(), sender: currentRoleId, content: dataURL, time: Date.now(), type: 'image', caption: caption };
-    if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = [];
-    appData.chats[currentRoleId].push(msg);
-    debouncedSaveData();
-    if (currentChatType === 'role' && currentRoleId === currentRoleId) {
-        appendMessageToDOM(currentRoleId, dataURL, Date.now(), null, 'image');
-    } else {
-        incrementUnread(currentRoleId);
-    }
-    showToast('涂鸦已发送');
-}
-function roleRandomSpellAndSend(showOnCanvas = true) {
-    if (currentChatType !== 'role' || !currentRoleId) {
-        showToast('仅在单人聊天中可用');
-        return;
-    }
-    const length = 3 + Math.floor(Math.random() * 13);
-    let word = '';
-    for (let i = 0; i < length; i++) {
-        const letter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-        word += letter;
-    }
-    if (showOnCanvas && doodleCtx && doodleCanvas) {
-        const x = Math.random() * (doodleCanvas.width - 100) + 50;
-        const y = Math.random() * (doodleCanvas.height - 100) + 50;
-        doodleCtx.font = `bold ${24 + Math.random() * 24}px Arial`;
-        doodleCtx.fillStyle = doodleIsErasing ? '#fff' : doodleCurrentColor;
-        doodleCtx.fillText(word, x, y);
-        sendCanvasAsImage(doodleCanvas, `🎨 涂鸦本拼写：${word}`);
-    } else {
-        const content = `🎨 涂鸦本拼写：${word}`;
-        const msg = { id: Date.now(), sender: currentRoleId, content: content, time: Date.now(), type: 'text' };
-        if (!appData.chats[currentRoleId]) appData.chats[currentRoleId] = [];
-        appData.chats[currentRoleId].push(msg);
-        debouncedSaveData();
-        if (currentChatType === 'role' && currentRoleId === currentRoleId) {
-            appendMessageToDOM(currentRoleId, content, Date.now(), null, 'text');
-        } else {
-            incrementUnread(currentRoleId);
-        }
-        showToast('涂鸦本消息已发送');
-    }
-}
-function checkAndTriggerAutoDoodle() {
-    if (!appData.settings.moment?.enabled) return;
-    const today = new Date().toLocaleDateString('sv-SE');
-    appData.roles.forEach(role => {
-        if (role.lastDoodleDate !== today && Math.random() < 0.15) {
-            role.lastDoodleDate = today;
-            const length = 3 + Math.floor(Math.random() * 13);
-            let word = '';
-            for (let i = 0; i < length; i++) {
-                word += String.fromCharCode(65 + Math.floor(Math.random() * 26));
-            }
-            const content = `🎨 我的涂鸦：拼出了 ${word}`;
-            if (!appData.chats[role.id]) appData.chats[role.id] = [];
-            const msg = { id: Date.now(), sender: role.id, content, time: Date.now(), type: 'text' };
-            appData.chats[role.id].push(msg);
-            debouncedSaveData();
-            if (currentChatType === 'role' && currentRoleId === role.id) {
-                appendMessageToDOM(role.id, content, Date.now(), null, 'text');
-            } else {
-                incrementUnread(role.id);
-            }
-        }
-    });
-}
+
+// ========== 涂鸦本已删除，保留空函数占位 ==========
+function initDoodleCanvasEvents() {}
+function openDoodlePad() { showToast('此功能已移除'); }
+function closeDoodlePad() {}
+function roleRandomDoodle() {}
+function roleRandomSpellAndSend() {}
+function checkAndTriggerAutoDoodle() {}
+
+// ========== 抉择功能已删除，保留空函数占位 ==========
+function openDecision() { showToast('此功能已移除'); }
+function closeDecision() {}
+function makeDecision() {}
+function openDecisionHelper() { showToast('此功能已移除'); }
+function closeDecisionHelper() {}
+function submitDecisionRequest() {}
+function updateDecisionOptionsCounter() {}
+
 function showChatHeaderMenu() { showToast('聊天信息'); }
 function showChatSettings() { openChatSettings(); }
 function batchFavorite() { showToast('长按消息可收藏'); }
@@ -12887,6 +13042,7 @@ function startSplashAnimation() {
                 splashScreen.classList.add("hidden"); 
                 loadData(); 
                 setupCSSVariableMonitor();
+                initStickySystem();
             }, 1000); 
             return;
         }
@@ -13793,7 +13949,398 @@ window.closeCosmicGraphicModal = closeCosmicGraphicModal;
     }
 })();
 
-console.log('Spiritual connection v2.0 - 所有功能已加载');
+// ==================== 新增：便利贴功能（卡片式 + 收藏盒） ====================
+
+// 便利贴内容池（含情感联动）
+const STICKY_NICKNAMES = ['炫炫', '老婆', '乖乖', '妹妹'];
+const STICKY_ADJECTIVES = ['最爱的', '最可爱的', '最漂亮的', '萌萌的', '最贴心的', '最甜的'];
+const STICKY_CONTENTS = [
+    '想让你多陪陪我',
+    '好好吃饭，不要饿着',
+    '好好睡觉，不要熬夜',
+    '今天天气很好，想和你分享',
+    '记得多喝水哦',
+    '工作不要太累，注意休息',
+    '想听你的声音',
+    '你笑起来很好看',
+    '要照顾好自己',
+    '今天的你很棒',
+    '想和你一起散步',
+    '你是我最甜蜜的牵挂',
+    '无论多晚，我都在这里',
+    '你的存在就是我最大的幸福',
+    '希望今天能见到你',
+    '今天也要开心哦',
+    '记得按时吃饭，我会心疼的',
+    '累了就休息，不要硬撑',
+    '好想抱抱你',
+    '你是我一天中最美好的部分'
+];
+
+// 生成便利贴
+function generateSticky(role) {
+    if (!role) return null;
+    const today = new Date().toDateString();
+    // 检查今天是否已有便利贴
+    const todaySticky = appData.stickies.find(s => s.roleId === role.id && new Date(s.date).toDateString() === today);
+    if (todaySticky) return null;
+    
+    // 15% 概率生成
+    if (Math.random() > 0.15) return null;
+    
+    const nickname = STICKY_NICKNAMES[Math.floor(Math.random() * STICKY_NICKNAMES.length)];
+    const adjective = STICKY_ADJECTIVES[Math.floor(Math.random() * STICKY_ADJECTIVES.length)];
+    const content = STICKY_CONTENTS[Math.floor(Math.random() * STICKY_CONTENTS.length)];
+    
+    const sticky = {
+        id: generateUID(),
+        roleId: role.id,
+        nickname: nickname,
+        adjective: adjective,
+        content: content,
+        date: Date.now(),
+        isToday: true,
+        collected: false,
+        replies: [],
+        read: false
+    };
+    
+    appData.stickies.push(sticky);
+    debouncedSaveData();
+    updateStickyUnreadBadge();
+    return sticky;
+}
+
+// 检查并生成每日便利贴
+function checkDailyStickies() {
+    const today = new Date().toDateString();
+    appData.roles.forEach(role => {
+        // 清理过期的今日标记
+        appData.stickies.forEach(s => {
+            if (s.roleId === role.id && new Date(s.date).toDateString() !== today) {
+                s.isToday = false;
+            }
+        });
+        // 检查是否已有今日便利贴
+        const hasToday = appData.stickies.some(s => s.roleId === role.id && new Date(s.date).toDateString() === today);
+        if (!hasToday) {
+            generateSticky(role);
+        }
+    });
+    debouncedSaveData();
+    updateStickyUnreadBadge();
+}
+
+// 初始化便利贴系统
+function initStickySystem() {
+    setTimeout(() => {
+        checkDailyStickies();
+        markStickiesRead();
+        updateStickyUnreadBadge();
+    }, 2000);
+    
+    // 每小时检查一次（只在应用活跃时）
+    setInterval(() => {
+        if (!document.hidden) {
+            checkDailyStickies();
+        }
+    }, 60 * 60 * 1000);
+}
+
+// 标记今日便利贴为已读
+function markStickiesRead() {
+    const today = new Date().toDateString();
+    appData.stickies.forEach(s => {
+        if (new Date(s.date).toDateString() === today) {
+            s.read = true;
+        }
+    });
+    debouncedSaveData();
+    updateStickyUnreadBadge();
+}
+
+// 更新便利贴未读角标
+function updateStickyUnreadBadge() {
+    const badge = document.getElementById('sticky-unread-badge');
+    if (!badge) return;
+    const today = new Date().toDateString();
+    const unread = appData.stickies.filter(s => 
+        new Date(s.date).toDateString() === today && 
+        !s.collected && 
+        !s.read
+    ).length;
+    if (unread > 0) {
+        badge.textContent = unread > 99 ? '99+' : unread;
+        badge.classList.remove('hidden');
+    } else {
+        badge.classList.add('hidden');
+    }
+}
+
+// 打开便利贴页面
+function openStickyPage() {
+    checkDailyStickies();
+    document.getElementById('page-sticky').classList.add('active');
+    document.getElementById('page-home').classList.remove('active');
+    renderStickies();
+    updateStickyUnreadBadge();
+}
+
+// 关闭便利贴页面
+function closeStickyPage() {
+    document.getElementById('page-sticky').classList.remove('active');
+    document.getElementById('page-home').classList.add('active');
+    markStickiesRead();
+    updateStickyUnreadBadge();
+}
+
+// ========== ★ 核心：渲染便利贴列表（卡片样式，双列网格，内容格式按要求） ==========
+function renderStickies() {
+    const container = document.getElementById('sticky-body');
+    if (!container) return;
+    
+    const stickies = appData.stickies.filter(s => !s.collected);
+    stickies.sort((a, b) => b.date - a.date);
+    
+    if (stickies.length === 0) {
+        container.innerHTML = '<div class="sticky-empty">📋 暂无便利贴<br><span style="font-size:11px;color:#aaa;">每天有15%的概率收到角色的小纸条哦</span></div>';
+        return;
+    }
+    
+    let html = '';
+    const today = new Date().toDateString();
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    
+    stickies.forEach(sticky => {
+        const role = appData.roles.find(r => r.id === sticky.roleId);
+        const avatar = role?.avatar || DEFAULT_AVATAR;
+        const roleName = role?.name || '未知';
+        const dateObj = new Date(sticky.date);
+        const dateStr = dateObj.toDateString() === today ? '今天' :
+                        dateObj.toDateString() === yesterday ? '昨天' :
+                        `${dateObj.getMonth()+1}月${dateObj.getDate()}日`;
+        const isTodaySticky = dateObj.toDateString() === today;
+        
+        // 格式：最爱的炫炫：\n  不要熬夜了，早点休息！\n—— 你的老公xxx
+        const contentLines = sticky.content.split('\n');
+        const firstLine = contentLines[0] || '';
+        const restLines = contentLines.slice(1).join('\n');
+        
+        // 构造显示内容：强称号，然后缩进正文，最后签名
+        let displayHtml = `<strong>${escapeHtml(sticky.adjective)}${escapeHtml(sticky.nickname)}：</strong>`;
+        if (restLines) {
+            displayHtml += `<br><span style="padding-left:0.5em;">${escapeHtml(restLines)}</span>`;
+        } else {
+            // 如果内容没有换行，则直接显示
+            displayHtml += `<br><span style="padding-left:0.5em;">${escapeHtml(sticky.content)}</span>`;
+        }
+        // 添加签名（统一格式：—— 你的老公xxx）
+        displayHtml += `<br><span class="sticky-signature">—— 你的${escapeHtml(roleName)}</span>`;
+        
+        // 渲染回复内容
+        let repliesHtml = '';
+        if (sticky.replies && sticky.replies.length > 0) {
+            repliesHtml = '<div class="sticky-replies">';
+            sticky.replies.forEach(reply => {
+                if (reply.startsWith('data:image') || reply.startsWith('http')) {
+                    repliesHtml += `<div class="reply-bubble"><img src="${reply}" alt="表情"></div>`;
+                } else {
+                    repliesHtml += `<div class="reply-bubble"><span class="reply-text">${escapeHtml(reply)}</span></div>`;
+                }
+            });
+            repliesHtml += '</div>';
+        }
+        
+        // 随机旋转角度
+        const rotate = (Math.random() * 2 - 1) * 1.2;
+        const style = `--rotate: ${rotate}deg;`;
+        
+        html += `
+            <div class="sticky-card" data-id="${sticky.id}" style="${style}">
+                <div class="sticky-top">
+                    <span class="date-label">${dateStr} ${isTodaySticky ? '✨' : ''}</span>
+                    <div class="actions">
+                        <button onclick="event.stopPropagation(); toggleCollectSticky('${sticky.id}')" title="收藏">
+                            <i data-lucide="bookmark" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="event.stopPropagation(); deleteSticky('${sticky.id}')" title="删除">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="sticky-content">
+                    ${displayHtml}
+                </div>
+                <div class="sticky-footer">
+                    <div class="role-info">
+                        <img src="${avatar}" alt="${escapeHtml(roleName)}">
+                        <span>—— ${escapeHtml(roleName)}</span>
+                    </div>
+                    <div class="reply-area">
+                        <button onclick="event.stopPropagation(); toggleStickyReplyInput('${sticky.id}')" title="回复">
+                            <i data-lucide="message-circle" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="event.stopPropagation(); openStickerPickerForSticky('${sticky.id}')" title="表情包">
+                            <i data-lucide="smile" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="sticky-reply-input-area" id="sticky-reply-${sticky.id}" style="display:none;">
+                    <input type="text" id="sticky-reply-input-${sticky.id}" placeholder="输入回复..." maxlength="100">
+                    <button onclick="submitStickyReply('${sticky.id}')">发送</button>
+                </div>
+                ${repliesHtml}
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+    setTimeout(() => lucide.createIcons(), 50);
+}
+
+// 切换回复输入框显示
+function toggleStickyReplyInput(stickyId) {
+    const area = document.getElementById(`sticky-reply-${stickyId}`);
+    if (!area) return;
+    if (area.style.display === 'none' || !area.style.display) {
+        area.style.display = 'flex';
+        const input = document.getElementById(`sticky-reply-input-${stickyId}`);
+        if (input) setTimeout(() => input.focus(), 100);
+    } else {
+        area.style.display = 'none';
+    }
+}
+
+// 提交便利贴文字回复
+function submitStickyReply(stickyId) {
+    const input = document.getElementById(`sticky-reply-input-${stickyId}`);
+    if (!input) return;
+    const text = input.value.trim();
+    if (!text) {
+        showToast('请输入回复内容');
+        return;
+    }
+    
+    const sticky = appData.stickies.find(s => s.id === stickyId);
+    if (!sticky) return;
+    
+    if (!sticky.replies) sticky.replies = [];
+    sticky.replies.push(text);
+    debouncedSaveData();
+    renderStickies();
+    showToast('回复已发送 💬');
+}
+
+// 收藏/取消收藏便利贴
+function toggleCollectSticky(stickyId) {
+    const sticky = appData.stickies.find(s => s.id === stickyId);
+    if (!sticky) return;
+    sticky.collected = !sticky.collected;
+    debouncedSaveData();
+    renderStickies();
+    updateStickyUnreadBadge();
+    if (sticky.collected) {
+        showToast('已收藏到便签盒 📦');
+    } else {
+        showToast('已取消收藏');
+    }
+}
+
+// 删除便利贴
+function deleteSticky(stickyId) {
+    showConfirm('确定删除这张便利贴吗？', () => {
+        appData.stickies = appData.stickies.filter(s => s.id !== stickyId);
+        debouncedSaveData();
+        renderStickies();
+        updateStickyUnreadBadge();
+        showToast('已删除');
+    });
+}
+
+// 为便利贴回复表情包
+function openStickerPickerForSticky(stickyId) {
+    currentStickyReplyId = stickyId;
+    openStickerPicker();
+    const originalSend = window.sendStickerMessage;
+    window.sendStickerMessage = function(src) {
+        const sticky = appData.stickies.find(s => s.id === currentStickyReplyId);
+        if (sticky) {
+            if (!sticky.replies) sticky.replies = [];
+            sticky.replies.push(src);
+            debouncedSaveData();
+            renderStickies();
+            showToast('表情已回复 💬');
+            closeStickerPicker();
+        } else {
+            originalSend(src);
+        }
+        window.sendStickerMessage = originalSend;
+        currentStickyReplyId = null;
+    };
+}
+
+let currentStickyReplyId = null;
+
+// 打开收藏盒（便签盒）
+function openStickyCollection() {
+    const modal = document.getElementById('sticky-collection-modal');
+    const container = document.getElementById('collection-panel-content');
+    if (!modal || !container) return;
+    
+    const collected = appData.stickies.filter(s => s.collected);
+    let html = `
+        <div class="collection-header">
+            <h3>📦 便签盒</h3>
+            <button onclick="closeStickyCollection()">✕</button>
+        </div>
+    `;
+    
+    if (collected.length === 0) {
+        html += `
+            <div class="text-center text-gray-400 py-8">
+                <div style="font-size:40px;margin-bottom:12px;">📦</div>
+                <p>暂无收藏的便利贴</p>
+                <p style="font-size:12px;">点击便利贴左上角的📖按钮即可收藏</p>
+            </div>
+        `;
+    } else {
+        collected.forEach(sticky => {
+            const role = appData.roles.find(r => r.id === sticky.roleId);
+            const roleName = role?.name || '未知';
+            const dateObj = new Date(sticky.date);
+            const dateStr = dateObj.toLocaleDateString('zh-CN');
+            html += `
+                <div class="collection-item">
+                    <div class="content"><strong>${escapeHtml(sticky.adjective)}${escapeHtml(sticky.nickname)}：</strong>${escapeHtml(sticky.content)}</div>
+                    <div class="meta">
+                        <span>—— ${escapeHtml(roleName)} · ${dateStr}</span>
+                        <button onclick="toggleCollectSticky('${sticky.id}'); closeStickyCollection();">取消收藏</button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+    
+    container.innerHTML = html;
+    modal.classList.remove('hidden');
+}
+
+function closeStickyCollection() {
+    document.getElementById('sticky-collection-modal').classList.add('hidden');
+}
+
+// 暴露全局函数
+window.openStickyPage = openStickyPage;
+window.closeStickyPage = closeStickyPage;
+window.toggleCollectSticky = toggleCollectSticky;
+window.deleteSticky = deleteSticky;
+window.openStickyCollection = openStickyCollection;
+window.closeStickyCollection = closeStickyCollection;
+window.openStickerPickerForSticky = openStickerPickerForSticky;
+window.toggleStickyReplyInput = toggleStickyReplyInput;
+window.submitStickyReply = submitStickyReply;
+
+console.log('Spiritual connection v2.0 - 所有功能已加载（情绪面板已移除，便利贴已优化）');
 
 </script>
 </body>
