@@ -2435,7 +2435,7 @@
             height: 260px;
             flex-shrink: 0;
             overflow: visible;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--accent-color) 0%, var(--bg-secondary) 100%);
             cursor: pointer;
         }
         #moment-cover-bg {
@@ -2471,12 +2471,12 @@
             padding: 8px 16px;
             font-size: 0;
             color: transparent;
-            background: #ffffff;
+            background: var(--bg-secondary);
         }
 
         #page-moment-detail {
             z-index: 40;
-            background: #fff;
+            background: var(--bg-secondary);
         }
         .moment-detail-nav {
             position: sticky;
@@ -3292,14 +3292,15 @@
             padding: 12px 12px 20px;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 14px;
+            gap: 12px;
             align-content: start;
+            align-items: start;
             background: #f5f0eb;
         }
         .sticky-card {
             background: #fffcf5;
-            border-radius: 4px;
-            padding: 12px 12px 10px;
+            border-radius: 6px;
+            padding: 10px 10px 8px;
             box-shadow: 
                 0 1px 1px rgba(0,0,0,0.05),
                 0 2px 4px rgba(0,0,0,0.06),
@@ -3314,8 +3315,9 @@
             backdrop-filter: blur(2px);
             display: flex;
             flex-direction: column;
-            min-height: 120px;
+            aspect-ratio: 1 / 1;
             font-size: 12px;
+            min-height: 0;
         }
         .sticky-card::before {
             content: '';
@@ -3359,14 +3361,25 @@
         .sticky-card .sticky-content {
             font-family: 'Times New Roman', serif;
             font-size: 12px;
-            line-height: 1.6;
+            line-height: 1.5;
             color: #2c2c2c;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             white-space: pre-wrap;
             word-break: break-word;
             position: relative;
             z-index: 1;
             flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+            max-height: none;
+            -webkit-overflow-scrolling: touch;
+        }
+        .sticky-card .sticky-content::-webkit-scrollbar {
+            width: 2px;
+        }
+        .sticky-card .sticky-content::-webkit-scrollbar-thumb {
+            background: rgba(200,180,160,0.35);
+            border-radius: 2px;
         }
         .sticky-card .sticky-content strong {
             color: #5a3e2b;
@@ -3509,6 +3522,9 @@
             border-top: 1px solid rgba(200,180,160,0.12);
             position: relative;
             z-index: 1;
+            max-height: 52px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         .sticky-replies .reply-bubble {
             background: rgba(240,235,225,0.6);
@@ -4031,6 +4047,12 @@
             display: inline-block;
             margin-bottom: 12px;
         }
+        .questionnaire-card .q-role {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
         .questionnaire-card .q-title {
             font-size: 15px;
             font-weight: 600;
@@ -4348,7 +4370,7 @@
         .traj-gloss-item {
             position: relative;
             display: flex;
-            padding-bottom: 14px;
+            padding-bottom: 10px;
         }
         .traj-gloss-item::before {
             content: '';
@@ -4399,8 +4421,8 @@
             backdrop-filter: blur(6px);
             -webkit-backdrop-filter: blur(6px);
             border: 0.5px solid rgba(255, 200, 210, 0.55);
-            border-radius: 18px;
-            padding: 14px 14px 12px;
+            border-radius: 14px;
+            padding: 9px 12px 8px;
             display: flex;
             flex-direction: column;
             transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
@@ -4419,18 +4441,18 @@
             transform: scale(0.97);
         }
         .traj-gloss-time {
-            font-size: 12px;
+            font-size: 11px;
             color: #998892;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             letter-spacing: 0.3px;
         }
         .traj-gloss-text {
             display: flex;
             align-items: flex-start;
             gap: 6px;
-            font-size: 14px;
+            font-size: 13px;
             color: #4b3c44;
-            line-height: 1.6;
+            line-height: 1.45;
         }
         .traj-gloss-text .traj-icon {
             display: inline-flex;
@@ -4442,14 +4464,14 @@
         .traj-gloss-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 8px;
+            gap: 5px;
+            margin-top: 5px;
         }
         .traj-gloss-tag {
-            font-size: 11px;
+            font-size: 10px;
             line-height: 1;
-            padding: 4px 8px;
-            border-radius: 10px;
+            padding: 3px 7px;
+            border-radius: 9px;
             background: rgba(255, 214, 224, 0.45);
             color: #c06888;
         }
@@ -4466,9 +4488,9 @@
             display: flex;
             align-items: center;
             gap: 4px;
-            font-size: 12px;
+            font-size: 11px;
             color: #c06888;
-            margin-top: 6px;
+            margin-top: 4px;
         }
         .traj-gloss-extra .traj-extra-icon {
             display: inline-flex;
@@ -4480,28 +4502,24 @@
             display: flex;
             justify-content: flex-end;
             align-items: center;
-            gap: 8px;
-            margin-top: 10px;
-            padding-top: 8px;
+            gap: 6px;
+            margin-top: 6px;
+            padding-top: 5px;
             border-top: 0.5px solid rgba(255, 200, 210, 0.35);
         }
         .traj-gloss-reply-btn {
-            font-size: 12px;
+            font-size: 11px;
             color: #8a7680;
             background: rgba(255, 255, 255, 0.65);
             border: 1px solid rgba(255, 200, 210, 0.4);
             border-radius: 999px;
-            padding: 5px 14px;
+            padding: 3px 12px;
             cursor: pointer;
             transition: all 0.2s;
         }
-        .traj-gloss-reply-btn:hover {
-            background: rgba(255, 255, 255, 0.9);
-            color: #c06888;
-        }
         .traj-gloss-heart-btn {
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             border: none;
             background: transparent;
             border-radius: 50%;
@@ -4515,8 +4533,8 @@
         .traj-gloss-heart-btn:hover { transform: scale(1.15); }
         .traj-gloss-heart-btn.hearted { color: #ff6f91; }
         .traj-gloss-jump-btn {
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             border: none;
             background: rgba(255, 255, 255, 0.5);
             border-radius: 50%;
@@ -5931,7 +5949,7 @@
 </div>
 
 <!-- ========== 朋友圈页面 ========== -->
-<div id="page-moments" class="page bg-[#f0f2f5] z-40">
+<div id="page-moments" class="page z-40" style="background: var(--bg-secondary);">
     <header class="absolute top-0 left-0 w-full bg-transparent shadow-none z-20 safe-top" style="background-color: transparent !important;">
         <div class="px-2 py-2 flex items-center h-12">
             <button onclick="closeMomentPage()" class="p-2 -ml-2 rounded-full" style="background: rgba(0,0,0,0.3); color: white;">
@@ -5946,7 +5964,7 @@
     <main class="flex-1 overflow-auto p-0 scrollbar-hide pb-8" id="moment-list-scroll">
         <div id="moment-cover-wrapper" onclick="document.getElementById('moment-cover-upload-input').click();">
             <img id="moment-cover-bg" src="" alt="封面" style="display:none;" />
-            <div id="moment-cover-placeholder" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+            <div id="moment-cover-placeholder" style="background: linear-gradient(135deg, var(--accent-color) 0%, var(--bg-secondary) 100%); width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
                 <span style="color:rgba(255,255,255,0.5); font-size:14px;">点击更换封面</span>
             </div>
             <input type="file" id="moment-cover-upload-input" accept="image/*" style="display:none;" onchange="handleMomentCoverUpload(this)" />
@@ -6399,6 +6417,7 @@
 <!-- ★★★ 问卷答题卡片 ★★★ -->
 <div id="modal-questionnaire" class="modal-overlay hidden" style="z-index: 1700;">
     <div class="questionnaire-card" id="questionnaire-card">
+        <div class="q-role" id="q-role"></div>
         <div class="q-tag">小问题问问你</div>
         <div class="q-title" id="q-title">问题标题</div>
         <div class="q-options" id="q-options"></div>
@@ -15242,7 +15261,7 @@ window.closeCosmicGraphicModal = closeCosmicGraphicModal;
 // ==================== 新增：便利贴功能（卡片式 + 收藏盒） ====================
 
 // 便利贴内容池（含情感联动）
-const STICKY_NICKNAMES = ['炫炫', '老婆', '乖乖', '妹妹'];
+const STICKY_NICKNAMES = ['炫炫', '老婆', '乖乖', '妹妹', '宝贝', '亲爱的', '小可爱', '大宝贝'];
 const STICKY_ADJECTIVES = ['最爱的', '最可爱的', '最漂亮的', '萌萌的', '最贴心的', '最甜的'];
 const STICKY_CONTENTS = [
     '想让你多陪陪我',
@@ -15402,13 +15421,13 @@ function renderStickies() {
         const contentLines = sticky.content.split('\n');
         const restLines = contentLines.slice(1).join('\n');
         
-        let displayHtml = `<strong>${escapeHtml(sticky.adjective)}${escapeHtml(sticky.nickname)}：</strong>`;
+        let displayHtml = `<strong>${escapeHtml(sticky.nickname)}：</strong>`;
         if (restLines) {
             displayHtml += `<br><span style="padding-left:0.5em;">${escapeHtml(restLines)}</span>`;
         } else {
             displayHtml += `<br><span style="padding-left:0.5em;">${escapeHtml(sticky.content)}</span>`;
         }
-        displayHtml += `<br><span class="sticky-signature">—— 你的${escapeHtml(roleName)}</span>`;
+        displayHtml += `<br><span class="sticky-signature">—— ${escapeHtml(roleName)}</span>`;
         
         let repliesHtml = '';
         if (sticky.replies && sticky.replies.length > 0) {
@@ -15878,10 +15897,11 @@ function acceptInviteFromMessage(roleId, inviteId, btnEl) {
             const allWords = getActiveWordList();
             if (allWords.length > 0) {
                 const followUp = allWords[Math.floor(Math.random() * allWords.length)];
+                const iconSymbol = data.kind === 'music' ? ' 🎵' : ' 📖';
                 const msg = {
                     id: Date.now() + 1,
                     sender: role.id,
-                    content: followUp + (Math.random() < 0.3 ? ' 🎵' : ' 📖'),
+                    content: followUp + iconSymbol,
                     time: Date.now(),
                     type: 'text',
                     read: false
@@ -15928,10 +15948,11 @@ function declineInviteFromMessage(roleId, inviteId, btnEl) {
             const allWords = getActiveWordList();
             if (allWords.length > 0) {
                 const reply = allWords[Math.floor(Math.random() * allWords.length)];
+                const iconSymbol = data.kind === 'music' ? ' 🎵' : ' 📖';
                 const msg = {
                     id: Date.now() + 1,
                     sender: role.id,
-                    content: reply + ' (下次吧)',
+                    content: reply + iconSymbol + ' (下次吧)',
                     time: Date.now(),
                     type: 'text',
                     read: false
@@ -16498,7 +16519,7 @@ function triggerQuestionnaire(role) {
     const key = role.id + '_' + today;
     if (appData.questionnaireTriggeredToday[key]) return;
     
-    if (Math.random() > 0.25) return;
+    if (Math.random() > 0.03) return;
     
     const qs = appData.questionnaires.filter(q => q.options && q.options.length > 0);
     if (qs.length === 0) return;
@@ -16520,6 +16541,9 @@ function triggerQuestionnaire(role) {
 function showQuestionnaireCard(q, role) {
     const modal = document.getElementById('modal-questionnaire');
     if (!modal) return;
+    
+    const roleEl = document.getElementById('q-role');
+    if (roleEl) roleEl.textContent = role?.name ? `${role.name} 问你` : '';
     
     document.getElementById('q-title').textContent = q.question;
     
@@ -16632,8 +16656,13 @@ function submitQuestionnaire() {
         return;
     }
     
-    // 全部答完，角色统一回复
+    // 全部答完，角色有 35% 概率统一回复
     setTimeout(() => {
+        if (Math.random() > 0.35) {
+            selectedQuestionnaireAnswers = [];
+            currentQuestionnaireId = null;
+            return;
+        }
         const allWords = getActiveWordList();
         let replyText;
         if (allWords.length > 0) {
@@ -16658,10 +16687,9 @@ function submitQuestionnaire() {
         } else {
             incrementUnread(roleId);
         }
+        selectedQuestionnaireAnswers = [];
+        currentQuestionnaireId = null;
     }, 2000 + Math.random() * 3000);
-    
-    selectedQuestionnaireAnswers = [];
-    currentQuestionnaireId = null;
 }
 
 // ========== 4. 问卷管理界面 ==========
@@ -16810,7 +16838,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // ========== 5. 生活轨迹功能 ==========
 
 const TRAJECTORY_CATEGORIES = [
-    { name: '日常', weight: 30, icon: 'coffee', items: [
+    { name: '日常', weight: 24, icon: 'coffee', items: [
         { text: '在喝咖啡', icon: 'coffee' },
         { text: '刚吃完早餐', icon: 'utensils' },
         { text: '正在看书', icon: 'book-open' },
@@ -16819,9 +16847,17 @@ const TRAJECTORY_CATEGORIES = [
         { text: '在喝茶', icon: 'cup-soda' },
         { text: '在看窗外', icon: 'sunset' },
         { text: '在写日记', icon: 'pen-line' },
-        { text: '在整理房间', icon: 'sparkles' }
+        { text: '在整理房间', icon: 'sparkles' },
+        { text: '在给绿植浇水', icon: 'flower2' },
+        { text: '在楼下遛弯', icon: 'footprints' },
+        { text: '在收拾背包', icon: 'backpack' },
+        { text: '在看一部老电影', icon: 'zap' },
+        { text: '在煮一壶热茶', icon: 'cup-soda' },
+        { text: '在挑一张喜欢的唱片', icon: 'music' },
+        { text: '在记账', icon: 'file' },
+        { text: '在阳台上吹风', icon: 'wind' }
     ]},
-    { name: '饮食', weight: 20, icon: 'utensils', items: [
+    { name: '饮食', weight: 17, icon: 'utensils', items: [
         { text: '早餐喝了一碗热粥', icon: 'cup-soda' },
         { text: '午餐点了最爱的盖浇饭', icon: 'utensils' },
         { text: '晚饭想吃火锅了', icon: 'cooking-pot' },
@@ -16832,26 +16868,46 @@ const TRAJECTORY_CATEGORIES = [
         { text: '啃了一个苹果', icon: 'flower2' },
         { text: '晚饭煮了红豆汤', icon: 'cooking-pot' },
         { text: '在剥柚子', icon: 'flower2' },
-        { text: '给自己炒了两个小菜', icon: 'chef' }
+        { text: '给自己炒了两个小菜', icon: 'chef' },
+        { text: '给自己做了一杯手冲咖啡', icon: 'coffee' },
+        { text: '蒸了一笼小笼包', icon: 'cooking-pot' },
+        { text: '在啃黄瓜当零嘴', icon: 'flower2' },
+        { text: '午饭叫了一份沙拉', icon: 'salad' },
+        { text: '在烤小饼干', icon: 'chef' },
+        { text: '给自己榨了杯果汁', icon: 'cup-soda' },
+        { text: '晚饭煮了海鲜粥', icon: 'cup-soda' }
     ]},
-    { name: '运动', weight: 12, icon: 'dumbbell', items: [
+    { name: '运动', weight: 14, icon: 'dumbbell', items: [
         { text: '去健身房撸铁了', icon: 'dumbbell' },
         { text: '出门夜跑了一圈', icon: 'running' },
         { text: '做了几组拉伸放松', icon: 'activity' },
         { text: '在楼下散步消食', icon: 'footprints' },
         { text: '打了会儿羽毛球', icon: 'dumbbell' },
-        { text: '骑自行车兜了兜风', icon: 'footprints' },
-        { text: '早起做了晨练', icon: 'sun' }
+        { text: '骑自行车兜了兜风', icon: 'bike' },
+        { text: '早起做了晨练', icon: 'sun' },
+        { text: '跟着视频跳了会儿操', icon: 'activity' },
+        { text: '去游泳池游了几圈', icon: 'activity' },
+        { text: '打了会儿篮球', icon: 'dumbbell' },
+        { text: '在家做了几组深蹲', icon: 'dumbbell' },
+        { text: '去爬了个小山头', icon: 'activity' },
+        { text: '傍晚出去快走了半小时', icon: 'footprints' },
+        { text: '骑共享单车去买东西', icon: 'bike' }
     ]},
-    { name: '睡眠', weight: 10, icon: 'bed', items: [
+    { name: '睡眠', weight: 12, icon: 'bed', items: [
         { text: '午休眯了一会儿', icon: 'bed' },
         { text: '昨晚睡得挺早', icon: 'moon' },
         { text: '刚醒，还有点迷糊', icon: 'bed-double' },
         { text: '今天有点困，想补个觉', icon: 'bed' },
         { text: '做了一个好梦', icon: 'moon' },
-        { text: '在酝酿睡意', icon: 'bed' }
+        { text: '在酝酿睡意', icon: 'bed' },
+        { text: '昨天熬夜了，今天好困', icon: 'moon' },
+        { text: '梦到你了', icon: 'heart' },
+        { text: '下午补了个午觉', icon: 'bed-double' },
+        { text: '在打哈欠，好困', icon: 'activity' },
+        { text: '准备睡个午觉，待会聊', icon: 'bed' },
+        { text: '睡了一觉精神多了', icon: 'sun' }
     ]},
-    { name: '工作', weight: 18, icon: 'briefcase', items: [
+    { name: '工作', weight: 16, icon: 'briefcase', items: [
         { text: '在写今天的方案', icon: 'laptop' },
         { text: '刚开完会', icon: 'briefcase' },
         { text: '在整理工作文档', icon: 'file' },
@@ -16859,9 +16915,33 @@ const TRAJECTORY_CATEGORIES = [
         { text: '摸鱼了一会儿', icon: 'coffee' },
         { text: '刚下班，在回家路上', icon: 'sunset' },
         { text: '在准备明天的汇报', icon: 'laptop' },
-        { text: '改了会儿代码', icon: 'laptop' }
+        { text: '改了会儿代码', icon: 'laptop' },
+        { text: '在回复客户邮件', icon: 'file' },
+        { text: '在做一个新的项目', icon: 'briefcase' },
+        { text: '刚做完周报', icon: 'file' },
+        { text: '在会议室头脑风暴', icon: 'briefcase' },
+        { text: '今天有点忙，刚歇下来', icon: 'laptop' },
+        { text: '在打电话沟通工作', icon: 'message-circle' },
+        { text: '在整理报销单', icon: 'file' },
+        { text: '开完会脑袋还在放空', icon: 'cloud' },
+        { text: '在写工作周报', icon: 'laptop' }
     ]},
-    { name: '与我相关的小事', weight: 20, icon: 'heart', items: [
+    { name: '阅读', weight: 12, icon: 'book', items: [
+        { text: '翻开了一本新书', icon: 'book' },
+        { text: '读到一句很喜欢的话', icon: 'book' },
+        { text: '今天看完了想看的章节', icon: 'book' },
+        { text: '在整理读书笔记', icon: 'book-marked' },
+        { text: '被书里的情节打动到了', icon: 'book' },
+        { text: '在重读一本很喜欢的书', icon: 'book' },
+        { text: '读到有趣的地方忍不住笑了', icon: 'book' },
+        { text: '在床边放了本睡前读物', icon: 'book-open' },
+        { text: '书看到一半，舍不得合上', icon: 'book' },
+        { text: '在给书里的句子划线', icon: 'book-marked' },
+        { text: '今天读了一小段诗集', icon: 'book' },
+        { text: '刚买了两本想看的书', icon: 'gift' },
+        { text: '在书里夹了一片书签', icon: 'book-marked' }
+    ]},
+    { name: '与我相关的小事', weight: 17, icon: 'heart', items: [
         { text: '路过我们常去的那家店', icon: 'store' },
         { text: '想起你说过的话', icon: 'message-circle' },
         { text: '看到一件很适合你的东西', icon: 'gift' },
@@ -16869,9 +16949,30 @@ const TRAJECTORY_CATEGORIES = [
         { text: '听到一首歌想起你', icon: 'music' },
         { text: '今天的晚霞像你的笑容', icon: 'sunset' },
         { text: '看到一对情侣，想起我们', icon: 'heart' },
-        { text: '闻到熟悉的味道，想起你', icon: 'flower' }
+        { text: '闻到熟悉的味道，想起你', icon: 'flower' },
+        { text: '在相册里翻到我们的照片', icon: 'heart' },
+        { text: '天气变凉了，想提醒你加衣服', icon: 'zap' },
+        { text: '看到你爱吃的那家店在打折', icon: 'gift' },
+        { text: '今天路过一家花店，想到你', icon: 'flower' },
+        { text: '收藏了一首歌，想分享给你', icon: 'music' },
+        { text: '想起你说过周末要做什么', icon: 'heart' },
+        { text: '看到一只很像你的小猫', icon: 'heart' },
+        { text: '想到你认真做事的样子', icon: 'sparkles' },
+        { text: '收藏了一条你可能会喜欢的句子', icon: 'book-open' },
+        { text: '今天的云很好看，想拍给你', icon: 'sunset' }
     ]},
-    { name: '发呆碎碎念', weight: 10, icon: 'moon', items: [
+    { name: '生病/健康', weight: 8, icon: 'thermometer', items: [
+        { text: '有点感冒，在喝热水', icon: 'thermometer' },
+        { text: '喉咙不太舒服，喝了好多水', icon: 'pill' },
+        { text: '今天有点不舒服，在休息', icon: 'bed' },
+        { text: '吃了感冒药，想睡一会儿', icon: 'pill' },
+        { text: '腰有点酸，在贴膏药', icon: 'pill' },
+        { text: '头疼，闭着眼睛歇会儿', icon: 'thermometer' },
+        { text: '在泡脚缓解疲劳', icon: 'activity' },
+        { text: '量了体温，有点低烧', icon: 'thermometer' },
+        { text: '有点鼻塞，多喝点热水', icon: 'pill' }
+    ]},
+    { name: '发呆碎碎念', weight: 8, icon: 'moon', items: [
         { text: '有点无聊', icon: 'cloud' },
         { text: '不知道该做什么', icon: 'help-circle' },
         { text: '今天好安静', icon: 'volume-x' },
@@ -16879,7 +16980,9 @@ const TRAJECTORY_CATEGORIES = [
         { text: '想你了', icon: 'heart' },
         { text: '有点困了', icon: 'moon' },
         { text: '发了一会儿呆', icon: 'cloud' },
-        { text: '感觉今天很特别', icon: 'sparkles' }
+        { text: '感觉今天很特别', icon: 'sparkles' },
+        { text: '窗外下雨了，听着雨声', icon: 'cloud' },
+        { text: '今天太阳很好，心情不错', icon: 'sun' }
     ]}
 ];
 
@@ -16923,7 +17026,15 @@ const TRAJ_ICON_SVGS = {
     zap: '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
     activity: '<path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/>',
     clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
-    file: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/>'
+    file: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/>',
+    backpack: '<path d="M4 10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M8 21v-5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v5"/><path d="M8 10h8"/><path d="M8 18h8"/>',
+    bike: '<circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/>',
+    book: '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>',
+    'book-marked': '<path d="M10 2v8l3-3 3 3V2"/><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>',
+    salad: '<path d="M7 21h10"/><path d="M12 21a9 9 0 0 0 9-9H3a9 9 0 0 0 9 9Z"/><path d="M11.38 12a2.4 2.4 0 0 1-.4-4.77 2.4 2.4 0 0 1 3.2-2.77 2.4 2.4 0 0 1 3.47-.63 2.4 2.4 0 0 1 3.37 3.37 2.4 2.4 0 0 1-1.1 3.7 2.51 2.51 0 0 1 .03 1.1"/><path d="m13 12 4-4"/><path d="M10.9 7.25A3.99 3.99 0 0 0 4 10c0 .73.2 1.41.54 2"/>',
+    pill: '<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/>',
+    thermometer: '<path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/>',
+    wind: '<path d="M12.8 19.6A2 2 0 1 0 14 16H2"/><path d="M17.5 8a2.5 2.5 0 1 1 2 4H2"/><path d="M9.8 4.4A2 2 0 1 1 11 8H2"/>'
 };
 
 function getLineIconSvg(name, size) {
@@ -16985,7 +17096,7 @@ function inferTrajTagFromText(text) {
     return 'daily';
 }
 
-function updateLifeTrajectory() {
+function updateLifeTrajectory(roleArg) {
     const today = new Date().toDateString();
     const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     appData.lifeTrajectory = appData.lifeTrajectory.filter(t => t.time > sevenDaysAgo);
@@ -17018,8 +17129,7 @@ function updateLifeTrajectory() {
     const targetMin = 6;
     const targetMax = 10;
     
-    if (todayCount >= targetMax) return;
-    
+    if (todayCount >= targetMax) return;    
     // 忙碌后补发：若距最近一条轨迹已超过 2.5 小时，补发一句"刚刚在忙，一直在惦记你"
     const sortedToday = todayTrajectories.slice().sort((a, b) => b.time - a.time);
     const lastToday = sortedToday[0];
@@ -17051,8 +17161,12 @@ function updateLifeTrajectory() {
     }
     
     if (appData.roles.length === 0) return;
-    const role = appData.roles[Math.floor(Math.random() * appData.roles.length)];
+    const role = roleArg || appData.roles[Math.floor(Math.random() * appData.roles.length)];
     if (!role) return;
+    
+    // 每个角色单独配额：今日该角色轨迹达到 5 条后停止新增
+    const roleTodayCount = todayTrajectories.filter(t => t.roleId === role.id).length;
+    if (roleTodayCount >= 5) return;
     
     const trajectory = generateTrajectory(role);
     if (!trajectory) return;
@@ -17481,7 +17595,7 @@ function getTrajectoryExtraMessage(trajectory) {
 // ========== 6. 消息撤回机制 ==========
 
 function handleMessageWithRecall(role, msgContent, msgTime, msgId) {
-    if (Math.random() < 0.09) {
+    if (Math.random() < 0.15) {
         const recallDelay = 2000 + Math.random() * 3000;
         setTimeout(() => {
             const msgs = appData.chats[role.id] || [];
@@ -17606,16 +17720,18 @@ function initNewFeatures() {
         }
     }, 15 * 60 * 1000);
     
+    // 每个角色单独调度：30-60 分钟随机间隔（随机时分），到点后仅为该角色生成一条随机轨迹
+    const roleTrajectoryTimers = {};
     function scheduleTrajectoryUpdate() {
-        // 白天 30-60 分钟随机更新一条；晚间休闲时段 25-45 分钟；非固定整点，避免机械感
-        const hour = new Date().getHours();
-        const evening = hour >= 20 || hour < 6;
-        const delay = (evening ? (25 + Math.random() * 20) : (30 + Math.random() * 30)) * 60 * 1000;
-        if (trajectoryUpdateTimer) clearTimeout(trajectoryUpdateTimer);
-        trajectoryUpdateTimer = setTimeout(() => {
-            updateLifeTrajectory();
-            scheduleTrajectoryUpdate();
-        }, delay);
+        appData.roles.forEach(role => {
+            if (!role || !role.id) return;
+            if (roleTrajectoryTimers[role.id]) clearTimeout(roleTrajectoryTimers[role.id]);
+            const delay = (30 + Math.random() * 30) * 60 * 1000;
+            roleTrajectoryTimers[role.id] = setTimeout(() => {
+                updateLifeTrajectory(role);
+                scheduleTrajectoryUpdate();
+            }, delay);
+        });
     }
     scheduleTrajectoryUpdate();
     
@@ -17717,11 +17833,12 @@ window.executeRoleReply = function(role) {
             }
             
             const msgId = Date.now() + count;
+            const thisTime = Date.now();
             const msg = { 
                 id: msgId, 
                 sender: role.id, 
                 content: finalContent, 
-                time: Date.now(), 
+                time: thisTime, 
                 quote, 
                 type, 
                 read: false 
@@ -17736,7 +17853,7 @@ window.executeRoleReply = function(role) {
                     showRoleTyping(role.id, role.name, role.avatar, 600);
                     setTimeout(() => hideRoleTyping(role.id), 500);
                 }
-                appendMessageToDOM(role.id, finalContent, Date.now(), quote, type);
+                appendMessageToDOM(role.id, finalContent, thisTime, quote, type);
             } else {
                 incrementUnread(role.id);
             }
@@ -17744,7 +17861,6 @@ window.executeRoleReply = function(role) {
             
             const thisMsgId = msgId;
             const thisContent = finalContent;
-            const thisTime = Date.now();
             
             setTimeout(() => {
                 handleMessageWithRecall(role, thisContent, thisTime, thisMsgId);
