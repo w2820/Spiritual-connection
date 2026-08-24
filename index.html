@@ -4146,7 +4146,8 @@
             font-weight: 700;
         }
         .questionnaire-mgr .mgr-list {
-            flex: 1;
+            flex: none;
+            height: 226px;
             overflow-y: auto;
             margin-bottom: 16px;
         }
@@ -4354,7 +4355,8 @@
         }
         /* ---- 时间轴滚动区 ---- */
         .traj-gloss-scroll {
-            flex: 1 1 0;
+            flex: none;
+            height: min(560px, 58vh);
             min-height: 0;
             overflow-y: auto;
             margin-top: 14px;
@@ -4425,17 +4427,16 @@
             backdrop-filter: blur(6px);
             -webkit-backdrop-filter: blur(6px);
             border: 0.5px solid rgba(255, 200, 210, 0.55);
-            border-radius: 14px;
-            padding: 9px 12px 8px;
+            border-radius: 18px;
+            padding: 16px 14px;
             display: flex;
             flex-direction: column;
             transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
-            animation: trajCardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+            animation: trajCardIn 0.4s ease-out both;
         }
         @keyframes trajCardIn {
-            0% { opacity: 0; transform: translateX(-14px) translateY(6px); filter: blur(2px); }
-            60% { opacity: 1; transform: translateX(2px) translateY(-1px); filter: blur(0); }
-            100% { opacity: 1; transform: translateX(0) translateY(0); filter: blur(0); }
+            0% { opacity: 0; transform: translateY(8px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
         .traj-gloss-card:hover {
             background: rgba(255, 255, 255, 0.55);
@@ -4445,7 +4446,7 @@
             transform: scale(0.97);
         }
         .traj-gloss-time {
-            font-size: 11px;
+            font-size: 12px;
             color: #998892;
             margin-bottom: 4px;
             letter-spacing: 0.3px;
@@ -4454,9 +4455,9 @@
             display: flex;
             align-items: flex-start;
             gap: 6px;
-            font-size: 13px;
+            font-size: 14px;
             color: #4b3c44;
-            line-height: 1.45;
+            line-height: 1.6;
         }
         .traj-gloss-text .traj-icon {
             display: inline-flex;
@@ -4472,10 +4473,10 @@
             margin-top: 5px;
         }
         .traj-gloss-tag {
-            font-size: 10px;
+            font-size: 11px;
             line-height: 1;
-            padding: 3px 7px;
-            border-radius: 9px;
+            padding: 2px 6px;
+            border-radius: 10px;
             background: rgba(255, 214, 224, 0.45);
             color: #c06888;
         }
@@ -4506,8 +4507,8 @@
             display: flex;
             justify-content: flex-end;
             align-items: center;
-            gap: 6px;
-            margin-top: 6px;
+            gap: 8px;
+            margin-top: 10px;
             padding-top: 5px;
             border-top: 0.5px solid rgba(255, 200, 210, 0.35);
         }
@@ -4645,8 +4646,8 @@
             border-color: transparent;
         }
         .traj-history-list {
-            flex: 1;
-            min-height: 0;
+            flex: none;
+            height: 260px;
             overflow-y: auto;
         }
         .traj-history-item {
@@ -6958,6 +6959,8 @@ let questionnaireQueue = [];
 // 生活轨迹相关
 let trajectoryUpdateTimer = null;
 let trajectoryRefreshTimer = null;
+let trajectorySweepTimer = null;
+const nextTrajectoryTime = {};
 
 // 悬浮播放器相关
 let floatingAudio = null;
@@ -16809,7 +16812,7 @@ function sendUserQuestionnaire(qId) {
         } else {
             incrementUnread(role.id);
         }
-    }, 2000 + Math.random() * 3000);
+    }, 5000 + Math.random() * 10000);
 }
 
 function renderQuestionnaireList() {
@@ -16959,7 +16962,24 @@ const TRAJECTORY_CATEGORIES = [
         { text: '在煮一壶热茶', icon: 'cup-soda' },
         { text: '在挑一张喜欢的唱片', icon: 'music' },
         { text: '在记账', icon: 'file' },
-        { text: '在阳台上吹风', icon: 'wind' }
+        { text: '在阳台上吹风', icon: 'wind' },
+        { text: '在通勤路上，戴着耳机', icon: 'bike' },
+        { text: '在排队取快递', icon: 'package' },
+        { text: '刚取了外卖', icon: 'utensils' },
+        { text: '在逛超市囤了点东西', icon: 'store' },
+        { text: '在洗衣服晾衣服', icon: 'sparkles' },
+        { text: '在拖地打扫卫生', icon: 'sparkles' },
+        { text: '在学一个新技能', icon: 'laptop' },
+        { text: '在整理手机相册', icon: 'file' },
+        { text: '在给朋友回消息', icon: 'message-circle' },
+        { text: '在等公交，有点无聊', icon: 'timer' },
+        { text: '在给猫猫梳毛', icon: 'heart' },
+        { text: '在修剪指甲', icon: 'sparkles' },
+        { text: '在翻看今天拍的照片', icon: 'file' },
+        { text: '在捣鼓一个手工小玩意儿', icon: 'sparkles' },
+        { text: '在列购物清单', icon: 'file' },
+        { text: '刚出门，先去办点事', icon: 'footprints' },
+        { text: '在取钱交房租', icon: 'store' }
     ]},
     { name: '饮食', weight: 17, icon: 'utensils', items: [
         { text: '早餐喝了一碗热粥', icon: 'cup-soda' },
@@ -17063,7 +17083,11 @@ const TRAJECTORY_CATEGORIES = [
         { text: '看到一只很像你的小猫', icon: 'heart' },
         { text: '想到你认真做事的样子', icon: 'sparkles' },
         { text: '收藏了一条你可能会喜欢的句子', icon: 'book-open' },
-        { text: '今天的云很好看，想拍给你', icon: 'sunset' }
+        { text: '今天的云很好看，想拍给你', icon: 'sunset' },
+        { text: '有点想你，等会儿忙完就来陪你', icon: 'heart' },
+        { text: '感觉你最近有点累，记得早点休息', icon: 'zap' },
+        { text: '想到你，嘴角忍不住翘起来', icon: 'heart' },
+        { text: '今天心情不错，第一个想告诉你', icon: 'sparkles' }
     ]},
     { name: '生病/健康', weight: 8, icon: 'thermometer', items: [
         { text: '有点感冒，在喝热水', icon: 'thermometer' },
@@ -17148,6 +17172,7 @@ const TRAJ_ICON_SVGS = {
     zap: '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
     activity: '<path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/>',
     clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+    package: '<path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>',
     file: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/>',
     backpack: '<path d="M4 10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M8 21v-5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v5"/><path d="M8 10h8"/><path d="M8 18h8"/>',
     bike: '<circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/>',
@@ -17901,20 +17926,33 @@ function initNewFeatures() {
         }
     }, 15 * 60 * 1000);
     
-    // 每个角色单独调度：30-120 分钟随机间隔，全天持续刷新轨迹（凌晨在 updateLifeTrajectory 内低概率）
-    const roleTrajectoryTimers = {};
-    function scheduleTrajectoryUpdate() {
+    // 轨迹刷新：每个角色在 30-120 分钟随机时间刷新一个节点，24 小时持续。
+    // 采用「每 30 秒扫描 nextTrajectoryTime」的调度方式，避免链式 setTimeout 因异常或浏览器节流中断，
+    // 也避免出现"到下午停止刷新 / 凌晨高频刷新"的问题。凌晨是否真的产出轨迹由 updateLifeTrajectory 内的低概率控制。
+    if (trajectorySweepTimer) clearInterval(trajectorySweepTimer);
+    const trajectorySweep = () => {
+        const now = Date.now();
+        const today = new Date().toDateString();
         appData.roles.forEach(role => {
             if (!role || !role.id) return;
-            if (roleTrajectoryTimers[role.id]) clearTimeout(roleTrajectoryTimers[role.id]);
-            const delay = (30 + Math.random() * 90) * 60 * 1000;
-            roleTrajectoryTimers[role.id] = setTimeout(() => {
-                updateLifeTrajectory(role);
-                scheduleTrajectoryUpdate();
-            }, delay);
+            const hasTodayTraj = appData.lifeTrajectory.some(t => t.roleId === role.id && new Date(t.time).toDateString() === today);
+            if (!nextTrajectoryTime[role.id] || nextTrajectoryTime[role.id] <= now) {
+                // 该角色当天还没有轨迹时，尽快安排首条（1-3 分钟内），否则按 30-120 分钟随机排期
+                const base = hasTodayTraj ? 30 + Math.random() * 90 : (1 + Math.random() * 2);
+                nextTrajectoryTime[role.id] = now + base * 60 * 1000;
+            }
+            if (now >= nextTrajectoryTime[role.id]) {
+                nextTrajectoryTime[role.id] = now + (30 + Math.random() * 90) * 60 * 1000;
+                try {
+                    updateLifeTrajectory(role);
+                } catch (e) {
+                    console.error('轨迹刷新异常', e);
+                }
+            }
         });
-    }
-    scheduleTrajectoryUpdate();
+    };
+    trajectorySweep();
+    trajectorySweepTimer = setInterval(trajectorySweep, 30 * 1000);
     
     if (currentChatType === 'role' && currentRoleId) {
         setTimeout(() => {
