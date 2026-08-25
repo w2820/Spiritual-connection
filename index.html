@@ -304,6 +304,28 @@
             overscroll-behavior-y: none;
         }
         .page.active { display: flex; }
+        #page-home {
+            background:
+                radial-gradient(circle at 86% 6%, rgba(214, 231, 223, 0.6), transparent 42%),
+                radial-gradient(circle at 6% 28%, rgba(232, 211, 168, 0.45), transparent 40%),
+                radial-gradient(circle at 72% 88%, rgba(207, 225, 218, 0.5), transparent 45%),
+                radial-gradient(circle at 28% 96%, rgba(240, 226, 200, 0.55), transparent 42%),
+                radial-gradient(2px 2px at 20% 22%, rgba(199, 155, 90, 0.4), transparent),
+                radial-gradient(2px 2px at 76% 16%, rgba(216, 183, 122, 0.45), transparent),
+                radial-gradient(1.5px 1.5px at 55% 38%, rgba(199, 155, 90, 0.35), transparent),
+                radial-gradient(2px 2px at 88% 52%, rgba(182, 205, 196, 0.4), transparent),
+                radial-gradient(1.5px 1.5px at 12% 58%, rgba(199, 155, 90, 0.4), transparent),
+                radial-gradient(2px 2px at 40% 74%, rgba(216, 183, 122, 0.35), transparent),
+                radial-gradient(1.5px 1.5px at 66% 7%, rgba(216, 183, 122, 0.4), transparent),
+                radial-gradient(1.5px 1.5px at 32% 10%, rgba(182, 205, 196, 0.42), transparent),
+                linear-gradient(178deg, #fcf7ed 0%, #f5f0e5 40%, #edf1ec 100%);
+        }
+        #page-home > header {
+            background: rgba(255, 253, 248, 0.66) !important;
+            -webkit-backdrop-filter: blur(14px) saturate(150%);
+            backdrop-filter: blur(14px) saturate(150%);
+            border-bottom: 1px solid rgba(232, 222, 204, 0.5);
+        }
         .safe-top { padding-top: env(safe-area-inset-top); }
         .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
         .role-card:active { transform: scale(0.98); }
@@ -339,16 +361,319 @@
             width: 100vw;
             height: 100dvh;
             height: 100vh;
-            background-color: #f5e6d3;
+            background: #ece7db;
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 99999;
-            transition: opacity 0.8s ease, visibility 0.8s ease;
+            overflow: hidden;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
         }
         .splash-screen.hidden {
             opacity: 0;
             visibility: hidden;
+        }
+        .splash-bg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 28%;
+            z-index: 0;
+            user-select: none;
+            -webkit-user-drag: none;
+            filter: sepia(0.25) saturate(0.92) brightness(1.02);
+        }
+        .splash-vignette {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            background:
+                linear-gradient(180deg, rgba(30, 24, 18, 0.05) 0%, rgba(30, 24, 18, 0) 32%, rgba(30, 24, 18, 0) 58%, rgba(30, 24, 18, 0.2) 100%);
+        }
+        .splash-orbital {
+            position: absolute;
+            left: 50%;
+            top: 26%;
+            width: 0;
+            height: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .orb-ring {
+            position: absolute;
+            left: 0;
+            top: 0;
+            border-radius: 50%;
+        }
+        .orb-ring.ring-1 { width: 60vmin; height: 60vmin; margin-left: -30vmin; margin-top: -30vmin; }
+        .orb-ring.ring-2 { width: 38vmin; height: 38vmin; margin-left: -19vmin; margin-top: -19vmin; }
+        .orb-ring .orb-dot {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 0 5px 1px rgba(255, 255, 255, 0.65);
+            opacity: 0.25;
+            animation: orbTwinkle 2.8s ease-in-out infinite;
+        }
+        .orb-ring.ring-1 .orb-dot:nth-child(1) { left: 50%; top: -2px; margin-left: -2px; animation-delay: 0s; }
+        .orb-ring.ring-1 .orb-dot:nth-child(2) { left: 85.4%; top: 14.6%; margin: -2px; animation-delay: 0.4s; }
+        .orb-ring.ring-1 .orb-dot:nth-child(3) { left: 100%; top: 50%; margin: -2px 0 0 -2px; animation-delay: 0.8s; }
+        .orb-ring.ring-1 .orb-dot:nth-child(4) { left: 85.4%; bottom: 14.6%; margin: -2px; animation-delay: 1.2s; }
+        .orb-ring.ring-1 .orb-dot:nth-child(5) { left: 50%; bottom: -2px; margin-left: -2px; animation-delay: 1.6s; }
+        .orb-ring.ring-1 .orb-dot:nth-child(6) { left: 14.6%; bottom: 14.6%; margin: -2px; animation-delay: 2s; }
+        .orb-ring.ring-2 .orb-dot:nth-child(1) { left: 50%; top: -2px; margin-left: -2px; animation-delay: 0.2s; }
+        .orb-ring.ring-2 .orb-dot:nth-child(2) { right: -2px; top: 50%; margin-top: -2px; animation-delay: 1s; }
+        .orb-ring.ring-2 .orb-dot:nth-child(3) { left: 50%; bottom: -2px; margin-left: -2px; animation-delay: 1.8s; }
+        .orb-ring.ring-2 .orb-dot:nth-child(4) { left: -2px; top: 50%; margin-top: -2px; animation-delay: 2.6s; }
+        @keyframes orbTwinkle {
+            0%, 100% { opacity: 0.15; transform: scale(0.6); }
+            50% { opacity: 1; transform: scale(1.25); }
+        }
+
+        .splash-universe {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+        .nebula {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(44px);
+        }
+        .nebula-1 {
+            width: 460px;
+            height: 420px;
+            background: radial-gradient(circle, rgba(244, 224, 178, 0.6), transparent 70%);
+            top: -9%;
+            right: -11%;
+            animation: nebulaDrift 9s ease-in-out infinite alternate;
+        }
+        .nebula-2 {
+            width: 400px;
+            height: 380px;
+            background: radial-gradient(circle, rgba(236, 226, 208, 0.55), transparent 70%);
+            bottom: -7%;
+            left: -9%;
+            animation: nebulaDrift 11s ease-in-out infinite alternate-reverse;
+        }
+        @keyframes nebulaDrift {
+            from { transform: translate(0, 0) scale(1); }
+            to { transform: translate(-16px, 12px) scale(1.08); }
+        }
+
+        .splash-planet {
+            position: absolute;
+            top: 26%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 124px;
+            height: 124px;
+            animation: planetFloat 6s ease-in-out infinite;
+            z-index: 2;
+        }
+        .planet-sphere {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 32% 28%, #fffefb 0%, #fdf2df 34%, #f0d9b6 66%, #d9b78a 100%);
+            box-shadow: 0 0 52px rgba(242, 216, 166, 0.55), 0 0 104px rgba(255, 244, 216, 0.4), inset -12px -14px 30px rgba(160, 118, 74, 0.18);
+            overflow: hidden;
+        }
+        .planet-sphere::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 26% 30%, rgba(158, 118, 74, 0.16) 0 7%, transparent 8%),
+                radial-gradient(circle at 64% 22%, rgba(150, 112, 70, 0.14) 0 9%, transparent 10%),
+                radial-gradient(circle at 46% 58%, rgba(158, 118, 74, 0.12) 0 6%, transparent 7%),
+                radial-gradient(circle at 76% 66%, rgba(150, 112, 70, 0.15) 0 8%, transparent 9%),
+                radial-gradient(circle at 32% 78%, rgba(158, 118, 74, 0.13) 0 5%, transparent 6%),
+                radial-gradient(circle at 58% 44%, rgba(150, 112, 70, 0.1) 0 5%, transparent 6%),
+                radial-gradient(circle at 84% 38%, rgba(150, 112, 70, 0.1) 0 4%, transparent 5%),
+                radial-gradient(circle at 18% 54%, rgba(158, 118, 74, 0.09) 0 4%, transparent 5%);
+        }
+        .planet-sphere::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 30% 35%, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 42%, rgba(214, 184, 138, 0.18) 62%, rgba(255, 255, 255, 0.1) 100%),
+                conic-gradient(from 0deg, transparent 0deg, rgba(214, 184, 138, 0.14) 42deg, transparent 84deg, transparent 132deg, rgba(214, 184, 138, 0.11) 172deg, transparent 214deg, transparent 262deg, rgba(214, 184, 138, 0.14) 302deg, transparent 342deg);
+            animation: planetSpin 26s linear infinite;
+        }
+        @keyframes planetSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .stardust-ring {
+            position: absolute;
+            top: 26%;
+            left: 50%;
+            width: 230px;
+            height: 230px;
+            margin-left: -115px;
+            margin-top: -53px;
+            border-radius: 50%;
+            animation: orbitSpin 13s linear infinite;
+            z-index: 2;
+            pointer-events: none;
+        }
+        .stardust-node {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: rgba(217, 185, 138, 0.95);
+            box-shadow: 0 0 8px rgba(217, 185, 138, 0.95);
+        }
+        .stardust-ring .stardust-node:nth-child(1) { top: -2px; left: 50%; margin-left: -1px; }
+        .stardust-ring .stardust-node:nth-child(2) { top: 50%; right: -2px; margin-top: -1px; background: rgba(182, 212, 202, 0.95); box-shadow: 0 0 8px rgba(182, 212, 202, 0.9); }
+        .stardust-ring .stardust-node:nth-child(3) { bottom: -2px; left: 50%; margin-left: -1px; }
+        .stardust-ring .stardust-node:nth-child(4) { top: 50%; left: -2px; margin-top: -1px; background: rgba(222, 202, 162, 0.95); box-shadow: 0 0 8px rgba(222, 202, 162, 0.9); }
+        .stardust-ring .stardust-node:nth-child(5) { top: 8%; left: 8%; background: rgba(232, 212, 168, 0.9); box-shadow: 0 0 6px rgba(232, 212, 168, 0.85); }
+        .stardust-ring .stardust-node:nth-child(6) { bottom: 8%; right: 8%; background: rgba(206, 200, 182, 0.9); box-shadow: 0 0 6px rgba(206, 200, 182, 0.85); }
+        .star-shape {
+            position: absolute;
+            color: #e8c98e;
+            text-shadow: 0 0 14px rgba(232, 201, 142, 0.85), 0 0 30px rgba(232, 201, 142, 0.45);
+            z-index: 2;
+            pointer-events: none;
+            animation: starPulse 4.5s ease-in-out infinite alternate;
+            line-height: 1;
+        }
+        .star-shape:nth-child(odd) { animation-duration: 3.6s; }
+        .star-shape:nth-child(3n) { animation-delay: -1.4s; }
+        .star-shape:nth-child(2n) { color: #d9e9e2; text-shadow: 0 0 14px rgba(190, 224, 214, 0.8); }
+        @keyframes starPulse {
+            from { opacity: 0.45; transform: scale(0.88) rotate(0deg); }
+            to { opacity: 1; transform: scale(1.1) rotate(14deg); }
+        }
+        .planet-shine {
+            position: absolute;
+            top: 15%;
+            left: 19%;
+            width: 36%;
+            height: 24%;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.9), transparent 70%);
+            filter: blur(2px);
+        }
+        .planet-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 256px;
+            height: 96px;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            border: 1.5px solid rgba(224, 186, 120, 0.6);
+            border-radius: 50%;
+            box-shadow: 0 0 16px rgba(224, 186, 120, 0.32), 0 0 34px rgba(224, 186, 120, 0.18), inset 0 0 8px rgba(224, 186, 120, 0.2);
+            z-index: 3;
+            pointer-events: none;
+        }
+        .planet-ring::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 88%;
+            height: 72%;
+            transform: translate(-50%, -50%);
+            border: 1px solid rgba(238, 208, 152, 0.6);
+            border-radius: 50%;
+        }
+        @keyframes planetFloat {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-9px); }
+        }
+        .splash-planet-glow {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 320px;
+            height: 320px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 238, 206, 0.55) 0%, rgba(255, 242, 218, 0.25) 40%, transparent 66%);
+            animation: glowPulse 5s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        .planet-orbit {
+            position: absolute;
+            top: 27%;
+            left: 50%;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .orbit-o1 { width: 340px; height: 138px; border: 1.6px solid rgba(224, 186, 120, 0.6); animation: orbitSpin 16s linear infinite; }
+        .orbit-o2 { width: 414px; height: 166px; border: 1px solid rgba(232, 200, 140, 0.4); animation: orbitSpin 22s linear infinite reverse; }
+        .orbit-o3 { width: 274px; height: 112px; border: 1px dashed rgba(226, 192, 132, 0.45); animation: orbitSpin 12s linear infinite; }
+        .orbit-o4 { width: 486px; height: 190px; border: 1px solid rgba(226, 200, 156, 0.26); animation: orbitSpin 28s linear infinite reverse; }
+        @keyframes orbitSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .orb-node {
+            position: absolute;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #e3bd85;
+            box-shadow: 0 0 12px rgba(227, 189, 133, 0.9);
+        }
+        .orbit-o1 .orb-node:nth-child(1) { top: 50%; left: -3px; }
+        .orbit-o1 .orb-node:nth-child(2) { bottom: 7%; right: 13%; }
+        .orbit-o2 .orb-node { width: 6px; height: 6px; top: 12%; left: 42%; background: #e6c78f; box-shadow: 0 0 10px rgba(230, 199, 143, 0.9); }
+        .orbit-o3 .orb-node { width: 5px; height: 5px; top: 58%; right: -2px; background: #e8cf9e; box-shadow: 0 0 8px rgba(232, 207, 158, 0.9); }
+        .orbit-o4 .orb-node { width: 5px; height: 5px; top: 30%; left: 6%; background: #f0ddb6; box-shadow: 0 0 8px rgba(240, 221, 182, 0.85); }
+
+        .splash-rays {
+            position: absolute;
+            top: 26%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+        .splash-ray {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(220, 186, 140, 0.65), transparent);
+            transform-origin: left center;
+            opacity: 0.5;
+        }
+
+        .splash-cloud {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 253, 247, 0.9), rgba(255, 251, 242, 0.4) 55%, transparent 74%);
+            filter: blur(16px);
+        }
+        .cloud-1 { width: 480px; height: 150px; bottom: -3%; left: -12%; animation: cloudDrift 10s ease-in-out infinite alternate; }
+        .cloud-2 { width: 420px; height: 130px; bottom: 4%; right: -10%; animation: cloudDrift 12s ease-in-out infinite alternate-reverse; }
+        .cloud-3 { width: 360px; height: 120px; bottom: -2%; left: 22%; opacity: 0.8; animation: cloudDrift 9s ease-in-out infinite alternate; }
+        .cloud-4 { width: 380px; height: 130px; top: -4%; left: -9%; opacity: 0.7; animation: cloudDrift 11s ease-in-out infinite alternate-reverse; }
+        .cloud-5 { width: 400px; height: 140px; top: -3%; right: -8%; opacity: 0.75; animation: cloudDrift 8s ease-in-out infinite alternate; }
+        .cloud-6 {
+            width: 420px;
+            height: 180px;
+            top: -8%;
+            right: -6%;
+            opacity: 0.55;
+            background: radial-gradient(circle, rgba(226, 240, 234, 0.9), rgba(226, 240, 234, 0.4) 55%, transparent 74%);
+            animation: cloudDrift 13s ease-in-out infinite alternate-reverse;
+        }
+        @keyframes cloudDrift {
+            from { transform: translateX(0); }
+            to { transform: translateX(22px); }
         }
 
         .stars-container {
@@ -366,9 +691,15 @@
             position: absolute;
             width: 2.5px;
             height: 2.5px;
-            background: rgba(180, 160, 140, 0.35);
+            background: rgba(206, 182, 148, 0.5);
             border-radius: 50%;
             animation: starTwinkle 3s ease-in-out infinite alternate;
+        }
+        .star-static {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(238, 214, 168, 0.9), rgba(238, 214, 168, 0.25));
+            animation: none;
         }
         @keyframes starTwinkle {
             0% { opacity: 0.15; transform: scale(0.8); }
@@ -384,7 +715,7 @@
         .splash-glow-1 {
             width: 500px;
             height: 500px;
-            background: radial-gradient(circle, rgba(130, 203, 178, 0.15) 0%, transparent 65%);
+            background: radial-gradient(circle, rgba(240, 220, 180, 0.18) 0%, transparent 65%);
             top: -10%;
             left: 50%;
             transform: translateX(-50%);
@@ -393,7 +724,7 @@
         .splash-glow-2 {
             width: 300px;
             height: 300px;
-            background: radial-gradient(circle, rgba(200, 180, 160, 0.1) 0%, transparent 65%);
+            background: radial-gradient(circle, rgba(226, 210, 190, 0.14) 0%, transparent 65%);
             bottom: 5%;
             right: 5%;
             animation: glowPulse 8s ease-in-out infinite reverse;
@@ -404,105 +735,29 @@
         }
 
         .loading-container {
-            position: relative;
-            z-index: 1;
-            width: 82%;
-            max-width: 340px;
-            padding: 50px 32px 40px;
-            background: rgba(130, 203, 178, 0.2);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.35);
-            border-radius: 24px;
-            box-shadow: 0 8px 32px rgba(130, 203, 178, 0.15), inset 0 1px 0 rgba(255,255,255,0.4);
+            position: absolute;
+            z-index: 3;
+            left: 0;
+            right: 0;
+            bottom: 10%;
             display: flex;
             flex-direction: column;
             align-items: center;
             opacity: 0;
-            transform: translateY(40px) scale(0.92);
-            transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
+            transform: translateY(26px);
+            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
         }
         .loading-container.visible {
             opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-
-        .icon-wrapper {
-            position: relative;
-            width: 110px;
-            height: 110px;
-            margin-bottom: 24px;
-        }
-        .orbit {
-            position: absolute;
-            inset: 0;
-            border: 1.5px dashed rgba(130, 203, 178, 0.35);
-            border-radius: 50%;
-            animation: orbitRotate 4.2s linear infinite;
-        }
-        .orbit::before {
-            content: '';
-            position: absolute;
-            top: 7px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 7px;
-            height: 7px;
-            background: #82cbb2;
-            border-radius: 50%;
-            box-shadow: 0 0 12px rgba(130, 203, 178, 0.5);
-        }
-        .orbit:nth-child(2) {
-            width: 82px;
-            height: 82px;
-            margin: 14px;
-            animation-duration: 6.2s;
-            animation-direction: reverse;
-        }
-        .orbit:nth-child(2)::before {
-            top: auto;
-            bottom: 7px;
-            background: #a8d5c0;
-        }
-        @keyframes orbitRotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .earth-icon {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 54px;
-            height: 54px;
-            color: #82cbb2;
-            opacity: 0;
-            animation: earthAppear 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-            animation-delay: 0.3s;
-            filter: drop-shadow(0 0 20px rgba(130, 203, 178, 0.3));
-        }
-        @keyframes earthAppear {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
-            70% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
-            100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-        }
-
-        .loading-label {
-            font-size: 10px;
-            letter-spacing: 3px;
-            color: rgba(130, 203, 178, 0.6);
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            font-weight: 500;
+            transform: translateY(0);
         }
 
         .title-text {
             font-family: 'Marck Script', cursive;
-            font-size: 1.6rem;
+            font-size: 1.35rem;
             font-weight: 400;
-            color: #5aa87f;
-            margin-bottom: 16px;
+            color: #b98d5e;
+            margin-bottom: 14px;
             text-align: center;
             letter-spacing: 1px;
         }
@@ -511,64 +766,52 @@
         }
 
         .quote-text {
-            height: 24px;
-            font-size: 12px;
-            color: #5aa87f;
+            min-height: 30px;
+            font-size: 15px;
+            color: #8a6b45;
             text-align: center;
-            white-space: nowrap;
-            margin-bottom: 28px;
+            max-width: 84%;
+            margin-bottom: 26px;
             overflow: hidden;
-            font-weight: 400;
-            letter-spacing: 0.3px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            line-height: 1.7;
+            font-family: "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+            text-shadow: 0 1px 6px rgba(255, 248, 230, 0.9);
+            opacity: 1;
+            transition: opacity 0.4s ease;
+        }
+        .quote-text.fading {
+            opacity: 0;
         }
         .quote-text span {
             display: inline-block;
             opacity: 0;
-            animation: letterReveal 3.2s ease-in-out forwards;
+            animation: letterIn 0.55s ease forwards;
         }
-        @keyframes letterReveal {
-            0% { opacity: 0; transform: translateY(4px) scale(0.9); }
-            15% { opacity: 1; transform: translateY(0) scale(1); }
-            85% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-4px) scale(0.9); }
+        @keyframes letterIn {
+            0% { opacity: 0; transform: translateY(6px) scale(0.9); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        .progress-bar-box {
-            width: 100%;
-            height: 3px;
-            background: rgba(130, 203, 178, 0.15);
-            border-radius: 99px;
-            overflow: hidden;
-            margin-bottom: 14px;
-            position: relative;
+        .splash-enter-btn {
+            appearance: none;
+            border: 1.5px solid rgba(217, 179, 120, 0.75);
+            background: rgba(255, 252, 245, 0.5);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            color: #a97f4e;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            padding: 12px 38px;
+            border-radius: 999px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(214, 178, 132, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #82cbb2, #a8d5c0, #82cbb2);
-            border-radius: 99px;
-            transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-            position: relative;
-        }
-        .progress-bar::after {
-            content: '';
-            position: absolute;
-            right: -4px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 9px;
-            height: 9px;
-            background: #fff;
-            border-radius: 50%;
-            box-shadow: 0 0 12px rgba(130, 203, 178, 0.6), 0 0 24px rgba(130, 203, 178, 0.3);
-        }
-
-        .status-text {
-            font-size: 0.75rem;
-            color: rgba(130, 203, 178, 0.7);
-            font-weight: 400;
-            letter-spacing: 0.5px;
-        }
+        .splash-enter-btn:hover { box-shadow: 0 8px 26px rgba(214, 178, 132, 0.32); }
+        .splash-enter-btn:active { transform: scale(0.96); }
 
         #music-player-card {
             display: none;
@@ -848,9 +1091,6 @@
             font-size: 12px; font-weight: 400; margin-top: 2px; opacity: 0.85; text-align: center;
         }
         .love-body { padding: 18px 18px; }
-        .love-mood-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 16px; }
-        .love-mood-icon { font-size: 36px; }
-        .love-mood-text { font-size: 22px; font-weight: 700; }
         .love-quote-list { background: #f8f9fa; border-radius: 14px; padding: 12px; margin-bottom: 16px; min-height: 70px; }
         .love-quote-item { padding: 5px 0; border-bottom: 1px dashed #dee2e6; font-size: 14px; }
         .love-quote-item:last-child { border-bottom: none; }
@@ -3058,6 +3298,50 @@
             border-top: 1px solid var(--border-color);
             padding-top: 16px;
         }
+        .bubble-preset-section {
+            margin-top: 16px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 16px;
+        }
+        .bubble-preset-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            max-height: 240px;
+            overflow-y: auto;
+            padding-right: 2px;
+        }
+        .bubble-preset-item {
+            cursor: pointer;
+            padding: 8px 6px 6px;
+            border: 2px solid transparent;
+            border-radius: 14px;
+            background: #fff;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.06);
+            text-align: center;
+            transition: all 0.15s ease;
+        }
+        .bubble-preset-item:active { transform: scale(0.96); }
+        .bubble-preset-item.active { border-color: var(--accent-color); box-shadow: 0 0 0 2px var(--accent-light, rgba(130, 203, 178, 0.25)); }
+        .bubble-preset-preview {
+            position: relative;
+            min-height: 66px;
+            padding: 10px 6px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: visible;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(250,247,238,.9), rgba(241,238,228,.9));
+        }
+        .bubble-preset-name { font-size: 11px; color: #666; margin-top: 5px; }
+        .bubble-preset-label {
+            font-size: 12px;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
         .bubble-css-editor label {
             font-size: 12px;
             font-weight: 600;
@@ -3295,74 +3579,87 @@
             gap: 12px;
             align-content: start;
             align-items: start;
-            background: #f5f0eb;
+            background: linear-gradient(180deg, #fdf7f4, #f8f2ef);
         }
         .sticky-card {
-            background: #fffcf5;
-            border-radius: 6px;
-            padding: 10px 10px 8px;
+            background: linear-gradient(160deg, rgba(255,255,255,0.92), rgba(255,248,242,0.85));
+            border-radius: 18px;
+            padding: 12px 12px 10px;
             box-shadow: 
-                0 1px 1px rgba(0,0,0,0.05),
-                0 2px 4px rgba(0,0,0,0.06),
-                0 4px 10px rgba(0,0,0,0.04);
+                0 2px 4px rgba(233,30,99,0.04),
+                0 6px 18px rgba(233,30,99,0.08),
+                0 12px 32px rgba(233,30,99,0.05);
             position: relative;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
-            border-left: 4px solid #f5d742;
-            border-top: 1px solid #f0ebe4;
-            border-right: 1px solid #f0ebe4;
-            border-bottom: 1px solid #e8e0d6;
+            border: 1px solid rgba(255,255,255,0.95);
             transform: rotate(var(--rotate, 0deg));
-            backdrop-filter: blur(2px);
             display: flex;
             flex-direction: column;
-            aspect-ratio: 1 / 1;
+            height: 172px;
             font-size: 12px;
             min-height: 0;
+            overflow: hidden;
         }
         .sticky-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                repeating-linear-gradient(
-                    transparent,
-                    transparent 28px,
-                    rgba(0,0,0,0.02) 28px,
-                    rgba(0,0,0,0.02) 29px
-                );
+            top: 0; left: 0; right: 0;
+            height: 90px;
+            background:
+                radial-gradient(circle at 85% 0%, rgba(255,183,197,0.28), rgba(255,255,255,0) 60%),
+                radial-gradient(circle at 10% 100%, rgba(255,224,188,0.3), rgba(255,255,255,0) 55%);
             pointer-events: none;
-            border-radius: 4px;
+            border-radius: 18px 18px 0 0;
         }
         .sticky-card::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                linear-gradient(
-                    to bottom,
-                    rgba(255,255,240,0.3) 0%,
-                    transparent 18px,
-                    transparent 80%,
-                    rgba(200,180,160,0.05) 100%
-                );
+            bottom: 0; left: 0; right: 0;
+            height: 26px;
+            background: linear-gradient(to top, rgba(255,255,255,0.4), transparent);
             pointer-events: none;
-            border-radius: 4px;
         }
         .sticky-card:active {
-            transform: scale(0.99) rotate(var(--rotate, 0deg));
-            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            transform: scale(0.98) rotate(var(--rotate, 0deg));
+            box-shadow: 0 2px 8px rgba(233,30,99,0.12);
+        }
+        .sticky-need {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+        .sticky-need .need-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #ffd9e2, #ffe9f0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(233,30,99,0.12);
+        }
+        .sticky-need .need-badge {
+            background: linear-gradient(135deg, rgba(255,158,182,0.22), rgba(255,214,224,0.28));
+            color: #d0486e;
+            border-radius: 999px;
+            padding: 3px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .sticky-card .sticky-content {
-            font-family: 'Times New Roman', serif;
+            font-family: 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
             font-size: 12px;
-            line-height: 1.5;
-            color: #2c2c2c;
+            line-height: 1.55;
+            color: #4a3a40;
             margin-bottom: 6px;
             white-space: pre-wrap;
             word-break: break-word;
@@ -3378,7 +3675,7 @@
             width: 2px;
         }
         .sticky-card .sticky-content::-webkit-scrollbar-thumb {
-            background: rgba(200,180,160,0.35);
+            background: rgba(233,30,99,0.2);
             border-radius: 2px;
         }
         .sticky-card .sticky-content strong {
@@ -3391,7 +3688,7 @@
             display: block;
             text-align: right;
             font-style: italic;
-            color: #8a7a6a;
+            color: #b49a9f;
             font-size: 11px;
             margin-top: 4px;
         }
@@ -3399,7 +3696,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             font-size: 10px;
             color: #b0a090;
             position: relative;
@@ -3407,7 +3704,7 @@
         }
         .sticky-card .sticky-top .date-label {
             font-weight: 500;
-            color: #b8a898;
+            color: #c9a3ab;
             letter-spacing: 0.3px;
         }
         .sticky-card .sticky-top .actions {
@@ -3419,7 +3716,7 @@
             border: none;
             font-size: 14px;
             cursor: pointer;
-            color: #bbb;
+            color: #d5b6bd;
             padding: 0 2px;
             transition: color 0.2s;
         }
@@ -3433,7 +3730,7 @@
             font-size: 10px;
             color: #b0a090;
             padding-top: 6px;
-            border-top: 1px dashed rgba(180,160,140,0.2);
+            border-top: 1px dashed rgba(233,30,99,0.15);
             position: relative;
             z-index: 1;
             margin-top: auto;
@@ -3448,11 +3745,19 @@
             height: 18px;
             border-radius: 50%;
             object-fit: cover;
-            border: 1px solid #e8e0d6;
+            border: 1px solid rgba(233,30,99,0.15);
         }
         .sticky-card .sticky-footer .role-info span {
-            color: #b0a090;
+            color: #b49a9f;
             font-style: italic;
+        }
+        .sticky-card .sticky-footer .role-info .sticky-role-name {
+            font-weight: 600;
+            color: #8a6a72;
+            font-style: normal;
+        }
+        .sticky-card .sticky-footer .role-info .sticky-role-date {
+            font-style: normal;
         }
         .sticky-card .sticky-footer .reply-area {
             display: flex;
@@ -3464,7 +3769,7 @@
             border: none;
             font-size: 14px;
             cursor: pointer;
-            color: #b0a090;
+            color: #c9a3ab;
             padding: 0 2px;
             transition: color 0.2s;
         }
@@ -4181,6 +4486,635 @@
         #modal-questionnaire-editor {
             z-index: 1300;
         }
+                /* ★★★ 运势占卜弹窗（暖棕白卡） ★★★ */
+        #modal-fortune {
+            z-index: 1500;
+        }
+        .fortune-card {
+            width: 92%;
+            max-width: 400px;
+            max-height: 84vh;
+            margin: auto;
+            background: #fff;
+            border-radius: 22px;
+            box-shadow: 0 18px 50px rgba(94, 72, 52, 0.22);
+            padding: 16px 18px 54px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: fadeInUp 0.3s ease;
+        }
+        .fortune-tabs {
+            display: flex;
+            border-bottom: 1px solid #eee5da;
+            margin-bottom: 14px;
+            flex-shrink: 0;
+        }
+        .fortune-tab {
+            flex: 1;
+            border: none;
+            background: none;
+            padding: 10px 0 8px;
+            font-size: 13px;
+            color: #a49a8f;
+            cursor: pointer;
+            position: relative;
+            font-family: inherit;
+            transition: color 0.2s;
+        }
+        .fortune-tab.active { color: #a06a3a; font-weight: 600; }
+        .fortune-tab.active::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: -1px;
+            width: 30px;
+            height: 2.5px;
+            border-radius: 2px;
+            background: #c98a4b;
+        }
+        .fortune-page { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+        .fortune-page.hidden { display: none; }
+
+        /* 选择提问页 */
+        .fortune-select-title {
+            text-align: center;
+            font-size: 15px;
+            font-weight: 600;
+            color: #5d4a3a;
+            margin-bottom: 14px;
+        }
+        .fortune-layout-btns { display: flex; gap: 10px; }
+        .fortune-layout-btn {
+            flex: 1;
+            border: 1px solid #e4d9cb;
+            background: #fff;
+            border-radius: 14px;
+            padding: 14px 0;
+            font-size: 15px;
+            color: #8a7a68;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .fortune-layout-btn.active {
+            background: #c98a4b;
+            border-color: #c98a4b;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(201, 138, 75, 0.3);
+        }
+        .fortune-layout-hint {
+            text-align: center;
+            font-size: 11px;
+            color: #b5a89a;
+            margin: 10px 0 16px;
+        }
+        .fortune-question-label {
+            font-size: 12px;
+            color: #8a7a68;
+            margin-bottom: 8px;
+        }
+        .fortune-question {
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #e4d9cb;
+            background: #fbf8f3;
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-size: 13px;
+            color: #5d4a3a;
+            outline: none;
+            font-family: inherit;
+            margin-bottom: 16px;
+        }
+        .fortune-question::placeholder { color: #c2b6a8; }
+        .fortune-draw-btn {
+            width: 100%;
+            border: none;
+            border-radius: 16px;
+            padding: 13px 0;
+            background: #c98a4b;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(201, 138, 75, 0.35);
+            transition: transform 0.2s;
+            font-family: inherit;
+            margin-top: auto;
+        }
+        .fortune-draw-btn:active { transform: scale(0.97); }
+
+        /* 牌阵结果页 */
+        .fortune-subtabs { display: flex; gap: 8px; margin-bottom: 10px; }
+        .fortune-subtab {
+            border: 1px solid #e4d9cb;
+            background: #fff;
+            color: #8a7a68;
+            border-radius: 999px;
+            padding: 5px 14px;
+            font-size: 12px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .fortune-subtab.active { background: #c98a4b; border-color: #c98a4b; color: #fff; }
+        .fortune-result-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #5d4a3a;
+            margin-bottom: 12px;
+        }
+        .fortune-moon { color: #c98a4b; font-size: 16px; }
+        .fortune-body {
+            flex: 1;
+            min-height: 120px;
+            max-height: 46vh;
+            overflow-y: auto;
+            padding: 4px 2px;
+        }
+        .fortune-body::-webkit-scrollbar { width: 3px; }
+        .fortune-body::-webkit-scrollbar-thumb { background: rgba(201, 138, 75, 0.3); border-radius: 3px; }
+        .fortune-deck { display: flex; justify-content: center; gap: 10px; padding: 6px 0 4px; }
+        .fortune-card-slot { flex: 1; max-width: 108px; display: flex; flex-direction: column; align-items: center; }
+        .fortune-card-label { font-size: 11px; color: #8a7a68; margin-bottom: 6px; white-space: nowrap; }
+        .fortune-flip { width: 100%; cursor: pointer; perspective: 900px; }
+        .fortune-card-inner {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 3 / 4.4;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+        }
+        .fortune-flip.flipped .fortune-card-inner { transform: rotateY(180deg); }
+        .fortune-card-face {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            padding: 8px 6px;
+            overflow: hidden;
+            text-align: center;
+        }
+        .fortune-card-back {
+            background:
+                radial-gradient(circle at 50% 24%, rgba(255, 235, 170, 0.22), rgba(0, 0, 0, 0) 55%),
+                radial-gradient(circle at 50% 88%, rgba(255, 235, 170, 0.12), rgba(0, 0, 0, 0) 40%),
+                linear-gradient(165deg, #2b3a67, #1d2a4d 60%, #16213c);
+            border: 1px solid rgba(255, 235, 170, 0.35);
+            box-shadow: 0 5px 16px rgba(30, 42, 78, 0.35);
+        }
+        .fcb-moon { font-size: 34px; color: #f5df9e; text-shadow: 0 0 12px rgba(245, 223, 158, 0.55); }
+        .fcb-stars { font-size: 11px; color: rgba(245, 223, 158, 0.85); letter-spacing: 4px; margin-top: 8px; }
+        .fortune-card-front {
+            transform: rotateY(180deg);
+            background: linear-gradient(160deg, #fdf7ee, #f1e3cd);
+            border: 1px solid rgba(200, 166, 120, 0.65);
+            box-shadow: 0 4px 14px rgba(180, 140, 90, 0.2);
+        }
+        .fortune-card-front .fcard-top { font-size: 16px; color: #b08050; line-height: 1; }
+        .fortune-card-front .fcard-roman { font-size: 10px; font-weight: 700; color: #a97f52; }
+        .fortune-card-front .fcard-name { font-size: 12px; font-weight: 700; color: #4b3c44; margin-top: 4px; line-height: 1.3; }
+        .fortune-card-front .fcard-pos { font-size: 9px; color: #b9805a; background: rgba(201, 138, 75, 0.14); border-radius: 999px; padding: 1px 7px; margin-top: 4px; }
+        .fortune-card-front .fcard-desc {
+            font-size: 9.5px;
+            color: #7d6a72;
+            line-height: 1.45;
+            margin-top: 5px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 6;
+            -webkit-box-orient: vertical;
+        }
+        .fortune-q {
+            background: rgba(244, 235, 224, 0.7);
+            border-left: 3px solid #c98a4b;
+            border-radius: 10px;
+            padding: 8px 10px;
+            font-size: 12px;
+            color: #7a644f;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        .fortune-note { margin-top: 10px; flex-shrink: 0; }
+        .fortune-note textarea {
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #e4d9cb;
+            background: #fbf8f3;
+            border-radius: 12px;
+            padding: 9px 11px;
+            font-size: 12px;
+            color: #5d4a3a;
+            outline: none;
+            resize: none;
+            height: 54px;
+            font-family: inherit;
+        }
+        .fortune-note textarea::placeholder { color: #c2b6a8; }
+        .fortune-note-save {
+            margin-top: 6px;
+            width: 100%;
+            border: none;
+            border-radius: 999px;
+            padding: 7px 0;
+            background: #c98a4b;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(201, 138, 75, 0.3);
+            font-family: inherit;
+        }
+        .fortune-hint { text-align: center; font-size: 10.5px; color: #b5a89a; margin-top: 10px; flex-shrink: 0; }
+        .fortune-close {
+            position: absolute;
+            right: 16px;
+            bottom: 14px;
+            border: none;
+            background: #f6efe7;
+            color: #8a7a68;
+            border-radius: 999px;
+            padding: 6px 20px;
+            font-size: 12px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .fortune-close:active { background: #efe5d8; }
+
+        /* 结果卡片（雷祖圣签） */
+        .fortune-card-item {
+            background: #fbf8f3;
+            border: 0.5px solid #e8ddcf;
+            border-radius: 14px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+        }
+        .fdc-tarot {
+            background: linear-gradient(160deg, #fff9f0, #f7e9d8);
+            border-left: 4px solid #d8b48f;
+        }
+        .fdc-tarot .fdc-roman {
+            font-size: 12px;
+            font-weight: 700;
+            color: #b08050;
+            background: rgba(216, 180, 143, 0.18);
+            border-radius: 6px;
+            padding: 1px 5px;
+        }
+        .fdc-tarot .fdc-symbol { font-size: 13px; color: #c89a6a; }
+        .fdc-lenormand {
+            background: linear-gradient(160deg, #f7fbfd, #e8f1f5);
+            border-left: 4px solid #7fb0c9;
+        }
+        .fortune-card-item .fc-head { display: flex; justify-content: space-between; align-items: center; }
+        .fortune-card-item .fc-name { font-weight: 700; font-size: 15px; color: #4b3c44; }
+        .fortune-card-item .fc-pos {
+            font-size: 11px;
+            color: #b9805a;
+            background: rgba(201, 138, 75, 0.14);
+            border-radius: 999px;
+            padding: 2px 8px;
+        }
+        .fortune-card-item .fc-meaning { font-size: 12px; color: #7d6a72; margin-top: 4px; line-height: 1.5; }
+        .fortune-card-item .fc-verse { font-size: 13px; color: #a97f52; font-style: italic; margin-top: 4px; line-height: 1.5; }
+        .fortune-card-item.fc-fortune-good { border-left: 4px solid #d8a96a; }
+        .fortune-card-item.fc-fortune-mid { border-left: 4px solid #d9c79e; }
+        .fortune-card-item.fc-fortune-bad { border-left: 4px solid #9aa6b5; }
+        .fortune-loading { text-align: center; color: #a06a3a; font-size: 14px; padding: 40px 0; letter-spacing: 1px; }
+        .fortune-combo { margin-top: 10px; padding: 10px 12px; background: rgba(244, 235, 224, 0.7); border-radius: 12px; font-size: 12px; color: #8a7a68; line-height: 1.6; }
+
+        /* 往昔 · 历史 */
+        .fortune-history-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #5d4a3a;
+            margin-bottom: 10px;
+        }
+        .fortune-history-clear {
+            border: none;
+            background: none;
+            font-size: 11px;
+            color: #b5a89a;
+            cursor: pointer;
+            padding: 0;
+            font-family: inherit;
+        }
+        .fortune-history-clear:active { color: #c0392b; }
+        .fortune-history-list {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 2px;
+        }
+        .fortune-history-list::-webkit-scrollbar { width: 3px; }
+        .fortune-history-list::-webkit-scrollbar-thumb { background: rgba(201, 138, 75, 0.3); border-radius: 3px; }
+        .fortune-history-item {
+            background: #fbf8f3;
+            border-radius: 10px;
+            padding: 8px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+        }
+        .fortune-history-item .fh-info {
+            font-size: 11px;
+            color: #7a644f;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .fortune-history-item .fh-type {
+            font-size: 10px;
+            padding: 1px 6px;
+            border-radius: 999px;
+            background: rgba(201, 138, 75, 0.16);
+            color: #a06a3a;
+            flex-shrink: 0;
+        }
+        .fortune-history-empty {
+            font-size: 12px;
+            color: #b5a89a;
+            text-align: center;
+            padding: 40px 0;
+        }
+.period-card {
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            background: rgba(255, 246, 250, 0.82);
+            backdrop-filter: blur(14px) saturate(170%);
+            -webkit-backdrop-filter: blur(14px) saturate(170%);
+            border-radius: 24px;
+            padding: 22px 20px;
+            box-shadow: 0 18px 50px rgba(233, 30, 99, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            animation: fadeInUp 0.3s ease;
+            color: #5b4b52;
+        }
+        .period-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .period-orb {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff7ba9, #ff4d88);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(255, 77, 136, 0.4);
+        }
+        .period-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #c2185b;
+            flex: 1;
+        }
+        .period-close {
+            border: none;
+            background: none;
+            font-size: 16px;
+            color: #b08e9a;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .period-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .period-summary-item {
+            background: rgba(255, 255, 255, 0.75);
+            border-radius: 14px;
+            padding: 12px 6px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+        }
+        .period-summary-num {
+            font-size: 20px;
+            font-weight: 700;
+            color: #e91e63;
+        }
+        .period-summary-label {
+            font-size: 11px;
+            color: #a88997;
+            margin-top: 2px;
+        }
+        .period-cal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 2px 0 10px;
+            padding: 0 4px;
+        }
+        .period-cal-nav {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #e8e3df;
+            background: #fffaf5;
+            border-radius: 50%;
+            color: #b98d7a;
+            font-size: 18px;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .period-cal-nav:active { transform: scale(0.94); }
+        .period-cal-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #8a6a5c;
+            letter-spacing: 1px;
+        }
+        .period-cal-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: 5px;
+        }
+        .period-cal-weekdays span {
+            text-align: center;
+            font-size: 11px;
+            color: #c0a89a;
+            font-weight: 600;
+        }
+        .period-cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            background: #f7f2ee;
+            border: 1px solid #e8e3df;
+            border-radius: 14px;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        .period-cal-cell {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 10px;
+            background: #fcf8f4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 1px;
+        }
+        .period-cal-cell.blank { background: transparent; }
+        .period-cal-cell.today { background: #fdefe9; }
+        .cal-day-num {
+            font-size: 13px;
+            color: #6b5a52;
+            font-weight: 500;
+            line-height: 1;
+        }
+        .cal-day-num.dim { color: #fff; }
+        .cal-today-ring {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 1.5px solid #e88a68;
+            color: #c05a38;
+            font-size: 13px;
+            font-weight: 700;
+            background: #fff;
+        }
+        .cal-today-tag {
+            font-size: 8px;
+            color: #e88a68;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .cal-ring {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            font-size: 13px;
+            font-weight: 600;
+            color: #6b5a52;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+        .cal-ring-period {
+            border: 1.5px solid rgba(217, 122, 108, 0.75);
+            background: rgba(217, 122, 108, 0.08);
+            color: #8a4a3c;
+        }
+        .cal-ring-pred {
+            border: 1px solid rgba(217, 122, 108, 0.35);
+            color: #9a7a6c;
+        }
+        .period-cal-legend {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: #a88997;
+        }
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+        }
+        .dot-period { border: 1.5px solid rgba(217, 122, 108, 0.75); background: rgba(217, 122, 108, 0.08); }
+        .dot-pred { border: 1px solid rgba(217, 122, 108, 0.35); }
+        .dot-today {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 1.5px solid #e88a68;
+            background: #fff;
+            box-sizing: border-box;
+        }
+        .period-add-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #ff8fb3, #ff4d88);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(255, 77, 136, 0.35);
+        }
+        .period-add-btn:active { transform: scale(0.97); }
+        .period-hint {
+            text-align: center;
+            font-size: 11px;
+            color: #b08e9a;
+            margin-top: 8px;
+        }
+        .period-form { display: flex; flex-direction: column; gap: 12px; }
+        .period-field { display: flex; flex-direction: column; gap: 5px; }
+        .period-field label {
+            font-size: 12px;
+            color: #a88997;
+            font-weight: 500;
+        }
+        .period-input {
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(233, 30, 99, 0.2);
+            background: rgba(255, 255, 255, 0.85);
+            font-size: 14px;
+            color: #5b4b52;
+            outline: none;
+        }
+        .period-input:focus { border-color: #ff4d88; }
+        .period-save-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #ff8fb3, #ff4d88);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .period-save-btn:active { transform: scale(0.97); }
         .questionnaire-editor {
             width: 92%;
             max-width: 400px;
@@ -4746,30 +5680,101 @@
         #toast {
             z-index: 99999;
         }
+
+        #msg-popup-stack {
+            position: fixed;
+            top: 14px;
+            right: 14px;
+            z-index: 1500;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-end;
+            pointer-events: none;
+            max-width: 78vw;
+        }
+        .msg-popup {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(14px) saturate(170%);
+            -webkit-backdrop-filter: blur(14px) saturate(170%);
+            border-radius: 16px;
+            padding: 10px 14px;
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.95);
+            cursor: pointer;
+            max-width: 72vw;
+            animation: msgPopupIn 0.35s cubic-bezier(0.22, 0.9, 0.36, 1);
+        }
+        .msg-popup.hiding {
+            animation: msgPopupOut 0.3s ease forwards;
+        }
+        .msg-popup-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: linear-gradient(135deg, #e9a8c8, #c87aae);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-weight: 600;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .msg-popup-body {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            min-width: 0;
+        }
+        .msg-popup-name {
+            font-size: 12px;
+            font-weight: 700;
+            color: #444;
+        }
+        .msg-popup-content {
+            font-size: 12px;
+            color: #777;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 44vw;
+        }
+        .msg-popup-time {
+            font-size: 10px;
+            color: #aaa;
+            flex-shrink: 0;
+        }
+        @keyframes msgPopupIn {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes msgPopupOut {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(30px); }
+        }
     </style>
 </head>
 <body class="text-gray-800">
 
 <!-- 进场动画 -->
 <div id="splash-screen" class="splash-screen">
-  <div class="stars-container" id="starsContainer"></div>
-  <div class="splash-glow splash-glow-1"></div>
-  <div class="splash-glow splash-glow-2"></div>
+  <img class="splash-bg" src="assets/splash-bg.jpg" alt="">
+  <div class="splash-vignette"></div>
+  <div class="splash-orbital">
+    <div class="orb-ring ring-1"><span class="orb-dot"></span><span class="orb-dot"></span><span class="orb-dot"></span><span class="orb-dot"></span><span class="orb-dot"></span><span class="orb-dot"></span></div>
+    <div class="orb-ring ring-2"><span class="orb-dot"></span><span class="orb-dot"></span><span class="orb-dot"></span><span class="orb-dot"></span></div>
+  </div>
   <div class="loading-container" id="loadingCard">
-    <div class="icon-wrapper">
-      <div class="orbit"></div>
-      <div class="orbit"></div>
-      <svg class="earth-icon" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.55 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
-      </svg>
-    </div>
-    <p class="loading-label">LOADING</p>
     <div class="title-text" id="titleText">Spiritual connection</div>
     <div class="quote-text" id="quoteText"></div>
-    <div class="progress-bar-box">
-      <div class="progress-bar" id="progressBar"></div>
-    </div>
-    <p class="status-text" id="statusText">正在连接中...</p>
+    <button class="splash-enter-btn" id="splashEnterBtn" onclick="enterMain()">✦ 进入页面 ✦</button>
   </div>
 </div>
 
@@ -5092,6 +6097,14 @@
         <div class="space-y-6 mb-8">
             <div><label class="text-sm font-medium block mb-3">气泡圆角大小</label><input type="range" id="bubble-radius" min="4" max="32" value="13" class="w-full" style="accent-color: var(--accent-color);" oninput="updateBubblePreview()"><div class="flex justify-between text-xs text-gray-400 mt-1"><span>尖锐</span><span>圆润</span></div></div>
             <div><label class="text-sm font-medium block mb-3">气泡阴影强度</label><input type="range" id="bubble-shadow" min="0" max="10" value="1" class="w-full" style="accent-color: var(--accent-color);" oninput="updateBubblePreview()"></div>
+            <div class="bubble-preset-section">
+                <label class="bubble-preset-label">✨ 角色使用的气泡</label>
+                <div class="bubble-preset-grid" id="bubble-preset-role"></div>
+            </div>
+            <div class="bubble-preset-section">
+                <label class="bubble-preset-label">💬 我使用的气泡</label>
+                <div class="bubble-preset-grid" id="bubble-preset-mine"></div>
+            </div>
             <div class="bg-gray-50 p-4 rounded-2xl flex flex-col gap-3">
                 <div class="flex items-end gap-2"><div class="w-8 h-8 rounded-full bg-gray-200"></div><div class="message-received px-4 py-2 text-sm">你好呀！这是一条预览消息。</div></div>
                 <div class="flex items-end justify-end gap-2"><div class="message-sent px-4 py-2 text-sm" style="color: #fff;">收到，这是我的回复。</div></div>
@@ -5222,6 +6235,7 @@
             <button onclick="openMusicLibrary()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="music-2" class="w-5 h-5"></i></div><span class="text-xs font-medium">音乐库</span></button>
             <button onclick="openStats()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="bar-chart-2" class="w-5 h-5"></i></div><span class="text-xs font-medium">消息统计</span></button>
             <button onclick="openFortune()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="clock" class="w-5 h-5"></i></div><span class="text-xs font-medium">运势·占卜</span></button>
+            <button onclick="openPeriodTracker()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: #ffe4ec; color: #e91e63;"><i data-lucide="flower" class="w-5 h-5"></i></div><span class="text-xs font-medium">经期记录</span></button>
             <button onclick="openImportantDays()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="heart" class="w-5 h-5"></i></div><span class="text-xs font-medium">重要日</span></button>
             <button onclick="openMailbox()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="mail" class="w-5 h-5"></i></div><span class="text-xs font-medium">写信功能</span></button>
             <button onclick="openStatusWordbank()" class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--accent-light); color: var(--accent-color);"><i data-lucide="database" class="w-5 h-5"></i></div><span class="text-xs font-medium">角色状态词库</span></button>
@@ -5560,7 +6574,7 @@
 
 <!-- 🥰面板 -->
 <div id="modal-love-panel" class="modal-overlay hidden">
-    <div class="love-card"><div class="love-header"><div class="shimmer-overlay"></div><div class="season-box"><span class="season-emoji" id="season-emoji">🌸</span></div><div class="festival-eng" id="love-header-eng">GOOD EVENING</div><div class="festival-cn" id="love-header-cn">今天也要开心哦</div><div class="date-big" id="love-header-date">2026年4月21日</div></div><div class="love-body"><div class="love-mood-row"><span class="love-mood-emoji" id="love-mood-emoji">😊</span><span class="love-mood-text" id="love-mood-name">害羞</span></div><div class="love-quote-list" id="love-quote-list"></div><div class="love-info-grid"><div class="love-info-card"><div class="love-info-label">老公的天气</div><div class="love-info-value" id="love-weather">阴雨绵绵</div></div><div class="love-info-card"><div class="love-info-label">老公的状态</div><div class="love-info-value" id="love-status">难过</div></div></div><div class="love-footer-quote" id="love-footer-quote">谷雨生百谷，你是我生命里最饱满的那颗。</div><button class="love-btn" onclick="toggleLovePanel()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M12 3v2"/><path d="m18.4 5.6-1.4 1.4"/><path d="M21 12h-2"/><path d="m18.4 18.4-1.4-1.4"/><path d="M12 19v2"/><path d="m7 17-1.4 1.4"/><path d="M5 12H3"/><path d="m7 7 1.4-1.4"/><circle cx="12" cy="12" r="3"/><path d="M12 5a1 1 0 0 1 0 2 5 5 0 0 1 5 5 1 1 0 0 1-2 0 3 3 0 0 0-3-3 1 1 0 0 1 0-2Z"/></svg><span>知道了，开始今天</span><div class="shimmer-overlay"></div></button></div></div>
+    <div class="love-card"><div class="love-header"><div class="shimmer-overlay"></div><div class="season-box"><span class="season-emoji" id="season-emoji">🌸</span></div><div class="festival-eng" id="love-header-eng">GOOD EVENING</div><div class="festival-cn" id="love-header-cn">今天也要开心哦</div><div class="date-big" id="love-header-date">2026年4月21日</div></div><div class="love-body"><div class="love-quote-list" id="love-quote-list"></div><div class="love-info-grid"><div class="love-info-card"><div class="love-info-label">ta所在地天气</div><div class="love-info-value" id="love-weather">阴雨绵绵</div></div><div class="love-info-card"><div class="love-info-label">ta的今日状态</div><div class="love-info-value" id="love-status">难过</div></div></div><div class="love-footer-quote" id="love-footer-quote">谷雨生百谷，你是我生命里最饱满的那颗。</div><button class="love-btn" onclick="toggleLovePanel()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M12 3v2"/><path d="m18.4 5.6-1.4 1.4"/><path d="M21 12h-2"/><path d="m18.4 18.4-1.4-1.4"/><path d="M12 19v2"/><path d="m7 17-1.4 1.4"/><path d="M5 12H3"/><path d="m7 7 1.4-1.4"/><circle cx="12" cy="12" r="3"/><path d="M12 5a1 1 0 0 1 0 2 5 5 0 0 1 5 5 1 1 0 0 1-2 0 3 3 0 0 0-3-3 1 1 0 0 1 0-2Z"/></svg><span>知道了，开始今天</span><div class="shimmer-overlay"></div></button></div></div>
 </div>
 
 <!-- 源码查看 -->
@@ -5597,7 +6611,93 @@
 </div>
 
 <!-- 运势占卜 -->
-<div id="modal-fortune" class="modal-overlay hidden"><div class="modal-card text-center"><h2 class="text-xl font-bold mb-4">✨ 今日运势 ✨</h2><div id="fortune-text" class="text-lg italic mb-4" style="color: var(--accent-color);">点击抽签</div><button onclick="drawFortune()" class="text-white px-6 py-2 rounded-full" style="background-color: var(--button-primary-bg);">抽签</button><button onclick="closeFortune()" class="mt-4 w-full bg-gray-100 p-2 rounded-xl">关闭</button></div></div>
+<div id="modal-fortune" class="modal-overlay hidden" style="z-index:1500;">
+  <div class="fortune-card">
+    <div class="fortune-tabs">
+      <button class="fortune-tab" data-type="leizu" onclick="switchFortuneTab('leizu')">雷祖圣签</button>
+      <button class="fortune-tab" data-type="lenormand" onclick="switchFortuneTab('lenormand')">雷诺曼占卜</button>
+      <button class="fortune-tab active" data-type="tarot" onclick="switchFortuneTab('tarot')">塔罗占卜</button>
+      <button class="fortune-tab" data-type="history" onclick="switchFortuneTab('history')">往昔</button>
+    </div>
+    <div class="fortune-page" id="fortune-select-page">
+      <div class="fortune-select-title">请选择牌阵</div>
+      <div class="fortune-layout-btns">
+        <button class="fortune-layout-btn" data-layout="single" onclick="setFortuneLayout('single')">单张</button>
+        <button class="fortune-layout-btn active" data-layout="three" onclick="setFortuneLayout('three')">三张</button>
+      </div>
+      <div class="fortune-layout-hint">单张 · 今日指引　/　三张 · 过去现在未来</div>
+      <div class="fortune-question-label">你的提问（可选）</div>
+      <input class="fortune-question" id="fortune-question" maxlength="40" placeholder="将内心的迷惑轻轻诉说…">
+      <button class="fortune-draw-btn" id="fortune-draw-btn" onclick="drawFortune()">开始塔罗占卜</button>
+    </div>
+    <div class="fortune-page hidden" id="fortune-result-page">
+      <div class="fortune-subtabs">
+        <button class="fortune-subtab active" onclick="switchFortuneSub(this)">每周主牌</button>
+        <button class="fortune-subtab" onclick="switchFortuneSub(this)">每日运势</button>
+      </div>
+      <div class="fortune-result-title"><span class="fortune-moon">☾</span><span id="fortune-result-title-text">三牌展开</span></div>
+      <div class="fortune-body" id="fortune-body"></div>
+      <div class="fortune-note">
+        <textarea id="fortune-note-input" placeholder="写下你对今日牌阵的感悟…"></textarea>
+        <button class="fortune-note-save" onclick="saveFortuneNote()">保存</button>
+      </div>
+      <div class="fortune-hint">每日零时自动更新 · 点击牌背翻开查看解读</div>
+    </div>
+    <div class="fortune-page hidden" id="fortune-history-page">
+      <div class="fortune-history-head"><span>📜 占卜历史</span><button class="fortune-history-clear" onclick="clearFortuneHistory()">清空</button></div>
+      <div class="fortune-history-list" id="fortune-history-list"></div>
+    </div>
+    <button class="fortune-close" onclick="closeFortune()">关闭</button>
+  </div>
+</div>
+
+<!-- 经期记录 -->
+<div id="modal-period" class="modal-overlay hidden" style="z-index:1500;">
+  <div class="period-card">
+    <div class="period-header">
+      <span class="period-orb"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-3.5 8-10c0-4-3.6-6-8-6s-8 2-8 6c0 6.5 8 10 8 10Z"/><path d="M12 22s-2-2.5-2-5"/></svg></span>
+      <div class="period-title">🌸 我的经期记录</div>
+      <button class="period-close" onclick="closePeriodTracker()">✕</button>
+    </div>
+    <div class="period-summary" id="period-summary"></div>
+    <div class="period-cal-head">
+      <button class="period-cal-nav" onclick="shiftPeriodMonth(-1)">‹</button>
+      <div class="period-cal-title" id="period-cal-title"></div>
+      <button class="period-cal-nav" onclick="shiftPeriodMonth(1)">›</button>
+    </div>
+    <div class="period-cal-weekdays"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+    <div class="period-cal-grid" id="period-cal-grid"></div>
+    <div class="period-cal-legend">
+      <span class="legend-item"><span class="legend-dot dot-period"></span>经期</span>
+      <span class="legend-item"><span class="legend-dot dot-pred"></span>预计经期</span>
+      <span class="legend-item"><span class="legend-dot dot-today"></span>今天</span>
+    </div>
+    <button class="period-add-btn" onclick="openPeriodEditor()">＋ 记录本次经期</button>
+    <div class="period-hint">点击经期标记可删除该条记录</div>
+  </div>
+</div>
+
+<!-- 经期编辑 -->
+<div id="modal-period-editor" class="modal-overlay hidden" style="z-index:1600;">
+  <div class="period-card" style="max-width:340px;">
+    <div class="period-header">
+      <span class="period-orb"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-3.5 8-10c0-4-3.6-6-8-6s-8 2-8 6c0 6.5 8 10 8 10Z"/></svg></span>
+      <div class="period-title">记录经期</div>
+      <button class="period-close" onclick="closePeriodEditor()">✕</button>
+    </div>
+    <div class="period-form">
+      <div class="period-field">
+        <label>开始日期</label>
+        <input type="date" id="period-start" class="period-input">
+      </div>
+      <div class="period-field">
+        <label>结束日期</label>
+        <input type="date" id="period-end" class="period-input">
+      </div>
+      <button class="period-save-btn" onclick="savePeriodRecord()">保存</button>
+    </div>
+  </div>
+</div>
 
 <!-- 重要日 -->
 <div id="modal-important-days" class="modal-overlay hidden">
@@ -5758,6 +6858,7 @@
 
 <!-- Toast 提示 -->
 <div id="toast" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/80 text-white px-6 py-3 rounded-full text-sm font-medium opacity-0 pointer-events-none transition-opacity duration-300 z-[120]"></div>
+<div id="msg-popup-stack" class="fixed top-4 right-4 z-[130] flex flex-col gap-2 items-end pointer-events-none"></div>
 
 <!-- 操作菜单容器 -->
 <div id="action-sheet-container"></div>
@@ -6525,7 +7626,7 @@ const DEFAULT_DATA = {
         autoSendProbEnabled: false,
         autoSendProbPercent: 50,
         transferTestMode: false,
-        moment: { enabled: true, probability: 15, maxPerDay: 3, myPostCommentProb: 45, rolePostCommentProb: 35, authorReplyProb: 30, userCommentReplyProb: 65 },
+        moment: { enabled: true, probability: 15, maxPerDay: 3, globalMaxPerDay: 3, myPostCommentProb: 45, rolePostCommentProb: 35, authorReplyProb: 30, userCommentReplyProb: 65 },
         momentCover: '',
         musicPlayerEnabled: true,
         musicShuffle: true,
@@ -6540,7 +7641,7 @@ const DEFAULT_DATA = {
     wordbanks: {
         moods: ['开心', '难过', '生气', '平淡', '兴奋', '疲惫', '期待', '害羞'],
         weathers: ['阳光明媚', '阴雨绵绵', '绿意盎然', '大雪纷飞', '秋高气爽', '雷电交加'],
-        quotes: ['每一天都因为有你而特别 ✨', '你是我这一生等了半世未拆的礼物 🎁', '山河远阔，人间烟火，无一是你，无一不是你 🌊', '我见众生皆草木，唯有见你是青山 🍃', '海底月是天上月，眼前人是心上人 🌙', '你是落日弥漫的橘，天边透亮的星 🌟', '谷雨生百谷，你是我生命里最饱满的那颗。'],
+        quotes: ['每一天都因为有你而特别 ✨', '你是我这一生等了半世未拆的礼物 🎁', '山河远阔，人间烟火，无一是你，无一不是你 🌊', '我见众生皆草木，唯有见你是青山 🍃', '海底月是天上月，眼前人是心上人 🌙', '你是落日弥漫的橘，天边透亮的星 🌟', '谷雨生百谷，你是我生命里最饱满的那颗。', '风起时想你，风停时也想你，原来风一直替我念着你的名字', '你的名字是世上最短的诗，我念了一生仍觉意犹未尽', '我把月亮揉碎，铺成去见你的路', '星辰滚落人间，我只拾得你这一枚', '四季流转，落花有信，而你是我每一封回信里不变的落款', '云穿过山巅，像我想你的念头，一整天都没停歇', '你是夜色里亮着的窗，我所有的晚归都有了方向', '世间所有盛大的相遇，都是为了让我们这一场变得理所当然', '我愿做你窗前的那盏灯，把漫长黑夜一盏一盏点亮', '春天的风、夏天的雨、秋天的叶、冬天的雪，都不及你抬头的那一眼', '我收集了半生的晚霞，只为在你回眸时铺满整个天际', '青山不老，绿水长流，我愿你在我心上，住得比岁月更久', '夜里起风时，我就想你一次；风停后，满城的灯都像你', '我的诗意不多，全部分给了你的眉眼', '你就像一场温柔的大雪，落满我原本荒芜的世界', '海会枯，石会烂，可我想你的这颗心，比海深比石坚', '花开花落是季节的事，想你念你是呼吸的事', '我在人间贩卖黄昏，只为收集世间温柔与你相逢', '你是我所有路过的风景里，唯一想停下安家的人', '宇宙那么大，银河那么长，我还是要穿过它来见你', '晚风与薄雾间，藏着我想说给你听的一切', '我把日子过成了诗，字里行间都是你的影子', '月升月落一轮回，我对你的心动却从未走完一个回合', '世间温柔皆如轻薄柳絮，唯有你落进心里生了根', '我沿着星光走了很远，才遇见你这一盏暖灯', '风信子开在春天，我的信都写给你', '爱意可以躲过所有人的眼睛，唯独藏不住与你对视的瞬间', '愿我们像山水相望，久处不厌，初心不忘', '梦里梦外都是你，醒来更胜从前', '人间烟火色，最抚凡人心；凡心千万里，最念一个你', '你是藏在风里、云里、日子里，让我甘愿倾尽一生的秘密'],
         replies: ['贴贴', '爱你', '在干嘛？', '吃饭了吗？', '想你了', '今天天气真好'],
         wordGroups: [{ name: '默认', words: [{ text: '贴贴', blocked: false }, { text: '爱你', blocked: false }, { text: '在干嘛？', blocked: false }, { text: '吃饭了吗？', blocked: false }, { text: '想你了', blocked: false }, { text: '今天天气真好', blocked: false }, { text: '你是我的', blocked: false }, { text: '不许看别人', blocked: false }, { text: '我会永远在你身边', blocked: false }, { text: '加油', blocked: false }, { text: '抱抱', blocked: false }, { text: '嗯', blocked: false }, { text: '好的', blocked: false }, { text: '知道了', blocked: false }, { text: '晚安', blocked: false }, { text: '早安', blocked: false }, { text: '午安', blocked: false }] }],
         emojis: ['😊', '😂', '❤️', '👍', '🎉', '🔥', '😭', '😍', '🥰', '😘'],
@@ -6696,7 +7797,114 @@ const DEFAULT_DATA = {
 
 // --- 全局状态 ---
 let appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
-let tempAppearance = { theme: 'custom', customColor: '#82cbb2', savedSchemes: [], backgrounds: { home: '', chat: '', group: '' }, bubble: { radius: 13, shadow: 1 }, avatarShape: 'circle', avatarSettings: { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' }, customBubbleCss: '' };
+const BUBBLE_PRESETS = [
+    { id: 'youLian', name: '幽莲', received: `
+html body [data-bubble="youLian"] .message-received { background: linear-gradient(135deg,rgba(235,229,249,.72),rgba(222,212,243,.66)) !important; color:#3e2f66 !important; border:1px solid rgba(165,145,214,.5) !important; border-radius: 14px 14px 14px 5px !important; -webkit-backdrop-filter: blur(12px) saturate(150%) !important; backdrop-filter: blur(12px) saturate(150%) !important; box-shadow: 0 4px 14px rgba(138,120,190,.16), inset 0 1px 0 rgba(255,255,255,.8) !important; }
+html body [data-bubble="youLian"] .message-received::after { content:''; display:block !important; position:absolute; top:-7px; right:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(138,108,201,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+`, sent: `
+html body [data-bubble="youLian"] .message-sent { background: linear-gradient(135deg,rgba(222,212,243,.66),rgba(207,194,238,.6)) !important; color:#3e2f66 !important; border:1px solid rgba(165,145,214,.5) !important; border-radius: 14px 14px 5px 14px !important; -webkit-backdrop-filter: blur(12px) saturate(150%) !important; backdrop-filter: blur(12px) saturate(150%) !important; box-shadow: 0 4px 14px rgba(138,120,190,.16), inset 0 1px 0 rgba(255,255,255,.8) !important; }
+html body [data-bubble="youLian"] .message-sent::before { content:''; display:block !important; position:absolute; top:-7px; left:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(138,108,201,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+` },
+    { id: 'biHeTu', name: '碧荷小兔', received: `
+html body [data-bubble="biHeTu"] .message-received { background: linear-gradient(135deg,rgba(224,240,233,.75),rgba(206,232,220,.68)) !important; color:#2e5a49 !important; border:1px solid rgba(150,197,178,.5) !important; border-radius: 16px 16px 16px 5px !important; -webkit-backdrop-filter: blur(12px) saturate(155%) !important; backdrop-filter: blur(12px) saturate(155%) !important; box-shadow: 0 4px 14px rgba(120,170,150,.16), inset 0 1px 0 rgba(255,255,255,.85) !important; }
+html body [data-bubble="biHeTu"] .message-received::after { content:''; display:block !important; position:absolute; top:-7px; right:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(217,138,166,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+`, sent: `
+html body [data-bubble="biHeTu"] .message-sent { background: linear-gradient(135deg,rgba(206,232,220,.68),rgba(186,222,206,.62)) !important; color:#2e5a49 !important; border:1px solid rgba(150,197,178,.5) !important; border-radius: 16px 16px 5px 16px !important; -webkit-backdrop-filter: blur(12px) saturate(155%) !important; backdrop-filter: blur(12px) saturate(155%) !important; box-shadow: 0 4px 14px rgba(120,170,150,.16), inset 0 1px 0 rgba(255,255,255,.85) !important; }
+html body [data-bubble="biHeTu"] .message-sent::before { content:''; display:block !important; position:absolute; top:-7px; left:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(217,138,166,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+` },
+    { id: 'heDeng', name: '荷花灯笼', received: `
+html body [data-bubble="heDeng"] .message-received { background: linear-gradient(135deg,rgba(255,240,228,.75),rgba(255,228,206,.68)) !important; color:#7a4430 !important; border:1px solid rgba(224,168,132,.5) !important; border-radius: 15px 15px 15px 5px !important; -webkit-backdrop-filter: blur(12px) saturate(155%) !important; backdrop-filter: blur(12px) saturate(155%) !important; box-shadow: 0 4px 14px rgba(216,158,120,.16), inset 0 1px 0 rgba(255,255,255,.85) !important; }
+html body [data-bubble="heDeng"] .message-received::after { content:''; display:block !important; position:absolute; top:-7px; right:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(217,122,74,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+`, sent: `
+html body [data-bubble="heDeng"] .message-sent { background: linear-gradient(135deg,rgba(255,228,206,.68),rgba(250,214,188,.62)) !important; color:#7a4430 !important; border:1px solid rgba(224,168,132,.5) !important; border-radius: 15px 15px 5px 15px !important; -webkit-backdrop-filter: blur(12px) saturate(155%) !important; backdrop-filter: blur(12px) saturate(155%) !important; box-shadow: 0 4px 14px rgba(216,158,120,.16), inset 0 1px 0 rgba(255,255,255,.85) !important; }
+html body [data-bubble="heDeng"] .message-sent::before { content:''; display:block !important; position:absolute; top:-7px; left:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(217,122,74,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+` },
+    { id: 'guMao', name: '古风小猫', received: `
+html body [data-bubble="guMao"] .message-received { background: linear-gradient(135deg,rgba(248,244,236,.78),rgba(240,233,220,.7)) !important; color:#55402e !important; border:1px solid rgba(200,190,175,.5) !important; border-radius: 15px 15px 15px 5px !important; -webkit-backdrop-filter: blur(12px) saturate(150%) !important; backdrop-filter: blur(12px) saturate(150%) !important; box-shadow: 0 4px 14px rgba(180,165,140,.16), inset 0 1px 0 rgba(255,255,255,.9) !important; }
+html body [data-bubble="guMao"] .message-received::after { content:''; display:block !important; position:absolute; top:-7px; right:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(176,138,94,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+`, sent: `
+html body [data-bubble="guMao"] .message-sent { background: linear-gradient(135deg,rgba(240,233,220,.7),rgba(230,220,202,.64)) !important; color:#55402e !important; border:1px solid rgba(200,190,175,.5) !important; border-radius: 15px 15px 5px 15px !important; -webkit-backdrop-filter: blur(12px) saturate(150%) !important; backdrop-filter: blur(12px) saturate(150%) !important; box-shadow: 0 4px 14px rgba(180,165,140,.16), inset 0 1px 0 rgba(255,255,255,.9) !important; }
+html body [data-bubble="guMao"] .message-sent::before { content:''; display:block !important; position:absolute; top:-7px; left:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(176,138,94,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+` },
+    { id: 'yingTuo', name: '春日樱花兔', received: `
+html body [data-bubble="yingTuo"] .message-received { background: linear-gradient(135deg,rgba(255,236,240,.75),rgba(255,220,228,.68)) !important; color:#7d3a52 !important; border:1px solid rgba(233,166,180,.5) !important; border-radius: 16px 16px 16px 5px !important; -webkit-backdrop-filter: blur(12px) saturate(155%) !important; backdrop-filter: blur(12px) saturate(155%) !important; box-shadow: 0 4px 14px rgba(224,150,168,.16), inset 0 1px 0 rgba(255,255,255,.9) !important; }
+html body [data-bubble="yingTuo"] .message-received::after { content:''; display:block !important; position:absolute; top:-7px; right:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(229,138,160,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+`, sent: `
+html body [data-bubble="yingTuo"] .message-sent { background: linear-gradient(135deg,rgba(255,220,228,.68),rgba(250,206,216,.62)) !important; color:#7d3a52 !important; border:1px solid rgba(233,166,180,.5) !important; border-radius: 16px 16px 5px 16px !important; -webkit-backdrop-filter: blur(12px) saturate(155%) !important; backdrop-filter: blur(12px) saturate(155%) !important; box-shadow: 0 4px 14px rgba(224,150,168,.16), inset 0 1px 0 rgba(255,255,255,.9) !important; }
+html body [data-bubble="yingTuo"] .message-sent::before { content:''; display:block !important; position:absolute; top:-7px; left:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(229,138,160,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+` },
+    { id: 'zhuJuan', name: '竹卷萌友', received: `
+html body [data-bubble="zhuJuan"] .message-received { background: linear-gradient(135deg,rgba(230,242,228,.75),rgba(213,233,209,.68)) !important; color:#33522e !important; border:1px solid rgba(158,192,150,.5) !important; border-radius: 15px 15px 15px 5px !important; -webkit-backdrop-filter: blur(12px) saturate(155%) !important; backdrop-filter: blur(12px) saturate(155%) !important; box-shadow: 0 4px 14px rgba(140,180,130,.16), inset 0 1px 0 rgba(255,255,255,.85) !important; }
+html body [data-bubble="zhuJuan"] .message-received::after { content:''; display:block !important; position:absolute; top:-7px; right:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(106,160,90,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+`, sent: `
+html body [data-bubble="zhuJuan"] .message-sent { background: linear-gradient(135deg,rgba(213,233,209,.68),rgba(194,222,189,.62)) !important; color:#33522e !important; border:1px solid rgba(158,192,150,.5) !important; border-radius: 15px 15px 5px 15px !important; -webkit-backdrop-filter: blur(12px) saturate(155%) !important; backdrop-filter: blur(12px) saturate(155%) !important; box-shadow: 0 4px 14px rgba(140,180,130,.16), inset 0 1px 0 rgba(255,255,255,.85) !important; }
+html body [data-bubble="zhuJuan"] .message-sent::before { content:''; display:block !important; position:absolute; top:-7px; left:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(106,160,90,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+` },
+    { id: 'jinGui', name: '金桂甜语', received: `
+html body [data-bubble="jinGui"] .message-received { background: linear-gradient(135deg,rgba(255,244,222,.75),rgba(255,234,196,.68)) !important; color:#6b4a1e !important; border:1px solid rgba(224,180,110,.5) !important; border-radius: 16px 16px 16px 5px !important; -webkit-backdrop-filter: blur(12px) saturate(155%) !important; backdrop-filter: blur(12px) saturate(155%) !important; box-shadow: 0 4px 14px rgba(214,170,98,.16), inset 0 1px 0 rgba(255,255,255,.9) !important; }
+html body [data-bubble="jinGui"] .message-received::after { content:''; display:block !important; position:absolute; top:-7px; right:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(208,162,58,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+`, sent: `
+html body [data-bubble="jinGui"] .message-sent { background: linear-gradient(135deg,rgba(255,234,196,.68),rgba(250,222,178,.62)) !important; color:#6b4a1e !important; border:1px solid rgba(224,180,110,.5) !important; border-radius: 16px 16px 5px 16px !important; -webkit-backdrop-filter: blur(12px) saturate(155%) !important; backdrop-filter: blur(12px) saturate(155%) !important; box-shadow: 0 4px 14px rgba(214,170,98,.16), inset 0 1px 0 rgba(255,255,255,.9) !important; }
+html body [data-bubble="jinGui"] .message-sent::before { content:''; display:block !important; position:absolute; top:-7px; left:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(208,162,58,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+` },
+    { id: 'chaChan', name: '茶香禅意', received: `
+html body [data-bubble="chaChan"] .message-received { background: linear-gradient(135deg,rgba(244,238,228,.76),rgba(235,225,210,.7)) !important; color:#52422e !important; border:1px solid rgba(196,178,152,.5) !important; border-radius: 14px 14px 14px 5px !important; -webkit-backdrop-filter: blur(12px) saturate(150%) !important; backdrop-filter: blur(12px) saturate(150%) !important; box-shadow: 0 4px 14px rgba(180,160,128,.16), inset 0 1px 0 rgba(255,255,255,.9) !important; }
+html body [data-bubble="chaChan"] .message-received::after { content:''; display:block !important; position:absolute; top:-7px; right:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(176,138,90,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+`, sent: `
+html body [data-bubble="chaChan"] .message-sent { background: linear-gradient(135deg,rgba(235,225,210,.7),rgba(224,212,194,.64)) !important; color:#52422e !important; border:1px solid rgba(196,178,152,.5) !important; border-radius: 14px 14px 5px 14px !important; -webkit-backdrop-filter: blur(12px) saturate(150%) !important; backdrop-filter: blur(12px) saturate(150%) !important; box-shadow: 0 4px 14px rgba(180,160,128,.16), inset 0 1px 0 rgba(255,255,255,.9) !important; }
+html body [data-bubble="chaChan"] .message-sent::before { content:''; display:block !important; position:absolute; top:-7px; left:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(176,138,90,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+` },
+    { id: 'heMeng', name: '荷风清梦', received: `
+html body [data-bubble="heMeng"] .message-received { background: linear-gradient(135deg,rgba(225,241,244,.75),rgba(207,231,236,.68)) !important; color:#2c5661 !important; border:1px solid rgba(148,195,204,.5) !important; border-radius: 16px 16px 16px 5px !important; -webkit-backdrop-filter: blur(12px) saturate(155%) !important; backdrop-filter: blur(12px) saturate(155%) !important; box-shadow: 0 4px 14px rgba(128,180,190,.16), inset 0 1px 0 rgba(255,255,255,.9) !important; }
+html body [data-bubble="heMeng"] .message-received::after { content:''; display:block !important; position:absolute; top:-7px; right:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(90,163,168,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+`, sent: `
+html body [data-bubble="heMeng"] .message-sent { background: linear-gradient(135deg,rgba(207,231,236,.68),rgba(188,220,228,.62)) !important; color:#2c5661 !important; border:1px solid rgba(148,195,204,.5) !important; border-radius: 16px 16px 5px 16px !important; -webkit-backdrop-filter: blur(12px) saturate(155%) !important; backdrop-filter: blur(12px) saturate(155%) !important; box-shadow: 0 4px 14px rgba(128,180,190,.16), inset 0 1px 0 rgba(255,255,255,.9) !important; }
+html body [data-bubble="heMeng"] .message-sent::before { content:''; display:block !important; position:absolute; top:-7px; left:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(90,163,168,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+` },
+    { id: 'guoXiang', name: '国红祥云', received: `
+html body [data-bubble="guoXiang"] .message-received { background: linear-gradient(135deg,rgba(255,246,232,.78),rgba(250,235,214,.7)) !important; color:#6b332c !important; border:1px solid rgba(203,92,80,.55) !important; border-radius: 14px 14px 14px 5px !important; -webkit-backdrop-filter: blur(12px) saturate(150%) !important; backdrop-filter: blur(12px) saturate(150%) !important; box-shadow: 0 4px 14px rgba(196,88,74,.16), inset 0 1px 0 rgba(255,255,255,.92) !important; }
+html body [data-bubble="guoXiang"] .message-received::after { content:''; display:block !important; position:absolute; top:-7px; right:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(192,90,74,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+`, sent: `
+html body [data-bubble="guoXiang"] .message-sent { background: linear-gradient(135deg,rgba(250,235,214,.7),rgba(244,222,196,.64)) !important; color:#6b332c !important; border:1px solid rgba(203,92,80,.55) !important; border-radius: 14px 14px 5px 14px !important; -webkit-backdrop-filter: blur(12px) saturate(150%) !important; backdrop-filter: blur(12px) saturate(150%) !important; box-shadow: 0 4px 14px rgba(196,88,74,.16), inset 0 1px 0 rgba(255,255,255,.92) !important; }
+html body [data-bubble="guoXiang"] .message-sent::before { content:''; display:block !important; position:absolute; top:-7px; left:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(192,90,74,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+` },
+    { id: 'zhongYing', name: '中式樱花', received: `
+html body [data-bubble="zhongYing"] .message-received { background: linear-gradient(135deg,rgba(255,234,238,.75),rgba(255,219,226,.68)) !important; color:#6e3046 !important; border:1px solid rgba(216,148,162,.5) !important; border-radius: 16px 16px 16px 5px !important; -webkit-backdrop-filter: blur(12px) saturate(155%) !important; backdrop-filter: blur(12px) saturate(155%) !important; box-shadow: 0 4px 14px rgba(210,140,156,.16), inset 0 1px 0 rgba(255,255,255,.9) !important; }
+html body [data-bubble="zhongYing"] .message-received::after { content:''; display:block !important; position:absolute; top:-7px; right:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(208,90,122,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+`, sent: `
+html body [data-bubble="zhongYing"] .message-sent { background: linear-gradient(135deg,rgba(255,219,226,.68),rgba(250,206,216,.62)) !important; color:#6e3046 !important; border:1px solid rgba(216,148,162,.5) !important; border-radius: 16px 16px 5px 16px !important; -webkit-backdrop-filter: blur(12px) saturate(155%) !important; backdrop-filter: blur(12px) saturate(155%) !important; box-shadow: 0 4px 14px rgba(210,140,156,.16), inset 0 1px 0 rgba(255,255,255,.9) !important; }
+html body [data-bubble="zhongYing"] .message-sent::before { content:''; display:block !important; position:absolute; top:-7px; left:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(208,90,122,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+` },
+    { id: 'zhuJie', name: '竹节', received: `
+html body [data-bubble="zhuJie"] .message-received { background: linear-gradient(135deg,rgba(228,241,229,.75),rgba(212,232,213,.68)) !important; color:#31562f !important; border:1px solid rgba(152,185,148,.5) !important; border-radius: 14px 14px 14px 5px !important; -webkit-backdrop-filter: blur(12px) saturate(155%) !important; backdrop-filter: blur(12px) saturate(155%) !important; box-shadow: 0 4px 14px rgba(136,172,130,.16), inset 0 1px 0 rgba(255,255,255,.85) !important; }
+html body [data-bubble="zhuJie"] .message-received::after { content:''; display:block !important; position:absolute; top:-7px; right:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(90,154,90,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+`, sent: `
+html body [data-bubble="zhuJie"] .message-sent { background: linear-gradient(135deg,rgba(212,232,213,.68),rgba(194,222,196,.62)) !important; color:#31562f !important; border:1px solid rgba(152,185,148,.5) !important; border-radius: 14px 14px 5px 14px !important; -webkit-backdrop-filter: blur(12px) saturate(155%) !important; backdrop-filter: blur(12px) saturate(155%) !important; box-shadow: 0 4px 14px rgba(136,172,130,.16), inset 0 1px 0 rgba(255,255,255,.85) !important; }
+html body [data-bubble="zhuJie"] .message-sent::before { content:''; display:block !important; position:absolute; top:-7px; left:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(90,154,90,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+` },
+    { id: 'heiBai', name: '黑白无常', received: `
+html body [data-bubble="heiBai"] .message-received { background: linear-gradient(135deg,rgba(244,244,244,.78),rgba(232,232,232,.72)) !important; color:#2f2f2f !important; border:1px solid rgba(120,120,120,.55) !important; border-radius: 14px 14px 14px 5px !important; -webkit-backdrop-filter: blur(12px) saturate(140%) !important; backdrop-filter: blur(12px) saturate(140%) !important; box-shadow: 0 4px 14px rgba(90,90,90,.14), inset 0 1px 0 rgba(255,255,255,.95) !important; }
+html body [data-bubble="heiBai"] .message-received::after { content:''; display:block !important; position:absolute; top:-7px; right:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(85,85,85,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+`, sent: `
+html body [data-bubble="heiBai"] .message-sent { background: linear-gradient(135deg,rgba(232,232,232,.72),rgba(218,218,218,.66)) !important; color:#2f2f2f !important; border:1px solid rgba(120,120,120,.55) !important; border-radius: 14px 14px 5px 14px !important; -webkit-backdrop-filter: blur(12px) saturate(140%) !important; backdrop-filter: blur(12px) saturate(140%) !important; box-shadow: 0 4px 14px rgba(90,90,90,.14), inset 0 1px 0 rgba(255,255,255,.95) !important; }
+html body [data-bubble="heiBai"] .message-sent::before { content:''; display:block !important; position:absolute; top:-7px; left:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(85,85,85,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+` },
+    { id: 'lvDou', name: '绿豆清甜', received: `
+html body [data-bubble="lvDou"] .message-received { background: linear-gradient(135deg,rgba(232,242,232,.75),rgba(216,233,216,.68)) !important; color:#32522f !important; border:1px solid rgba(156,190,156,.5) !important; border-radius: 16px 16px 16px 5px !important; -webkit-backdrop-filter: blur(12px) saturate(155%) !important; backdrop-filter: blur(12px) saturate(155%) !important; box-shadow: 0 4px 14px rgba(138,176,136,.16), inset 0 1px 0 rgba(255,255,255,.85) !important; }
+html body [data-bubble="lvDou"] .message-received::after { content:''; display:block !important; position:absolute; top:-7px; right:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(106,154,90,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+`, sent: `
+html body [data-bubble="lvDou"] .message-sent { background: linear-gradient(135deg,rgba(216,233,216,.68),rgba(197,223,197,.62)) !important; color:#32522f !important; border:1px solid rgba(156,190,156,.5) !important; border-radius: 16px 16px 5px 16px !important; -webkit-backdrop-filter: blur(12px) saturate(155%) !important; backdrop-filter: blur(12px) saturate(155%) !important; box-shadow: 0 4px 14px rgba(138,176,136,.16), inset 0 1px 0 rgba(255,255,255,.85) !important; }
+html body [data-bubble="lvDou"] .message-sent::before { content:''; display:block !important; position:absolute; top:-7px; left:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(106,154,90,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+` },
+    { id: 'saiBo', name: '赛博平安符', received: `
+html body [data-bubble="saiBo"] .message-received { background: linear-gradient(135deg,rgba(232,240,248,.76),rgba(218,231,244,.7)) !important; color:#2e4a6b !important; border:1px solid rgba(140,170,205,.55) !important; border-radius: 15px 15px 15px 5px !important; -webkit-backdrop-filter: blur(12px) saturate(155%) !important; backdrop-filter: blur(12px) saturate(155%) !important; box-shadow: 0 4px 14px rgba(126,158,196,.16), inset 0 1px 0 rgba(255,255,255,.9) !important; }
+html body [data-bubble="saiBo"] .message-received::after { content:''; display:block !important; position:absolute; top:-7px; right:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(74,106,168,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+`, sent: `
+html body [data-bubble="saiBo"] .message-sent { background: linear-gradient(135deg,rgba(218,231,244,.7),rgba(204,221,240,.64)) !important; color:#2e4a6b !important; border:1px solid rgba(140,170,205,.55) !important; border-radius: 15px 15px 5px 15px !important; -webkit-backdrop-filter: blur(12px) saturate(155%) !important; backdrop-filter: blur(12px) saturate(155%) !important; box-shadow: 0 4px 14px rgba(126,158,196,.16), inset 0 1px 0 rgba(255,255,255,.9) !important; }
+html body [data-bubble="saiBo"] .message-sent::before { content:''; display:block !important; position:absolute; top:-7px; left:-5px; width:14px; height:14px; background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(74,106,168,0.55)); -webkit-mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat; mask-image:url("data:image/svg+xml;%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2020.6%20C7%2016.3%203.4%2012.7%203.4%209.1%20C3.4%206.5%205.2%204.8%207.4%204.8%20C9.1%204.8%2011%205.9%2012%207.8%20C13%205.9%2014.9%204.8%2016.6%204.8%20C18.8%204.8%2020.6%206.5%2020.6%209.1%20C20.6%2012.7%2017%2016.3%2012%2020.6%20Z'%2F%3E%3C%2Fsvg%3E"); mask-size:contain; mask-repeat:no-repeat; opacity:.8; filter:blur(.4px); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); z-index:2; }
+` }
+];
+let tempAppearance = { theme: 'custom', customColor: '#82cbb2', savedSchemes: [], backgrounds: { home: '', chat: '', group: '' }, bubble: { radius: 13, shadow: 1, presetRole: 'none', presetMine: 'none' }, avatarShape: 'circle', avatarSettings: { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' }, customBubbleCss: '' };
 let currentChatType = 'role';
 let currentRoleId = null;
 let currentGroupId = null;
@@ -6944,6 +8152,34 @@ const LENORMAND_CARDS = [
     { id: '34', name: '鱼', meaning: '财富、流动、金钱、丰盛' },
     { id: '35', name: '锚', meaning: '稳定、希望、安全、安顿' },
     { id: '36', name: '十字架', meaning: '负担、苦痛、责任、灵性考验' }
+];
+
+// 雷祖圣签（24签）
+const LEIZU_STICKS = [
+    { id: '1', name: '天开黄道', fortune: '上上', verse: '天开黄道启祥光，万类欣欣向日长。', meaning: '运势大吉，百事顺遂。所求之事皆可如愿，谋事在人，成事在天，此刻天时地利人和俱备。' },
+    { id: '2', name: '风云际会', fortune: '上上', verse: '风云际会正当时，虎啸龙吟展作为。', meaning: '贵人将至，机遇涌现。事业与感情都将迎来转机，主动把握便得良机。' },
+    { id: '3', name: '顺水行舟', fortune: '上吉', verse: '顺水行舟不费力，只须稳舵向前行。', meaning: '万事顺遂，水到渠成。眼下只需保持节奏，平稳推进即可得偿所愿。' },
+    { id: '4', name: '花开富贵', fortune: '上吉', verse: '花开富贵满庭芳，蜂蝶翩翩入画堂。', meaning: '福气盈门，喜事将近。家宅安宁，感情升温，收获颇丰。' },
+    { id: '5', name: '龙吟虎啸', fortune: '中吉', verse: '龙吟虎啸风云动，拨开云雾见青天。', meaning: '略有波折，终获光明。过程虽有阻力，结局可期，勿轻言放弃。' },
+    { id: '6', name: '月照寒潭', fortune: '中吉', verse: '月照寒潭明似镜，心清自可照乾坤。', meaning: '宜静心自省。保持清醒与专注，分清主次，则难题自解。' },
+    { id: '7', name: '春回大地', fortune: '中吉', verse: '春回大地万物苏，枯木逢春亦发枝。', meaning: '旧事将过，新生渐起。过往的遗憾会慢慢愈合，新的机会开始萌发。' },
+    { id: '8', name: '乘风破浪', fortune: '中吉', verse: '乘风破浪会有时，直挂云帆济沧海。', meaning: '信心所致，金石为开。大胆迈出一步，会有意想不到的收获。' },
+    { id: '9', name: '静待时机', fortune: '中平', verse: '静水深流意未休，耐心守候自当头。', meaning: '时机未到，宜守不宜攻。沉住气，等待是最好的选择。' },
+    { id: '10', name: '云开雾散', fortune: '中平', verse: '云开雾散见晴空，一番思量自不同。', meaning: '困惑将解，勿急躁。多思量、多沟通，真相自然会浮现。' },
+    { id: '11', name: '柳暗花明', fortune: '中平', verse: '山重水复疑无路，柳暗花明又一村。', meaning: '看似困境，实有转机。换个角度看问题，出路就在转角处。' },
+    { id: '12', name: '守正持中', fortune: '中平', verse: '守正持中行稳步，不争不抢自安然。', meaning: '以稳为本。不去强求，安守本分，反而能得平和与自在。' },
+    { id: '13', name: '平沙落雁', fortune: '中平', verse: '平沙落雁影参差，莫向人间问是非。', meaning: '宜独处修心。少论是非，专注自己的事，心宽自然路宽。' },
+    { id: '14', name: '闭门造车', fortune: '下下', verse: '闭门造车不合辙，错失良机徒叹嗟。', meaning: '方向有偏，需及时调整。多听取他人意见，避免一意孤行。' },
+    { id: '15', name: '雾里看花', fortune: '下下', verse: '雾里看花看不真，云遮月暗更愁人。', meaning: '诸事朦胧，易生误判。此时不宜做重大决定，待雾散后再定夺。' },
+    { id: '16', name: '逆水行舟', fortune: '下下', verse: '逆水行舟用力撑，一篙松劲退千寻。', meaning: '阻力较大，步履维艰。越是此时越要坚持，松懈只会前功尽弃。' },
+    { id: '17', name: '枯木逢春', fortune: '下吉', verse: '枯木逢春又发花，否极泰来气运加。', meaning: '低谷将尽，转机将至。再坚持一下，局势即将好转。' },
+    { id: '18', name: '磨杵成针', fortune: '中吉', verse: '磨杵成针贵有恒，铁心终不负深情。', meaning: '贵在坚持。眼下虽慢，但积累终有回报，勿因微小而放弃。' },
+    { id: '19', name: '锦上添花', fortune: '上吉', verse: '锦上添花花更艳，好上加好事事圆。', meaning: '好消息将接连而来。感情事业皆有添彩之事，可与人分享喜悦。' },
+    { id: '20', name: '披星戴月', fortune: '中吉', verse: '披星戴月勤为本，苦尽甘来自有程。', meaning: '付出终有回报。勤勉之人自有天助，苦功不会白费。' },
+    { id: '21', name: '明珠出海', fortune: '上上', verse: '明珠出海耀光辉，才气终须遇好机。', meaning: '才华将遇伯乐。你的闪光点会被看见，大胆展现自己。' },
+    { id: '22', name: '守株待兔', fortune: '下下', verse: '守株待兔终无果，坐失良机空自哦。', meaning: '不可依赖侥幸。机会需要主动争取，等待只会一无所获。' },
+    { id: '23', name: '岁寒松柏', fortune: '中吉', verse: '岁寒方识松柏操，患难之中见真情。', meaning: '情谊经得起考验。真心的关系会在关键时刻愈发坚固。' },
+    { id: '24', name: '紫气东来', fortune: '上上', verse: '紫气东来祥瑞至，福星高照运亨通。', meaning: '大吉之兆。诸事顺心，心想事成，出门见喜，喜从天降。' }
 ];
 
 // ========== ★★★ 新增功能相关变量 ★★★ ==========
@@ -7989,6 +9225,13 @@ document.addEventListener('visibilitychange', function() {
             }));
         } catch(e) {}
         saveDataImmediately().catch(() => {});
+    } else {
+        checkAutoSendMessages();
+        checkAutoMailGeneration();
+        checkMailReplies();
+        if (appData.settings.moment?.enabled) checkAutoMoments();
+        if (appData.settings.autoCall?.enabled) checkAutoCall();
+        saveDataImmediately().catch(() => {});
     }
 });
 
@@ -8029,6 +9272,26 @@ function startUnifiedTimers() {
         unifiedTickCount++;
         
         if (document.hidden) {
+            // 后台运行：降频但保持自动消息/弹窗/邮件/来电正常触发
+            if (unifiedTickCount % 6 === 0) {
+                if (appData.settings.autoSend) {
+                    checkAutoSendMessages();
+                }
+                checkMailReplies();
+            }
+            if (unifiedTickCount % 20 === 0) {
+                if (appData.settings.autoCall?.enabled) {
+                    checkAutoCall();
+                }
+                if (appData.settings.moment?.enabled) {
+                    checkAutoMoments();
+                }
+            }
+            if (unifiedTickCount % 30 === 0) {
+                if (appData.transferSettings?.enabled && !appData.settings.transferTestMode) {
+                    checkAutoTransfer();
+                }
+            }
             if (unifiedTickCount % 20 === 0) {
                 updateOnlineStatuses();
             }
@@ -8213,17 +9476,27 @@ function checkAutoMoments() {
     if (!appData.settings.moment?.enabled) return;
     const now = new Date();
     const today = now.toDateString();
-    appData.roles.forEach(role => {
+    if (appData.momentDailyKey !== today) {
+        appData.momentDailyKey = today;
+        appData.momentDailyCount = 0;
+    }
+    const globalMax = appData.settings.moment.globalMaxPerDay ?? Math.max(1, Math.min(3, Math.ceil(appData.roles.length / 2)));
+    if (appData.momentDailyCount >= globalMax) return;
+    let triggeredInRound = 0;
+    for (const role of appData.roles) {
+        if (triggeredInRound >= 1) break;
         if (!role.lastMomentDate || role.lastMomentDate !== today) {
             role.todayMomentCount = 0;
             role.lastMomentDate = today;
         }
-        if (role.todayMomentCount >= (appData.settings.moment.maxPerDay || 3)) return;
+        if (role.todayMomentCount >= (appData.settings.moment.maxPerDay || 3)) continue;
         const checkProb = (appData.settings.moment.probability || 15) / 48;
         if (Math.random() * 100 < checkProb) {
             generateAutoMoment(role);
+            appData.momentDailyCount = (appData.momentDailyCount || 0) + 1;
+            triggeredInRound++;
         }
-    });
+    }
 }
 
 function updateOnlineStatuses() {
@@ -8252,7 +9525,7 @@ function sendAutoMessageForRole(role) {
     if (!appData.chats[role.id]) appData.chats[role.id] = [];
     const msg = { id: Date.now(), sender: role.id, content, time: Date.now(), type }; appData.chats[role.id].push(msg);
     role.lastActive = Date.now(); debouncedSaveData();
-    if (currentChatType === 'role' && currentRoleId !== role.id) incrementUnread(role.id);
+    if (currentChatType === 'role' && currentRoleId !== role.id) { incrementUnread(role.id); showMessagePopup({ target: role.id, content, sender: role.id, type }); }
     if (currentChatType === 'role' && currentRoleId === role.id) appendMessageToDOM(role.id, content, Date.now(), null, type);
 }
 
@@ -8269,7 +9542,7 @@ function triggerGroupAutoReply(group) {
         if (appData.wordbanks.stickers.length > 0 && Math.random() * 100 < (appData.settings.stickerProb || 10)) { type = 'image'; content = appData.wordbanks.stickers[Math.floor(Math.random() * appData.wordbanks.stickers.length)]; }
         else { if (Math.random() * 100 < (appData.settings.emojiProb || 20) && appData.wordbanks.emojis.length > 0) content += ' ' + appData.wordbanks.emojis[Math.floor(Math.random() * appData.wordbanks.emojis.length)]; }
         const msg = { id: Date.now() + index, sender: speakerId, content, time: Date.now(), type }; appData.groupChats[group.id].push(msg); debouncedSaveData();
-        if (currentChatType === 'group' && currentGroupId === group.id) appendMessageToDOM(speakerId, content, Date.now(), null, type); else incrementUnread('group_' + group.id);
+        if (currentChatType === 'group' && currentGroupId === group.id) appendMessageToDOM(speakerId, content, Date.now(), null, type); else { incrementUnread('group_' + group.id); showMessagePopup({ target: 'group_' + group.id, content, sender: speakerId, type }); }
     }, index * 800); });
 }
 
@@ -8434,11 +9707,14 @@ async function loadData() {
         if (appData.settings.autoSendProbPercent === undefined) appData.settings.autoSendProbPercent = 50;
         if (appData.settings.transferTestMode === undefined) appData.settings.transferTestMode = false;
         if (appData.settings.multiMsgInterval === undefined) appData.settings.multiMsgInterval = 2;
-        if (!appData.settings.moment) appData.settings.moment = { enabled: true, probability: 15, maxPerDay: 3, myPostCommentProb: 45, rolePostCommentProb: 35, authorReplyProb: 30, userCommentReplyProb: 65 };
+        if (!appData.settings.moment) appData.settings.moment = { enabled: true, probability: 15, maxPerDay: 3, globalMaxPerDay: 3, myPostCommentProb: 45, rolePostCommentProb: 35, authorReplyProb: 30, userCommentReplyProb: 65 };
         if (appData.settings.moment.myPostCommentProb === undefined) appData.settings.moment.myPostCommentProb = 45;
         if (appData.settings.moment.rolePostCommentProb === undefined) appData.settings.moment.rolePostCommentProb = 35;
         if (appData.settings.moment.authorReplyProb === undefined) appData.settings.moment.authorReplyProb = 30;
         if (appData.settings.moment.userCommentReplyProb === undefined) appData.settings.moment.userCommentReplyProb = 65;
+        if (appData.settings.moment.globalMaxPerDay === undefined) appData.settings.moment.globalMaxPerDay = 3;
+        if (appData.momentDailyKey === undefined) appData.momentDailyKey = '';
+        if (appData.momentDailyCount === undefined) appData.momentDailyCount = 0;
         if (appData.settings.momentCover === undefined) appData.settings.momentCover = '';
         if (appData.settings.musicPlayerEnabled === undefined) appData.settings.musicPlayerEnabled = true;
         if (appData.settings.musicShuffle === undefined) appData.settings.musicShuffle = true;
@@ -8900,13 +10176,15 @@ async function handleMomentCoverUpload(input) {
 }
 
 async function initAppearance() {
-    if (!appData.appearance) appData.appearance = { theme: 'custom', customColor: '#82cbb2', savedSchemes: [], backgrounds: { home: '', chat: '', group: '' }, bubble: { radius: 13, shadow: 1 }, avatarShape: 'circle', avatarSettings: { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' }, customThemeColors: {}, customBubbleCss: '' };
+    if (!appData.appearance) appData.appearance = { theme: 'custom', customColor: '#82cbb2', savedSchemes: [], backgrounds: { home: '', chat: '', group: '' }, bubble: { radius: 13, shadow: 1, presetRole: 'none', presetMine: 'none' }, avatarShape: 'circle', avatarSettings: { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' }, customThemeColors: {}, customBubbleCss: '' };
     else { 
         if (!appData.appearance.theme) appData.appearance.theme = 'custom'; 
         if (!appData.appearance.customColor) appData.appearance.customColor = '#82cbb2'; 
         if (!appData.appearance.savedSchemes) appData.appearance.savedSchemes = []; 
         if (!appData.appearance.backgrounds) appData.appearance.backgrounds = { home: '', chat: '', group: '' }; 
         if (!appData.appearance.bubble) appData.appearance.bubble = { radius: 13, shadow: 1 }; 
+        if (appData.appearance.bubble.presetRole === undefined) appData.appearance.bubble.presetRole = 'none';
+        if (appData.appearance.bubble.presetMine === undefined) appData.appearance.bubble.presetMine = 'none';
         if (!appData.appearance.avatarShape) appData.appearance.avatarShape = 'circle';
         if (!appData.appearance.avatarSettings) appData.appearance.avatarSettings = { showAvatar: true, showEveryMessage: true, showNameInSingle: true, size: 36, align: 'center' };
         if (!appData.appearance.customThemeColors) appData.appearance.customThemeColors = {};
@@ -8916,6 +10194,7 @@ async function initAppearance() {
     appData.appearance.backgrounds = { ...appData.appearance.backgrounds, ...loadedBackgrounds };
     tempAppearance = JSON.parse(JSON.stringify(appData.appearance));
     applyAppearance();
+    applyBubblePresetCss();
 }
 
 function applyAppearance() {
@@ -9001,6 +10280,49 @@ function deleteScheme(index) {
 }
 
 function incrementUnread(target) { if (!unreadCounts[target]) unreadCounts[target] = 0; unreadCounts[target]++; saveUnreadCounts(); if (target.startsWith('group_')) renderGroupList(); else renderRoleList(); }
+
+function getRoleNameById(id) {
+    const r = appData.roles.find(r => r.id === id);
+    return r ? (r.nickname || r.name || '角色') : '未知角色';
+}
+
+function getRoleAvatarById(id) {
+    const r = appData.roles.find(r => r.id === id);
+    return r ? (r.avatar || '') : '';
+}
+
+function showMessagePopup({ target, content, sender, type }) {
+    if (!document.hidden && currentChatType === 'role' && currentRoleId === target) return;
+    if (!document.hidden && currentChatType === 'group' && currentGroupId === target.replace('group_', '')) return;
+    const isGroup = String(target).startsWith('group_');
+    const groupId = isGroup ? target.replace('group_', '') : null;
+    const group = isGroup ? (appData.groups.find(g => g.id === groupId) || null) : null;
+    const name = isGroup ? (group ? group.name : '群聊') : getRoleNameById(target);
+    const avatar = isGroup ? (group && group.avatar ? group.avatar : '') : getRoleAvatarById(target);
+    const displayContent = (type === 'image') ? '[图片]' : content;
+    const stack = document.getElementById('msg-popup-stack');
+    const popup = document.createElement('div');
+    popup.className = 'msg-popup';
+    popup.innerHTML = `
+        ${avatar ? `<img class="msg-popup-avatar" src="${avatar}" onerror="this.outerHTML='<div class=&quot;msg-popup-avatar&quot;>${(name[0] || '?').replace(/"/g, '&quot;')}</div>'">` : `<div class="msg-popup-avatar">${(name[0] || '?').replace(/"/g, '&quot;')}</div>`}
+        <div class="msg-popup-body">
+            <div class="msg-popup-name">${escapeHtml(name)}</div>
+            <div class="msg-popup-content">${escapeHtml(displayContent)}</div>
+        </div>
+        <div class="msg-popup-time">${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</div>`;
+    popup.addEventListener('click', () => {
+        if (isGroup) { openGroupChat(groupId); }
+        else { openChat(target); }
+        closePopup(popup);
+    });
+    stack.appendChild(popup);
+    setTimeout(() => closePopup(popup), 6000);
+}
+
+function closePopup(popup) {
+    popup.classList.add('hiding');
+    setTimeout(() => { if (popup.parentNode) popup.parentNode.removeChild(popup); }, 300);
+}
 function clearUnread(target) { if (unreadCounts[target]) { delete unreadCounts[target]; saveUnreadCounts(); if (target.startsWith('group_')) renderGroupList(); else renderRoleList(); } }
 
 function updateDate() { const el = document.getElementById('current-date'); if (el) el.textContent = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }); }
@@ -9782,6 +11104,12 @@ function createMessageElement(sender, content, time, quote = null, type = 'text'
             badge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`;
             div.querySelector('.flex.flex-col.max-w-\\[70\\%\\]')?.appendChild(badge);
         }
+    }
+    const bubbleScope = isMe
+        ? (appData?.appearance?.bubble?.presetMine || 'none')
+        : (appData?.appearance?.bubble?.presetRole || 'none');
+    if (bubbleScope && bubbleScope !== 'none') {
+        div.setAttribute('data-bubble', bubbleScope);
     }
     return div;
 }
@@ -10610,6 +11938,7 @@ function switchAppearanceTab(tab) {
         document.getElementById('bubble-radius').value = tempAppearance.bubble.radius || 13;
         document.getElementById('bubble-shadow').value = tempAppearance.bubble.shadow || 1;
         updateBubblePreview();
+        renderBubblePresets();
         
         const textarea = document.getElementById('custom-bubble-css');
         const applyBtn = document.getElementById('apply-bubble-css');
@@ -11397,66 +12726,397 @@ function resetHistorySearch() {
     applyHistoryFilters();
 }
 
-function openFortune() { 
-    document.getElementById('modal-fortune').classList.remove('hidden'); 
-    drawFortune(); 
+let fortuneType = 'tarot';
+let fortuneDrawing = false;
+let fortuneQuestion = '';
+let fortuneLayout = 'three';
+
+function openFortune() {
+    document.getElementById('modal-fortune').classList.remove('hidden');
+    const ni = document.getElementById('fortune-note-input');
+    if (ni) ni.value = (appData.fortuneNotes && appData.fortuneNotes[formatDateStr(new Date())]) || '';
+    showFortunePage('select');
+    document.querySelectorAll('.fortune-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.type === fortuneType));
 }
+
+function saveFortuneNote() {
+    const v = (document.getElementById('fortune-note-input')?.value || '').trim();
+    if (!appData.fortuneNotes) appData.fortuneNotes = {};
+    appData.fortuneNotes[formatDateStr(new Date())] = v;
+    debouncedSaveData();
+    showToast(v ? '已保存今日解读' : '已清空今日解读');
+}
+
 function closeFortune() { document.getElementById('modal-fortune').classList.add('hidden'); }
 
-function drawFortune() {
-    const type = Math.random() < 0.5 ? 'tarot' : 'lenormand';
-    const resultDiv = document.getElementById('fortune-text');
-    
-    if (type === 'tarot') {
-        const shuffled = [...TAROT_CARDS].sort(() => Math.random() - 0.5);
-        const cards = shuffled.slice(0, 3);
-        const positions = ['过去', '现在', '未来'];
-        const isReversed = cards.map(() => Math.random() < 0.3);
-        
-        resultDiv.innerHTML = `
-            <div class="tarot-reading" style="text-align:left; font-size:13px; line-height:1.6;">
-                <div class="tarot-title" style="font-size:18px; font-weight:700; text-align:center; margin-bottom:12px; color:var(--accent-color);">🔮 塔罗占卜</div>
-                <div class="tarot-cards" style="display:flex; flex-direction:column; gap:10px;">
-                    ${cards.map((card, i) => `
-                        <div class="tarot-card" style="background:#f8f9fa; border-radius:12px; padding:10px 14px; border-left:4px solid ${isReversed[i] ? '#e74c3c' : 'var(--accent-color)'};">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span style="font-weight:700; font-size:15px;">${card.name}</span>
-                                <span style="font-size:11px; color:#999;">${positions[i]}</span>
-                            </div>
-                            <div style="font-size:12px; color:#666; margin-top:2px;">
-                                ${isReversed[i] ? '⬇️ 逆位：' : '⬆️ 正位：'}
-                                ${isReversed[i] ? card.reverse : card.meaning}
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-                <div style="text-align:center; font-size:11px; color:#aaa; margin-top:12px;">✦ 点击抽签可重新占卜 ✦</div>
-            </div>
-        `;
+function showFortunePage(page) {
+    document.getElementById('fortune-select-page').classList.toggle('hidden', page !== 'select');
+    document.getElementById('fortune-result-page').classList.toggle('hidden', page !== 'result');
+    document.getElementById('fortune-history-page').classList.toggle('hidden', page !== 'history');
+}
+
+function setFortuneLayout(layout) {
+    fortuneLayout = layout;
+    document.querySelectorAll('.fortune-layout-btn').forEach(b => b.classList.toggle('active', b.dataset.layout === layout));
+}
+
+function switchFortuneSub(btn) {
+    document.querySelectorAll('.fortune-subtab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
+
+function switchFortuneTab(type) {
+    fortuneType = type;
+    document.querySelectorAll('.fortune-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.type === type));
+    if (type === 'history') {
+        showFortunePage('history');
+        renderFortuneHistory();
     } else {
-        const shuffled = [...LENORMAND_CARDS].sort(() => Math.random() - 0.5);
-        const cards = shuffled.slice(0, 3);
-        
-        resultDiv.innerHTML = `
-            <div class="lenormand-reading" style="text-align:left; font-size:13px; line-height:1.6;">
-                <div class="lenormand-title" style="font-size:18px; font-weight:700; text-align:center; margin-bottom:12px; color:var(--accent-color);">🃏 雷诺曼占卜</div>
-                <div class="lenormand-cards" style="display:flex; flex-direction:column; gap:10px;">
-                    ${cards.map((card, i) => `
-                        <div class="lenormand-card" style="background:#f8f9fa; border-radius:12px; padding:10px 14px; border-left:4px solid var(--accent-color);">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span style="font-weight:700; font-size:15px;">${card.id}. ${card.name}</span>
-                            </div>
-                            <div style="font-size:12px; color:#666; margin-top:2px;">${card.meaning}</div>
-                        </div>
-                    `).join('')}
-                </div>
-                <div style="text-align:center; font-size:12px; color:#666; margin-top:12px; padding:8px; background:#f0f0f0; border-radius:8px;">
-                    📖 组合解读：${cards.map(c => c.name).join(' → ')}
-                </div>
-                <div style="text-align:center; font-size:11px; color:#aaa; margin-top:8px;">✦ 点击抽签可重新占卜 ✦</div>
-            </div>
-        `;
+        showFortunePage('select');
     }
+}
+
+function drawFortune() {
+    if (fortuneDrawing) return;
+    fortuneQuestion = (document.getElementById('fortune-question')?.value || '').trim();
+    fortuneDrawing = true;
+    const body = document.getElementById('fortune-body');
+    const type = fortuneType;
+    const layout = fortuneLayout;
+    const now = new Date();
+    const dateStr = `${now.getMonth() + 1}月${now.getDate()}日`;
+    document.getElementById('fortune-result-title-text').textContent = `${dateStr} · ${layout === 'single' ? '单张指引' : '三牌展开'}`;
+    showFortunePage('result');
+    body.innerHTML = `<div class="fortune-loading">✨ 洗牌中…</div>`;
+    setTimeout(() => {
+        fortuneDrawing = false;
+        if (type === 'tarot') renderTarot(body, layout);
+        else if (type === 'lenormand') renderLenormand(body, layout);
+        else renderLeizu(body);
+    }, 900 + Math.random() * 500);
+}
+
+function flipFortuneCard(flipEl) { flipEl.classList.add('flipped'); }
+
+function fortuneSlotHtml(card, label, roman, symbol, position, reversed, isLenormand) {
+    const desc = reversed ? card.reverse : card.meaning;
+    const nameText = isLenormand ? `${card.id}. ${card.name}` : card.name;
+    const posText = isLenormand ? position : (reversed ? '逆位' : '正位');
+    const top = isLenormand
+        ? `<div class="fcard-top">🃏</div>`
+        : `<div class="fcard-top">${symbol || '✦'}<span class="fcard-roman">${roman || ''}</span></div>`;
+    return `
+        <div class="fortune-card-slot">
+            <div class="fortune-card-label">${label}</div>
+            <div class="fortune-flip" onclick="flipFortuneCard(this)">
+                <div class="fortune-card-inner">
+                    <div class="fortune-card-face fortune-card-back">
+                        <span class="fcb-moon">☾</span>
+                        <span class="fcb-stars">✦ ✦ ✦</span>
+                    </div>
+                    <div class="fortune-card-face fortune-card-front">
+                        ${top}
+                        <div class="fcard-name">${nameText}</div>
+                        <div class="fcard-pos">${posText}</div>
+                        <div class="fcard-desc">${desc}</div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+}
+
+function renderTarot(body, layout) {
+    const count = layout === 'single' ? 1 : 3;
+    const shuffled = [...TAROT_CARDS].sort(() => Math.random() - 0.5);
+    const cards = shuffled.slice(0, count);
+    const positions = layout === 'single' ? ['今日指引'] : ['过去 · 根源', '现在 · 核心', '未来 · 启示'];
+    const isReversed = cards.map(() => Math.random() < 0.3);
+    const romanMap = ['0', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX', 'XXI'];
+    const symbols = ['0', '∞', '✦', '☾', '♛', '♜', '☨', '⚝', '♞', '☍', '☼', '⚖', '☯', '☿', '⚗', '☠', '⚡', '☄', '♈', '♉', '♊', '♋'];
+    let html = fortuneQuestion ? `<div class="fortune-q">🔮 占卜问题：${escapeHtml(fortuneQuestion)}</div>` : '';
+    html += `<div class="fortune-deck">`;
+    cards.forEach((card, i) => {
+        html += fortuneSlotHtml(card, positions[i], romanMap[card.id] || card.id, symbols[card.id] || '✦', positions[i], isReversed[i], false);
+    });
+    html += `</div>`;
+    body.innerHTML = html;
+    addFortuneRecord('塔罗', cards.map((c, i) => `${positions[i].split('·')[0].trim()}·${c.name}（${isReversed[i] ? '逆' : '正'}）`).join(' / '));
+}
+
+function renderLenormand(body, layout) {
+    const count = layout === 'single' ? 1 : 3;
+    const shuffled = [...LENORMAND_CARDS].sort(() => Math.random() - 0.5);
+    const cards = shuffled.slice(0, count);
+    const positions = layout === 'single' ? ['今日指引'] : ['过去 · 根源', '现在 · 核心', '未来 · 启示'];
+    let html = fortuneQuestion ? `<div class="fortune-q">🔮 占卜问题：${escapeHtml(fortuneQuestion)}</div>` : '';
+    html += `<div class="fortune-deck">`;
+    cards.forEach((card, i) => {
+        html += fortuneSlotHtml(card, positions[i], '', '', positions[i], false, true);
+    });
+    html += `</div>`;
+    body.innerHTML = html;
+    addFortuneRecord('雷诺曼', cards.map(c => `${c.id}.${c.name}`).join(' / '));
+}
+
+function renderLeizu(body) {
+    const stick = LEIZU_STICKS[Math.floor(Math.random() * LEIZU_STICKS.length)];
+    const isGood = stick.fortune.includes('上');
+    const isBad = stick.fortune.includes('下');
+    const cls = isGood ? 'fc-fortune-good' : (isBad ? 'fc-fortune-bad' : 'fc-fortune-mid');
+    body.innerHTML = (fortuneQuestion ? `<div class="fortune-q">🔮 占卜问题：${escapeHtml(fortuneQuestion)}</div>` : '') + `
+        <div class="fortune-card-item ${cls}">
+            <div class="fc-head">
+                <span class="fc-name">⚡ 第${stick.id}签 · ${stick.name}</span>
+                <span class="fc-pos">${stick.fortune}</span>
+            </div>
+            <div class="fc-verse">"${stick.verse}"</div>
+            <div class="fc-meaning" style="margin-top:6px;">${stick.meaning}</div>
+        </div>
+        <div class="fortune-hint" style="margin-top:4px;">雷祖威灵，签示吉凶，心诚则灵</div>`;
+    addFortuneRecord('雷祖圣签', `第${stick.id}签·${stick.name}（${stick.fortune}）`);
+}
+
+// --- 占卜历史记录（保留30天，最多100条） ---
+function getFortuneHistory() {
+    if (!appData.fortuneHistory) appData.fortuneHistory = [];
+    return appData.fortuneHistory;
+}
+
+function addFortuneRecord(type, summary) {
+    const list = getFortuneHistory();
+    list.push({ type, summary, question: fortuneQuestion || '', time: Date.now() });
+    const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    appData.fortuneHistory = list.filter(r => r.time >= cutoff).slice(-100);
+    debouncedSaveData();
+    renderFortuneHistory();
+}
+
+function renderFortuneHistory() {
+    const listEl = document.getElementById('fortune-history-list');
+    if (!listEl) return;
+    const list = getFortuneHistory();
+    if (list.length === 0) {
+        listEl.innerHTML = '<div class="fortune-history-empty">暂无占卜记录</div>';
+        return;
+    }
+    listEl.innerHTML = [...list].reverse().map(r => `
+        <div class="fortune-history-item">
+            <span class="fh-info">${new Date(r.time).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}${r.question ? '【' + escapeHtml(r.question) + '】' : ''}　${escapeHtml(r.summary)}</span>
+            <span class="fh-type">${r.type}</span>
+        </div>`).join('');
+}
+
+function clearFortuneHistory() {
+    showConfirm('确定清空全部占卜记录吗？', () => {
+        appData.fortuneHistory = [];
+        debouncedSaveData();
+        renderFortuneHistory();
+        showToast('已清空');
+    });
+}
+// --- 经期记录 ---
+function getPeriodRecords() {
+    if (!appData.periodRecords) appData.periodRecords = [];
+    return appData.periodRecords;
+}
+
+function parseDateStr(s) {
+    const p = String(s).split('-').map(Number);
+    return new Date(p[0], p[1] - 1, p[2]);
+}
+
+function formatDateStr(d) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function addDays(d, n) {
+    const r = new Date(d);
+    r.setDate(r.getDate() + n);
+    return r;
+}
+
+function diffDays(a, b) {
+    const t = new Date(a); t.setHours(0, 0, 0, 0);
+    const f = new Date(b); f.setHours(0, 0, 0, 0);
+    return Math.round((f - t) / 86400000);
+}
+
+function periodAnalysis() {
+    const records = [...getPeriodRecords()].sort((a, b) => a.start < b.start ? 1 : -1);
+    const last = records[0] || null;
+    let avgCycle = 28;
+    if (records.length >= 2) {
+        const gaps = [];
+        for (let i = 0; i < records.length - 1; i++) {
+            const g = diffDays(parseDateStr(records[i + 1].start), parseDateStr(records[i].start));
+            if (g >= 20 && g <= 45) gaps.push(g);
+        }
+        if (gaps.length > 0) avgCycle = Math.round(gaps.reduce((a, b) => a + b, 0) / gaps.length);
+    }
+    return { records, last, avgCycle };
+}
+
+let periodCursor = null;
+
+function openPeriodTracker() {
+    periodCursor = null;
+    pageHistory.push('advanced');
+    document.getElementById('modal-settings-advanced').classList.add('hidden');
+    document.getElementById('modal-period').classList.remove('hidden');
+    renderPeriodTracker();
+}
+
+function closePeriodTracker() {
+    document.getElementById('modal-period').classList.add('hidden');
+    if (pageHistory.pop() === 'advanced') document.getElementById('modal-settings-advanced').classList.remove('hidden');
+}
+
+function renderPeriodTracker() {
+    const { records, last, avgCycle } = periodAnalysis();
+    const summary = document.getElementById('period-summary');
+    const grid = document.getElementById('period-cal-grid');
+    const title = document.getElementById('period-cal-title');
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const nowY = today.getFullYear(), nowM = today.getMonth();
+
+    if (!periodCursor) periodCursor = { y: nowY, m: nowM };
+
+    if (!last) {
+        summary.innerHTML = `<div class="period-summary-item" style="grid-column:1/-1;"><div class="period-summary-num">—</div><div class="period-summary-label">暂无记录，点击下方按钮记录本次经期</div></div>`;
+    } else {
+        const lastStart = parseDateStr(last.start);
+        const lastEnd = last.end ? parseDateStr(last.end) : null;
+        const periodDays = lastEnd ? (diffDays(lastStart, lastEnd) + 1) : null;
+        const nextStart = addDays(lastStart, avgCycle);
+        const daysToNext = diffDays(today, nextStart);
+        const daysSinceStart = diffDays(lastStart, today);
+
+        let state = 'period-mid';
+        let stateLabel = '预测安全期';
+        if (daysSinceStart >= 0 && daysSinceStart <= (periodDays || 5)) { state = 'period-ing'; stateLabel = '预计经期中'; }
+        else if (daysToNext >= 0 && daysToNext <= 7) { state = 'period-near'; stateLabel = '即将来潮'; }
+
+        summary.innerHTML = `
+            <div class="period-summary-item" style="border:1.5px solid ${state === 'period-ing' ? '#ff4d88' : state === 'period-near' ? '#ff9e5e' : 'rgba(255,255,255,0.9)'};">
+                <div class="period-summary-num" style="font-size:13px; line-height:1.5;">${stateLabel}</div>
+            </div>
+            <div class="period-summary-item">
+                <div class="period-summary-num">${daysToNext >= 0 ? daysToNext : Math.abs(daysToNext)}<small style="font-size:11px;">天</small></div>
+                <div class="period-summary-label">${daysToNext >= 0 ? '距下次预计' : '已逾期'}</div>
+            </div>
+            <div class="period-summary-item">
+                <div class="period-summary-num">${avgCycle}<small style="font-size:11px;">天</small></div>
+                <div class="period-summary-label">平均周期</div>
+            </div>
+            <div class="period-summary-item" style="grid-column:1/-1; padding:10px;">
+                <div class="period-summary-label" style="font-size:12px;">下次预计：${formatDateStr(nextStart)}　安全期：${formatDateStr(addDays(lastEnd || lastStart, (periodDays || 5) + 1))} ~ ${formatDateStr(addDays(nextStart, -8))}</div>
+            </div>`;
+    }
+
+    const y = periodCursor.y, m = periodCursor.m;
+    title.textContent = `${m + 1}月 · ${y === nowY ? '今年' : y + '年'}`;
+
+    const periodSet = {};
+    records.forEach(r => {
+        let d = parseDateStr(r.start);
+        const e = r.end ? parseDateStr(r.end) : d;
+        while (d <= e) {
+            const key = formatDateStr(d);
+            if (!periodSet[key]) periodSet[key] = r;
+            d = addDays(d, 1);
+        }
+    });
+
+    const predSet = {};
+    if (last) {
+        const lastStart = parseDateStr(last.start);
+        const lastEnd = last.end ? parseDateStr(last.end) : null;
+        const periodDays = lastEnd ? (diffDays(lastStart, lastEnd) + 1) : 5;
+        for (let k = 1; k <= 6; k++) {
+            const s = addDays(lastStart, avgCycle * k);
+            for (let i = 0; i < periodDays; i++) predSet[formatDateStr(addDays(s, i))] = true;
+        }
+    }
+
+    const firstDay = new Date(y, m, 1);
+    const daysInMonth = new Date(y, m + 1, 0).getDate();
+    const lead = firstDay.getDay();
+    let cells = '';
+    for (let i = 0; i < lead; i++) cells += `<div class="period-cal-cell blank"></div>`;
+    for (let day = 1; day <= daysInMonth; day++) {
+        const d = new Date(y, m, day);
+        const key = formatDateStr(d);
+        const isToday = (y === nowY && m === nowM && day === today.getDate());
+        const rec = periodSet[key];
+        const isPeriod = !!rec;
+        const isPred = !isPeriod && !!predSet[key];
+        let inner = '';
+        if (isToday) {
+            inner = `<span class="cal-today-ring">${day}</span><span class="cal-today-tag">今天</span>`;
+        } else if (isPeriod) {
+            inner = `<span class="cal-ring cal-ring-period" title="经期 ${rec.start}${rec.end ? ' ~ ' + rec.end : ''}" onclick="deletePeriodByDate('${key}')">${day}</span>`;
+        } else if (isPred) {
+            inner = `<span class="cal-ring cal-ring-pred">${day}</span>`;
+        } else {
+            inner = `<span class="cal-day-num">${day}</span>`;
+        }
+        cells += `<div class="period-cal-cell ${isToday ? 'today' : ''}">${inner}</div>`;
+    }
+    grid.innerHTML = cells;
+}
+
+function shiftPeriodMonth(delta) {
+    if (!periodCursor) { const now = new Date(); periodCursor = { y: now.getFullYear(), m: now.getMonth() }; }
+    const d = new Date(periodCursor.y, periodCursor.m + delta, 1);
+    periodCursor = { y: d.getFullYear(), m: d.getMonth() };
+    renderPeriodTracker();
+}
+
+function deletePeriodByDate(key) {
+    const rec = getPeriodRecords().find(r => r.start <= key && (!r.end || r.end >= key));
+    if (!rec) return;
+    showConfirm(`删除 ${rec.start}${rec.end ? ' ~ ' + rec.end : ''} 这条经期记录？`, async () => {
+        appData.periodRecords = getPeriodRecords().filter(x => x.id !== rec.id);
+        await saveData();
+        renderPeriodTracker();
+        showToast('已删除');
+    });
+}
+
+function openPeriodEditor() {
+    const today = formatDateStr(new Date());
+    document.getElementById('period-start').value = today;
+    document.getElementById('period-end').value = today;
+    document.getElementById('modal-period-editor').classList.remove('hidden');
+}
+
+function closePeriodEditor() {
+    document.getElementById('modal-period-editor').classList.add('hidden');
+}
+
+async function savePeriodRecord() {
+    const start = document.getElementById('period-start').value;
+    const end = document.getElementById('period-end').value;
+    if (!start) { showToast('请选择开始日期'); return; }
+    if (end && end < start) { showToast('结束日期不能早于开始日期'); return; }
+    const records = getPeriodRecords();
+    const existing = records.find(r => r.start === start);
+    if (existing) existing.end = end || '';
+    else records.push({ id: Date.now().toString(), start, end: end || '' });
+    appData.periodRecords = records;
+    await saveData();
+    closePeriodEditor();
+    renderPeriodTracker();
+    showToast('已保存');
+}
+
+function deletePeriodRecord(id) {
+    showConfirm('确定删除这条记录吗？', async () => {
+        appData.periodRecords = getPeriodRecords().filter(r => r.id !== id);
+        await saveData();
+        renderPeriodTracker();
+        showToast('已删除');
+    });
 }
 
 // --- 重要日 ---
@@ -13910,7 +15570,13 @@ window.triggerMomentCheck = function() {
     if (!appData.settings.moment?.enabled) { showToast('朋友圈自动功能未启用'); return; }
     const now = new Date();
     const today = now.toDateString();
-    appData.roles.forEach(role => {
+    if (appData.momentDailyKey !== today) {
+        appData.momentDailyKey = today;
+        appData.momentDailyCount = 0;
+    }
+    const globalMax = appData.settings.moment.globalMaxPerDay ?? Math.max(1, Math.min(3, Math.ceil(appData.roles.length / 2)));
+    if (appData.momentDailyCount >= globalMax) { showToast('今日朋友圈动态已达上限'); return; }
+    for (const role of appData.roles) {
         if (!role.lastMomentDate || role.lastMomentDate !== today) {
             role.todayMomentCount = 0;
             role.lastMomentDate = today;
@@ -13919,9 +15585,11 @@ window.triggerMomentCheck = function() {
             const checkProb = (appData.settings.moment.probability || 15) / 48;
             if (Math.random() * 100 < checkProb * 10) {
                 generateAutoMoment(role);
+                appData.momentDailyCount = (appData.momentDailyCount || 0) + 1;
+                if (appData.momentDailyCount >= globalMax) break;
             }
         }
-    });
+    }
     const threeDaysAgo = Date.now() - 3 * 24 * 60 * 60 * 1000;
     const recentMoments = appData.moments.filter(m => m.time > threeDaysAgo);
     recentMoments.forEach(moment => {
@@ -14099,7 +15767,7 @@ function renderMomentPhotosGrid() {
         const div = document.createElement('div');
         div.className = 'moment-photo-item';
         div.style.position = 'relative';
-        div.innerHTML = `<img src="${src}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;"><button style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.5);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;" onclick="event.stopPropagation(); deleteMomentPhoto(${i})">✖️</button>`;
+        div.innerHTML = `<img src="${src}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;"><button style="position:absolute;top:2px;right:2px;background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(0,0,0,0.55));color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;" onclick="event.stopPropagation(); deleteMomentPhoto(${i})">✖️</button>`;
         grid.appendChild(div);
     });
 }
@@ -14311,78 +15979,88 @@ function unlockAudioOnce() { ensureAudioContext(); document.removeEventListener(
 window.addEventListener('DOMContentLoaded', startSplashAnimation);
 function startSplashAnimation() { 
     updateDate();
-    const quotes = ["遇见你，是所有故事的开始","我携满天星辰以赠你，仍觉星辰不及你","心若有所向，何惧道阻且长","温柔是宝藏，你也是","世间万物，皆不如你","目光所及，全都是你"]; 
-    const quoteText = document.getElementById("quoteText"), progressBar = document.getElementById("progressBar"), statusText = document.getElementById("statusText"); 
+    const quotes = [
+        "遇见你，是所有故事的开始",
+        "我携满天星辰以赠你，仍觉星辰不及你",
+        "心若有所向，何惧道阻且长",
+        "温柔是宝藏，你也是",
+        "世间万物，皆不如你",
+        "目光所及，全都是你",
+        "在浩瀚星海里，你是我的坐标",
+        "云落星河，我落你心间",
+        "宇宙山河浪漫，生活点滴温暖",
+        "绕过星河与山海，只想奔向你",
+        "你是藏在星轨里的温柔答案",
+        "把所有的星光都收集给你",
+        "愿我们的故事，比星辰更长久",
+        "今夜月色很好，想你也在看同一个月亮"
+    ];
+    const quoteText = document.getElementById("quoteText"); 
     const loadingCard = document.getElementById("loadingCard"), splashScreen = document.getElementById("splash-screen"); 
-    let idx = 0, progress = 0; 
-    document.getElementById("titleText").innerHTML = 'Spiritual connection'.split('').map((c,i) => `<span style="animation-delay:${i*0.08}s">${c}</span>`).join(''); 
+    document.getElementById("titleText").innerHTML = 'Spiritual connection'.split('').map((c,i) => `<span style="animation-delay:${i*0.04}s">${c}</span>`).join(''); 
     
     const starsContainer = document.getElementById("starsContainer");
     if (starsContainer) {
         starsContainer.innerHTML = '';
-        for (let i = 0; i < 80; i++) {
+        for (let i = 0; i < 120; i++) {
             const star = document.createElement('div');
-            star.className = 'star';
-            const size = 1.5 + Math.random() * 2.5;
-            const duration = 3 + Math.random() * 4;
-            const delay = Math.random() * 5;
-            star.style.left = Math.random() * 100 + '%';
-            star.style.top = Math.random() * 100 + '%';
+            const size = 1.2 + Math.random() * 2.6;
+            const duration = 2.5 + Math.random() * 3.5;
+            const delay = Math.random() * 4;
+            let x, y;
+            if (i < 84) { x = 50 + Math.random() * 50; y = Math.random() * 42; }
+            else { x = Math.random() * 100; y = Math.random() * 100; }
+            star.className = (i % 5 === 0) ? 'star-static' : 'star';
+            star.style.left = x + '%';
+            star.style.top = y + '%';
             star.style.width = size + 'px';
             star.style.height = size + 'px';
+            star.style.opacity = (0.25 + Math.random() * 0.6).toFixed(2);
             star.style.animationDuration = duration + 's';
             star.style.animationDelay = delay + 's';
             starsContainer.appendChild(star);
         }
     }
     
-    function showQuote() { 
-        quoteText.innerHTML = ""; 
-        const text = quotes[idx++ % quotes.length]; 
-        text.split('').forEach((c, i) => { 
-            let s = document.createElement("span"); 
-            s.textContent = c; 
-            s.style.animationDelay = `${i * 0.07}s`; 
-            void s.offsetWidth;
-            quoteText.appendChild(s); 
-        }); 
-    } 
-    
-    setTimeout(() => loadingCard.classList.add("visible"), 300); 
-    showQuote(); 
-    const quoteInterval = setInterval(showQuote, 3200); 
-    
-    function updateProgress() {
-        progress += Math.random() * 1.5 + 0.5; 
-        if (progress >= 100) {
-            progress = 100;
-            progressBar.style.width = progress + "%";
-            void progressBar.offsetWidth;
-            statusText.textContent = "连接成功"; 
-            clearInterval(timer); 
-            clearInterval(quoteInterval);
-            setTimeout(() => { 
-                splashScreen.classList.add("hidden"); 
-                loadData(); 
-                setupCSSVariableMonitor();
-                initStickySystem();
-                initNewFeatures();
-            }, 1000); 
-            return;
-        }
-        progressBar.style.width = progress + "%";
-        void progressBar.offsetWidth;
-        statusText.textContent = "正在连接中..."; 
+    // 随机抽取若干条宣言轮播（不重复），切换带淡入淡出
+    const pool = [...quotes].sort(() => Math.random() - 0.5);
+    let quotePos = 0;
+    function showQuote() {
+        quoteText.classList.add("fading");
+        setTimeout(() => {
+            quoteText.innerHTML = "";
+            const text = pool[quotePos++ % pool.length];
+            text.split('').forEach((c, i) => {
+                let s = document.createElement("span");
+                s.textContent = c;
+                s.style.animationDelay = `${i * 0.045}s`;
+                void s.offsetWidth;
+                quoteText.appendChild(s);
+            });
+            quoteText.classList.remove("fading");
+        }, 400);
     }
     
-    const timer = setInterval(updateProgress, 100); 
+    setTimeout(() => loadingCard.classList.add("visible"), 200);
+    showQuote();
+    const quoteInterval = setInterval(showQuote, 2600);
 }
+
+function enterMain() {
+    const splashScreen = document.getElementById("splash-screen");
+    if (splashScreen) splashScreen.classList.add("hidden");
+    loadData();
+    setupCSSVariableMonitor();
+    initStickySystem();
+    initNewFeatures();
+}
+window.enterMain = enterMain;
 function getSolarTerm(date) { const y = date.getFullYear(), m = date.getMonth() + 1, d = date.getDate(); const terms = [{ name: '小寒', emoji: '❄️', month: 1, day: 5 },{ name: '大寒', emoji: '🧊', month: 1, day: 20 },{ name: '立春', emoji: '🌱', month: 2, day: 4 },{ name: '雨水', emoji: '💧', month: 2, day: 19 },{ name: '惊蛰', emoji: '🐛', month: 3, day: 5 },{ name: '春分', emoji: '🌿', month: 3, day: 20 },{ name: '清明', emoji: '🍃', month: 4, day: 4 },{ name: '谷雨', emoji: '🌧️', month: 4, day: 20 },{ name: '立夏', emoji: '☀️', month: 5, day: 5 },{ name: '小满', emoji: '🌾', month: 5, day: 21 },{ name: '芒种', emoji: '🌾', month: 6, day: 5 },{ name: '夏至', emoji: '☀️', month: 6, day: 21 },{ name: '小暑', emoji: '🔥', month: 7, day: 7 },{ name: '大暑', emoji: '🔥', month: 7, day: 22 },{ name: '立秋', emoji: '🍂', month: 8, day: 7 },{ name: '处暑', emoji: '🍂', month: 8, day: 23 },{ name: '白露', emoji: '💧', month: 9, day: 7 },{ name: '秋分', emoji: '🍂', month: 9, day: 23 },{ name: '寒露', emoji: '💧', month: 10, day: 8 },{ name: '霜降', emoji: '❄️', month: 10, day: 23 },{ name: '立冬', emoji: '❄️', month: 11, day: 7 },{ name: '小雪', emoji: '❄️', month: 11, day: 22 },{ name: '大雪', emoji: '❄️', month: 12, day: 7 },{ name: '冬至', emoji: '🧊', month: 12, day: 21 }]; for (let t of terms) { if (t.month === m && t.day === d) return { name: t.name, emoji: t.emoji, greeting: `${t.name}快乐`, eng: t.name.toUpperCase() }; } return null; }
 function getFestivalGreeting(date) { const solarHolidays = { '1,1': '元旦快乐', '2,14': '情人节快乐', '3,8': '女神节快乐', '4,1': '愚人节快乐', '5,1': '劳动节快乐', '6,1': '儿童节快乐', '10,1': '国庆快乐', '12,25': '圣诞快乐' }; return solarHolidays[`${date.getMonth()+1},${date.getDate()}`] || null; }
 function getRandomEngGreeting() { return ['GOOD MORNING', 'GOOD AFTERNOON', 'GOOD EVENING', 'HELLO THERE', 'NICE DAY', 'BE HAPPY'][Math.floor(Math.random()*6)]; }
 function getRandomCnCompliment() { return ['今天也要开心哦', '你值得所有美好', '又是喜欢你的一天', '全世界你最可爱', '你笑起来真好看', '今天也要加油鸭', '元气满满', '愿你被世界温柔以待'][Math.floor(Math.random()*8)]; }
 function getRandomLoveQuotes(count = 4) { const allWords = getActiveWordList(); if (!allWords.length) return ['贴贴', '爱你', '在干嘛？', '想你了']; return [...new Set([...allWords].sort(() => Math.random() - 0.5))].slice(0, count); }
-function refreshLovePanel() { const now = Date.now(), role = appData.roles.find(r => r.id === currentRoleId); if (!role) return; if (!role.lastLoveRefresh || (now - role.lastLoveRefresh) > 12*60*60*1000 || !role.currentLoveState) { const today = new Date(), dateStr = today.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }), solarTerm = getSolarTerm(today), festival = getFestivalGreeting(today); let headerEng, headerCn, seasonEmoji; if (solarTerm) { seasonEmoji = solarTerm.emoji; headerEng = solarTerm.eng; headerCn = solarTerm.greeting; } else if (festival) { seasonEmoji = '🎉'; headerEng = festival.toUpperCase().replace(/快乐/g, ''); headerCn = festival; } else { seasonEmoji = today.getMonth()<2?'❄️':(today.getMonth()<5?'🌸':(today.getMonth()<8?'☀️':(today.getMonth()<11?'🍂':'❄️'))); headerEng = getRandomEngGreeting(); headerCn = getRandomCnCompliment(); } const mood = appData.wordbanks.moods[Math.floor(Math.random()*appData.wordbanks.moods.length)] || '开心', moodEmojis = { '开心': '😊', '难过': '😢', '生气': '😠', '平淡': '😐', '兴奋': '🤩', '疲惫': '😫', '期待': '🤗', '害羞': '😳' }, quotes = getRandomLoveQuotes(3+Math.floor(Math.random()*3)); role.currentLoveState = { dateStr, seasonEmoji, headerEng, headerCn, mood, moodEmoji: moodEmojis[mood]||'😊', weather: appData.wordbanks.weathers[Math.floor(Math.random()*appData.wordbanks.weathers.length)]||'晴朗', status: appData.wordbanks.moods[Math.floor(Math.random()*appData.wordbanks.moods.length)]||'一切都好', quotes, footerQuote: appData.wordbanks.quotes[Math.floor(Math.random()*appData.wordbanks.quotes.length)]||'每一天都因为有你而特别 ✨' }; role.lastLoveRefresh = now; debouncedSaveData(); } const s = role.currentLoveState; document.getElementById('love-header-date').textContent = s.dateStr; document.getElementById('season-emoji').textContent = s.seasonEmoji; document.getElementById('love-header-eng').textContent = s.headerEng; document.getElementById('love-header-cn').textContent = s.headerCn; document.getElementById('love-mood-emoji').textContent = s.moodEmoji; document.getElementById('love-mood-name').textContent = s.mood; document.getElementById('love-weather').textContent = s.weather; document.getElementById('love-status').textContent = s.status; document.getElementById('love-quote-list').innerHTML = s.quotes.map(q => `<div class="love-quote-item">${escapeHtml(q)}</div>`).join(''); document.getElementById('love-footer-quote').textContent = s.footerQuote; }
+function refreshLovePanel() { const now = Date.now(), role = appData.roles.find(r => r.id === currentRoleId); if (!role) return; if (!role.lastLoveRefresh || (now - role.lastLoveRefresh) > 12*60*60*1000 || !role.currentLoveState) { const today = new Date(), dateStr = today.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }), solarTerm = getSolarTerm(today), festival = getFestivalGreeting(today); let headerEng, headerCn, seasonEmoji; if (solarTerm) { seasonEmoji = solarTerm.emoji; headerEng = solarTerm.eng; headerCn = solarTerm.greeting; } else if (festival) { seasonEmoji = '🎉'; headerEng = festival.toUpperCase().replace(/快乐/g, ''); headerCn = festival; } else { seasonEmoji = today.getMonth()<2?'❄️':(today.getMonth()<5?'🌸':(today.getMonth()<8?'☀️':(today.getMonth()<11?'🍂':'❄️'))); headerEng = getRandomEngGreeting(); headerCn = getRandomCnCompliment(); } const quotes = getRandomLoveQuotes(3+Math.floor(Math.random()*3)); role.currentLoveState = { dateStr, seasonEmoji, headerEng, headerCn, weather: appData.wordbanks.weathers[Math.floor(Math.random()*appData.wordbanks.weathers.length)]||'晴朗', status: appData.wordbanks.moods[Math.floor(Math.random()*appData.wordbanks.moods.length)]||'一切都好', quotes, footerQuote: appData.wordbanks.quotes[Math.floor(Math.random()*appData.wordbanks.quotes.length)]||'每一天都因为有你而特别 ✨' }; role.lastLoveRefresh = now; debouncedSaveData(); } const s = role.currentLoveState; document.getElementById('love-header-date').textContent = s.dateStr; document.getElementById('season-emoji').textContent = s.seasonEmoji; document.getElementById('love-header-eng').textContent = s.headerEng; document.getElementById('love-header-cn').textContent = s.headerCn; document.getElementById('love-weather').textContent = s.weather; document.getElementById('love-status').textContent = s.status; document.getElementById('love-quote-list').innerHTML = s.quotes.map(q => `<div class="love-quote-item">${escapeHtml(q)}</div>`).join(''); document.getElementById('love-footer-quote').textContent = s.footerQuote; }
 function toggleLovePanel() { const m = document.getElementById('modal-love-panel'); if (m.classList.contains('hidden')) { if (currentRoleId) refreshLovePanel(); else if (appData.roles.length>0) { currentRoleId = appData.roles[0].id; refreshLovePanel(); } m.classList.remove('hidden'); } else m.classList.add('hidden'); }
 window.toggleLovePanel = toggleLovePanel;
 window.addEventListener('beforeunload', function() {
@@ -14538,6 +16216,55 @@ window.exportChatHistory = exportChatHistory;
 window.importChatHistory = importChatHistory;
 
 // ========== 增强版 applyCustomBubbleCss ==========
+function applyBubblePresetCss() {
+    const styleId = 'bubble-preset-style';
+    let tag = document.getElementById(styleId);
+    if (!tag) {
+        tag = document.createElement('style');
+        tag.id = styleId;
+        document.head.appendChild(tag);
+    }
+    tag.textContent = BUBBLE_PRESETS.map(p => p.received + '\n' + p.sent).join('\n');
+    document.head.appendChild(tag);
+}
+
+function renderBubblePresets() {
+    const roleGrid = document.getElementById('bubble-preset-role');
+    const mineGrid = document.getElementById('bubble-preset-mine');
+    if (!roleGrid || !mineGrid) return;
+    const buildItem = (p, side) => {
+        const key = side === 'role' ? 'presetRole' : 'presetMine';
+        const current = appData?.appearance?.bubble?.[key] || 'none';
+        const active = current === p.id;
+        const bubbleClass = side === 'role' ? 'message-received' : 'message-sent';
+        const scope = p.id === 'none' ? '' : ` data-bubble="${p.id}"`;
+        return `<div class="bubble-preset-item ${active ? 'active' : ''}" onclick="selectBubblePreset('${side}','${p.id}')">
+            <div class="bubble-preset-preview"${scope}><div class="${bubbleClass}" style="max-width:92%;padding:8px 12px;font-size:12px;border-radius:10px;">风 月</div></div>
+            <div class="bubble-preset-name">${p.name}</div>
+        </div>`;
+    };
+    const items = [{ id: 'none', name: '默认' }, ...BUBBLE_PRESETS];
+    roleGrid.innerHTML = items.map(p => buildItem(p, 'role')).join('');
+    mineGrid.innerHTML = items.map(p => buildItem(p, 'mine')).join('');
+    applyBubblePresetCss();
+}
+
+function selectBubblePreset(side, id) {
+    if (!appData.appearance) appData.appearance = {};
+    if (!appData.appearance.bubble) appData.appearance.bubble = { radius: 13, shadow: 1 };
+    const key = side === 'role' ? 'presetRole' : 'presetMine';
+    appData.appearance.bubble[key] = id;
+    if (typeof debouncedSaveData === 'function') {
+        debouncedSaveData();
+    } else {
+        saveData();
+    }
+    renderBubblePresets();
+    if (typeof renderChatMessages === 'function') {
+        renderChatMessages();
+    }
+}
+
 function applyCustomBubbleCss(cssCode) {
     const styleId = 'user-custom-bubble-style';
     let styleTag = document.getElementById(styleId);
@@ -15287,47 +17014,64 @@ window.closeCosmicGraphicModal = closeCosmicGraphicModal;
 const STICKY_NICKNAMES = ['炫炫', '老婆', '乖乖', '妹妹', '宝贝', '亲爱的', '小可爱', '大宝贝'];
 const STICKY_ADJECTIVES = ['最爱的', '最可爱的', '最漂亮的', '萌萌的', '最贴心的', '最甜的'];
 const STICKY_CONTENTS = [
-    '想让你多陪陪我',
-    '好好吃饭，不要饿着',
-    '好好睡觉，不要熬夜',
-    '今天天气很好，想和你分享',
-    '记得多喝水哦',
-    '工作不要太累，注意休息',
-    '想听你的声音',
-    '你笑起来很好看',
-    '要照顾好自己',
-    '今天的你很棒',
-    '想和你一起散步',
-    '你是我最甜蜜的牵挂',
-    '无论多晚，我都在这里',
-    '你的存在就是我最大的幸福',
-    '希望今天能见到你',
-    '今天也要开心哦',
-    '记得按时吃饭，我会心疼的',
-    '累了就休息，不要硬撑',
-    '好想抱抱你',
-    '你是我一天中最美好的部分'
+    { icon: '🤗', type: '想陪伴', text: '今晚有点孤单，想让你陪我说说话，好不好？' },
+    { icon: '🎧', type: '想听歌', text: '收藏了一首新歌，想和你一起戴耳机听完。' },
+    { icon: '🚶', type: '想散步', text: '傍晚的风很好，想和你沿着河边慢慢走一圈。' },
+    { icon: '📞', type: '想通电话', text: '突然想听听你的声音，方便的时候回我一个电话吧。' },
+    { icon: '🌙', type: '想晚安', text: '今天想听你亲口说晚安再睡，别偷懒哦。' },
+    { icon: '🎬', type: '想看剧', text: '新剧开播了，想攒着和你一起看第一集。' },
+    { icon: '🍜', type: '想吃饭', text: '想吃你推荐的那家面馆，改天一起去呀。' },
+    { icon: '☕', type: '想喝咖啡', text: '下午想找家安静的咖啡店，你来陪我坐坐吗？' },
+    { icon: '🎮', type: '想打游戏', text: '新赛季了，想和你双排上分，来吗？' },
+    { icon: '🏃', type: '想运动', text: '今天想出门跑跑步，你来监督我吧。' },
+    { icon: '📷', type: '想拍照', text: '今天的云很好看，想拉你一起去拍几张。' },
+    { icon: '📖', type: '想看书', text: '想和你读同一本书，然后交换读后感。' },
+    { icon: '💌', type: '想写信', text: '有些话想写在信里给你，等你有空慢慢看。' },
+    { icon: '🍳', type: '想做饭', text: '周末想一起下厨，我做饭你打下手好不好？' },
+    { icon: '🌻', type: '想晒太阳', text: '午后的阳光正好，想和你在阳台晒晒太阳。' },
+    { icon: '✈️', type: '想旅行', text: '看到一张机票特价，突然好想和你一起去旅行。' },
+    { icon: '🎂', type: '想庆生', text: '快到我生日啦，想和你一起吹蜡烛。' },
+    { icon: '🐾', type: '想看宠物', text: '楼下的小猫好可爱，想拉你一起去喂它。' },
+    { icon: '🧺', type: '想逛超市', text: '想去超市囤点零食，你也一起来吧。' },
+    { icon: '🎡', type: '想游乐园', text: '很久没坐摩天轮了，想和你一起看夜景。' },
+    { icon: '🛋️', type: '想宅家', text: '今天哪也不想去，就想和你窝在沙发上。' },
+    { icon: '🧘', type: '想放松', text: '最近有点累，想和你一起做个冥想放松下。' },
+    { icon: '🌃', type: '想看夜景', text: '城市的夜景很美，想和你并肩站在天台上看。' },
+    { icon: '🎤', type: '想唱歌', text: 'K歌房新开了一家，想和你一起唱到打烊。' },
+    { icon: '🚴', type: '想骑车', text: '想和你骑自行车穿过林荫道，风会很好。' },
+    { icon: '🍉', type: '想吃西瓜', text: '夏天不吃西瓜不算完整，你切我吃好不好？' },
+    { icon: '🛒', type: '想网购', text: '想买件新衣服，拿不定主意，你来帮我挑。' },
+    { icon: '💃', type: '想跳舞', text: '听到一首歌好想跳舞，你要不要当我的观众？' },
+    { icon: '🧸', type: '想要抱抱', text: '今天有点委屈，需要一个抱抱才能充电。' },
+    { icon: '🍵', type: '想喝茶', text: '想和你泡一壶茶，坐在窗边慢慢聊。' },
+    { icon: '🌊', type: '想看海', text: '心里一直惦记着海边，想和你一起去吹海风。' },
+    { icon: '🎁', type: '想要惊喜', text: '这周想要一个小惊喜，你会满足我的对吧？' },
+    { icon: '🍓', type: '想吃甜点', text: '甜品店出了新品草莓蛋糕，想和你一起去尝。' },
+    { icon: '🖼️', type: '想看展', text: '美术馆有新展，想和你一起慢慢逛。' },
+    { icon: '🌌', type: '想看星星', text: '晚上想找个没光的地方看星星，你去吗？' }
 ];
 
-// 生成便利贴
+// 生成便利贴（角色需求卡片）
 function generateSticky(role) {
     if (!role) return null;
     const today = new Date().toDateString();
     const todaySticky = appData.stickies.find(s => s.roleId === role.id && new Date(s.date).toDateString() === today);
     if (todaySticky) return null;
     
-    if (Math.random() > 0.03) return null;
+    if (Math.random() > 0.04) return null;
     
     const nickname = STICKY_NICKNAMES[Math.floor(Math.random() * STICKY_NICKNAMES.length)];
     const adjective = STICKY_ADJECTIVES[Math.floor(Math.random() * STICKY_ADJECTIVES.length)];
-    const content = STICKY_CONTENTS[Math.floor(Math.random() * STICKY_CONTENTS.length)];
+    const item = STICKY_CONTENTS[Math.floor(Math.random() * STICKY_CONTENTS.length)];
     
     const sticky = {
         id: generateUID(),
         roleId: role.id,
         nickname: nickname,
         adjective: adjective,
-        content: content,
+        icon: item.icon,
+        needType: item.type,
+        content: item.text,
         date: Date.now(),
         isToday: true,
         collected: false,
@@ -15444,13 +17188,12 @@ function renderStickies() {
         const contentLines = sticky.content.split('\n');
         const restLines = contentLines.slice(1).join('\n');
         
-        let displayHtml = `<strong>${escapeHtml(sticky.nickname)}：</strong>`;
+        let displayHtml = '';
         if (restLines) {
-            displayHtml += `<br><span style="padding-left:0.5em;">${escapeHtml(restLines)}</span>`;
+            displayHtml += `${escapeHtml(restLines)}`;
         } else {
-            displayHtml += `<br><span style="padding-left:0.5em;">${escapeHtml(sticky.content)}</span>`;
+            displayHtml += `${escapeHtml(sticky.content)}`;
         }
-        displayHtml += `<br><span class="sticky-signature">—— ${escapeHtml(roleName)}</span>`;
         
         let repliesHtml = '';
         if (sticky.replies && sticky.replies.length > 0) {
@@ -15481,13 +17224,19 @@ function renderStickies() {
                         </button>
                     </div>
                 </div>
+                <div class="sticky-need">
+                    <span class="need-icon">${sticky.icon || '💌'}</span>
+                    <span class="need-badge">${escapeHtml(sticky.needType || '小需求')}</span>
+                </div>
                 <div class="sticky-content">
                     ${displayHtml}
+                    <span class="sticky-signature">—— ${escapeHtml(roleName)}</span>
                 </div>
                 <div class="sticky-footer">
                     <div class="role-info">
                         <img src="${avatar}" alt="${escapeHtml(roleName)}">
-                        <span>—— ${escapeHtml(roleName)}</span>
+                        <span class="sticky-role-name">${escapeHtml(roleName)}</span>
+                        <span class="sticky-role-date">${dateStr}</span>
                     </div>
                     <div class="reply-area">
                         <button onclick="event.stopPropagation(); toggleStickyReplyInput('${sticky.id}')" title="回复">
@@ -17901,6 +19650,11 @@ function ensureMusicInvitePlan(role) {
 }
 
 function initNewFeatures() {
+    // 进入主界面即按当日已过时段补算每个角色的生活轨迹（无需打开轨迹页）
+    appData.roles.forEach(role => {
+        try { ensureSeedTrajectories(role); } catch (e) { console.error('轨迹种子生成异常', e); }
+    });
+    
     // 音乐/阅读邀请：每个角色每天 15% 概率、在当天随机时间段发起一次
     if (musicInviteTimer) clearInterval(musicInviteTimer);
     musicInviteTimer = setInterval(() => {
@@ -17952,7 +19706,7 @@ function initNewFeatures() {
         });
     };
     trajectorySweep();
-    trajectorySweepTimer = setInterval(trajectorySweep, 30 * 1000);
+    trajectorySweepTimer = setInterval(trajectorySweep, 60 * 1000);
     
     if (currentChatType === 'role' && currentRoleId) {
         setTimeout(() => {
