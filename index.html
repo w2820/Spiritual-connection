@@ -6099,8 +6099,8 @@
                 <div class="bubble-preset-grid" id="bubble-preset-mine"></div>
             </div>
             <div class="bg-gray-50 p-4 rounded-2xl flex flex-col gap-3">
-                <div class="flex items-end gap-2"><div class="w-8 h-8 rounded-full bg-gray-200"></div><div class="message-received px-4 py-2 text-sm">你好呀！这是一条预览消息。</div></div>
-                <div class="flex items-end justify-end gap-2"><div class="message-sent px-4 py-2 text-sm" style="color: #fff;">收到，这是我的回复。</div></div>
+                <div class="flex items-end gap-2"><div class="w-8 h-8 rounded-full bg-gray-200"></div><div id="preview-bubble-received" class="message-received px-4 py-2 text-sm">你好呀！这是一条预览消息。</div></div>
+                <div class="flex items-end justify-end gap-2"><div id="preview-bubble-sent" class="message-sent px-4 py-2 text-sm" style="color: #fff;">收到，这是我的回复。</div></div>
             </div>
         </div>
         <div class="bubble-css-editor">
@@ -6704,7 +6704,7 @@
 
 <!-- 角色在线状态弹窗 -->
 <div id="modal-online-status" class="modal-overlay hidden">
-    <div class="online-status-card"><div class="online-status-header"><span class="online-status-title">角色在线状态</span><button class="online-status-close" onclick="closeOnlineStatus()">&times;</button></div><div class="online-status-body"><div class="online-status-role-selector"><select id="online-status-role-select" class="online-status-role-select" onchange="switchOnlineStatusRole()"></select></div><div class="online-status-switch-row"><span>启用自动切换</span><div class="ios-switch" id="online-status-switch" onclick="toggleSwitch(this)"></div></div><p style="font-size:12px;color:var(--text-secondary);margin-top:-8px;margin-bottom:16px;">基于时间自动更新在线状态</p><label style="font-size:14px;font-weight:500;margin-bottom:8px;display:block;">状态列表</label><div class="online-status-list" id="online-status-list"></div><div class="online-status-add"><input type="text" id="new-online-status" placeholder="输入新状态，如：在忙"><button class="btn-primary" onclick="addOnlineStatus()" style="padding:8px 16px;">添加</button></div></div><div class="online-status-footer"><button class="btn-primary" onclick="saveOnlineStatus()" style="width:100%;">保存设置</button></div></div>
+    <div class="online-status-card"><div class="online-status-header"><span class="online-status-title">角色在线状态</span><button class="online-status-close" onclick="closeOnlineStatus()">&times;</button></div><div class="online-status-body"><div class="online-status-role-selector"><select id="online-status-role-select" class="online-status-role-select" onchange="switchOnlineStatusRole()"></select></div><div class="online-status-switch-row"><span>启用自动切换</span><div class="ios-switch" id="online-status-switch" onclick="toggleSwitch(this)"></div></div><p style="font-size:12px;color:var(--text-secondary);margin-top:-8px;margin-bottom:16px;">基于时间自动更新在线状态</p><label style="font-size:14px;font-weight:500;margin-bottom:8px;display:block;">状态列表</label><div class="online-status-list" id="online-status-list"></div><div class="online-status-add"><input type="text" id="new-online-status" placeholder="输入新状态，如：在忙"><button class="btn-primary" onclick="addOnlineStatus()" style="padding:8px 16px;">添加</button></div></div><div class="online-status-footer"><button class="btn-primary" onclick="applyOnlineStatusToAll()" style="width:100%;">应用到全部角色</button><button class="btn-primary" onclick="saveOnlineStatus()" style="width:100%;margin-top:8px;">保存设置</button></div></div>
 </div>
 
 <!-- ========== 戳一戳设置卡片 ========== -->
@@ -8663,8 +8663,15 @@ async function saveDataImmediately() {
         Object.keys(appData.chats).forEach(k => { if (appData.chats[k].length > 500) appData.chats[k] = appData.chats[k].slice(-450); });
         Object.keys(appData.groupChats).forEach(k => { if (appData.groupChats[k].length > 500) appData.groupChats[k] = appData.groupChats[k].slice(-450); });
         syncAllReplies();
-        const dataToSave = JSON.parse(JSON.stringify(appData));
-        delete dataToSave.appearance?.backgrounds;
+        const bgObj = appData.appearance?.backgrounds;
+        const hasBackgrounds = bgObj && Object.values(bgObj).some(v => v);
+        let dataToSave;
+        if (hasBackgrounds) {
+            dataToSave = JSON.parse(JSON.stringify(appData));
+            delete dataToSave.appearance.backgrounds;
+        } else {
+            dataToSave = appData;
+        }
         await store.setItem('appData', dataToSave);
         await store.setItem('customThemes', customThemes);
         await store.setItem('themeSchemes', themeSchemes);
@@ -8713,6 +8720,15 @@ async function loadThemeSchemes() {
 }
 
 function forceApplyTheme() {
+    const colors = appData.appearance?.customThemeColors;
+    if (colors && Object.keys(colors).length > 0) {
+        applyCustomColors(colors);
+        if (appData.appearance.customBubbleCss) {
+            applyCustomBubbleCss(appData.appearance.customBubbleCss);
+        }
+        return;
+    }
+    
     let restoredFromBackup = false;
     try {
         const backup = localStorage.getItem('spiritual_theme_backup');
@@ -8720,6 +8736,9 @@ function forceApplyTheme() {
             const data = JSON.parse(backup);
             const isValid = data._timestamp && (Date.now() - data._timestamp < 5 * 60 * 1000);
             if (isValid && data.customThemeColors && Object.keys(data.customThemeColors).length > 0) {
+                appData.appearance.customThemeColors = data.customThemeColors;
+                appData.appearance.theme = data.theme || 'custom';
+                appData.appearance.customColor = data.customColor || '#82cbb2';
                 applyCustomColors(data.customThemeColors);
                 if (data.customBubbleCss !== undefined) {
                     appData.appearance.customBubbleCss = data.customBubbleCss;
@@ -8736,15 +8755,6 @@ function forceApplyTheme() {
         return;
     }
     
-    const colors = appData.appearance?.customThemeColors;
-    if (colors && Object.keys(colors).length > 0) {
-        applyCustomColors(colors);
-        if (appData.appearance.customBubbleCss) {
-            applyCustomBubbleCss(appData.appearance.customBubbleCss);
-        }
-        return;
-    }
-    
     const themeId = appData.appearance?.theme;
     if (themeId && themeId !== 'custom') {
         applyBuiltinTheme(themeId);
@@ -8758,12 +8768,9 @@ function forceApplyTheme() {
         const backup = localStorage.getItem('spiritual_theme_backup');
         if (backup) {
             const data = JSON.parse(backup);
-            if (data.customThemeColors && Object.keys(data.customThemeColors).length > 0) {
+            const isValid = data._timestamp && (Date.now() - data._timestamp < 5 * 60 * 1000);
+            if (isValid && data.customThemeColors && Object.keys(data.customThemeColors).length > 0) {
                 applyCustomColors(data.customThemeColors);
-                if (data.customBubbleCss !== undefined) {
-                    appData.appearance.customBubbleCss = data.customBubbleCss;
-                    applyCustomBubbleCss(data.customBubbleCss);
-                }
                 return;
             }
         }
@@ -8803,6 +8810,9 @@ function applyBuiltinTheme(themeId) {
     
     for (const variable of Object.keys(THEME_COLOR_MAPPINGS)) {
         if (variable === '--accent-color') continue;
+        if (variable === '--button-primary-bg') continue;
+        if (variable === '--tab-active-text') continue;
+        if (variable === '--tab-active-border') continue;
         root.style.removeProperty(variable);
     }
     root.style.setProperty('--bg-secondary', '#ffffff');
@@ -8820,19 +8830,23 @@ function applyBuiltinTheme(themeId) {
     showToast(`已应用「${theme.name}」主题`);
 }
 
+function applyThemeColorVariable(root, variable, color, colors) {
+    root.style.setProperty(variable, color);
+    if (variable !== '--accent-color') return;
+    root.style.setProperty('--accent-rgb', hexToRgb(color).join(','));
+    root.style.setProperty('--accent-light', hexToRgba(color, 0.1));
+    const hasExplicit = (v) => colors && colors[v] !== undefined && colors[v] !== null && colors[v] !== '';
+    if (!hasExplicit('--button-primary-bg')) root.style.setProperty('--button-primary-bg', color);
+    if (!hasExplicit('--tab-active-text')) root.style.setProperty('--tab-active-text', color);
+    if (!hasExplicit('--tab-active-border')) root.style.setProperty('--tab-active-border', color);
+}
+
 function applyCustomColors(colors) {
     const root = document.documentElement;
     
     for (const [variable, color] of Object.entries(colors)) {
         if (color) {
-            root.style.setProperty(variable, color);
-            if (variable === '--accent-color') {
-                root.style.setProperty('--accent-rgb', hexToRgb(color).join(','));
-                root.style.setProperty('--button-primary-bg', color);
-                root.style.setProperty('--tab-active-text', color);
-                root.style.setProperty('--tab-active-border', color);
-                root.style.setProperty('--accent-light', hexToRgba(color, 0.1));
-            }
+            applyThemeColorVariable(root, variable, color, colors);
         }
     }
     
@@ -9087,11 +9101,12 @@ window.updateThemeColorFromEditor = function(variable, value) {
     const root = document.documentElement;
     root.style.setProperty(variable, value);
     if (variable === '--accent-color') {
+        const editedColors = (appData.appearance && appData.appearance.customThemeColors) || {};
         root.style.setProperty('--accent-rgb', hexToRgb(value).join(','));
-        root.style.setProperty('--button-primary-bg', value);
-        root.style.setProperty('--tab-active-text', value);
-        root.style.setProperty('--tab-active-border', value);
         root.style.setProperty('--accent-light', hexToRgba(value, 0.1));
+        if (!editedColors['--button-primary-bg']) root.style.setProperty('--button-primary-bg', value);
+        if (!editedColors['--tab-active-text']) root.style.setProperty('--tab-active-text', value);
+        if (!editedColors['--tab-active-border']) root.style.setProperty('--tab-active-border', value);
     }
     if (variable === '--bg-secondary') {
         updateBgSecondaryRgb();
@@ -9109,19 +9124,6 @@ window.updateThemeColorFromEditor = function(variable, value) {
     
     const displaySpan = document.getElementById(`value-${variable.replace(/--/g, '')}`);
     if (displaySpan) displaySpan.textContent = value;
-    
-    document.querySelectorAll('*').forEach(el => {
-        const display = window.getComputedStyle(el).display;
-        if (display !== 'none') {
-            el.style.willChange = 'auto';
-            void el.offsetHeight;
-            el.style.willChange = '';
-        }
-    });
-    
-    root.style.transform = 'translateZ(0)';
-    void root.offsetHeight;
-    root.style.transform = '';
 };
 
 window.updateThemeColorChannel = function(variable, channel, val) {
@@ -9642,7 +9644,8 @@ async function loadData() {
         if ((!appData.appearance || !appData.appearance.customThemeColors || Object.keys(appData.appearance.customThemeColors).length === 0) && localStorage.getItem('spiritual_theme_backup')) {
             try {
                 const backup = JSON.parse(localStorage.getItem('spiritual_theme_backup'));
-                if (backup && backup.customThemeColors) {
+                const isValid = backup && backup._timestamp && (Date.now() - backup._timestamp < 5 * 60 * 1000);
+                if (isValid && backup.customThemeColors) {
                     appData.appearance = appData.appearance || {};
                     appData.appearance.customThemeColors = backup.customThemeColors;
                     appData.appearance.theme = backup.theme || 'custom';
@@ -9824,6 +9827,7 @@ async function loadData() {
             appData.appearance.theme = 'custom';
             appData.appearance.customColor = currentColors['--accent-color'] || '#82cbb2';
             saveData();
+            applyAppearance();
             closeThemeEditor();
             showToast('主题已保存并应用');
         };
@@ -10209,14 +10213,7 @@ function applyAppearance() {
     let mainColor = '#82cbb2';
     if (customThemeColors && Object.keys(customThemeColors).length > 0) {
         for (const [varName, color] of Object.entries(customThemeColors)) {
-            root.style.setProperty(varName, color);
-            if (varName === '--accent-color') {
-                root.style.setProperty('--accent-rgb', hexToRgb(color).join(','));
-                root.style.setProperty('--button-primary-bg', color);
-                root.style.setProperty('--tab-active-text', color);
-                root.style.setProperty('--tab-active-border', color);
-                root.style.setProperty('--accent-light', hexToRgba(color, 0.1));
-            }
+            applyThemeColorVariable(root, varName, color, customThemeColors);
         }
     } else {
         if (theme === 'custom') mainColor = customColor || '#82cbb2';
@@ -10230,7 +10227,7 @@ function applyAppearance() {
     document.body.className = `text-gray-800 transition-colors duration-300 ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-[#f3f4f6]'}`;
     const metaTheme = document.querySelector('meta[name="theme-color"]');
     if (metaTheme) metaTheme.setAttribute('content', mainColor);
-    const home = document.getElementById('page-home'); if (backgrounds.home) { home.style.backgroundImage = `url(${backgrounds.home})`; home.style.backgroundSize = 'cover'; home.style.backgroundColor = 'transparent'; } else { home.style.backgroundImage = ''; home.style.backgroundColor = theme === 'dark' ? '#111827' : '#f9fafb'; }
+    const home = document.getElementById('page-home'); if (backgrounds.home) { home.style.backgroundImage = `url(${backgrounds.home})`; home.style.backgroundSize = 'cover'; home.style.backgroundColor = 'transparent'; } else { home.style.backgroundImage = ''; home.style.backgroundColor = (customThemeColors && customThemeColors['--bg-primary']) || (theme === 'dark' ? '#111827' : '#f9fafb'); }
     const chat = document.getElementById('page-chat'); 
     let chatBg = null;
     if (currentChatType === 'role' && currentRoleId) {
@@ -11026,39 +11023,43 @@ function createMessageElement(sender, content, time, quote = null, type = 'text'
             </div>
             <div class="flex-shrink-0 ${showAvatarThisMsg ? '' : 'hidden'}" style="width:${avatarSize}px; height:${avatarSize}px; margin-left:8px;"><img src="${myProfile.avatar || DEFAULT_AVATAR}" class="w-full h-full ${avatarShapeClassLocal} object-cover border border-gray-100"></div>`;
         }
-    } else {
-        let qt = '';
-        if (quote) {
-            if (typeof quote === 'object' && quote.type) {
-                if (quote.type === 'image') {
-                    qt = `<div class="quote-preview" style="display:flex; align-items:center; gap:6px;"><img src="${quote.content}" style="width:30px; height:30px; border-radius:4px; object-fit:cover;"><span style="color:#888; font-size:12px;">图片</span></div>`;
-                } else {
-                    qt = `<div class="quote-preview">${escapeHtml(getQuotePreview(quote))}</div>`;
+        } else if (type === 'recall') {
+            div.className = 'recall-bubble';
+            div.dataset.msgTime = time;
+            div.innerHTML = `<span>${escapeHtml(content)}</span>`;
+        } else {
+            let qt = '';
+            if (quote) {
+                if (typeof quote === 'object' && quote.type) {
+                    if (quote.type === 'image') {
+                        qt = `<div class="quote-preview" style="display:flex; align-items:center; gap:6px;"><img src="${quote.content}" style="width:30px; height:30px; border-radius:4px; object-fit:cover;"><span style="color:#888; font-size:12px;">图片</span></div>`;
+                    } else {
+                        qt = `<div class="quote-preview">${escapeHtml(getQuotePreview(quote))}</div>`;
+                    }
+                } else if (typeof quote === 'string') {
+                    qt = `<div class="quote-preview">${escapeHtml(quote)}</div>`;
                 }
-            } else if (typeof quote === 'string') {
-                qt = `<div class="quote-preview">${escapeHtml(quote)}</div>`;
+            }
+            if (!isMe) {
+                div.innerHTML = `<div class="flex-shrink-0 ${showAvatarThisMsg ? '' : 'hidden'}" style="width:${avatarSize}px; height:${avatarSize}px; margin-right:8px;"><img src="${avatar}" class="w-full h-full ${avatarShapeClassLocal} object-cover border border-gray-100"></div>
+                <div class="flex flex-col max-w-[70%]">
+                    ${showName ? `<div class="text-sm font-bold text-gray-700 mb-1">${escapeHtml(name)}</div>` : ''}
+                    <div class="flex items-end gap-2">
+                        <div class="message-received text-gray-900" style="max-width:100%; word-break:break-all; overflow-wrap:break-word; white-space:pre-wrap;">${qt}${escapeHtml(content)}</div>
+                    </div>
+                    <span class="text-xs text-gray-400 mt-1 text-left">${tsWithRead}</span>
+                </div>`;
+            } else {
+                div.innerHTML = `<div class="flex flex-col items-end max-w-[70%]">
+                    <div class="flex items-end gap-2">
+                        <div class="message-sent text-white" style="max-width:100%; word-break:break-all; overflow-wrap:break-word; white-space:pre-wrap;">${qt}${escapeHtml(content)}</div>
+                    </div>
+                    <span class="text-xs text-gray-400 mt-1 text-right">${tsWithRead}</span>
+                </div>
+                <div class="flex-shrink-0 ${showAvatarThisMsg ? '' : 'hidden'}" style="width:${avatarSize}px; height:${avatarSize}px; margin-left:8px;"><img src="${myProfile.avatar || DEFAULT_AVATAR}" class="w-full h-full ${avatarShapeClassLocal} object-cover border border-gray-100"></div>`;
             }
         }
-        if (!isMe) {
-            div.innerHTML = `<div class="flex-shrink-0 ${showAvatarThisMsg ? '' : 'hidden'}" style="width:${avatarSize}px; height:${avatarSize}px; margin-right:8px;"><img src="${avatar}" class="w-full h-full ${avatarShapeClassLocal} object-cover border border-gray-100"></div>
-            <div class="flex flex-col max-w-[70%]">
-                ${showName ? `<div class="text-sm font-bold text-gray-700 mb-1">${escapeHtml(name)}</div>` : ''}
-                <div class="flex items-end gap-2">
-                    <div class="message-received text-gray-900" style="max-width:100%; word-break:break-all; overflow-wrap:break-word; white-space:pre-wrap;">${qt}${escapeHtml(content)}</div>
-                </div>
-                <span class="text-xs text-gray-400 mt-1 text-left">${tsWithRead}</span>
-            </div>`;
-        } else {
-            div.innerHTML = `<div class="flex flex-col items-end max-w-[70%]">
-                <div class="flex items-end gap-2">
-                    <div class="message-sent text-white" style="max-width:100%; word-break:break-all; overflow-wrap:break-word; white-space:pre-wrap;">${qt}${escapeHtml(content)}</div>
-                </div>
-                <span class="text-xs text-gray-400 mt-1 text-right">${tsWithRead}</span>
-            </div>
-            <div class="flex-shrink-0 ${showAvatarThisMsg ? '' : 'hidden'}" style="width:${avatarSize}px; height:${avatarSize}px; margin-left:8px;"><img src="${myProfile.avatar || DEFAULT_AVATAR}" class="w-full h-full ${avatarShapeClassLocal} object-cover border border-gray-100"></div>`;
-        }
-    }
-    if (sender !== 'system' && type !== 'poke' && type !== 'call' && type !== 'call_missed') {
+    if (sender !== 'system' && type !== 'poke' && type !== 'call' && type !== 'call_missed' && type !== 'recall') {
         div.dataset.msgSender = sender;
         div.dataset.msgContent = content;
         div.dataset.msgTime = time;
@@ -11475,7 +11476,7 @@ function executeRoleReply(role) {
             } else {
                 incrementUnread(role.id);
             }
-            sendNotificationIfNeeded(`${role.name} 发来消息`, finalContent);
+            sendNotificationIfNeeded(`${role.name} 发来消息`, finalContent, role.id);
 
             if (Math.random() < 0.03) {
                 setTimeout(() => {
@@ -11683,7 +11684,7 @@ async function sendRolePokeReply(role, count, initialDelayMs = 0) {
                 } else {
                     incrementUnread(role.id);
                 }
-                sendNotificationIfNeeded(`${role.name} 发来消息`, content);
+                sendNotificationIfNeeded(`${role.name} 发来消息`, content, role.id);
             }, (i - 1) * intervalMs);
         }
     }, initialDelayMs);
@@ -12278,12 +12279,13 @@ async function toggleNotificationPermission() {
         showToast('无法请求通知权限');
     }
 }
-function sendNotificationIfNeeded(title, body) {
-    if (notificationPermissionGranted && document.visibilityState === 'hidden') {
-        try {
-            new Notification(title, { body, icon: appData.userProfile?.avatar || DEFAULT_AVATAR, tag: 'app-message' });
-        } catch(e) {}
-    }
+function sendNotificationIfNeeded(title, body, targetRoleId) {
+    if (!notificationPermissionGranted) return;
+    const viewingChat = currentChatType === 'role' && currentRoleId === targetRoleId;
+    if (viewingChat && document.visibilityState === 'visible') return;
+    try {
+        new Notification(title, { body, icon: appData.userProfile?.avatar || DEFAULT_AVATAR, tag: 'app-message', renotify: true });
+    } catch(e) {}
 }
 
 // --- 备份/恢复 ---
@@ -13151,6 +13153,8 @@ function renderOnlineStatusList(statusList) { const container = document.getElem
 function addOnlineStatus() { if (!currentOnlineStatusRoleId) return; const role = appData.roles.find(r => r.id === currentOnlineStatusRoleId); if (!role) return; if (!role.onlineStatus) role.onlineStatus = { enabled: true, statusList: [], currentStatus: '在线', lastUpdate: 0 }; const input = document.getElementById('new-online-status'), value = input.value.trim(); if (!value) { showToast('请输入状态'); return; } if (role.onlineStatus.statusList.includes(value)) { showToast('状态已存在'); return; } role.onlineStatus.statusList.push(value); renderOnlineStatusList(role.onlineStatus.statusList); input.value = ''; }
 function removeOnlineStatus(index) { if (!currentOnlineStatusRoleId) return; const role = appData.roles.find(r => r.id === currentOnlineStatusRoleId); if (!role || !role.onlineStatus) return; role.onlineStatus.statusList.splice(index, 1); renderOnlineStatusList(role.onlineStatus.statusList); }
 async function saveOnlineStatus() { if (!currentOnlineStatusRoleId) return; const role = appData.roles.find(r => r.id === currentOnlineStatusRoleId); if (!role) return; if (!role.onlineStatus) role.onlineStatus = { enabled: true, statusList: [], currentStatus: '在线', lastUpdate: 0 }; role.onlineStatus.enabled = document.getElementById('online-status-switch').classList.contains('active'); await saveData(); closeOnlineStatus(); showToast('设置已保存'); }
+
+async function applyOnlineStatusToAll() { if (!currentOnlineStatusRoleId) return; const role = appData.roles.find(r => r.id === currentOnlineStatusRoleId); if (!role) return; if (!role.onlineStatus) role.onlineStatus = { enabled: true, statusList: [], currentStatus: '在线', lastUpdate: 0 }; const src = role.onlineStatus; let count = 0; appData.roles.forEach(r => { if (r.id === currentOnlineStatusRoleId) return; if (!r.onlineStatus) r.onlineStatus = { enabled: true, statusList: [], currentStatus: '在线', lastUpdate: 0 }; r.onlineStatus.statusList = [...src.statusList]; r.onlineStatus.enabled = src.enabled; count++; }); await saveData(); showToast(`已将状态应用到其余 ${count} 个角色`); }
 function refreshRoleOnlineStatus(role) { if (!role.onlineStatus || !role.onlineStatus.enabled) return; const now = Date.now(), threeHours = 3 * 60 * 60 * 1000; if (!role.onlineStatus.lastUpdate || (now - role.onlineStatus.lastUpdate) >= threeHours) { const list = role.onlineStatus.statusList; role.onlineStatus.currentStatus = (list && list.length > 0) ? list[Math.floor(Math.random() * list.length)] : '在线'; role.onlineStatus.lastUpdate = now; debouncedSaveData(); } }
 
 // --- 回信生成 ---
@@ -14319,7 +14323,7 @@ function executePoke() {
                     appData.chats[currentRoleId].push(replyMsg);
                     debouncedSaveData();
                     appendMessageToDOM(currentRoleId, replyContent, Date.now(), null, 'text');
-                    sendNotificationIfNeeded(`${role.name} 发来消息`, replyContent);
+                    sendNotificationIfNeeded(`${role.name} 发来消息`, replyContent, role.id);
                 }
             }, 1500 + Math.random() * 2000);
         }
@@ -14573,7 +14577,7 @@ function sendRoleTransfer(role, force = false) {
     debouncedSaveData();
     if (currentChatType === 'role' && currentRoleId === role.id) appendMessageToDOM(role.id, content, Date.now(), null, 'transfer');
     else incrementUnread(role.id);
-    sendNotificationIfNeeded(`${role.name} 转账`, `收到 ¥${amount} ${note ? '—— ' + note : ''}`);
+    sendNotificationIfNeeded(`${role.name} 转账`, `收到 ¥${amount} ${note ? '—— ' + note : ''}`, role.id);
     window._transferSending = false;
 }
 function openTransferSettings() { const s = appData.transferSettings; document.getElementById('setting-auto-transfer-switch').classList.toggle('active', s.enabled); document.getElementById('setting-transfer-min').value = s.minAmount; document.getElementById('setting-transfer-max').value = s.maxAmount; document.getElementById('setting-transfer-prob').value = s.probability; document.getElementById('setting-transfer-interval').value = s.checkInterval; const testSwitch = document.getElementById('setting-transfer-test-switch'); if (testSwitch) testSwitch.classList.toggle('active', appData.settings.transferTestMode); document.getElementById('modal-transfer-settings').classList.remove('hidden'); }
@@ -16253,6 +16257,18 @@ function renderBubblePresets() {
     roleGrid.innerHTML = items.map(p => buildItem(p, 'role')).join('');
     mineGrid.innerHTML = items.map(p => buildItem(p, 'mine')).join('');
     applyBubblePresetCss();
+    const previewReceived = document.getElementById('preview-bubble-received');
+    const previewSent = document.getElementById('preview-bubble-sent');
+    if (previewReceived) {
+        const rolePreset = appData?.appearance?.bubble?.presetRole || 'none';
+        if (rolePreset === 'none') previewReceived.removeAttribute('data-bubble');
+        else previewReceived.setAttribute('data-bubble', rolePreset);
+    }
+    if (previewSent) {
+        const minePreset = appData?.appearance?.bubble?.presetMine || 'none';
+        if (minePreset === 'none') previewSent.removeAttribute('data-bubble');
+        else previewSent.setAttribute('data-bubble', minePreset);
+    }
 }
 
 function selectBubblePreset(side, id) {
@@ -17728,7 +17744,7 @@ function declineInviteFromMessage(roleId, inviteId, btnEl) {
                 const msg = {
                     id: Date.now() + 1,
                     sender: role.id,
-                    content: reply + ' (下次吧)',
+                    content: reply,
                     time: Date.now(),
                     type: 'text',
                     read: false
@@ -19551,30 +19567,48 @@ function handleMessageWithRecall(role, msgContent, msgTime, msgId) {
                 if (targetElement) {
                     targetElement.classList.add('recalling');
                     setTimeout(() => {
-                        targetElement.remove();
-                        const recallDiv = document.createElement('div');
-                        recallDiv.className = 'recall-bubble';
-                        recallDiv.innerHTML = `<span>对方悄悄撤回了一条消息～</span>`;
-                        const parent = messagesContainer;
-                        const siblings = parent.querySelectorAll('.message-wrapper, .recall-bubble, .call-system-message, .poke-system-message');
-                        let insertBefore = null;
-                        for (const sibling of siblings) {
-                            if (sibling.dataset && sibling.dataset.msgTime && parseInt(sibling.dataset.msgTime) > msgTime) {
-                                insertBefore = sibling;
-                                break;
+                        const stillInDom = targetElement.isConnected;
+                        if (stillInDom) targetElement.remove();
+                        if (stillInDom) {
+                            const recallDiv = document.createElement('div');
+                            recallDiv.className = 'recall-bubble';
+                            recallDiv.innerHTML = `<span>对方悄悄撤回了一条消息～</span>`;
+                            const parent = messagesContainer;
+                            const siblings = parent.querySelectorAll('.message-wrapper, .recall-bubble, .call-system-message, .poke-system-message');
+                            let insertBefore = null;
+                            for (const sibling of siblings) {
+                                if (sibling.dataset && sibling.dataset.msgTime && parseInt(sibling.dataset.msgTime) > msgTime) {
+                                    insertBefore = sibling;
+                                    break;
+                                }
                             }
-                        }
-                        if (insertBefore) {
-                            parent.insertBefore(recallDiv, insertBefore);
-                        } else {
-                            parent.appendChild(recallDiv);
+                            if (insertBefore) {
+                                parent.insertBefore(recallDiv, insertBefore);
+                            } else {
+                                parent.appendChild(recallDiv);
+                            }
                         }
                     }, 800);
                 }
             }
             
             const chatMsgs = appData.chats[role.id] || [];
+            const targetIndex = chatMsgs.findIndex(m => m.id === msgId);
             appData.chats[role.id] = chatMsgs.filter(m => m.id !== msgId);
+            if (!appData.chats[role.id]) appData.chats[role.id] = [];
+            const recallNotice = {
+                id: generateUID(),
+                sender: role.id,
+                content: '对方悄悄撤回了一条消息～',
+                time: msgTime,
+                type: 'recall',
+                read: true
+            };
+            if (targetIndex >= 0) {
+                appData.chats[role.id].splice(Math.min(targetIndex, appData.chats[role.id].length), 0, recallNotice);
+            } else {
+                appData.chats[role.id].push(recallNotice);
+            }
             
             if (!appData.recallLog) appData.recallLog = [];
             appData.recallLog.push({
@@ -19826,7 +19860,7 @@ window.executeRoleReply = function(role) {
             } else {
                 incrementUnread(role.id);
             }
-            sendNotificationIfNeeded(`${role.name} 发来消息`, finalContent);
+            sendNotificationIfNeeded(`${role.name} 发来消息`, finalContent, role.id);
             
             const thisMsgId = msgId;
             const thisContent = finalContent;
